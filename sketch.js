@@ -1,6 +1,6 @@
 // 1. GLOBALE VARIABLEN
 var designSelect, modeSelect, inputField, sektS, dirSelect, codeDisplay;
-var sliders = [], colorIndicators = [], sliderPanel, sektGroup;
+var sliders = [], sliderPanel, sektGroup;
 var logoImg = null;
 var qMatrix = [];
 
@@ -20,9 +20,8 @@ const charMap = { 'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,
 var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
 function preload() {
-    logoImg = loadImage('Logo.png', () => {}, () => {
-        logoImg = loadImage('logo.png', () => {}, () => console.log("Kein Logo"));
-    });
+    // Falls das Logo fehlt, wird der Fehler ignoriert und das Programm startet trotzdem
+    logoImg = loadImage('Logo.png', img => console.log("Logo geladen"), err => console.log("Logo fehlt"));
 }
 
 function setup() {
@@ -59,13 +58,14 @@ function setup() {
     dirSelect = createSelect(); dirSelect.option('Außen'); dirSelect.option('Innen');
     createUIGroup("RICHTUNG", dirSelect, "65px", "95px");
 
-    var saveBtn = createButton('Download').parent(topBar).style('margin-left', 'auto').style('background', '#ffffff').style('color', '#000000').style('border', 'none').style('padding', '8px 12px').style('border-radius', '4px').style('font-weight', 'bold').style('cursor', 'pointer');
+    // Weißer Button, schwarze Schrift
+    var saveBtn = createButton('Download').parent(topBar).style('margin-left', 'auto').style('background', '#ffffff').style('color', '#000000').style('border', 'none').style('padding', '8px 12px').style('border-radius', '4px').style('font-weight', 'bold');
     saveBtn.mousePressed(exportHighRes);
 
     sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150').style('padding', '8px');
     for (var i = 1; i <= 9; i++) {
         var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','5px');
-        colorIndicators[i] = createDiv("").parent(sRow).style('width', '10px').style('height', '10px').style('border-radius', '50%');
+        createDiv("").parent(sRow).style('width', '10px').style('height', '10px').style('border-radius', '50%');
         sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
     }
 
@@ -74,7 +74,7 @@ function setup() {
 }
 
 function updateLayout() {
-    if (!sliderPanel || !sliders[1]) return;
+    if (!sliderPanel) return;
     var isMobile = windowWidth < 600;
     if (isMobile) {
         sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%').style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)');
@@ -88,28 +88,23 @@ function updateLayout() {
 
 function draw() {
     background(255);
-    // Sicherheits-Check: Wenn UI noch nicht da, nichts zeichnen
-    if (!designSelect || !sliders[1] || !inputField) return;
+    if (!designSelect || !inputField) return;
 
     var isMobile = windowWidth < 600;
     var design = designSelect.value();
     if (design === "Rund") sektGroup.show(); else sektGroup.hide();
     
     var rawVal = inputField.value();
-    if (!rawVal) return;
-
     var baseCode = (modeSelect.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
     while (baseCode.length < 8) baseCode.push(0);
     baseCode = baseCode.slice(0, 8);
     var startDigit = baseCode[0] || 1;
     var drawCode = (dirSelect.value() === 'Innen') ? [...baseCode].reverse() : baseCode;
     
-    if (codeDisplay) codeDisplay.html(baseCode.join(""));
+    codeDisplay.html(baseCode.join(""));
 
     push();
-    // Zentrierung für Mobile & Desktop
-    var centerY = isMobile ? (height / 2) - 30 : (height / 2) + 40;
-    translate(width / 2, centerY);
+    translate(width / 2, height / 2 + (isMobile ? -20 : 40));
     
     if (design === "Quadrat") {
         scale((min(width, height) / 850) * (isMobile ? 0.75 : 0.9));
@@ -162,10 +157,9 @@ function exportHighRes() {
 }
 
 function getFinalCol(val, startDigit) {
-    if (!sliders[val]) return color(0);
     var hex = colorMatrix[startDigit][val - 1];
     var col = color(hex);
-    var sVal = sliders[val].value();
+    var sVal = sliders[val] ? sliders[val].value() : 85;
     return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
 }
 

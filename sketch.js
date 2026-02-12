@@ -4,7 +4,6 @@ var sliders = [], colorIndicators = [], sliderPanel, sektGroup;
 var logoImg, qMatrix = [];
 var isAdmin = false;
 
-// Zentrale Farbtabelle (9 Varianten basierend auf der Startzahl)
 const colorMatrix = {
     1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
     2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
@@ -25,7 +24,8 @@ const charMap = {
 var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
 function preload() { 
-    logoImg = loadImage('logo.png'); 
+    // Falls das Logo fehlt, fängt p5 den Fehler hier ab, aber wir prüfen es später in draw()
+    logoImg = loadImage('logo.png', () => {}, () => console.log("Logo konnte nicht geladen werden - fahre ohne Logo fort.")); 
 }
 
 function setup() {
@@ -38,11 +38,11 @@ function setup() {
     // TOPBAR
     var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
         .style('background', '#2c3e50').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
-        .style('gap', isMobile ? '8px' : '20px').style('z-index', '200').style('align-items', 'center').style('height', isMobile ? '55px' : '75px');
+        .style('gap', isMobile ? '8px' : '20px').style('z-index', '200').style('align-items', 'center').style('height', isMobile ? '55px' : '75px').style('box-sizing', 'border-box');
 
     function createUIGroup(labelTxt, element, wMobile, wDesktop) {
         var group = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column');
-        createSpan(labelTxt).parent(group).style('font-size', '8px').style('color', '#bdc3c7').style('font-weight', 'bold');
+        createSpan(labelTxt).parent(group).style('font-size', '8px').style('color', '#bdc3c7').style('font-weight', 'bold').style('text-transform', 'uppercase');
         if (element) {
             element.parent(group).style('width', isMobile ? wMobile : wDesktop)
                    .style('background', '#34495e').style('color', '#fff').style('border', 'none').style('border-radius', '4px')
@@ -69,12 +69,12 @@ function setup() {
     dirSelect = createSelect(); dirSelect.option('Außen'); dirSelect.option('Innen');
     createUIGroup("RICHTUNG", dirSelect, "65px", "95px");
 
-    var saveBtn = createButton('DL').parent(topBar).style('margin-left', 'auto').style('background', '#fff').style('border-radius', '4px').style('font-weight', 'bold');
+    var saveBtn = createButton('DL').parent(topBar).style('margin-left', 'auto').style('background', '#fff').style('border-radius', '4px').style('font-weight', 'bold').style('padding', '5px 10px').style('cursor', 'pointer');
     saveBtn.mousePressed(exportHighRes);
 
     sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150').style('padding', '8px');
     for (var i = 1; i <= 9; i++) {
-        var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','5px');
+        var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','5px').style('margin-bottom', '2px');
         colorIndicators[i] = createDiv("").parent(sRow).style('width', '10px').style('height', '10px').style('border-radius', '50%');
         sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
     }
@@ -85,20 +85,28 @@ function setup() {
 
 function updateLayout() {
     var isMobile = windowWidth < 600;
+    if (!sliderPanel) return; // Sicherheits-Check
+
     if (isMobile) {
         sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%').style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)');
-        for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px');
     } else {
         sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto').style('display', 'flex').style('flex-direction', 'column');
-        for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '80px');
+    }
+    
+    // Nur stylen wenn Slider existieren (behebt deinen Fehler!)
+    for (var i = 1; i <= 9; i++) {
+        if (sliders[i]) {
+            sliders[i].style('width', isMobile ? '75px' : '80px');
+        }
     }
 }
 
 function draw() {
     background(255);
     var isMobile = windowWidth < 600;
-    var design = designSelect.value();
+    if (!designSelect) return;
     
+    var design = designSelect.value();
     if (design === "Rund") sektGroup.show(); else sektGroup.hide();
 
     var rawVal = inputField.value();
@@ -132,7 +140,7 @@ function draw() {
     }
     pop();
 
-    if (logoImg && logoImg.width > 0) {
+    if (logoImg && logoImg.width > 1) { // Nur zeichnen wenn wirklich geladen
         var lW = isMobile ? 55 : 150;
         var lH = (logoImg.height / logoImg.width) * lW;
         image(logoImg, 15, isMobile ? height - 125 : height - lH - 25, lW, lH);
@@ -256,7 +264,6 @@ function exportHighRes() {
     var rawVal = inputField.value();
     var baseCode = (modeSelect.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
     while (baseCode.length < 8) baseCode.push(0);
-    baseCode = baseCode.slice(0, 8);
     var startDigit = baseCode[0] || 1;
     var drawCode = (dirSelect.value() === 'Innen') ? [...baseCode].reverse() : baseCode;
     
@@ -266,7 +273,7 @@ function exportHighRes() {
     else if(design === "Wabe") { pg.scale(2.4); renderWabe(drawCode, startDigit, pg); }
     pg.pop();
 
-    if (logoImg && logoImg.width > 0) {
+    if (logoImg && logoImg.width > 1) {
         var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;
         pg.image(logoImg, pg.width - lW - 100, pg.height - lH - 100, lW, lH);
     }

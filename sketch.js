@@ -1,181 +1,230 @@
-// --- GLOBALE VARIABLEN (Definitionen zur Fehlerbehebung) ---
-let inputField, designSelect, modeSelect, dirSelect, sektSelect, saveBtn;
-let sliders = [];
-let colorIndicators = []; 
-let logoImg, qMatrix = [];
+// 1. GLOBALE VARIABLEN & KONSTANTEN
+var designSelect, modeSelect, inputField, sektS, dirSelect, codeDisplay;
+var sliders = [], colorIndicators = [], sliderPanel, sektGroup;
+var logoImg = null; // Initialisierung als null
+var qMatrix = [];
 
-const charMap = { 'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4, 'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 };
-const baseColors = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
+const colorMatrix = {
+    1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
+    2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
+    3: ["#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B"],
+    4: ["#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00"],
+    5: ["#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00"],
+    6: ["#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB"],
+    7: ["#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0"],
+    8: ["#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB"],
+    9: ["#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500"]
+};
 
-function preload() {
-  logoImg = loadImage('logo.png', () => {}, () => {
-    logoImg = loadImage('Logo.png', () => {}, () => console.log("Logo fehlt"));
-  });
+const charMap = { 
+    'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,
+    'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 
+};
+
+var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
+
+function preload() { 
+    // Wir versuchen beide Varianten, falls du unsicher bist
+    logoImg = loadImage('Logo.png', 
+        () => console.log("Logo.png gefunden!"), 
+        () => {
+            console.log("Logo.png nicht gefunden, probiere logo.png...");
+            logoImg = loadImage('logo.png', 
+                () => console.log("logo.png gefunden!"),
+                () => console.log("Kein Logo gefunden - Programm startet trotzdem.")
+            );
+        }
+    ); 
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  colorMode(HSB, 360, 100, 100);
-  
-  let sidebar = createDiv('').id('ui-sidebar');
-  addStyles(); 
+    createCanvas(windowWidth, windowHeight);
+    colorMode(HSB, 360, 100, 100);
+    var isMobile = windowWidth < 600;
 
-  designSelect = createSelect().parent(sidebar).addClass('ui-select');
-  ['Quadrat', 'Rund', 'Wabe'].forEach(d => designSelect.option(d));
-  inputField = createInput('15011987').parent(sidebar).addClass('ui-input');
-  modeSelect = createSelect().parent(sidebar).addClass('ui-select');
-  modeSelect.option('Geburtstag'); modeSelect.option('Text');
-  dirSelect = createSelect().parent(sidebar).addClass('ui-select');
-  dirSelect.option('Außen'); dirSelect.option('Innen');
-  sektSelect = createSelect().parent(sidebar).addClass('ui-select');
-  ["6","8","10","12"].forEach(s => sektSelect.option(s)); sektSelect.selected("8");
+    // Topbar Erstellung
+    var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
+        .style('background', '#2c3e50').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
+        .style('gap', isMobile ? '8px' : '20px').style('z-index', '200').style('align-items', 'center').style('height', isMobile ? '55px' : '75px').style('box-sizing', 'border-box');
 
-  let sliderGrid = createDiv('').parent(sidebar).addClass('slider-grid');
-  for (let i = 1; i <= 9; i++) {
-    let row = createDiv('').parent(sliderGrid).addClass('slider-row');
-    colorIndicators[i] = createDiv('').parent(row).addClass('color-dot');
-    sliders[i] = createSlider(20, 100, 85).parent(row).style('width', '75px').input(redraw);
-  }
+    function createUIGroup(labelTxt, element, wMobile, wDesktop) {
+        var group = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column');
+        createSpan(labelTxt).parent(group).style('font-size', '8px').style('color', '#bdc3c7').style('font-weight', 'bold');
+        if (element) {
+            element.parent(group).style('width', isMobile ? wMobile : wDesktop)
+                   .style('background', '#34495e').style('color', '#fff').style('border', 'none').style('border-radius', '4px')
+                   .style('font-size', isMobile ? '11px' : '13px').style('height', isMobile ? '22px' : '32px');
+        }
+        return group;
+    }
 
-  saveBtn = createButton('DESIGN DOWNLOADEN').parent(sidebar).addClass('ui-btn');
-  saveBtn.mousePressed(exportHighRes);
+    designSelect = createSelect(); ["Quadrat", "Rund", "Wabe"].forEach(d => designSelect.option(d));
+    createUIGroup("DESIGN", designSelect, "75px", "100px");
 
-  [designSelect, modeSelect, dirSelect, sektSelect].forEach(s => s.changed(redraw));
-  inputField.input(redraw);
-  noLoop();
+    modeSelect = createSelect(); modeSelect.option('Geburtstag'); modeSelect.option('Affirmation');
+    createUIGroup("MODUS", modeSelect, "80px", "110px");
+
+    inputField = createInput('15011987');
+    createUIGroup("EINGABE", inputField, "75px", "130px");
+
+    var codeGroup = createUIGroup("CODE", null, "auto", "auto");
+    codeDisplay = createSpan("").parent(codeGroup).style('color', '#fff').style('font-weight', 'bold');
+
+    sektS = createSelect(); ["6","8","10","12","13"].forEach(s => sektS.option(s)); sektS.selected("8");
+    sektGroup = createUIGroup("SEKTOR", sektS, "40px", "60px");
+
+    dirSelect = createSelect(); dirSelect.option('Außen'); dirSelect.option('Innen');
+    createUIGroup("RICHTUNG", dirSelect, "65px", "95px");
+
+    var saveBtn = createButton('DL').parent(topBar).style('margin-left', 'auto').style('background', '#fff').style('border-radius', '4px').style('font-weight', 'bold');
+    saveBtn.mousePressed(exportHighRes);
+
+    // Slider Erstellung
+    sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150').style('padding', '8px');
+    for (var i = 1; i <= 9; i++) {
+        var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','5px');
+        colorIndicators[i] = createDiv("").parent(sRow).style('width', '10px').style('height', '10px').style('border-radius', '50%');
+        sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
+    }
+
+    // Erst Layout berechnen, wenn Slider sicher existieren
+    updateLayout();
+    [designSelect, modeSelect, dirSelect, inputField, sektS].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
 }
 
-// --- DEINE RECHENLOGIK (1:1 WIE IM ORIGINAL) ---
-
-function ex(a, b) { let s = (a||0)+(b||0); return s===0?0:(s%9===0?9:s%9); }
-
-function getCode() {
-  let val = inputField.value().toUpperCase();
-  if (modeSelect.value() === 'Geburtstag') {
-    let d = val.replace(/\D/g, "").split("").map(Number);
-    if(d.length < 1) return null;
-    while(d.length < 8) d.push(0);
-    return d.slice(0, 8);
-  } else {
-    let chars = val.replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => charMap[c] || 0);
-    if (chars.length === 0) return [1,1,1,1,1,1,1,1];
-    let row = chars;
-    while(row.length < 8) row.push(9);
-    while(row.length > 8) {
-      let next = [];
-      for (let i=0; i<row.length-1; i++) next.push(ex(row[i], row[i+1]));
-      row = next;
+function updateLayout() {
+    if (!sliderPanel || !sliders[1]) return; // Sicherheits-Check
+    var isMobile = windowWidth < 600;
+    
+    if (isMobile) {
+        sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%').style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)');
+    } else {
+        sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto').style('display', 'flex').style('flex-direction', 'column');
     }
-    return row;
-  }
+    
+    for (var i = 1; i <= 9; i++) {
+        if (sliders[i]) sliders[i].style('width', isMobile ? '75px' : '80px');
+    }
+}
+
+function draw() {
+    background(255);
+    if (!designSelect || !sliders[1]) return;
+    
+    var isMobile = windowWidth < 600;
+    var design = designSelect.value();
+    if (design === "Rund") sektGroup.show(); else sektGroup.hide();
+
+    var rawVal = inputField.value();
+    if (!rawVal) return;
+
+    var baseCode = (modeSelect.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
+    while (baseCode.length < 8) baseCode.push(0);
+    baseCode = baseCode.slice(0, 8);
+    var startDigit = baseCode[0] || 1;
+    var drawCode = (dirSelect.value() === 'Innen') ? [...baseCode].reverse() : baseCode;
+    
+    codeDisplay.html(baseCode.join(""));
+    for (var i = 1; i <= 9; i++) {
+        if(colorIndicators[i]) colorIndicators[i].style('background-color', colorMatrix[startDigit][i-1]);
+    }
+
+    push();
+    var centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
+    translate(width / 2, centerY);
+    
+    if (design === "Quadrat") {
+        scale((min(width, height) / 850) * (isMobile ? 0.8 : 0.95));
+        calcQuadratMatrix(drawCode);
+        renderQuadrat(startDigit);
+    } else if (design === "Rund") {
+        scale((min(width, height) / 900) * (isMobile ? 0.85 : 0.95));
+        renderRund(drawCode, startDigit);
+    } else if (design === "Wabe") {
+        scale((min(width, height) / 520) * (isMobile ? 0.45 : 0.48));
+        renderWabe(drawCode, startDigit);
+    }
+    pop();
+
+    if (logoImg && logoImg.width > 1) {
+        var lW = isMobile ? 55 : 150;
+        var lH = (logoImg.height / logoImg.width) * lW;
+        image(logoImg, 15, isMobile ? height - 125 : height - lH - 25, lW, lH);
+    }
+}
+
+// Hilfsfunktionen (Farben, Matrix-Logik)
+function getFinalCol(val, startDigit) {
+    var hex = colorMatrix[startDigit][val - 1];
+    var col = color(hex);
+    var sVal = sliders[val] ? sliders[val].value() : 85;
+    return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
 }
 
 function calcQuadratMatrix(code) {
-  qMatrix = Array(20).fill().map(() => Array(20).fill(0));
-  let d=[code[0],code[1]], m=[code[2],code[3]], j1=[code[4],code[5]], j2=[code[6],code[7]];
-  const set2 = (r,c,v1,v2) => { if(r<19&&c<19){ qMatrix[r][c]=v1; qMatrix[r][c+1]=v2; qMatrix[r+1][c]=v2; qMatrix[r+1][c+1]=v1; } };
-  for(let i=0; i<8; i+=2) set2(i,i,d[0],d[1]);
-  for(let i=0; i<6; i+=2) { set2(i,i+2,m[0],m[1]); set2(i+2,i,m[0],m[1]); }
-  for(let i=0; i<4; i+=2) { set2(i,i+4,j1[0],j1[1]); set2(i+4,i,j1[0],j1[1]); }
-  set2(0,6,j2[0],j2[1]); set2(6,0,j2[0],j2[1]);
-  for(let r=0; r<8; r++) for(let c=8; c<20; c++) qMatrix[r][c]=ex(qMatrix[r][c-2], qMatrix[r][c-1]);
-  for(let c=0; c<20; c++) for(let r=8; r<20; r++) qMatrix[r][c]=ex(qMatrix[r-2][c], qMatrix[r-1][c]);
+    qMatrix = Array(20).fill().map(() => Array(20).fill(0));
+    var set2 = (r, c, v1, v2) => { if (r < 20 && c < 20) { qMatrix[r][c] = v1; if(c+1<20) qMatrix[r][c+1]=v2; if(r+1<20) qMatrix[r+1][c]=v2; if(r+1<20 && c+1<20) qMatrix[r+1][c+1]=v1; } };
+    for(var i=0; i<8; i+=2) set2(i, i, code[0], code[1]);
+    for(var i=0; i<6; i+=2) { set2(i, i+2, code[2], code[3]); set2(i+2, i, code[2], code[3]); }
+    for(var i=0; i<4; i+=2) { set2(i, i+4, code[4], code[5]); set2(i+4, i, code[4], code[5]); }
+    set2(0, 6, code[6], code[7]); set2(6, 0, code[6], code[7]);
+    for(var r=0; r<8; r++) for(var c=8; c<20; c++) qMatrix[r][c] = ex(qMatrix[r][c-2], qMatrix[r][c-1]);
+    for(var c=0; c<20; c++) for(var r=8; r<20; r++) qMatrix[r][c] = ex(qMatrix[r-2][c], qMatrix[r-1][c]);
 }
 
-// --- DEINE ZEICHENLOGIKEN (KOMPLETT ZURÜCKGESETZT AUF DEIN ORIGINAL) ---
-
-function drawQuadrat(colors, target) {
-  let ctx=target||window; let ts=16; ctx.stroke(0,30); ctx.strokeWeight(0.5);
-  for(let r=0;r<20;r++) for(let c=0;c<20;c++) {
-    let v=qMatrix[r][c]; if(v>0){ ctx.fill(getSliderColor(colors[v-1],v));
-    ctx.rect(c*ts,-(r+1)*ts,ts,ts); ctx.rect(-(c+1)*ts,-(r+1)*ts,ts,ts);
-    ctx.rect(c*ts,r*ts,ts,ts); ctx.rect(-(c+1)*ts,r*ts,ts,ts); }
-  }
+function buildMandalaMatrix(raw) {
+    var n = 16; var m = Array.from({length: n}, (_, r) => Array(r + 1).fill(0));
+    var base = [...raw].reverse().concat(raw);
+    for (var i = 0; i < 16; i++) { m[15][i] = base[i]; m[15 - i][0] = base[i]; m[15 - i][15 - i] = base[i]; }
+    for (var c = 1; c <= 13; c++) m[14][c] = ex(m[15][c], m[15][c + 1]);
+    var c14 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[14][c]);
+    c14(1, [[2, 1]]); c14(2, [[3, 1], [3, 2], [13, 1], [13, 12]]); c14(3, [[4, 1], [4, 3], [12, 1], [12, 11]]);
+    c14(4, [[5, 1], [5, 4], [11, 1], [11, 10]]); c14(5, [[6, 1], [6, 5], [10, 1], [10, 9]]);
+    c14(6, [[7, 1], [7, 6], [9, 1], [9, 8]]); c14(7, [[8, 1], [8, 7]]);
+    for (var c = 2; c <= 10; c++) m[13][c] = ex(m[14][c], m[14][c + 1]);
+    var c13 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[13][c]);
+    c13(2, [[4, 2], [13, 11]]); c13(3, [[12, 2], [12, 10], [5, 2], [5, 3]]);
+    c13(4, [[11, 2], [11, 9], [6, 4], [6, 2]]); c13(5, [[10, 2], [10, 8], [7, 5], [7, 2]]);
+    c13(6, [[9, 2], [9, 7], [8, 6], [8, 2]]);
+    for (var j = 3; j <= 8; j++) m[12][j] = ex(m[13][j], m[13][j+1]);
+    var c12 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[12][c]);
+    c12(3, [[12, 9], [6, 3]]); c12(4, [[11, 3], [11, 8], [7, 4], [7, 3]]);
+    c12(5, [[10, 3], [10, 7], [8, 5], [8, 3]]); c12(6, [[9, 3], [9, 6]]);
+    m[11][4] = ex(m[12][4], m[12][5]); m[11][5] = ex(m[12][5], m[12][6]); m[11][6] = ex(m[12][6], m[12][7]);
+    var c11 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[11][c]);
+    c11(4, [[11, 7], [8, 4]]); c11(5, [[10, 4], [10, 6], [9, 4], [9, 5]]);
+    m[10][5] = ex(m[11][5], m[11][6]);
+    return m;
 }
 
-function drawRund(code, colors, target) {
-  let ctx=target||window; let sc=int(sektSelect.value()); let angle=TWO_PI/sc;
-  let frame=dirSelect.value()==='Innen'?[...code].reverse():[...code];
-  let base=[...frame].reverse().concat(frame);
-  let m=Array.from({length:16},(_,r)=>Array(r+1).fill(0));
-  for(let i=0;i<16;i++){ m[15][i]=base[i]; m[i][0]=base[i]; m[i][i]=base[i]; }
-  for(let r=14;r>=0;r--) for(let c=1;c<r;c++) m[r][c]=ex(m[r+1][c],m[r+1][c+1]);
-  for(let i=0;i<sc;i++){ ctx.push(); ctx.rotate(i*angle); let step=20, h=tan(angle/2)*step; ctx.stroke(0,30);
-    for(let r=0;r<16;r++) for(let c=0;c<=r;c++){ let v=m[r][c]; if(v>0){ ctx.fill(getSliderColor(colors[v-1],v));
-      let x=r*step, y=(c-r/2)*h*2; ctx.beginShape(); ctx.vertex(x,y); ctx.vertex(x+step,y-h); ctx.vertex(x+step*2,y); ctx.vertex(x+step,y+h); ctx.endShape(CLOSE); }}
-  ctx.pop(); }
-}
-
-function drawWabe(code, colors, target) {
-  let ctx=target||window; let sz=16.2; let path=dirSelect.value()==='Innen'?[...code,...[...code].reverse()]:[...[...code].reverse(),...code];
-  ctx.stroke(0,30); ctx.strokeWeight(0.5);
-  for(let s=0;s<6;s++){ ctx.push(); ctx.rotate(s*PI/3);
-    let m=Array(17).fill().map(()=>Array(17).fill(0)); for(let i=0;i<16;i++) m[16][i]=path[i % path.length];
-    for(let r=15;r>=1;r--) for(let i=0;i<r;i++) m[r][i]=ex(m[r+1][i],m[r+1][i+1]);
-    for(let r=1;r<=16;r++) for(let i=0;i<r;i++){ if(m[r][i]>0){ ctx.fill(getSliderColor(colors[m[r][i]-1],m[r][i]));
-      let x=(i-(r-1)/2)*sz*sqrt(3), y=-(r-1)*sz*1.5; ctx.beginShape(); for(let a=PI/6;a<TWO_PI;a+=PI/3) ctx.vertex(x+cos(a)*sz,y+sin(a)*sz); ctx.endShape(CLOSE); }}
-  ctx.pop(); }
-}
-
-// --- STEUERUNG (NUR HIER VERKNÜPFUNG ZUM UI) ---
-
-function draw() {
-  background(255);
-  let code = getCode();
-  if (!code) return;
-  let currentColors = getColorSet(code[0] || 1);
-  for (let i = 1; i <= 9; i++) { if(colorIndicators[i]) colorIndicators[i].style('background-color', currentColors[i-1]); }
-  
-  push();
-  let offsetX = windowWidth > 600 ? -140 : 0;
-  translate(width / 2 + offsetX, height / 2);
-  let design = designSelect.value();
-  let sc = (min(width, height) / 900);
-  
-  if (design === 'Quadrat') { scale(sc * 0.9); calcQuadratMatrix(dirSelect.value()==='Innen' ? [...code].reverse() : code); drawQuadrat(currentColors); }
-  else if (design === 'Rund') { scale(sc * 0.95); drawRund(code, currentColors); }
-  else { scale(sc * 1.8); drawWabe(code, currentColors); }
-  pop();
-
-  if (logoImg && logoImg.width > 0) {
-    let lW = windowWidth < 600 ? 60 : 150;
-    image(logoImg, 30, height - 100, lW, (logoImg.height/logoImg.width)*lW);
-  }
-}
-
-function getSliderColor(cStr, val) {
-  let col = color(cStr);
-  let sVal = sliders[val].value();
-  return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
-}
-
-function getColorSet(seed) {
-  let shift = (seed - 1) % 9;
-  return baseColors.slice(shift).concat(baseColors.slice(0, shift));
-}
-
-function addStyles() {
-  createElement('style', `
-    #ui-sidebar { position: fixed; top: 20px; right: 20px; width: 280px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: sans-serif; z-index: 1000; }
-    .ui-select, .ui-input { width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 5px; }
-    .ui-btn { width: 100%; padding: 10px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    .slider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .slider-row { display: flex; align-items: center; }
-    .color-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
-  `);
+function getCodeFromText(t) {
+    var a = t.toUpperCase().replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => charMap[c] || 9);
+    if (a.length === 0) return [1,1,1,1,1,1,1,1];
+    while (a.length < 8) a.push(9);
+    while (a.length > 8) { var n = []; for (var i=0; i<a.length-1; i++) n.push(ex(a[i], a[i+1])); a = n; }
+    return a;
 }
 
 function exportHighRes() {
-  let pg = createGraphics(2480, 3508);
-  pg.colorMode(HSB, 360, 100, 100); pg.background(255);
-  let code = getCode(); let colors = getColorSet(code[0]||1);
-  pg.push(); pg.translate(pg.width/2, pg.height*0.45);
-  let design = designSelect.value();
-  if(design==='Quadrat'){ pg.scale(4); calcQuadratMatrix(dirSelect.value()==='Innen'?[...code].reverse():code); drawQuadrat(colors, pg); }
-  else if(design==='Rund'){ pg.scale(3.5); drawRund(code, colors, pg); }
-  else { pg.scale(2.5); drawWabe(code, colors, pg); }
-  pg.pop();
-  save(pg, `Mandala_${design}.png`);
+    var pg = createGraphics(2480, 3508); pg.colorMode(HSB, 360, 100, 100); pg.background(255);
+    var design = designSelect.value();
+    var rawVal = inputField.value();
+    var baseCode = (modeSelect.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
+    while (baseCode.length < 8) baseCode.push(0);
+    var startDigit = baseCode[0] || 1;
+    var drawCode = (dirSelect.value() === 'Innen') ? [...baseCode].reverse() : baseCode;
+    
+    pg.push(); pg.translate(pg.width/2, pg.height*0.42);
+    if(design === "Quadrat") { pg.scale(3.8); calcQuadratMatrix(drawCode); renderQuadrat(startDigit, pg); }
+    else if(design === "Rund") { pg.scale(3.2); renderRund(drawCode, startDigit, pg); }
+    else if(design === "Wabe") { pg.scale(2.4); renderWabe(drawCode, startDigit, pg); }
+    pg.pop();
+
+    if (logoImg && logoImg.width > 1) {
+        var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;
+        pg.image(logoImg, pg.width - lW - 100, pg.height - lH - 100, lW, lH);
+    }
+    save(pg, 'MilzMore_' + design + '.png');
 }
 
-function windowResized() { resizeCanvas(windowWidth, windowHeight); redraw(); }
+function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }

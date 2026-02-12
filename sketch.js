@@ -1,4 +1,4 @@
-// 1. GLOBALE VARIABLEN & KONSTANTEN
+// 1. GLOBALE VARIABLEN
 var inputField, designSelect, modeSelect, dirSelect, sektSelect;
 var sliders = [], colorIndicators = [], sliderPanel;
 var logoImg, codeDisplay, isAdmin = false;
@@ -11,13 +11,13 @@ const charMap = {
 
 const baseColors = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
 
-// Hilfsfunktion für die Quersumme (1-9)
 var ex = (a, b) => {
   let s = (a || 0) + (b || 0);
   return (s === 0) ? 0 : (s % 9 === 0 ? 9 : s % 9);
 };
 
 function preload() {
+  // Vergewissere dich, dass logo.png im selben Ordner liegt
   logoImg = loadImage('logo.png');
 }
 
@@ -51,7 +51,7 @@ function setup() {
   createUIGroup("DESIGN", designSelect, "70px", "100px");
 
   modeSelect = createSelect();
-  modeSelect.option('Geburtstag'); modeSelect.option('Text/Affirm.');
+  modeSelect.option('Geburtstag'); modeSelect.option('Text');
   createUIGroup("MODUS", modeSelect, "80px", "110px");
 
   inputField = createInput('15011987');
@@ -65,11 +65,12 @@ function setup() {
   dirSelect.option('Außen'); dirSelect.option('Innen');
   createUIGroup("DIR", dirSelect, "60px", "80px");
 
-  var saveBtn = createButton('SAVE').parent(topBar)
+  var saveBtn = createButton('DOWNLOAD').parent(topBar)
     .style('margin-left', 'auto').style('background', '#fff').style('border', 'none').style('font-weight', 'bold')
     .style('border-radius', '4px').style('padding', '5px 10px').style('cursor', 'pointer');
   saveBtn.mousePressed(exportHighRes);
 
+  // SLIDER PANEL INITIALISIERUNG
   sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150');
   for (var i = 1; i <= 9; i++) {
     var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','5px');
@@ -78,7 +79,9 @@ function setup() {
   }
 
   updateLayout();
-  [designSelect, modeSelect, dirSelect, sektSelect, inputField].forEach(e => e.changed(() => redraw()));
+  [designSelect, modeSelect, dirSelect, sektSelect, inputField].forEach(e => {
+    if(e.changed) e.changed(() => redraw());
+  });
   inputField.input(() => redraw());
 }
 
@@ -88,12 +91,10 @@ function updateLayout() {
     sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
       .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '10px 5px');
     for (var i = 1; i <= 9; i++) sliders[i].style('width', '75px');
-    sektSelect.parent().hide(); // Platz sparen auf Mobile
   } else {
     sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
       .style('display', 'flex').style('flex-direction', 'column').style('padding', '15px').style('border-radius', '0 10px 10px 0');
     for (var i = 1; i <= 9; i++) sliders[i].style('width', '80px');
-    sektSelect.parent().show();
   }
 }
 
@@ -106,9 +107,8 @@ function draw() {
   var startDigit = code[0] || 1;
   var currentColors = getColorSet(startDigit);
   
-  // Farben im Panel aktualisieren
   for (var i = 1; i <= 9; i++) {
-    colorIndicators[i].style('background-color', currentColors[i-1]);
+    if(colorIndicators[i]) colorIndicators[i].style('background-color', currentColors[i-1]);
   }
 
   push();
@@ -124,7 +124,7 @@ function draw() {
   } else if (design === 'Rund') {
     scale((min(width, height) / 900) * (isMobile ? 0.85 : 0.95));
     drawRund(code, currentColors);
-  } else {
+  } else if (design === 'Wabe') {
     scale((min(width, height) / 520) * (isMobile ? 0.45 : 0.48));
     drawWabe(code, currentColors);
   }
@@ -201,11 +201,11 @@ function drawWabe(code, colors, target) {
   }
 }
 
-// --- HELFER ---
+// --- HELFER-FUNKTIONEN ---
 
 function getSliderColor(cStr, val) {
   let col = color(cStr);
-  let sVal = sliders[val].value();
+  let sVal = (sliders[val]) ? sliders[val].value() : 85;
   return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
 }
 
@@ -215,13 +215,13 @@ function getColorSet(seed) {
 }
 
 function getCode() {
-  let raw = inputField.value().toUpperCase().replace(/[^0-9A-ZÄÖÜß]/g, "");
+  let val = inputField.value().toUpperCase();
   if (modeSelect.value() === 'Geburtstag') {
-    let d = raw.replace(/\D/g, "").split("").map(Number);
+    let d = val.replace(/\D/g, "").split("").map(Number);
     while(d.length < 8) d.push(0);
     return d.slice(0, 8);
   } else {
-    let chars = raw.replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => charMap[c] || 0);
+    let chars = val.replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => charMap[c] || 0);
     if (chars.length === 0) return [1,1,1,1,1,1,1,1];
     let row = chars;
     while(row.length < 8) row.push(9);
@@ -253,9 +253,7 @@ function buildRundSector(code) {
   let frame = dirSelect.value() === 'Innen' ? [...code].reverse() : [...code];
   let base = [...frame].reverse().concat(frame);
   for (let i=0; i<16; i++) { m[15][i] = base[i]; m[i][0] = base[i]; m[i][i] = base[i]; }
-  for (let c=1; c<=13; c++) m[14][c] = ex(m[15][c], m[15][c+1]);
-  // Vereinfachte Füll-Logik für dieses Beispiel (kann durch deine spezifische m[r][k] Logik ersetzt werden)
-  for (let r=13; r>=0; r--) for (let c=1; c<r; c++) m[r][c] = ex(m[r+1][c], m[r+1][c+1]);
+  for (let r=14; r>=0; r--) for (let c=1; c<r; c++) m[r][c] = ex(m[r+1][c], m[r+1][c+1]);
   return m;
 }
 
@@ -268,7 +266,12 @@ function exportHighRes() {
   
   pg.push();
   pg.translate(pg.width/2, pg.height * 0.42);
-  if (design === 'Quadrat') { pg.scale(3.8); calcQuadratMatrix(dirSelect.value()==='Innen'?[...code].reverse():code); drawQuadrat(colors, pg); }
+  if (design === 'Quadrat') { 
+    pg.scale(3.8); 
+    let drawCode = dirSelect.value() === 'Innen' ? [...code].reverse() : code;
+    calcQuadratMatrix(drawCode); 
+    drawQuadrat(colors, pg); 
+  }
   else if (design === 'Rund') { pg.scale(3.2); drawRund(code, colors, pg); }
   else { pg.scale(2.4); drawWabe(code, colors, pg); }
   pg.pop();
@@ -285,4 +288,8 @@ function exportHighRes() {
   save(pg, `MilzMore_${design}_${inputField.value()}.png`);
 }
 
-function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); }
+function windowResized() { 
+  resizeCanvas(windowWidth, windowHeight); 
+  updateLayout(); 
+  redraw(); 
+}

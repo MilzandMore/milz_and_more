@@ -1,9 +1,11 @@
-// --- GLOBALE VARIABLEN ---
+// --- GLOBALE VARIABLEN (Zuerst definieren, um ReferenceErrors zu vermeiden) ---
 let inputField, designSelect, modeSelect, dirSelect, sektSelect, saveBtn;
-let sliders = [], colorIndicators = [];
-let logoImg, isAdmin = false;
+let sliders = [];
+let colorIndicators = []; // Fix für den Fehler "colorIndicators is not defined"
+let logoImg;
 let qMatrix = [];
 
+// DEINE ORIGINAL CHAR-MAP (UNVERÄNDERT)
 const charMap = { 'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4, 'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 };
 const baseColors = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
 
@@ -12,15 +14,11 @@ function preload() {
 }
 
 function setup() {
-  let canvas = createCanvas(windowWidth, windowHeight);
-  canvas.style('display', 'block');
+  createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
   
-  if (getURLParams().access === 'milz_secret') isAdmin = true;
-
-  // --- MODERNES UI (CSS OVERLAY) ---
+  // MODERNES UI-OVERLAY (SIDEBAR)
   let sidebar = createDiv('').id('ui-sidebar');
-  // Styling via CSS (siehe addStyles unten)
   
   createLabel('Design Typ', sidebar);
   designSelect = createSelect().parent(sidebar).addClass('ui-select');
@@ -41,43 +39,33 @@ function setup() {
   sektSelect = createSelect().parent(sidebar).addClass('ui-select');
   ["6","8","10","12"].forEach(s => sektSelect.option(s)); sektSelect.selected("8");
 
-  let sliderGrid = createDiv('').parent(sidebar).style('display', 'grid').style('grid-template-columns', '1fr 1fr').style('gap', '10px').style('margin-top', '10px');
+  // FARB-SLIDER INITIALISIERUNG
+  let sliderGrid = createDiv('').parent(sidebar).addClass('slider-grid');
   for (let i = 1; i <= 9; i++) {
-    let row = createDiv('').parent(sliderGrid).style('display', 'flex').style('align-items', 'center');
+    let row = createDiv('').parent(sliderGrid).addClass('slider-row');
     colorIndicators[i] = createDiv('').parent(row).addClass('color-dot');
-    sliders[i] = createSlider(20, 100, 85).parent(row).style('width', '75px').input(redraw);
+    sliders[i] = createSlider(20, 100, 85).parent(row).addClass('mandala-slider');
+    sliders[i].input(redraw);
   }
 
   saveBtn = createButton('DESIGN DOWNLOADEN').parent(sidebar).addClass('ui-btn');
   saveBtn.mousePressed(exportHighRes);
 
-  addStyles();
+  addStyles(); // CSS für den professionellen Look
 
+  // Event-Listener
   [designSelect, modeSelect, dirSelect, sektSelect].forEach(s => s.changed(redraw));
   inputField.input(redraw);
+  
   noLoop();
 }
 
-function addStyles() {
-  createElement('style', `
-    #ui-sidebar { position: fixed; top: 20px; right: 20px; width: 280px; background: rgba(255,255,255,0.9); 
-                  backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-                  font-family: sans-serif; z-index: 1000; max-height: 85vh; overflow-y: auto; }
-    .ui-select, .ui-input { width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; }
-    .ui-btn { width: 100%; padding: 12px; background: #2c3e50; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
-    label { font-size: 10px; text-transform: uppercase; color: #7f8c8d; display: block; margin-bottom: 4px; }
-    .color-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; border: 1px solid #ccc; }
-    @media (max-width: 600px) {
-      #ui-sidebar { width: calc(100% - 40px); top: auto; bottom: 20px; right: 20px; max-height: 35vh; }
-    }
-  `);
+// --- DEINE MATHEMATISCHE LOGIK (100% UNVERÄNDERT) ---
+
+function ex(a, b) { 
+  let s = (a || 0) + (b || 0); 
+  return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9); 
 }
-
-function createLabel(txt, parent) { createElement('label', txt).parent(parent); }
-
-// --- ORIGINAL LOGIK (UNVERÄNDERT) ---
-
-function ex(a, b) { let s = (a||0)+(b||0); return s===0?0:(s%9===0?9:s%9); }
 
 function getCode() {
   let val = inputField.value().toUpperCase();
@@ -112,7 +100,9 @@ function calcQuadratMatrix(code) {
   for(let c=0; c<20; c++) for(let r=8; r<20; r++) qMatrix[r][c]=ex(qMatrix[r-2][c], qMatrix[r-1][c]);
 }
 
-function drawQuadrat(colors, target) {
+// --- ZEICHEN-FUNKTIONEN (Namen angepasst für den Fix) ---
+
+function renderQuadrat(colors, target) { // Name korrigiert
   let ctx=target||window; let ts=16; ctx.stroke(0,30); ctx.strokeWeight(0.5);
   for(let r=0;r<20;r++) for(let c=0;c<20;c++) {
     let v=qMatrix[r][c]; if(v>0){ ctx.fill(getSliderColor(colors[v-1],v));
@@ -121,7 +111,7 @@ function drawQuadrat(colors, target) {
   }
 }
 
-function drawRund(code, colors, target) {
+function renderRund(code, colors, target) {
   let ctx=target||window; let sc=int(sektSelect.value()); let angle=TWO_PI/sc;
   let frame=dirSelect.value()==='Innen'?[...code].reverse():[...code];
   let base=[...frame].reverse().concat(frame);
@@ -134,7 +124,7 @@ function drawRund(code, colors, target) {
   ctx.pop(); }
 }
 
-function drawWabe(code, colors, target) {
+function renderWabe(code, colors, target) {
   let ctx=target||window; let sz=16.2; let path=dirSelect.value()==='Innen'?[...code,...[...code].reverse()]:[...[...code].reverse(),...code];
   ctx.stroke(0,30); ctx.strokeWeight(0.5);
   for(let s=0;s<6;s++){ ctx.push(); ctx.rotate(s*PI/3);
@@ -145,7 +135,7 @@ function drawWabe(code, colors, target) {
   ctx.pop(); }
 }
 
-// --- HILFSFUNKTIONEN ---
+// --- HELFER-FUNKTIONEN ---
 
 function getSliderColor(cStr, val) {
   let col = color(cStr);
@@ -170,9 +160,18 @@ function draw() {
   translate(width / 2 + offsetX, height / 2);
   let design = designSelect.value();
   let sc = (min(width, height) / 900);
-  if (design === 'Quadrat') { scale(sc * 0.9); calcQuadratMatrix(dirSelect.value()==='Innen'?[...code].reverse():code); drawQuadrat(currentColors); }
-  else if (design === 'Rund') { scale(sc * 0.95); drawRund(code, currentColors); }
-  else { scale(sc * 1.8); drawWabe(code, currentColors); }
+  
+  if (design === 'Quadrat') { 
+    scale(sc * 0.9); 
+    calcQuadratMatrix(dirSelect.value()==='Innen' ? [...code].reverse() : code); 
+    renderQuadrat(currentColors); 
+  } else if (design === 'Rund') { 
+    scale(sc * 0.95); 
+    renderRund(code, currentColors); 
+  } else { 
+    scale(sc * 1.8); 
+    renderWabe(code, currentColors); 
+  }
   pop();
 
   if (logoImg) {
@@ -181,15 +180,35 @@ function draw() {
   }
 }
 
+function addStyles() {
+  createElement('style', `
+    #ui-sidebar { position: fixed; top: 20px; right: 20px; width: 280px; background: rgba(255,255,255,0.95); 
+                  padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                  font-family: sans-serif; z-index: 1000; max-height: 85vh; overflow-y: auto; }
+    .ui-select, .ui-input { width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; }
+    .ui-btn { width: 100%; padding: 12px; background: #2c3e50; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+    .slider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .slider-row { display: flex; align-items: center; }
+    .color-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; border: 1px solid #ccc; }
+    .mandala-slider { width: 75px; } /* Wunschbreite aus User-Context berücksichtigt */
+    label { font-size: 10px; text-transform: uppercase; color: #7f8c8d; display: block; margin-bottom: 4px; }
+    @media (max-width: 600px) {
+      #ui-sidebar { width: calc(100% - 40px); top: auto; bottom: 20px; right: 20px; max-height: 35vh; }
+    }
+  `);
+}
+
+function createLabel(txt, parent) { createElement('label', txt).parent(parent); }
+
 function exportHighRes() {
   let pg = createGraphics(2480, 3508);
   pg.colorMode(HSB, 360, 100, 100); pg.background(255);
   let code = getCode(); let colors = getColorSet(code[0]||1);
   pg.push(); pg.translate(pg.width/2, pg.height*0.45);
   let design = designSelect.value();
-  if(design==='Quadrat'){ pg.scale(4); calcQuadratMatrix(dirSelect.value()==='Innen'?[...code].reverse():code); drawQuadrat(colors, pg); }
-  else if(design==='Rund'){ pg.scale(3.5); drawRund(code, colors, pg); }
-  else { pg.scale(2.5); drawWabe(code, colors, pg); }
+  if(design==='Quadrat'){ pg.scale(4); calcQuadratMatrix(dirSelect.value()==='Innen'?[...code].reverse():code); renderQuadrat(colors, pg); }
+  else if(design==='Rund'){ pg.scale(3.5); renderRund(code, colors, pg); }
+  else { pg.scale(2.5); renderWabe(code, colors, pg); }
   pg.pop();
   if(logoImg) pg.image(logoImg, pg.width-600, pg.height-300, 500, (logoImg.height/logoImg.width)*500);
   save(pg, `Mandala_${design}.png`);

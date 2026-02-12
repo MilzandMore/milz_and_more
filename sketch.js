@@ -1,7 +1,7 @@
-// 1. GLOBALE VARIABLEN & KONSTANTEN
+// 1. GLOBALE VARIABLEN
 var designSelect, modeSelect, inputField, sektS, dirSelect, codeDisplay;
 var sliders = [], colorIndicators = [], sliderPanel, sektGroup;
-var logoImg = null; // Initialisierung als null
+var logoImg = null;
 var qMatrix = [];
 
 const colorMatrix = {
@@ -16,25 +16,13 @@ const colorMatrix = {
     9: ["#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500"]
 };
 
-const charMap = { 
-    'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,
-    'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 
-};
-
+const charMap = { 'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 };
 var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
-function preload() { 
-    // Wir versuchen beide Varianten, falls du unsicher bist
-    logoImg = loadImage('Logo.png', 
-        () => console.log("Logo.png gefunden!"), 
-        () => {
-            console.log("Logo.png nicht gefunden, probiere logo.png...");
-            logoImg = loadImage('logo.png', 
-                () => console.log("logo.png gefunden!"),
-                () => console.log("Kein Logo gefunden - Programm startet trotzdem.")
-            );
-        }
-    ); 
+function preload() {
+    logoImg = loadImage('Logo.png', () => {}, () => {
+        logoImg = loadImage('logo.png');
+    });
 }
 
 function setup() {
@@ -42,18 +30,13 @@ function setup() {
     colorMode(HSB, 360, 100, 100);
     var isMobile = windowWidth < 600;
 
-    // Topbar Erstellung
-    var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
-        .style('background', '#2c3e50').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
-        .style('gap', isMobile ? '8px' : '20px').style('z-index', '200').style('align-items', 'center').style('height', isMobile ? '55px' : '75px').style('box-sizing', 'border-box');
+    var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%').style('background', '#2c3e50').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px').style('gap', isMobile ? '8px' : '20px').style('z-index', '200').style('align-items', 'center').style('height', isMobile ? '55px' : '75px').style('box-sizing', 'border-box');
 
     function createUIGroup(labelTxt, element, wMobile, wDesktop) {
         var group = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column');
         createSpan(labelTxt).parent(group).style('font-size', '8px').style('color', '#bdc3c7').style('font-weight', 'bold');
         if (element) {
-            element.parent(group).style('width', isMobile ? wMobile : wDesktop)
-                   .style('background', '#34495e').style('color', '#fff').style('border', 'none').style('border-radius', '4px')
-                   .style('font-size', isMobile ? '11px' : '13px').style('height', isMobile ? '22px' : '32px');
+            element.parent(group).style('width', isMobile ? wMobile : wDesktop).style('background', '#34495e').style('color', '#fff').style('border', 'none').style('border-radius', '4px').style('font-size', isMobile ? '11px' : '13px').style('height', isMobile ? '22px' : '32px');
         }
         return group;
     }
@@ -76,10 +59,10 @@ function setup() {
     dirSelect = createSelect(); dirSelect.option('Außen'); dirSelect.option('Innen');
     createUIGroup("RICHTUNG", dirSelect, "65px", "95px");
 
-    var saveBtn = createButton('DL').parent(topBar).style('margin-left', 'auto').style('background', '#fff').style('border-radius', '4px').style('font-weight', 'bold');
+    // Button wieder auf WEISS gesetzt
+    var saveBtn = createButton('Download').parent(topBar).style('margin-left', 'auto').style('background', '#ffffff').style('color', '#000000').style('border', 'none').style('padding', '8px 12px').style('border-radius', '4px').style('font-weight', 'bold').style('cursor', 'pointer');
     saveBtn.mousePressed(exportHighRes);
 
-    // Slider Erstellung
     sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150').style('padding', '8px');
     for (var i = 1; i <= 9; i++) {
         var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','5px');
@@ -87,21 +70,18 @@ function setup() {
         sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
     }
 
-    // Erst Layout berechnen, wenn Slider sicher existieren
     updateLayout();
-    [designSelect, modeSelect, dirSelect, inputField, sektS].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
+    [designSelect, modeSelect, dirSelect, inputField, sektS].forEach(e => e.changed(redraw));
 }
 
 function updateLayout() {
-    if (!sliderPanel || !sliders[1]) return; // Sicherheits-Check
+    if (!sliderPanel || !sliders[1]) return;
     var isMobile = windowWidth < 600;
-    
     if (isMobile) {
         sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%').style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)');
     } else {
         sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto').style('display', 'flex').style('flex-direction', 'column');
     }
-    
     for (var i = 1; i <= 9; i++) {
         if (sliders[i]) sliders[i].style('width', isMobile ? '75px' : '80px');
     }
@@ -110,11 +90,9 @@ function updateLayout() {
 function draw() {
     background(255);
     if (!designSelect || !sliders[1]) return;
-    
     var isMobile = windowWidth < 600;
     var design = designSelect.value();
     if (design === "Rund") sektGroup.show(); else sektGroup.hide();
-
     var rawVal = inputField.value();
     if (!rawVal) return;
 
@@ -123,25 +101,21 @@ function draw() {
     baseCode = baseCode.slice(0, 8);
     var startDigit = baseCode[0] || 1;
     var drawCode = (dirSelect.value() === 'Innen') ? [...baseCode].reverse() : baseCode;
-    
     codeDisplay.html(baseCode.join(""));
-    for (var i = 1; i <= 9; i++) {
-        if(colorIndicators[i]) colorIndicators[i].style('background-color', colorMatrix[startDigit][i-1]);
-    }
 
     push();
-    var centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
+    var centerY = isMobile ? height / 2 - 20 : height / 2 + 40;
     translate(width / 2, centerY);
     
     if (design === "Quadrat") {
-        scale((min(width, height) / 850) * (isMobile ? 0.8 : 0.95));
+        scale((min(width, height) / 800) * (isMobile ? 0.75 : 0.9));
         calcQuadratMatrix(drawCode);
         renderQuadrat(startDigit);
     } else if (design === "Rund") {
-        scale((min(width, height) / 900) * (isMobile ? 0.85 : 0.95));
+        scale((min(width, height) / 850) * (isMobile ? 0.8 : 0.95));
         renderRund(drawCode, startDigit);
     } else if (design === "Wabe") {
-        scale((min(width, height) / 520) * (isMobile ? 0.45 : 0.48));
+        scale((min(width, height) / 500) * (isMobile ? 0.42 : 0.48));
         renderWabe(drawCode, startDigit);
     }
     pop();
@@ -153,12 +127,99 @@ function draw() {
     }
 }
 
-// Hilfsfunktionen (Farben, Matrix-Logik)
+function exportHighRes() {
+    var pg = createGraphics(3508, 4961);
+    pg.colorMode(HSB, 360, 100, 100);
+    pg.background(255);
+    
+    var design = designSelect.value();
+    var rawVal = inputField.value();
+    var baseCode = (modeSelect.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
+    while (baseCode.length < 8) baseCode.push(0);
+    var startDigit = baseCode[0] || 1;
+    var drawCode = (dirSelect.value() === 'Innen') ? [...baseCode].reverse() : baseCode;
+
+    pg.push();
+    pg.translate(pg.width / 2, pg.height * 0.45);
+    if (design === "Quadrat") { pg.scale(5.5); calcQuadratMatrix(drawCode); renderQuadrat(startDigit, pg); }
+    else if (design === "Rund") { pg.scale(4.8); renderRund(drawCode, startDigit, pg); }
+    else if (design === "Wabe") { pg.scale(3.5); renderWabe(drawCode, startDigit, pg); }
+    pg.pop();
+
+    if (logoImg && logoImg.width > 1) {
+        var lW = 600;
+        var lH = (logoImg.height / logoImg.width) * lW;
+        pg.image(logoImg, pg.width - lW - 150, pg.height - lH - 250, lW, lH);
+    }
+    
+    pg.fill(0); pg.noStroke(); pg.textAlign(RIGHT); pg.textSize(80);
+    pg.text("Milz & More", pg.width - 150, pg.height - 150);
+
+    save(pg, 'MilzMore_' + rawVal + '_' + design + '.png');
+}
+
+// REST BLEIBT UNVERÄNDERT
 function getFinalCol(val, startDigit) {
     var hex = colorMatrix[startDigit][val - 1];
     var col = color(hex);
     var sVal = sliders[val] ? sliders[val].value() : 85;
     return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
+}
+
+function renderQuadrat(startDigit, target) {
+    var ctx = target || window;
+    var ts = 16; ctx.stroke(0, 35); ctx.strokeWeight(0.5);
+    for (var r = 0; r < 20; r++) {
+        for (var c = 0; c < 20; c++) {
+            var val = qMatrix[r][c];
+            if (val > 0) {
+                ctx.fill(getFinalCol(val, startDigit));
+                ctx.rect(c * ts, -(r + 1) * ts, ts, ts); ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts); 
+                ctx.rect(c * ts, r * ts, ts, ts); ctx.rect(-(c + 1) * ts, r * ts, ts, ts);        
+            }
+        }
+    }
+}
+
+function renderRund(code, startDigit, target) {
+    var ctx = target || window;
+    var m = buildMandalaMatrix(code);
+    var sc = int(sektS.value());
+    var step = 20; var angle = TWO_PI / sc; var h = tan(angle / 2) * step;
+    ctx.stroke(0, 35); ctx.strokeWeight(0.5);
+    for (var i = 0; i < sc; i++) {
+        ctx.push(); ctx.rotate(i * angle);
+        for (var r = 0; r < 16; r++) {
+            for (var c = 0; c <= r; c++) {
+                var v = m[r][c];
+                if (v > 0) ctx.fill(getFinalCol(v, startDigit)); else ctx.fill(255);
+                var x = r * step, y = (c - r / 2) * h * 2;
+                ctx.beginShape(); ctx.vertex(x, y); ctx.vertex(x + step, y - h); ctx.vertex(x + step * 2, y); ctx.vertex(x + step, y + h); ctx.endShape(CLOSE);
+            }
+        }
+        ctx.pop();
+    }
+}
+
+function renderWabe(code, startDigit, target) {
+    var ctx = target || window;
+    var sz = 16.2; ctx.stroke(0, 35); ctx.strokeWeight(0.5);
+    var path = (dirSelect.value() === 'Innen') ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
+    for (var s = 0; s < 6; s++) {
+        ctx.push(); ctx.rotate(s * PI / 3);
+        var m = Array(17).fill().map(() => Array(17).fill(0));
+        for (var i = 0; i < 16; i++) m[16][i] = path[i % path.length];
+        for (var r = 15; r >= 1; r--) for (var i = 0; i < r; i++) m[r][i] = ex(m[r+1][i], m[r+1][i+1]);
+        for (var r = 1; r <= 16; r++) {
+            for (var i = 0; i < r; i++) {
+                var v = m[r][i];
+                if (v > 0) ctx.fill(getFinalCol(v, startDigit)); else ctx.fill(255);
+                var x = (i - (r - 1) / 2) * sz * sqrt(3), y = -(r - 1) * sz * 1.5;
+                ctx.beginShape(); for (var a = PI/6; a < TWO_PI; a += PI/3) ctx.vertex(x + cos(a) * sz, y + sin(a) * sz); ctx.endShape(CLOSE);
+            }
+        }
+        ctx.pop();
+    }
 }
 
 function calcQuadratMatrix(code) {
@@ -203,28 +264,6 @@ function getCodeFromText(t) {
     while (a.length < 8) a.push(9);
     while (a.length > 8) { var n = []; for (var i=0; i<a.length-1; i++) n.push(ex(a[i], a[i+1])); a = n; }
     return a;
-}
-
-function exportHighRes() {
-    var pg = createGraphics(2480, 3508); pg.colorMode(HSB, 360, 100, 100); pg.background(255);
-    var design = designSelect.value();
-    var rawVal = inputField.value();
-    var baseCode = (modeSelect.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
-    while (baseCode.length < 8) baseCode.push(0);
-    var startDigit = baseCode[0] || 1;
-    var drawCode = (dirSelect.value() === 'Innen') ? [...baseCode].reverse() : baseCode;
-    
-    pg.push(); pg.translate(pg.width/2, pg.height*0.42);
-    if(design === "Quadrat") { pg.scale(3.8); calcQuadratMatrix(drawCode); renderQuadrat(startDigit, pg); }
-    else if(design === "Rund") { pg.scale(3.2); renderRund(drawCode, startDigit, pg); }
-    else if(design === "Wabe") { pg.scale(2.4); renderWabe(drawCode, startDigit, pg); }
-    pg.pop();
-
-    if (logoImg && logoImg.width > 1) {
-        var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;
-        pg.image(logoImg, pg.width - lW - 100, pg.height - lH - 100, lW, lH);
-    }
-    save(pg, 'MilzMore_' + design + '.png');
 }
 
 function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }

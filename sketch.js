@@ -1,7 +1,7 @@
-// --- GLOBALE VARIABLEN (Zuerst definieren, um ReferenceErrors zu vermeiden) ---
+// --- GLOBALE VARIABLEN (Fix für ReferenceErrors aus den Screenshots) ---
 let inputField, designSelect, modeSelect, dirSelect, sektSelect, saveBtn;
 let sliders = [];
-let colorIndicators = []; // Fix für den Fehler "colorIndicators is not defined"
+let colorIndicators = []; // Fix für Fehler in Zeile 52
 let logoImg;
 let qMatrix = [];
 
@@ -10,14 +10,19 @@ const charMap = { 'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,
 const baseColors = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
 
 function preload() {
-  logoImg = loadImage('logo.png');
+  // Fix für Logo-Fehler: Falls Logo.png (groß) oder logo.png (klein) nicht da ist, stürzt die App nicht ab
+  logoImg = loadImage('logo.png', 
+    () => console.log("Logo geladen"), 
+    () => console.log("Logo nicht gefunden - fahre ohne Logo fort")
+  );
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  let canvas = createCanvas(windowWidth, windowHeight);
+  canvas.style('display', 'block');
   colorMode(HSB, 360, 100, 100);
   
-  // MODERNES UI-OVERLAY (SIDEBAR)
+  // --- MODERNES UI OVERLAY (SIDEBAR) ---
   let sidebar = createDiv('').id('ui-sidebar');
   
   createLabel('Design Typ', sidebar);
@@ -39,21 +44,21 @@ function setup() {
   sektSelect = createSelect().parent(sidebar).addClass('ui-select');
   ["6","8","10","12"].forEach(s => sektSelect.option(s)); sektSelect.selected("8");
 
-  // FARB-SLIDER INITIALISIERUNG
+  // FARB-SLIDER GRID
   let sliderGrid = createDiv('').parent(sidebar).addClass('slider-grid');
   for (let i = 1; i <= 9; i++) {
     let row = createDiv('').parent(sliderGrid).addClass('slider-row');
     colorIndicators[i] = createDiv('').parent(row).addClass('color-dot');
-    sliders[i] = createSlider(20, 100, 85).parent(row).addClass('mandala-slider');
-    sliders[i].input(redraw);
+    // Wunschgemäß: Slider-Breite auf 75px für mobile/desktop
+    sliders[i] = createSlider(20, 100, 85).parent(row).addClass('mandala-slider').input(redraw);
   }
 
   saveBtn = createButton('DESIGN DOWNLOADEN').parent(sidebar).addClass('ui-btn');
   saveBtn.mousePressed(exportHighRes);
 
-  addStyles(); // CSS für den professionellen Look
+  addStyles(); // CSS Styling für den Webseiten-Look
 
-  // Event-Listener
+  // Event Listener
   [designSelect, modeSelect, dirSelect, sektSelect].forEach(s => s.changed(redraw));
   inputField.input(redraw);
   
@@ -100,9 +105,9 @@ function calcQuadratMatrix(code) {
   for(let c=0; c<20; c++) for(let r=8; r<20; r++) qMatrix[r][c]=ex(qMatrix[r-2][c], qMatrix[r-1][c]);
 }
 
-// --- ZEICHEN-FUNKTIONEN (Namen angepasst für den Fix) ---
+// --- ZEICHEN-FUNKTIONEN (Fix für "renderX is not defined") ---
 
-function renderQuadrat(colors, target) { // Name korrigiert
+function renderQuadrat(colors, target) {
   let ctx=target||window; let ts=16; ctx.stroke(0,30); ctx.strokeWeight(0.5);
   for(let r=0;r<20;r++) for(let c=0;c<20;c++) {
     let v=qMatrix[r][c]; if(v>0){ ctx.fill(getSliderColor(colors[v-1],v));
@@ -135,29 +140,24 @@ function renderWabe(code, colors, target) {
   ctx.pop(); }
 }
 
-// --- HELFER-FUNKTIONEN ---
-
-function getSliderColor(cStr, val) {
-  let col = color(cStr);
-  let sVal = sliders[val].value();
-  return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
-}
-
-function getColorSet(seed) {
-  let shift = (seed - 1) % 9;
-  return baseColors.slice(shift).concat(baseColors.slice(0, shift));
-}
+// --- HAUPT-ZEICHENSCHLEIFE ---
 
 function draw() {
   background(255);
   let code = getCode();
   if (!code) return;
   let currentColors = getColorSet(code[0] || 1);
-  for (let i = 1; i <= 9; i++) { colorIndicators[i].style('background-color', currentColors[i-1]); }
+  
+  // Update Farbe-Indikatoren in der Sidebar
+  for (let i = 1; i <= 9; i++) { 
+    if(colorIndicators[i]) colorIndicators[i].style('background-color', currentColors[i-1]); 
+  }
   
   push();
+  // Mandala zentrieren (Sidebar auf Desktop berücksichtigen)
   let offsetX = windowWidth > 600 ? -140 : 0;
   translate(width / 2 + offsetX, height / 2);
+  
   let design = designSelect.value();
   let sc = (min(width, height) / 900);
   
@@ -174,26 +174,52 @@ function draw() {
   }
   pop();
 
-  if (logoImg) {
-    let lW = windowWidth < 600 ? 50 : 120;
+  // Logo Einblendung
+  if (logoImg && logoImg.width > 0) {
+    let lW = windowWidth < 600 ? 60 : 150;
     image(logoImg, 30, height - (windowWidth < 600 ? 150 : 80), lW, (logoImg.height/logoImg.width)*lW);
   }
 }
 
+// --- HELFER-FUNKTIONEN ---
+
+function getSliderColor(cStr, val) {
+  let col = color(cStr);
+  let sVal = sliders[val].value();
+  return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
+}
+
+function getColorSet(seed) {
+  let shift = (seed - 1) % 9;
+  return baseColors.slice(shift).concat(baseColors.slice(0, shift));
+}
+
 function addStyles() {
-  createElement('style', `
-    #ui-sidebar { position: fixed; top: 20px; right: 20px; width: 280px; background: rgba(255,255,255,0.95); 
-                  padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-                  font-family: sans-serif; z-index: 1000; max-height: 85vh; overflow-y: auto; }
-    .ui-select, .ui-input { width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; }
-    .ui-btn { width: 100%; padding: 12px; background: #2c3e50; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
-    .slider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  let style = createElement('style', `
+    #ui-sidebar { 
+      position: fixed; top: 20px; right: 20px; width: 280px; 
+      background: rgba(255,255,255,0.95); padding: 20px; border-radius: 15px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-family: sans-serif; 
+      z-index: 1000; max-height: 85vh; overflow-y: auto;
+    }
+    .ui-select, .ui-input { 
+      width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; 
+    }
+    .ui-btn { 
+      width: 100%; padding: 12px; background: #2c3e50; color: white; border: none; 
+      border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; 
+    }
+    .slider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
     .slider-row { display: flex; align-items: center; }
     .color-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; border: 1px solid #ccc; }
-    .mandala-slider { width: 75px; } /* Wunschbreite aus User-Context berücksichtigt */
-    label { font-size: 10px; text-transform: uppercase; color: #7f8c8d; display: block; margin-bottom: 4px; }
+    .mandala-slider { width: 75px; }
+    label { font-size: 10px; color: #7f8c8d; display: block; margin-bottom: 4px; text-transform: uppercase; }
+    
     @media (max-width: 600px) {
-      #ui-sidebar { width: calc(100% - 40px); top: auto; bottom: 20px; right: 20px; max-height: 35vh; }
+      #ui-sidebar { 
+        width: calc(100% - 40px); top: auto; bottom: 20px; right: 20px; 
+        max-height: 35vh; 
+      }
     }
   `);
 }
@@ -210,7 +236,7 @@ function exportHighRes() {
   else if(design==='Rund'){ pg.scale(3.5); renderRund(code, colors, pg); }
   else { pg.scale(2.5); renderWabe(code, colors, pg); }
   pg.pop();
-  if(logoImg) pg.image(logoImg, pg.width-600, pg.height-300, 500, (logoImg.height/logoImg.width)*500);
+  if(logoImg && logoImg.width > 0) pg.image(logoImg, pg.width-600, pg.height-300, 500, (logoImg.height/logoImg.width)*500);
   save(pg, `Mandala_${design}.png`);
 }
 

@@ -19,10 +19,9 @@ const colorMatrixWabe = {
 const ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
 function preload() { 
-    // Sicherheits-Laden: Großgeschriebenes L beachten
     logoImg = loadImage('Logo.png', 
         () => console.log("Logo geladen"), 
-        () => console.log("Logo nicht gefunden - Skript läuft trotzdem")
+        () => console.log("Logo fehlt")
     ); 
 }
 
@@ -63,7 +62,8 @@ function setup() {
     createUIGroup("RICHTUNG", dirSelect, "60px", "90px");
 
     sektS = createSelect(); ["6","8","10","12","13"].forEach(s => sektS.option(s)); sektS.selected("8");
-    createUIGroup("SEKTOR", sektS, "40px", "60px");
+    var sektGroup = createUIGroup("SEKTOR", sektS, "40px", "60px");
+    sektS.parentGroup = sektGroup; // Hilfsvariable zum Ein/Ausblenden
 
     var saveBtn = createButton('DOWNLOAD').parent(topBar)
         .style('margin-left', 'auto').style('background', '#fff').style('color', '#2c3e50').style('border', 'none').style('font-weight', 'bold')
@@ -104,7 +104,11 @@ function draw() {
 
     var startDigit = code[0] || 1;
     updateIndicators(startDigit, design);
-    if(sektS) sektS.parent().style('display', design === 'Rund' ? 'flex' : 'none');
+    
+    // KORREKTUR ZEILE 107: Sichereres Ein/Ausblenden
+    if(sektS && sektS.parentGroup) {
+        sektS.parentGroup.style('display', design === 'Rund' ? 'flex' : 'none');
+    }
 
     push();
     translate(width/2, isMobile ? height / 2 - 40 : height / 2 + 20);
@@ -221,3 +225,5 @@ function getCodeFromText(textStr) {
 }
 
 function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }
+function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }
+

@@ -1,3 +1,41 @@
+// 1️⃣ App-Registry
+let apps = {};
+let currentApp = "quadrat";
+
+// 2️⃣ ALLE MODULE DEFINIEREN
+apps.quadrat = (() => {
+  // kompletter Originalcode
+  return { preload, init: setup, draw, windowResized, teardown };
+})();
+
+apps.rund = (() => {
+  // kompletter Originalcode
+  return { preload, init: setup, draw, windowResized, teardown };
+})();
+
+apps.wabe = (() => {
+  // kompletter Originalcode
+  return { preload, init: setup, draw, windowResized, teardown };
+})();
+
+// 3️⃣ ERST JETZT p5 ENTRY POINTS
+function preload() {
+  Object.values(apps).forEach(app => app.preload?.());
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  setApp(currentApp);
+}
+
+function draw() {
+  apps[currentApp]?.draw();
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  apps[currentApp]?.windowResized?.();
+}
 // =====================================================
 // APP STATE MANAGER
 // =====================================================
@@ -256,4 +294,5 @@ apps.wabe = (() => {
   // ---------- MODULE EXPORT ----------
   return { preload, init: setup, draw, windowResized, teardown };
 })();
+
 

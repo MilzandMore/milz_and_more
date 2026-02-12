@@ -4,7 +4,7 @@ var sliders = [], colorIndicators = [], sliderPanel, sektGroup;
 var logoImg, qMatrix = [];
 var isAdmin = false;
 
-// Deine Haupt-Farbtabelle (9 Varianten basierend auf der Startzahl)
+// Zentrale Farbtabelle (9 Varianten basierend auf der Startzahl)
 const colorMatrix = {
     1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
     2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
@@ -17,11 +17,16 @@ const colorMatrix = {
     9: ["#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500"]
 };
 
-const charMap = { 'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 };
+const charMap = { 
+    'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,
+    'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 
+};
 
 var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
-function preload() { logoImg = loadImage('logo.png'); }
+function preload() { 
+    logoImg = loadImage('logo.png'); 
+}
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -38,7 +43,11 @@ function setup() {
     function createUIGroup(labelTxt, element, wMobile, wDesktop) {
         var group = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column');
         createSpan(labelTxt).parent(group).style('font-size', '8px').style('color', '#bdc3c7').style('font-weight', 'bold');
-        if (element) element.parent(group).style('width', isMobile ? wMobile : wDesktop).style('background', '#34495e').style('color', '#fff').style('border', 'none').style('border-radius', '4px');
+        if (element) {
+            element.parent(group).style('width', isMobile ? wMobile : wDesktop)
+                   .style('background', '#34495e').style('color', '#fff').style('border', 'none').style('border-radius', '4px')
+                   .style('font-size', isMobile ? '11px' : '13px').style('height', isMobile ? '22px' : '32px');
+        }
         return group;
     }
 
@@ -52,7 +61,7 @@ function setup() {
     createUIGroup("EINGABE", inputField, "75px", "130px");
 
     var codeGroup = createUIGroup("CODE", null, "auto", "auto");
-    codeDisplay = createSpan("").parent(codeGroup).style('color', '#fff').style('font-weight', 'bold');
+    codeDisplay = createSpan("").parent(codeGroup).style('color', '#fff').style('font-weight', 'bold').style('font-size', isMobile ? '11px' : '14px');
 
     sektS = createSelect(); ["6","8","10","12","13"].forEach(s => sektS.option(s)); sektS.selected("8");
     sektGroup = createUIGroup("SEKTOR", sektS, "40px", "60px");
@@ -60,10 +69,10 @@ function setup() {
     dirSelect = createSelect(); dirSelect.option('Außen'); dirSelect.option('Innen');
     createUIGroup("RICHTUNG", dirSelect, "65px", "95px");
 
-    var saveBtn = createButton('DL').parent(topBar).style('margin-left', 'auto');
+    var saveBtn = createButton('DL').parent(topBar).style('margin-left', 'auto').style('background', '#fff').style('border-radius', '4px').style('font-weight', 'bold');
     saveBtn.mousePressed(exportHighRes);
 
-    sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150');
+    sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150').style('padding', '8px');
     for (var i = 1; i <= 9; i++) {
         var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','5px');
         colorIndicators[i] = createDiv("").parent(sRow).style('width', '10px').style('height', '10px').style('border-radius', '50%');
@@ -71,17 +80,17 @@ function setup() {
     }
 
     updateLayout();
-    [designSelect, modeSelect, dirSelect, inputField, sektS].forEach(e => e.changed(redraw));
+    [designSelect, modeSelect, dirSelect, inputField, sektS].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
 }
 
 function updateLayout() {
     var isMobile = windowWidth < 600;
     if (isMobile) {
-        sliderPanel.style('top', 'auto').style('bottom', '0').style('width', '100%').style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)');
-        for (var i = 1; i <= 9; i++) sliders[i].style('width', '75px');
+        sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%').style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)');
+        for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px');
     } else {
-        sliderPanel.style('bottom', 'auto').style('top', '90px').style('width', 'auto').style('display', 'flex').style('flex-direction', 'column');
-        for (var i = 1; i <= 9; i++) sliders[i].style('width', '80px');
+        sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto').style('display', 'flex').style('flex-direction', 'column');
+        for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '80px');
     }
 }
 
@@ -90,11 +99,11 @@ function draw() {
     var isMobile = windowWidth < 600;
     var design = designSelect.value();
     
-    // UI Handling
     if (design === "Rund") sektGroup.show(); else sektGroup.hide();
 
-    // Code Berechnung
     var rawVal = inputField.value();
+    if (rawVal === "" || (modeSelect.value() === 'Geburtstag' && rawVal.replace(/\D/g, "").length === 0)) return;
+
     var baseCode = (modeSelect.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
     while (baseCode.length < 8) baseCode.push(0);
     baseCode = baseCode.slice(0, 8);
@@ -102,7 +111,9 @@ function draw() {
     var drawCode = (dirSelect.value() === 'Innen') ? [...baseCode].reverse() : baseCode;
     
     codeDisplay.html(baseCode.join(""));
-    for (var i = 1; i <= 9; i++) colorIndicators[i].style('background-color', colorMatrix[startDigit][i-1]);
+    for (var i = 1; i <= 9; i++) {
+        if(colorIndicators[i]) colorIndicators[i].style('background-color', colorMatrix[startDigit][i-1]);
+    }
 
     push();
     var centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
@@ -121,7 +132,7 @@ function draw() {
     }
     pop();
 
-    if (logoImg) {
+    if (logoImg && logoImg.width > 0) {
         var lW = isMobile ? 55 : 150;
         var lH = (logoImg.height / logoImg.width) * lW;
         image(logoImg, 15, isMobile ? height - 125 : height - lH - 25, lW, lH);
@@ -149,11 +160,11 @@ function renderRund(code, startDigit, target) {
     var ctx = target || window;
     var m = buildMandalaMatrix(code);
     var sc = int(sektS.value());
-    var step = 20; var h = tan(PI / sc) * step;
+    var step = 20; var angle = TWO_PI / sc; var h = tan(angle / 2) * step;
     ctx.stroke(0, 35); ctx.strokeWeight(0.5);
     for (var i = 0; i < sc; i++) {
-        ctx.push(); ctx.rotate(i * TWO_PI / sc);
-        for (var r = 0; r < m.length; r++) {
+        ctx.push(); ctx.rotate(i * angle);
+        for (var r = 0; r < 16; r++) {
             for (var c = 0; c <= r; c++) {
                 var v = m[r][c];
                 if (v > 0) ctx.fill(getFinalCol(v, startDigit)); else ctx.fill(255);
@@ -167,7 +178,7 @@ function renderRund(code, startDigit, target) {
 
 function renderWabe(code, startDigit, target) {
     var ctx = target || window;
-    var sz = 16.2; ctx.stroke(0, 35);
+    var sz = 16.2; ctx.stroke(0, 35); ctx.strokeWeight(0.5);
     var path = (dirSelect.value() === 'Innen') ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
     for (var s = 0; s < 6; s++) {
         ctx.push(); ctx.rotate(s * PI / 3);
@@ -179,7 +190,7 @@ function renderWabe(code, startDigit, target) {
                 var v = m[r][i];
                 if (v > 0) ctx.fill(getFinalCol(v, startDigit)); else ctx.fill(255);
                 var x = (i - (r - 1) / 2) * sz * sqrt(3), y = -(r - 1) * sz * 1.5;
-                ctx.beginShape(); for (var a = PI / 6; a < TWO_PI; a += PI / 3) ctx.vertex(x + cos(a) * sz, y + sin(a) * sz); ctx.endShape(CLOSE);
+                ctx.beginShape(); for (var a = PI/6; a < TWO_PI; a += PI/3) ctx.vertex(x + cos(a) * sz, y + sin(a) * sz); ctx.endShape(CLOSE);
             }
         }
         ctx.pop();
@@ -191,7 +202,7 @@ function renderWabe(code, startDigit, target) {
 function getFinalCol(val, startDigit) {
     var hex = colorMatrix[startDigit][val - 1];
     var col = color(hex);
-    var sVal = sliders[val].value();
+    var sVal = sliders[val] ? sliders[val].value() : 85;
     return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
 }
 
@@ -207,18 +218,34 @@ function calcQuadratMatrix(code) {
 }
 
 function buildMandalaMatrix(raw) {
-    var m = Array.from({length: 16}, (_, r) => Array(r + 1).fill(0));
+    var n = 16; var m = Array.from({length: n}, (_, r) => Array(r + 1).fill(0));
     var base = [...raw].reverse().concat(raw);
-    for (var i=0; i<16; i++) { m[15][i]=base[i]; m[15-i][0]=base[i]; m[15-i][15-i]=base[i]; }
-    for (var c=1; c<=13; c++) m[14][c] = ex(m[15][c], m[15][c+1]);
-    // Vereinfachte Zuweisung für die inneren Punkte (basierend auf deinem Baustein)
-    var fillM = (c, coords) => coords.forEach(([r, k]) => m[r][k] = m[14][c]);
-    fillM(1, [[2,1]]); fillM(2, [[3,1],[3,2],[13,1],[13,12]]); // ... Rest der Logik
+    for (var i = 0; i < 16; i++) { m[15][i] = base[i]; m[15 - i][0] = base[i]; m[15 - i][15 - i] = base[i]; }
+    for (var c = 1; c <= 13; c++) m[14][c] = ex(m[15][c], m[15][c + 1]);
+    var c14 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[14][c]);
+    c14(1, [[2, 1]]); c14(2, [[3, 1], [3, 2], [13, 1], [13, 12]]); c14(3, [[4, 1], [4, 3], [12, 1], [12, 11]]);
+    c14(4, [[5, 1], [5, 4], [11, 1], [11, 10]]); c14(5, [[6, 1], [6, 5], [10, 1], [10, 9]]);
+    c14(6, [[7, 1], [7, 6], [9, 1], [9, 8]]); c14(7, [[8, 1], [8, 7]]);
+    for (var c = 2; c <= 10; c++) m[13][c] = ex(m[14][c], m[14][c + 1]);
+    var c13 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[13][c]);
+    c13(2, [[4, 2], [13, 11]]); c13(3, [[12, 2], [12, 10], [5, 2], [5, 3]]);
+    c13(4, [[11, 2], [11, 9], [6, 4], [6, 2]]); c13(5, [[10, 2], [10, 8], [7, 5], [7, 2]]);
+    c13(6, [[9, 2], [9, 7], [8, 6], [8, 2]]);
+    for (var j = 3; j <= 8; j++) m[12][j] = ex(m[13][j], m[13][j+1]);
+    var c12 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[12][c]);
+    c12(3, [[12, 9], [6, 3]]); c12(4, [[11, 3], [11, 8], [7, 4], [7, 3]]);
+    c12(5, [[10, 3], [10, 7], [8, 5], [8, 3]]); c12(6, [[9, 3], [9, 6]]);
+    m[11][4] = ex(m[12][4], m[12][5]); m[11][5] = ex(m[12][5], m[12][6]); m[11][6] = ex(m[12][6], m[12][7]);
+    var c11 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[11][c]);
+    c11(4, [[11, 7], [8, 4]]); c11(5, [[10, 4], [10, 6], [9, 4], [9, 5]]);
+    m[10][5] = ex(m[11][5], m[11][6]);
     return m;
 }
 
 function getCodeFromText(t) {
     var a = t.toUpperCase().replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => charMap[c] || 9);
+    if (a.length === 0) return [1,1,1,1,1,1,1,1];
+    while (a.length < 8) a.push(9);
     while (a.length > 8) { var n = []; for (var i=0; i<a.length-1; i++) n.push(ex(a[i], a[i+1])); a = n; }
     return a;
 }
@@ -226,16 +253,23 @@ function getCodeFromText(t) {
 function exportHighRes() {
     var pg = createGraphics(2480, 3508); pg.colorMode(HSB, 360, 100, 100); pg.background(255);
     var design = designSelect.value();
-    var baseCode = (modeSelect.value() === 'Affirmation') ? getCodeFromText(inputField.value()) : inputField.value().replace(/\D/g, "").split('').map(Number);
+    var rawVal = inputField.value();
+    var baseCode = (modeSelect.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
     while (baseCode.length < 8) baseCode.push(0);
+    baseCode = baseCode.slice(0, 8);
     var startDigit = baseCode[0] || 1;
     var drawCode = (dirSelect.value() === 'Innen') ? [...baseCode].reverse() : baseCode;
     
-    pg.push(); pg.translate(pg.width/2, pg.height*0.45);
+    pg.push(); pg.translate(pg.width/2, pg.height*0.42);
     if(design === "Quadrat") { pg.scale(3.8); calcQuadratMatrix(drawCode); renderQuadrat(startDigit, pg); }
     else if(design === "Rund") { pg.scale(3.2); renderRund(drawCode, startDigit, pg); }
-    else { pg.scale(2.4); renderWabe(drawCode, startDigit, pg); }
+    else if(design === "Wabe") { pg.scale(2.4); renderWabe(drawCode, startDigit, pg); }
     pg.pop();
+
+    if (logoImg && logoImg.width > 0) {
+        var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;
+        pg.image(logoImg, pg.width - lW - 100, pg.height - lH - 100, lW, lH);
+    }
     save(pg, 'MilzMore_' + design + '.png');
 }
 

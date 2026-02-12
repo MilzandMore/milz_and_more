@@ -1,4 +1,4 @@
-// 1. GLOBALE KONSTANTEN & VARIABLEN
+// 1. GLOBALE KONSTANTEN & VARIABLEN (Zuerst deklarieren!)
 const baseColors = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
 const affirmMap = { 
   A:1,J:1,S:1,Ä:1, B:2,K:2,T:2,Ö:2, C:3,L:3,U:3,Ü:3, D:4,M:4,V:4,ß:4, 
@@ -6,17 +6,30 @@ const affirmMap = {
 };
 const ex = (a,b) => (a + b) % 9 === 0 ? 9 : (a + b) % 9;
 
-let modeSelect, inputField, designSelect, codeDisplay, sektS, richtungS, sliders = [], colorIndicators = [], sliderPanel;
-let logoImg;
+// Alle UI Variablen initialisieren
+let modeSelect, inputField, codeDisplay, sektS, richtungS;
+let sliders = []; 
+let colorIndicators = []; // Hier lag der Fehler im Scope
+let sliderPanel, logoImg;
 let colorSeed = 1;
-let qMatrix = []; // Für Quadrat-Logik
 
+// 2. PRELOAD (Schriftarten und Logo)
 function preload() {
-  logoImg = loadImage('logo.png', () => {}, () => {
-    logoImg = loadImage('Logo.png', () => {}, () => console.log("Logo fehlt"));
-  });
+  // Sicherer Logo-Check (probiert beide Schreibweisen)
+  logoImg = loadImage('logo.png', 
+    () => console.log("logo.png geladen"), 
+    () => {
+      console.log("logo.png nicht gefunden, probiere Logo.png...");
+      logoImg = loadImage('Logo.png');
+    }
+  );
+
+  let link = createElement('link');
+  link.attribute('rel', 'stylesheet');
+  link.attribute('href', 'https://fonts.googleapis.com/css2?family=Inter:wght@300;500&display=swap');
 }
 
+// 3. SETUP
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
@@ -38,11 +51,6 @@ function setup() {
     }
     return group;
   }
-
-  designSelect = createSelect();
-  ['Quadrat', 'Rund', 'Wabe'].forEach(d => designSelect.option(d));
-  designSelect.selected('Rund');
-  createUIGroup("DESIGN", designSelect, "65px", "100px");
 
   modeSelect = createSelect();
   modeSelect.option('Geburtstag'); modeSelect.option('Affirmation');
@@ -70,6 +78,7 @@ function setup() {
     .style('font-size', isMobile ? '9px' : '13px').style('cursor', 'pointer').style('margin-top', isMobile ? '11px' : '14px');
   saveBtn.mousePressed(exportHighRes);
 
+  // SLIDER PANEL
   sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
   for (let i = 1; i <= 9; i++) {
     let sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','4px');
@@ -78,9 +87,8 @@ function setup() {
   }
 
   updateLayout();
-  [designSelect, modeSelect, inputField, sektS, richtungS].forEach(e => {
-    if(e.input) e.input(redraw);
-    if(e.changed) e.changed(redraw);
+  [modeSelect, inputField, sektS, richtungS].forEach(e => {
+    if(e.input) e.input(redraw); else e.changed(redraw);
   });
   noLoop();
 }
@@ -104,28 +112,22 @@ function draw() {
   if (rawVal === "" || (modeSelect.value() === 'Geburtstag' && rawVal.replace(/\D/g, "").length === 0)) return;
 
   background(255);
+  const sector = buildSector();
   const currentColors = getColorMatrix(colorSeed);
-  for (let i = 1; i <= 9; i++) { if(colorIndicators[i]) colorIndicators[i].style('background-color', currentColors[i-1]); }
+  
+  for (let i = 1; i <= 9; i++) { 
+    if(colorIndicators[i]) colorIndicators[i].style('background-color', currentColors[i-1]); 
+  }
 
   push();
   let centerY = isMobile ? height / 2 - 25 : height / 2 + 20;
   translate(width / 2 + (isMobile ? 0 : 50), centerY);
-  
-  let design = designSelect.value();
-  if (design === 'Rund') {
-    const sector = buildSector();
-    let scaleFactor = (min(width, height) / 900) * (isMobile ? 0.90 : 0.85);
-    scale(scaleFactor);
-    const sc = int(sektS.value());
-    const angle = TWO_PI / sc;
-    for (let i = 0; i < sc; i++) { push(); rotate(i * angle); drawSector(sector, currentColors); pop(); }
-  } else if (design === 'Quadrat') {
-    // Hier wird deine Quadrat-Logik gerendert
-    scale((min(width, height) / 900) * 0.9);
-    renderQuadrat(currentColors);
-  } else if (design === 'Wabe') {
-    scale((min(width, height) / 900) * 1.6);
-    renderWabe(currentColors);
+  let scaleFactor = (min(width, height) / 900) * (isMobile ? 0.90 : 0.85);
+  scale(scaleFactor);
+  const sc = int(sektS.value());
+  const angle = TWO_PI / sc;
+  for (let i = 0; i < sc; i++) {
+    push(); rotate(i * angle); drawSector(sector, currentColors); pop();
   }
   pop();
 
@@ -139,8 +141,52 @@ function draw() {
   }
 }
 
-// --- DEINE 1:1 SEKTOREN-LOGIK ---
+function drawSector(m, colors, target) {
+  let ctx = target || window;
+  const step = 20;
+  const sc = int(sektS.value());
+  const angle = TWO_PI / sc;
+  const h = tan(angle / 2) * step;
+  ctx.stroke(0, 35); ctx.strokeWeight(0.5);
+  for (let r = 0; r < m.length; r++) {
+    for (let c = 0; c <= r; c++) {
+      const v = m[r][c];
+      const x = r * step; const y = (c - r / 2) * h * 2;
+      if (v >= 1 && v <= 9) {
+        let baseCol = color(colors[v - 1]);
+        let sVal = sliders[v] ? sliders[v].value() : 85;
+        ctx.fill(hue(baseCol), map(sVal, 20, 100, 15, saturation(baseCol)), map(sVal, 20, 100, 98, brightness(baseCol)));
+      } else ctx.fill(255); 
+      ctx.beginShape(); ctx.vertex(x, y); ctx.vertex(x + step, y - h); ctx.vertex(x + step * 2, y); ctx.vertex(x + step, y + h); ctx.endShape(CLOSE);
+    }
+  }
+}
 
+function exportHighRes() {
+  let exportW = 2480; let exportH = 3508; 
+  let pg = createGraphics(exportW, exportH);
+  pg.colorMode(HSB, 360, 100, 100); pg.background(255);
+  const sector = buildSector();
+  const currentColors = getColorMatrix(colorSeed);
+  const sc = int(sektS.value());
+  const angle = TWO_PI / sc;
+  pg.push(); pg.translate(exportW / 2, exportH * 0.382); pg.scale(2.7); 
+  for (let i = 0; i < sc; i++) { pg.push(); pg.rotate(i * angle); drawSector(sector, currentColors, pg); pg.pop(); }
+  pg.pop();
+  if (logoImg) {
+    pg.push(); pg.tint(255, 0.45);
+    let wWidth = 350; let wHeight = (logoImg.height / logoImg.width) * wWidth;
+    for (let x = -100; x < exportW; x += 450) { for (let y = -100; y < exportH; y += 450) pg.image(logoImg, x, y, wWidth, wHeight); }
+    pg.pop();
+    pg.push(); pg.noTint();
+    let lW = 500; let lH = (logoImg.height / logoImg.width) * lW;
+    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+    pg.pop();
+  }
+  save(pg, 'Milz&More.png');
+}
+
+// --- DEINE UNVERÄNDERTE LOGIK ---
 function buildSector() {
   const n = 16;
   let m = Array.from({length: n}, (_, r) => Array(r + 1).fill(0));
@@ -174,29 +220,6 @@ function buildSector() {
   return m;
 }
 
-function drawSector(m, colors, target) {
-  let ctx = target || window;
-  const step = 20;
-  const sc = int(sektS.value());
-  const angle = TWO_PI / sc;
-  const h = tan(angle / 2) * step;
-  ctx.stroke(0, 35); ctx.strokeWeight(0.5);
-  for (let r = 0; r < m.length; r++) {
-    for (let c = 0; c <= r; c++) {
-      const v = m[r][c];
-      const x = r * step; const y = (c - r / 2) * h * 2;
-      if (v >= 1 && v <= 9) {
-        let baseCol = color(colors[v - 1]);
-        let sVal = sliders[v] ? sliders[v].value() : 85;
-        ctx.fill(hue(baseCol), map(sVal, 20, 100, 15, saturation(baseCol)), map(sVal, 20, 100, 98, brightness(baseCol)));
-      } else ctx.fill(255); 
-      ctx.beginShape(); ctx.vertex(x, y); ctx.vertex(x + step, y - h); ctx.vertex(x + step * 2, y); ctx.vertex(x + step, y + h); ctx.endShape(CLOSE);
-    }
-  }
-}
-
-// --- Hilfsfunktionen ---
-
 function codeFromAffirm(text) {
   let arr = []; text = text.toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
   for (let c of text) if (affirmMap[c]) arr.push(affirmMap[c]);
@@ -212,34 +235,6 @@ function getColorMatrix(seed) {
   const s = (seed === 0 || !seed) ? 1 : seed;
   const shift = (s - 1) % 9;
   return baseColors.slice(shift).concat(baseColors.slice(0, shift));
-}
-
-function exportHighRes() {
-  let exportW = 2480; let exportH = 3508; 
-  let pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100); pg.background(255);
-  const currentColors = getColorMatrix(colorSeed);
-  const design = designSelect.value();
-  pg.push();
-  pg.translate(exportW / 2, exportH * 0.382); 
-  if (design === 'Rund') {
-    const sector = buildSector(); pg.scale(2.7);
-    const sc = int(sektS.value()); const angle = TWO_PI / sc;
-    for (let i = 0; i < sc; i++) { pg.push(); pg.rotate(i * angle); drawSector(sector, currentColors, pg); pg.pop(); }
-  }
-  // Hier Platzhalter für Quadrat/Wabe Export-Aufrufe
-  pg.pop();
-  if (logoImg) {
-    pg.push(); pg.tint(255, 0.45);
-    let wWidth = 350; let wHeight = (logoImg.height / logoImg.width) * wWidth;
-    for (let x = -100; x < exportW; x += 450) { for (let y = -100; y < exportH; y += 450) { pg.image(logoImg, x, y, wWidth, wHeight); } }
-    pg.pop();
-    pg.push(); pg.noTint();
-    let lW = 500; let lH = (logoImg.height / logoImg.width) * lW;
-    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
-    pg.pop();
-  }
-  save(pg, 'Milz&More.png');
 }
 
 function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }

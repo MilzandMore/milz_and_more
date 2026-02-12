@@ -21,7 +21,7 @@ var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
 function preload() {
     logoImg = loadImage('Logo.png', () => {}, () => {
-        logoImg = loadImage('logo.png');
+        logoImg = loadImage('logo.png', () => {}, () => console.log("Kein Logo"));
     });
 }
 
@@ -59,7 +59,6 @@ function setup() {
     dirSelect = createSelect(); dirSelect.option('Außen'); dirSelect.option('Innen');
     createUIGroup("RICHTUNG", dirSelect, "65px", "95px");
 
-    // Button wieder auf WEISS gesetzt
     var saveBtn = createButton('Download').parent(topBar).style('margin-left', 'auto').style('background', '#ffffff').style('color', '#000000').style('border', 'none').style('padding', '8px 12px').style('border-radius', '4px').style('font-weight', 'bold').style('cursor', 'pointer');
     saveBtn.mousePressed(exportHighRes);
 
@@ -89,10 +88,13 @@ function updateLayout() {
 
 function draw() {
     background(255);
-    if (!designSelect || !sliders[1]) return;
+    // Sicherheits-Check: Wenn UI noch nicht da, nichts zeichnen
+    if (!designSelect || !sliders[1] || !inputField) return;
+
     var isMobile = windowWidth < 600;
     var design = designSelect.value();
     if (design === "Rund") sektGroup.show(); else sektGroup.hide();
+    
     var rawVal = inputField.value();
     if (!rawVal) return;
 
@@ -101,21 +103,23 @@ function draw() {
     baseCode = baseCode.slice(0, 8);
     var startDigit = baseCode[0] || 1;
     var drawCode = (dirSelect.value() === 'Innen') ? [...baseCode].reverse() : baseCode;
-    codeDisplay.html(baseCode.join(""));
+    
+    if (codeDisplay) codeDisplay.html(baseCode.join(""));
 
     push();
-    var centerY = isMobile ? height / 2 - 20 : height / 2 + 40;
+    // Zentrierung für Mobile & Desktop
+    var centerY = isMobile ? (height / 2) - 30 : (height / 2) + 40;
     translate(width / 2, centerY);
     
     if (design === "Quadrat") {
-        scale((min(width, height) / 800) * (isMobile ? 0.75 : 0.9));
+        scale((min(width, height) / 850) * (isMobile ? 0.75 : 0.9));
         calcQuadratMatrix(drawCode);
         renderQuadrat(startDigit);
     } else if (design === "Rund") {
-        scale((min(width, height) / 850) * (isMobile ? 0.8 : 0.95));
+        scale((min(width, height) / 900) * (isMobile ? 0.8 : 0.95));
         renderRund(drawCode, startDigit);
     } else if (design === "Wabe") {
-        scale((min(width, height) / 500) * (isMobile ? 0.42 : 0.48));
+        scale((min(width, height) / 520) * (isMobile ? 0.42 : 0.48));
         renderWabe(drawCode, startDigit);
     }
     pop();
@@ -154,15 +158,14 @@ function exportHighRes() {
     
     pg.fill(0); pg.noStroke(); pg.textAlign(RIGHT); pg.textSize(80);
     pg.text("Milz & More", pg.width - 150, pg.height - 150);
-
     save(pg, 'MilzMore_' + rawVal + '_' + design + '.png');
 }
 
-// REST BLEIBT UNVERÄNDERT
 function getFinalCol(val, startDigit) {
+    if (!sliders[val]) return color(0);
     var hex = colorMatrix[startDigit][val - 1];
     var col = color(hex);
-    var sVal = sliders[val] ? sliders[val].value() : 85;
+    var sVal = sliders[val].value();
     return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
 }
 

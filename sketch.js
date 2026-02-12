@@ -2,7 +2,6 @@
 var designSelect, modeSelect, inputField, sektS, dirSelect, codeDisplay;
 var sliders = [], colorIndicators = [], sliderPanel, sektGroup;
 var logoImg, qMatrix = [];
-var isAdmin = false;
 
 const colorMatrix = {
     1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
@@ -24,8 +23,11 @@ const charMap = {
 var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
 function preload() { 
-    // Hier jetzt exakt wie deine Datei: Logo.png
-    logoImg = loadImage('Logo.png', () => console.log("Logo geladen!"), () => console.log("Logo.png nicht gefunden.")); 
+    // WICHTIG: Exakt "Logo.png" mit großem L
+    logoImg = loadImage('Logo.png', 
+        () => console.log("Logo geladen!"), 
+        () => console.error("Logo.png konnte nicht geladen werden. Prüfe Dateiname!")
+    ); 
 }
 
 function setup() {
@@ -33,7 +35,7 @@ function setup() {
     colorMode(HSB, 360, 100, 100);
     var isMobile = windowWidth < 600;
 
-    // TOPBAR
+    // UI Erstellung
     var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
         .style('background', '#2c3e50').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
         .style('gap', isMobile ? '8px' : '20px').style('z-index', '200').style('align-items', 'center').style('height', isMobile ? '55px' : '75px').style('box-sizing', 'border-box');
@@ -70,6 +72,7 @@ function setup() {
     var saveBtn = createButton('DL').parent(topBar).style('margin-left', 'auto').style('background', '#fff').style('border-radius', '4px').style('font-weight', 'bold');
     saveBtn.mousePressed(exportHighRes);
 
+    // SLIDER PANEL
     sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150').style('padding', '8px');
     for (var i = 1; i <= 9; i++) {
         var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','5px');
@@ -77,14 +80,19 @@ function setup() {
         sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
     }
 
-    setTimeout(updateLayout, 100); // Kurz warten, damit DOM bereit ist
-    [designSelect, modeSelect, dirSelect, inputField, sektS].forEach(e => e.changed(redraw));
+    // SICHERHEIT: Das Layout erst stylen, wenn alles im DOM ist
+    setTimeout(updateLayout, 150);
+
+    [designSelect, modeSelect, dirSelect, inputField, sektS].forEach(e => {
+        if (e.changed) e.changed(redraw);
+    });
 }
 
 function updateLayout() {
-    if (!sliderPanel || !sliders[1]) return;
+    // CRASH-VERHINDERUNG: Prüfen ob Slider-Objekte existieren
+    if (!sliderPanel || !sliders[1]) return; 
+
     var isMobile = windowWidth < 600;
-    
     if (isMobile) {
         sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%').style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)');
     } else {
@@ -98,14 +106,14 @@ function updateLayout() {
 
 function draw() {
     background(255);
+    if (!designSelect || !sliders[1]) return; // Noch nicht bereit
+
     var isMobile = windowWidth < 600;
-    if (!designSelect) return;
-    
     var design = designSelect.value();
     if (design === "Rund") sektGroup.show(); else sektGroup.hide();
 
     var rawVal = inputField.value();
-    if (rawVal === "" || (modeSelect.value() === 'Geburtstag' && rawVal.replace(/\D/g, "").length === 0)) return;
+    if (!rawVal) return;
 
     var baseCode = (modeSelect.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
     while (baseCode.length < 8) baseCode.push(0);
@@ -135,11 +143,20 @@ function draw() {
     }
     pop();
 
+    // LOGO-CHECK
     if (logoImg && logoImg.width > 1) {
         var lW = isMobile ? 55 : 150;
         var lH = (logoImg.height / logoImg.width) * lW;
         image(logoImg, 15, isMobile ? height - 125 : height - lH - 25, lW, lH);
     }
+}
+
+// --- FUNKTIONEN ---
+function getFinalCol(val, startDigit) {
+    var hex = colorMatrix[startDigit][val - 1];
+    var col = color(hex);
+    var sVal = sliders[val] ? sliders[val].value() : 85;
+    return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
 }
 
 function renderQuadrat(startDigit, target) {
@@ -196,13 +213,6 @@ function renderWabe(code, startDigit, target) {
         }
         ctx.pop();
     }
-}
-
-function getFinalCol(val, startDigit) {
-    var hex = colorMatrix[startDigit][val - 1];
-    var col = color(hex);
-    var sVal = sliders[val] ? sliders[val].value() : 85;
-    return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
 }
 
 function calcQuadratMatrix(code) {

@@ -1,6 +1,6 @@
 // --- GLOBALE VARIABLEN ---
 var inputField, modeSelect, designSelect, dirSelect, sektS, sliders = [], colorIndicators = [], sliderPanel;
-var logoImg, codeDisplay;
+var logoImg, codeDisplay, sektGroup;
 
 const charMap = { 'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 };
 const baseColorsRund = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
@@ -19,10 +19,7 @@ const colorMatrixWabe = {
 const ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
 function preload() { 
-    logoImg = loadImage('Logo.png', 
-        () => console.log("Logo geladen"), 
-        () => console.log("Logo fehlt")
-    ); 
+    logoImg = loadImage('Logo.png'); 
 }
 
 function setup() {
@@ -62,8 +59,7 @@ function setup() {
     createUIGroup("RICHTUNG", dirSelect, "60px", "90px");
 
     sektS = createSelect(); ["6","8","10","12","13"].forEach(s => sektS.option(s)); sektS.selected("8");
-    var sektGroup = createUIGroup("SEKTOR", sektS, "40px", "60px");
-    sektS.parentGroup = sektGroup; // Hilfsvariable zum Ein/Ausblenden
+    sektGroup = createUIGroup("SEKTOR", sektS, "40px", "60px");
 
     var saveBtn = createButton('DOWNLOAD').parent(topBar)
         .style('margin-left', 'auto').style('background', '#fff').style('color', '#2c3e50').style('border', 'none').style('font-weight', 'bold')
@@ -105,9 +101,9 @@ function draw() {
     var startDigit = code[0] || 1;
     updateIndicators(startDigit, design);
     
-    // KORREKTUR ZEILE 107: Sichereres Ein/Ausblenden
-    if(sektS && sektS.parentGroup) {
-        sektS.parentGroup.style('display', design === 'Rund' ? 'flex' : 'none');
+    // VERBESSERTE LOGIK FÜR SEKTOR-ANZEIGE
+    if(sektGroup) {
+        if (design === 'Rund') sektGroup.show(); else sektGroup.hide();
     }
 
     push();
@@ -225,5 +221,3 @@ function getCodeFromText(textStr) {
 }
 
 function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }
-function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }
-

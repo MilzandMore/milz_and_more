@@ -1,7 +1,8 @@
 // 1. GLOBALE VARIABLEN & KONSTANTEN
 var designSelect, modeSelect, inputField, sektS, dirSelect, codeDisplay;
 var sliders = [], colorIndicators = [], sliderPanel, sektGroup;
-var logoImg, qMatrix = [];
+var logoImg = null; // Initialisierung als null
+var qMatrix = [];
 
 const colorMatrix = {
     1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
@@ -23,10 +24,16 @@ const charMap = {
 var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
 function preload() { 
-    // WICHTIG: Exakt "Logo.png" mit großem L
+    // Wir versuchen beide Varianten, falls du unsicher bist
     logoImg = loadImage('Logo.png', 
-        () => console.log("Logo geladen!"), 
-        () => console.error("Logo.png konnte nicht geladen werden. Prüfe Dateiname!")
+        () => console.log("Logo.png gefunden!"), 
+        () => {
+            console.log("Logo.png nicht gefunden, probiere logo.png...");
+            logoImg = loadImage('logo.png', 
+                () => console.log("logo.png gefunden!"),
+                () => console.log("Kein Logo gefunden - Programm startet trotzdem.")
+            );
+        }
     ); 
 }
 
@@ -35,7 +42,7 @@ function setup() {
     colorMode(HSB, 360, 100, 100);
     var isMobile = windowWidth < 600;
 
-    // UI Erstellung
+    // Topbar Erstellung
     var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
         .style('background', '#2c3e50').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
         .style('gap', isMobile ? '8px' : '20px').style('z-index', '200').style('align-items', 'center').style('height', isMobile ? '55px' : '75px').style('box-sizing', 'border-box');
@@ -72,7 +79,7 @@ function setup() {
     var saveBtn = createButton('DL').parent(topBar).style('margin-left', 'auto').style('background', '#fff').style('border-radius', '4px').style('font-weight', 'bold');
     saveBtn.mousePressed(exportHighRes);
 
-    // SLIDER PANEL
+    // Slider Erstellung
     sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150').style('padding', '8px');
     for (var i = 1; i <= 9; i++) {
         var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','5px');
@@ -80,19 +87,15 @@ function setup() {
         sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
     }
 
-    // SICHERHEIT: Das Layout erst stylen, wenn alles im DOM ist
-    setTimeout(updateLayout, 150);
-
-    [designSelect, modeSelect, dirSelect, inputField, sektS].forEach(e => {
-        if (e.changed) e.changed(redraw);
-    });
+    // Erst Layout berechnen, wenn Slider sicher existieren
+    updateLayout();
+    [designSelect, modeSelect, dirSelect, inputField, sektS].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
 }
 
 function updateLayout() {
-    // CRASH-VERHINDERUNG: Prüfen ob Slider-Objekte existieren
-    if (!sliderPanel || !sliders[1]) return; 
-
+    if (!sliderPanel || !sliders[1]) return; // Sicherheits-Check
     var isMobile = windowWidth < 600;
+    
     if (isMobile) {
         sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%').style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)');
     } else {
@@ -106,8 +109,8 @@ function updateLayout() {
 
 function draw() {
     background(255);
-    if (!designSelect || !sliders[1]) return; // Noch nicht bereit
-
+    if (!designSelect || !sliders[1]) return;
+    
     var isMobile = windowWidth < 600;
     var design = designSelect.value();
     if (design === "Rund") sektGroup.show(); else sektGroup.hide();
@@ -143,7 +146,6 @@ function draw() {
     }
     pop();
 
-    // LOGO-CHECK
     if (logoImg && logoImg.width > 1) {
         var lW = isMobile ? 55 : 150;
         var lH = (logoImg.height / logoImg.width) * lW;
@@ -151,68 +153,12 @@ function draw() {
     }
 }
 
-// --- FUNKTIONEN ---
+// Hilfsfunktionen (Farben, Matrix-Logik)
 function getFinalCol(val, startDigit) {
     var hex = colorMatrix[startDigit][val - 1];
     var col = color(hex);
     var sVal = sliders[val] ? sliders[val].value() : 85;
     return color(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
-}
-
-function renderQuadrat(startDigit, target) {
-    var ctx = target || window;
-    var ts = 16; ctx.stroke(0, 35); ctx.strokeWeight(0.5);
-    for (var r = 0; r < 20; r++) {
-        for (var c = 0; c < 20; c++) {
-            var val = qMatrix[r][c];
-            if (val > 0) {
-                ctx.fill(getFinalCol(val, startDigit));
-                ctx.rect(c * ts, -(r + 1) * ts, ts, ts); ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts); 
-                ctx.rect(c * ts, r * ts, ts, ts); ctx.rect(-(c + 1) * ts, r * ts, ts, ts);        
-            }
-        }
-    }
-}
-
-function renderRund(code, startDigit, target) {
-    var ctx = target || window;
-    var m = buildMandalaMatrix(code);
-    var sc = int(sektS.value());
-    var step = 20; var angle = TWO_PI / sc; var h = tan(angle / 2) * step;
-    ctx.stroke(0, 35); ctx.strokeWeight(0.5);
-    for (var i = 0; i < sc; i++) {
-        ctx.push(); ctx.rotate(i * angle);
-        for (var r = 0; r < 16; r++) {
-            for (var c = 0; c <= r; c++) {
-                var v = m[r][c];
-                if (v > 0) ctx.fill(getFinalCol(v, startDigit)); else ctx.fill(255);
-                var x = r * step, y = (c - r / 2) * h * 2;
-                ctx.beginShape(); ctx.vertex(x, y); ctx.vertex(x + step, y - h); ctx.vertex(x + step * 2, y); ctx.vertex(x + step, y + h); ctx.endShape(CLOSE);
-            }
-        }
-        ctx.pop();
-    }
-}
-
-function renderWabe(code, startDigit, target) {
-    var ctx = target || window;
-    var sz = 16.2; ctx.stroke(0, 35); ctx.strokeWeight(0.5);
-    var path = (dirSelect.value() === 'Innen') ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
-    for (var s = 0; s < 6; s++) {
-        ctx.push(); ctx.rotate(s * PI / 3);
-        var m = Array(17).fill().map(() => Array(17).fill(0));
-        for (var i = 0; i < 16; i++) m[16][i] = path[i % path.length];
-        for (var r = 15; r >= 1; r--) for (var i = 0; i < r; i++) m[r][i] = ex(m[r+1][i], m[r+1][i+1]);
-        for (var r = 1; r <= 16; r++) {
-            for (var i = 0; i < r; i++) {
-                var v = m[r][i];
-                if (v > 0) ctx.fill(getFinalCol(v, startDigit)); else ctx.fill(255);
-                var x = (i - (r - 1) / 2) * sz * sqrt(3), y = -(r - 1) * sz * 1.5;
-                ctx.beginShape(); for (var a = PI/6; a < TWO_PI; a += PI/3) ctx.vertex(x + cos(a) * sz, y + sin(a) * sz); ctx.endShape(CLOSE);
-            }
-        }
-        ctx.pop();
-    }
 }
 
 function calcQuadratMatrix(code) {

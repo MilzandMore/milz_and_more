@@ -1,6 +1,6 @@
 // --- GLOBALE VARIABLEN ---
 var inputField, modeSelect, designSelect, dirSelect, sektS, sliders = [], colorIndicators = [], sliderPanel;
-var logoImg, codeDisplay, sektGroup; // sektGroup hinzugefügt für stabile Steuerung
+var logoImg, codeDisplay, sektGroup;
 
 const charMap = { 'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 };
 const baseColorsRund = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
@@ -19,10 +19,7 @@ const colorMatrixWabe = {
 const ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
 function preload() { 
-    logoImg = loadImage('Logo.png', 
-        () => console.log("Logo geladen"), 
-        () => console.log("Logo nicht gefunden")
-    ); 
+    logoImg = loadImage('Logo.png'); 
 }
 
 function setup() {
@@ -62,7 +59,7 @@ function setup() {
     createUIGroup("RICHTUNG", dirSelect, "60px", "90px");
 
     sektS = createSelect(); ["6","8","10","12","13"].forEach(s => sektS.option(s)); sektS.selected("8");
-    sektGroup = createUIGroup("SEKTOR", sektS, "40px", "60px"); // Hier speichern wir die Gruppe
+    sektGroup = createUIGroup("SEKTOR", sektS, "40px", "60px");
 
     var saveBtn = createButton('DOWNLOAD').parent(topBar)
         .style('margin-left', 'auto').style('background', '#fff').style('color', '#2c3e50').style('border', 'none').style('font-weight', 'bold')
@@ -104,7 +101,6 @@ function draw() {
     var startDigit = code[0] || 1;
     updateIndicators(startDigit, design);
     
-    // REPARIERTE STELLE: Stabile Anzeige/Ausblendung
     if(sektGroup) {
         if(design === 'Rund') sektGroup.show(); else sektGroup.hide();
     }
@@ -112,28 +108,21 @@ function draw() {
     push();
     translate(width/2, isMobile ? height / 2 - 40 : height / 2 + 20);
 
+    // Wichtige Korrektur: Die richtigen Farbpaletten für das jeweilige Design übergeben
     if (design === 'Quadrat') {
         scale((min(width, height) / 850) * (isMobile ? 0.8 : 0.95));
-        renderQuadrat(code, startDigit);
+        renderQuadrat(code, colorMatrixWabe[startDigit]);
     } else if (design === 'Rund') {
         scale((min(width, height) / 900) * (isMobile ? 0.85 : 0.95));
-        renderRund(code, startDigit);
+        renderRund(code, getRundColors(startDigit));
     } else if (design === 'Wabe') {
         scale((min(width, height) / 520) * (isMobile ? 0.45 : 0.48));
-        renderWabe(code, startDigit);
+        renderWabe(code, colorMatrixWabe[startDigit]);
     }
     pop();
-
-    if (logoImg && logoImg.width > 0) {
-        push(); resetMatrix();
-        let lW = isMobile ? 55 : 150;
-        let lH = (logoImg.height / logoImg.width) * lW;
-        image(logoImg, 15, isMobile ? height - 125 : height - lH - 25, lW, lH);
-        pop();
-    }
 }
 
-function renderQuadrat(code, sD) {
+function renderQuadrat(code, palette) {
     let m = Array(17).fill().map(() => Array(17).fill(0));
     let p = (dirSelect.value() === 'b') ? [...code].reverse() : [...code];
     let fP = [...p, ...[...p].reverse()];
@@ -143,7 +132,7 @@ function renderQuadrat(code, sD) {
     for(let r=1; r<=16; r++) {
         for(let i=0; i<r; i++) {
             let v = m[r][i]; if (v === 0) continue;
-            fill(getSliderColor(colorMatrixWabe[sD][v-1], v));
+            fill(getSliderColor(palette[v-1], v));
             let x = (i-(r-1)/2)*sz, y = (r-1)*sz;
             rect(x-sz/2, y-sz/2, sz, sz); rect(-x-sz/2, -y-sz/2, sz, sz);
             rect(-y-sz/2, x-sz/2, sz, sz); rect(y-sz/2, -x-sz/2, sz, sz);
@@ -151,30 +140,32 @@ function renderQuadrat(code, sD) {
     }
 }
 
-function renderRund(code, sD) {
+function renderRund(code, palette) {
     let n = 16, m = Array.from({length: n}, (_, r) => Array(r + 1).fill(0));
     let p = (dirSelect.value() === 'b') ? [...code].reverse() : [...code];
     let base = [...p].reverse().concat(p);
     for (let i=0; i<16; i++) m[15][i] = base[i];
     for (let i=0; i<16; i++) { let r=15-i; m[r][0]=base[i]; m[r][r]=base[i]; }
     for (let r=14; r>=0; r--) for (let c=1; c<r; c++) m[r][c] = ex(m[r+1][c-1], m[r+1][c]);
-    let cols = getRundColors(sD), sc = int(sektS.value()), step = 20, h = tan(PI/sc)*step;
+    let sc = int(sektS.value()), step = 20, h = tan(PI/sc)*step;
     stroke(0, 35); strokeWeight(0.5);
     for (let s=0; s<sc; s++) {
         push(); rotate(s * TWO_PI / sc);
         for (let r=0; r<16; r++) {
             for (let c=0; c<=r; c++) {
                 let v = m[r][c];
-                fill(v >= 1 ? getSliderColor(cols[v-1], v) : 255);
-                let x = r*step, y = (c-r/2)*h*2;
-                beginShape(); vertex(x, y); vertex(x+step, y-h); vertex(x+step*2, y); vertex(x+step, y+h); endShape(CLOSE);
+                if(v >= 1) {
+                    fill(getSliderColor(palette[v-1], v));
+                    let x = r*step, y = (c-r/2)*h*2;
+                    beginShape(); vertex(x, y); vertex(x+step, y-h); vertex(x+step*2, y); vertex(x+step, y+h); endShape(CLOSE);
+                }
             }
         }
         pop();
     }
 }
 
-function renderWabe(code, sD) {
+function renderWabe(code, palette) {
     let sz = 16.2, p = (dirSelect.value() === 'b') ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
     stroke(0, 35);
     for (let s=0; s<6; s++) {
@@ -185,9 +176,11 @@ function renderWabe(code, sD) {
         for (let r=1; r<=16; r++) {
             for (let i=0; i<r; i++) {
                 let v = m[r][i];
-                fill(v >= 1 ? getSliderColor(colorMatrixWabe[sD][v-1], v) : 255);
-                let x = (i-(r-1)/2)*sz*sqrt(3), y = -(r-1)*sz*1.5;
-                beginShape(); for (let a=PI/6; a<TWO_PI; a+=PI/3) vertex(x+cos(a)*sz, y+sin(a)*sz); endShape(CLOSE);
+                if(v >= 1) {
+                    fill(getSliderColor(palette[v-1], v));
+                    let x = (i-(r-1)/2)*sz*sqrt(3), y = -(r-1)*sz*1.5;
+                    beginShape(); for (let a=PI/6; a<TWO_PI; a+=PI/3) vertex(x+cos(a)*sz, y+sin(a)*sz); endShape(CLOSE);
+                }
             }
         }
         pop();
@@ -195,14 +188,15 @@ function renderWabe(code, sD) {
 }
 
 function getSliderColor(hex, idx) {
+    if (!hex) return color(255);
     let col = color(hex);
     return color(hue(col), map(sliders[idx].value(), 20, 100, 15, saturation(col)), map(sliders[idx].value(), 20, 100, 98, brightness(col)));
 }
 
 function updateIndicators(s, d) {
     for (var i = 1; i <= 9; i++) {
-        let col = (d === 'Rund') ? getRundColors(s)[i-1] : colorMatrixWabe[s][i-1];
-        colorIndicators[i].style('background-color', col);
+        let palette = (d === 'Rund') ? getRundColors(s) : colorMatrixWabe[s];
+        colorIndicators[i].style('background-color', palette[i-1]);
     }
 }
 

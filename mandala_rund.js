@@ -1,48 +1,226 @@
-var inputFieldRund, sektorSelectRund, slidersRund = [];
-const mapZRund = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
+// 1. GLOBALE KONSTANTEN & VARIABLEN - RUND
+var baseColorsRund = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
+
+var affirmMapRund = { 
+  A:1,J:1,S:1,Ä:1, B:2,K:2,T:2,Ö:2, C:3,L:3,U:3,Ü:3, D:4,M:4,V:4,ß:4, 
+  E:5,N:5,W:5, F:6,O:6,X:6, G:7,P:7,Y:7, H:8,Q:8,Z:8, I:9,R:9 
+};
+
+var exRund = (a,b) => (a + b) % 9 === 0 ? 9 : (a + b) % 9;
+
+var modeSelectRund, inputFieldRund, codeDisplayRund, sektSRund, richtungSRund, slidersRund = [], colorIndicatorsRund = [], sliderPanelRund, topBarRund;
+var colorSeedRund = 1;
 
 function setupRund() {
-  var isMobile = windowWidth < 600; slidersRund = [];
-  let topBar = createDiv("").addClass('app-ui').style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
-    .style('background', '#2c3e50').style('display', 'flex').style('align-items', 'center').style('padding', '5px 10px').style('z-index', '5000').style('height', '65px');
+  var isMobile = windowWidth < 600;
 
-  let inputGroup = createDiv("").parent(topBar).style('display','flex').style('flex-direction','column').style('margin-left', '75px');
-  inputFieldRund = createInput('15011987').parent(inputGroup).style('width', isMobile ? '80px' : '120px');
+  // TOPBAR RUND
+  topBarRund = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
+    .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
+    .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
+    .style('align-items', 'center').style('box-sizing', 'border-box').style('height', isMobile ? '55px' : '75px');
 
-  let saveBtn = createButton('DOWNLOAD').parent(topBar).addClass('app-ui').style('margin-left', 'auto').style('padding', '10px').style('background','#fff').style('font-weight','bold');
-  saveBtn.mousePressed(() => save('Rund.png'));
-
-  let panel = createDiv("").addClass('app-ui').style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '5000');
-  if (isMobile) {
-    panel.style('bottom', '0').style('width', '100%').style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)');
-  } else {
-    panel.style('top', '80px').style('left', '0').style('padding', '10px');
+  function createUIGroupRund(labelTxt, element, wMobile, wDesktop) {
+    var group = createDiv("").parent(topBarRund).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
+    createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#bdc3c7').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
+    if (element) {
+      element.parent(group).style('width', isMobile ? wMobile : wDesktop)
+        .style('font-size', isMobile ? '11px' : '13px').style('background', '#34495e').style('color', '#fff')
+        .style('border', 'none').style('border-radius', '4px').style('padding', isMobile ? '3px 5px' : '6px 8px')
+        .style('height', isMobile ? '22px' : '32px');
+    }
+    return group;
   }
 
-  for (let i = 1; i <= 9; i++) {
-    let sRow = createDiv("").parent(panel).style('display','flex').style('align-items','center').style('padding','2px');
-    slidersRund[i] = createSlider(20, 100, 85).parent(sRow).style('width', '75px'); // [cite: 2026-02-11]
+  modeSelectRund = createSelect();
+  modeSelectRund.option('Geburtstag'); modeSelectRund.option('Affirmation');
+  createUIGroupRund("MODUS", modeSelectRund, "80px", "110px");
+
+  inputFieldRund = createInput("15011987");
+  createUIGroupRund("EINGABE", inputFieldRund, "75px", "140px");
+
+  var codeGroup = createUIGroupRund("CODE", null, "auto", "auto");
+  codeDisplayRund = createSpan("").parent(codeGroup).style('font-size', isMobile ? '11px' : '14px').style('color', '#fff').style('font-weight', '600').style('letter-spacing', '1px');
+
+  sektSRund = createSelect();
+  ["6","8","10","12","13"].forEach(s => sektSRund.option(s, s)); sektSRund.selected("8");
+  createUIGroupRund("SEKTOR", sektSRund, "40px", "60px");
+
+  richtungSRund = createSelect(); 
+  richtungSRund.option("Außen", "a"); richtungSRund.option("Innen", "b");
+  richtungSRund.selected("a");
+  createUIGroupRund("RICHTUNG", richtungSRund, "65px", "100px");
+
+  var saveBtn = createButton('DOWNLOAD').parent(topBarRund)
+    .style('margin-left', 'auto').style('background', '#ffffff').style('color', '#2c3e50')
+    .style('border', 'none').style('font-weight', 'bold').style('border-radius', '4px')
+    .style('padding', isMobile ? '6px 8px' : '10px 16px').style('font-size', isMobile ? '9px' : '12px').style('cursor', 'pointer');
+  saveBtn.mousePressed(exportHighResRund);
+
+  sliderPanelRund = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
+  for (var i = 1; i <= 9; i++) {
+    var sRow = createDiv("").parent(sliderPanelRund).style('display','flex').style('align-items','center').style('gap','4px');
+    colorIndicatorsRund[i] = createDiv("").parent(sRow).style('width', '8px').style('height', '8px').style('border-radius', '50%');
+    slidersRund[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
+  }
+
+  updateLayoutRund();
+  [modeSelectRund, inputFieldRund, sektSRund, richtungSRund].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
+}
+
+function updateLayoutRund() {
+  var isMobile = windowWidth < 600;
+  if (isMobile) {
+    sliderPanelRund.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
+      .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
+    for (var i = 1; i <= 9; i++) if(slidersRund[i]) slidersRund[i].style('width', '75px');
+  } else {
+    sliderPanelRund.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
+      .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
+    for (var i = 1; i <= 9; i++) if(slidersRund[i]) slidersRund[i].style('width', '80px');
   }
 }
 
 function drawRund() {
-  let isMobile = windowWidth < 600;
+  var isMobile = windowWidth < 600;
+  var rawVal = inputFieldRund.value().trim();
+  if (rawVal === "" || (modeSelectRund.value() === 'Geburtstag' && rawVal.replace(/\D/g, "").length === 0)) return;
+
+  var sector = buildSectorRund();
+  var currentColors = getColorMatrixRund(colorSeedRund);
+  
+  for (var i = 1; i <= 9; i++) { 
+    if(colorIndicatorsRund[i]) colorIndicatorsRund[i].style('background-color', currentColors[i-1]); 
+  }
+
   push();
-  translate(width/2, isMobile ? height/2 - 20 : height/2 + 40);
-  scale(isMobile ? 1.5 : 2.2); // GRÖSSENANPASSUNG
-  let code = inputFieldRund.value().split('').map(Number);
-  for(let i=0; i<12; i++) {
-    push(); rotate(TWO_PI/12 * i);
-    drawSektorRund(code);
-    pop();
+  var centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
+  var centerX = width / 2; 
+  translate(centerX, centerY);
+  
+  var scaleFactor = (min(width, height) / 900) * (isMobile ? 0.85 : 0.95);
+  scale(scaleFactor);
+  
+  var sc = int(sektSRund.value());
+  var angle = TWO_PI / sc;
+  for (var i = 0; i < sc; i++) {
+    push(); rotate(i * angle); drawSectorRundLogic(sector, currentColors); pop();
   }
   pop();
+
+  if (logoImg && logoImg.width > 0) {
+    push(); resetMatrix();
+    var lW = isMobile ? 55 : 150;
+    var lH = (logoImg.height / logoImg.width) * lW;
+    var logoY = isMobile ? height - 125 : height - lH - 25;
+    image(logoImg, 15, logoY, lW, lH); 
+    pop();
+  }
 }
 
-function drawSektorRund(code) {
-  for(let r=0; r<code.length; r++) {
-    let val = code[r] || 1;
-    fill(color(mapZRund[val])); noStroke();
-    arc(0, 0, (r+1)*24, (r+1)*24, 0, TWO_PI/12 + 0.01);
+function drawSectorRundLogic(m, colors, target) {
+  var ctx = target || window;
+  var step = 20;
+  var sc = int(sektSRund.value());
+  var angle = TWO_PI / sc;
+  var h = tan(angle / 2) * step;
+  ctx.stroke(0, 35); 
+  ctx.strokeWeight(0.5);
+  for (var r = 0; r < m.length; r++) {
+    for (var c = 0; c <= r; c++) {
+      var v = m[r][c];
+      var x = r * step; var y = (c - r / 2) * h * 2;
+      if (v >= 1 && v <= 9) {
+        var baseCol = color(colors[v - 1]);
+        var sVal = slidersRund[v] ? slidersRund[v].value() : 85;
+        ctx.fill(hue(baseCol), map(sVal, 20, 100, 15, saturation(baseCol)), map(sVal, 20, 100, 98, brightness(baseCol)));
+      } else ctx.fill(255); 
+      ctx.beginShape(); ctx.vertex(x, y); ctx.vertex(x + step, y - h); ctx.vertex(x + step * 2, y); ctx.vertex(x + step, y + h); ctx.endShape(CLOSE);
+    }
   }
+}
+
+function exportHighResRund() {
+  var exportW = 2480; var exportH = 3508; 
+  var pg = createGraphics(exportW, exportH);
+  pg.colorMode(HSB, 360, 100, 100); pg.background(255);
+  
+  var sector = buildSectorRund();
+  var currentColors = getColorMatrixRund(colorSeedRund);
+  var sc = int(sektSRund.value());
+  var angle = TWO_PI / sc;
+
+  pg.push(); 
+  pg.translate(exportW / 2, exportH * 0.40); 
+  pg.scale(3.2); 
+  for (var i = 0; i < sc; i++) { 
+    pg.push(); pg.rotate(i * angle); drawSectorRundLogic(sector, currentColors, pg); pg.pop(); 
+  }
+  pg.pop();
+
+  if (logoImg && !isAdmin) {
+    pg.resetMatrix(); pg.tint(255, 0.45);
+    var wWidth = 380; var wHeight = (logoImg.height / logoImg.width) * wWidth;
+    for (var x = -100; x < exportW + 400; x += 500) {
+      for (var y = -100; y < exportH + 400; y += 500) pg.image(logoImg, x, y, wWidth, wHeight);
+    }
+    pg.noTint();
+  }
+
+  if (logoImg) {
+    var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;
+    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+  }
+  save(pg, 'Milz&More_Rund.png');
+}
+
+function buildSectorRund() {
+  var n = 16;
+  var m = Array.from({length: n}, (_, r) => Array(r + 1).fill(0));
+  var isAffirm = modeSelectRund.value() === 'Affirmation';
+  var raw = isAffirm ? codeFromAffirmRund(inputFieldRund.value()) : inputFieldRund.value().replace(/\D/g, "").split("").map(Number);
+  while (raw.length < 8) raw.push(0);
+  raw = raw.slice(0, 8);
+  colorSeedRund = raw[0];
+  if(codeDisplayRund) codeDisplayRund.html(raw.join(""));
+  var frame = (richtungSRund.value() === "b") ? [...raw].reverse() : [...raw];
+  var base = [...frame].reverse().concat(frame);
+  for (var i = 0; i < 16; i++) m[15][i] = base[i];
+  for (var i = 0; i < 16; i++) { var r = 15 - i; m[r][0] = base[i]; m[r][r] = base[i]; }
+  for (var c = 1; c <= 13; c++) m[14][c] = exRund(m[15][c], m[15][c + 1]);
+  var c14 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[14][c]);
+  c14(1, [[2, 1]]); c14(2, [[3, 1], [3, 2], [13, 1], [13, 12]]); c14(3, [[4, 1], [4, 3], [12, 1], [12, 11]]);
+  c14(4, [[5, 1], [5, 4], [11, 1], [11, 10]]); c14(5, [[6, 1], [6, 5], [10, 1], [10, 9]]);
+  c14(6, [[7, 1], [7, 6], [9, 1], [9, 8]]); c14(7, [[8, 1], [8, 7]]);
+  for (var c = 2; c <= 10; c++) m[13][c] = exRund(m[14][c], m[14][c + 1]);
+  var c13 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[13][c]);
+  c13(2, [[4, 2], [13, 11]]); c13(3, [[12, 2], [12, 10], [5, 2], [5, 3]]);
+  c13(4, [[11, 2], [11, 9], [6, 4], [6, 2]]); c13(5, [[10, 2], [10, 8], [7, 5], [7, 2]]);
+  c13(6, [[9, 2], [9, 7], [8, 6], [8, 2]]);
+  for (var j = 3; j <= 8; j++) m[12][j] = exRund(m[13][j], m[13][j+1]);
+  var c12 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[12][c]);
+  c12(3, [[12, 9], [6, 3]]); c12(4, [[11, 3], [11, 8], [7, 4], [7, 3]]);
+  c12(5, [[10, 3], [10, 7], [8, 5], [8, 3]]); c12(6, [[9, 3], [9, 6]]);
+  m[11][4] = exRund(m[12][4], m[12][5]); m[11][5] = exRund(m[12][5], m[12][6]); m[11][6] = exRund(m[12][6], m[12][7]);
+  var c11 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[11][c]);
+  c11(4, [[11, 7], [8, 4]]); c11(5, [[10, 4], [10, 6], [9, 4], [9, 5]]);
+  m[10][5] = exRund(m[11][5], m[11][6]);
+  return m;
+}
+
+function codeFromAffirmRund(text) {
+  var arr = []; text = text.toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
+  for (var c of text) if (affirmMapRund[c]) arr.push(affirmMapRund[c]);
+  while (arr.length > 8) {
+    var n = []; for (var i = 0; i < arr.length - 1; i++) n.push(exRund(arr[i], arr[i + 1]));
+    arr = n;
+  }
+  while (arr.length < 8) arr.push(0);
+  return arr.slice(0, 8);
+}
+
+function getColorMatrixRund(seed) {
+  var s = (seed === 0 || !seed) ? 1 : seed;
+  var shift = (s - 1) % 9;
+  return baseColorsRund.slice(shift).concat(baseColorsRund.slice(0, shift));
 }

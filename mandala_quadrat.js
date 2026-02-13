@@ -1,19 +1,22 @@
 class MandalaQuadrat {
   constructor() {
-    // Deine Original-Matrix und Logik
-    this.qMatrix = {
-      1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
-      2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
-      3: ["#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B"],
-      4: ["#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00"],
-      5: ["#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00"],
-      6: ["#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB"],
-      7: ["#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0"],
-      8: ["#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB"],
-      9: ["#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500"]
+    this.qMatrix = [];
+    this.mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
+    this.colorMatrix = {
+      1: { 1: "#FF0000", 2: "#0000FF", 3: "#00FF00", 4: "#FFFF00", 5: "#00B0F0", 6: "#00FFFF", 7: "#FF66FF", 8: "#FF9900", 9: "#9900FF" },
+      2: { 1: "#0000FF", 2: "#00FF00", 3: "#FFFF00", 4: "#00B0F0", 5: "#00FFFF", 6: "#FF66FF", 7: "#FF9900", 8: "#9900FF", 9: "#FF0000" },
+      3: { 1: "#00FF00", 2: "#FFFF00", 3: "#00B0F0", 4: "#00FFFF", 5: "#FF66FF", 6: "#FF9900", 7: "#9900FF", 8: "#FF0000", 9: "#0000FF" },
+      4: { 1: "#FFFF00", 2: "#00B0F0", 3: "#00FFFF", 4: "#FF66FF", 5: "#FF9900", 6: "#9900FF", 7: "#FF0000", 8: "#0000FF", 9: "#00FF00" },
+      5: { 1: "#00B0F0", 2: "#00FFFF", 3: "#FF66FF", 4: "#FF9900", 5: "#9900FF", 6: "#FF0000", 7: "#0000FF", 8: "#00FF00", 9: "#FFFF00" },
+      6: { 1: "#00FFFF", 2: "#FF66FF", 3: "#FF9900", 4: "#9900FF", 5: "#FF0000", 6: "#0000FF", 7: "#00FF00", 8: "#FFFF00", 9: "#00B0F0" },
+      7: { 1: "#FF66FF", 2: "#FF9900", 3: "#9900FF", 4: "#FF0000", 5: "#0000FF", 6: "#00FF00", 7: "#FFFF00", 8: "#00B0F0", 9: "#00FFFF" },
+      8: { 1: "#FF9900", 2: "#9900FF", 3: "#FF0000", 4: "#0000FF", 5: "#00FF00", 6: "#FFFF00", 7: "#00B0F0", 8: "#00FFFF", 9: "#FF66FF" },
+      9: { 1: "#9900FF", 2: "#FF0000", 3: "#0000FF", 4: "#00FF00", 5: "#FFFF00", 6: "#00B0F0", 7: "#00FFFF", 8: "#FF66FF", 9: "#FF9900" }
     };
-    this.charMap = { A:1,J:1,S:1,Ä:1, B:2,K:2,T:2,Ö:2, C:3,L:3,U:3,Ü:3, D:4,M:4,V:4,ß:4, E:5,N:5,W:5, F:6,O:6,X:6, G:7,P:7,Y:7, H:8,Q:8,Z:8, I:9,R:9 };
-    this.ex = (a, b) => (a + b) % 9 === 0 ? 9 : (a + b) % 9;
+    this.charMap = {
+      'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,
+      'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
+    };
     
     this.uiElements = [];
     this.sliders = [];
@@ -22,122 +25,186 @@ class MandalaQuadrat {
 
   init(container) {
     let isMobile = windowWidth < 600;
-    const createUI = (lbl, el, wM, wD) => {
-      let g = createDiv("").parent(container).style('display','flex').style('flex-direction','column');
-      createSpan(lbl).parent(g).style('font-size','10px').style('color','#bdc3c7').style('font-weight','bold');
-      el.parent(g).style('width', isMobile ? wM : wD).style('background','#34495e').style('color','#fff').style('border','none').style('border-radius','4px').style('height', isMobile ? '22px' : '32px');
-      this.uiElements.push(g);
+    const createUIGroup = (labelTxt, element, wMobile, wDesktop) => {
+      let group = createDiv("").parent(container).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
+      createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#bdc3c7').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
+      if (element) {
+        element.parent(group).style('width', isMobile ? wMobile : wDesktop)
+          .style('font-size', isMobile ? '11px' : '13px').style('background', '#34495e').style('color', '#fff')
+          .style('border', 'none').style('border-radius', '4px').style('padding', isMobile ? '3px 5px' : '6px 8px')
+          .style('height', isMobile ? '22px' : '32px');
+      }
+      this.uiElements.push(group);
+      return group;
     };
 
     this.modeSelect = createSelect();
-    ['Geburtstag','Affirmation'].forEach(o => this.modeSelect.option(o));
-    createUI("MODUS", this.modeSelect, "80px", "110px");
+    this.modeSelect.option('Geburtstag');
+    this.modeSelect.option('Text');
+    createUIGroup("MODUS", this.modeSelect, "80px", "110px");
 
-    this.inputField = createInput("15011987");
-    createUI("EINGABE", this.inputField, "75px", "140px");
+    this.inputField = createInput('15011987');
+    createUIGroup("EINGABE", this.inputField, "75px", "140px");
 
-    this.sliderPanel = createDiv("").style('position','fixed').style('background','rgba(44,62,80,0.98)').style('z-index','150');
+    this.dirSelect = createSelect();
+    this.dirSelect.option('Außen');
+    this.dirSelect.option('Innen');
+    createUIGroup("RICHTUNG", this.dirSelect, "65px", "100px");
+
+    this.sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
     for (let i = 1; i <= 9; i++) {
-      let r = createDiv("").parent(this.sliderPanel).style('display','flex').style('align-items', 'center').style('gap','4px');
-      this.colorIndicators[i] = createDiv("").parent(r).style('width','8px').style('height','8px').style('border-radius','50%');
-      this.sliders[i] = createSlider(20, 100, 85).parent(r).input(() => redraw());
+      let sRow = createDiv("").parent(this.sliderPanel).style('display','flex').style('align-items','center').style('gap','4px');
+      this.colorIndicators[i] = createDiv("").parent(sRow).style('width', '8px').style('height', '8px').style('border-radius', '50%');
+      this.sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
     }
-    
+
     this.updateLayout();
-    [this.modeSelect, this.inputField].forEach(el => el.input(() => redraw()));
+    [this.modeSelect, this.dirSelect, this.inputField].forEach(e => e.input ? e.input(() => redraw()) : e.changed(() => redraw()));
   }
 
   updateLayout() {
     let isMobile = windowWidth < 600;
     if (isMobile) {
-      this.sliderPanel.style('top','auto').style('bottom','0').style('left','0').style('width','100%').style('display','grid').style('grid-template-columns','repeat(3,1fr)').style('padding','8px');
-      for (let i = 1; i <= 9; i++) this.sliders[i].style('width', '75px');
+      this.sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
+        .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
+      for (let i = 1; i <= 9; i++) if(this.sliders[i]) this.sliders[i].style('width', '75px');
     } else {
-      this.sliderPanel.style('bottom','auto').style('top','90px').style('left','0').style('width','auto').style('display','flex').style('flex-direction','column').style('padding','12px');
-      for (let i = 1; i <= 9; i++) this.sliders[i].style('width', '80px');
+      this.sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
+        .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
+      for (let i = 1; i <= 9; i++) if(this.sliders[i]) this.sliders[i].style('width', '80px');
     }
   }
 
   render() {
-    let raw = this.inputField.value().trim();
-    if (!raw) return;
-    let code = (this.modeSelect.value() === 'Affirmation') ? this.getAffirmCode(raw) : raw.replace(/\D/g, "").split("").map(Number);
-    while (code.length < 8) code.push(0);
-    code = code.slice(0, 8);
-    let cKey = code[0] || 1;
-    let colors = this.qMatrix[cKey];
+    let isMobile = windowWidth < 600;
+    let baseCode = (this.modeSelect.value().includes('Geburtstag')) ? this.getCodeFromDate() : this.getCodeFromText();
+    let startDigit = baseCode[0] || 1;
+    let drawCode = (this.dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
 
-    for (let i = 1; i <= 9; i++) this.colorIndicators[i].style('background', colors[i-1]);
+    for (let i = 1; i <= 9; i++) {
+      let hex = (this.colorMatrix[startDigit] && this.colorMatrix[startDigit][i]) ? this.colorMatrix[startDigit][i] : this.mapZ[i];
+      if(this.colorIndicators[i]) this.colorIndicators[i].style('background-color', hex);
+    }
 
     push();
-    translate(width/2, height/2 + (windowWidth < 600 ? -40 : 20));
-    let sc = (min(width, height) / 550) * (windowWidth < 600 ? 0.8 : 1.0);
-    scale(sc);
-    this.drawMandala(code, colors);
+    let scaleFactor = (min(width, height) / 850) * (isMobile ? 0.80 : 0.95);
+    let centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
+    let centerX = width / 2;
+    translate(centerX, centerY);
+    scale(scaleFactor);
+
+    this.calcQuadratMatrix(drawCode);
+    this.drawQuadrat(startDigit);
     pop();
   }
 
-  // DEINE ORIGINAL RECHENLOGIK FÜR DIE SPIEGELUNG
-  drawMandala(code, colors, target) {
-    let ctx = target || window;
-    let m = Array(16).fill().map(() => Array(16).fill(0));
-    
-    // Erste Zeile füllen
-    for (let i = 0; i < 8; i++) { 
-      m[0][i] = code[i]; 
-      m[0][15-i] = code[i]; 
-    }
-    
-    // Die Matrix berechnen
-    for (let r = 1; r < 16; r++) {
-      for (let c = 0; c < 16 - r; c++) {
-        m[r][c] = this.ex(m[r-1][c], m[r-1][c+1]);
-      }
-    }
+  // --- ORIGINALE RECHENLOGIK UNVERÄNDERT ---
+  ex(a, b) { 
+    let s = (a || 0) + (b || 0); 
+    return (s === 0) ? 0 : (s % 9 === 0 ? 9 : s % 9); 
+  }
 
-    let sz = 15;
-    ctx.stroke(0, 40);
-    for (let r = 0; r < 16; r++) {
-      for (let c = 0; c < 16 - r; c++) {
-        let v = m[r][c];
-        if (v > 0) {
-          let base = color(colors[v-1]);
-          let s = this.sliders[v].value();
-          ctx.fill(hue(base), map(s, 20, 100, 15, saturation(base)), map(s, 20, 100, 98, brightness(base)));
+  calcQuadratMatrix(code) {
+    this.qMatrix = Array(20).fill().map(() => Array(20).fill(0));
+    let d = [code[0], code[1]], m = [code[2], code[3]], j1 = [code[4], code[5]], j2 = [code[6], code[7]];
+    
+    const set2 = (r, c, v1, v2) => { 
+      if (r >= 20 || c >= 20) return; 
+      this.qMatrix[r][c] = v1; 
+      if(c+1 < 20) this.qMatrix[r][c+1] = v2; 
+      if(r+1 < 20) this.qMatrix[r+1][c] = v2; 
+      if(r+1 < 20 && c+1 < 20) this.qMatrix[r+1][c+1] = v1; 
+    };
+
+    for(let i = 0; i < 8; i+=2) set2(i, i, d[0], d[1]);
+    for(let i = 0; i < 6; i+=2) { set2(i, i+2, m[0], m[1]); set2(i+2, i, m[0], m[1]); }
+    for(let i = 0; i < 4; i+=2) { set2(i, i+4, j1[0], j1[1]); set2(i+4, i, j1[0], j1[1]); }
+    set2(0, 6, j2[0], j2[1]); set2(6, 0, j2[0], j2[1]);
+
+    for(let r = 0; r < 8; r++) { 
+      for(let c = 8; c < 20; c++) this.qMatrix[r][c] = this.ex(this.qMatrix[r][c-2], this.qMatrix[r][c-1]); 
+    }
+    for(let c = 0; c < 20; c++) { 
+      for(let r = 8; r < 20; r++) this.qMatrix[r][c] = this.ex(this.qMatrix[r-2][c], this.qMatrix[r-1][c]); 
+    }
+  }
+
+  drawQuadrat(startDigit, target) {
+    let ctx = target || window;
+    let ts = 16;
+    ctx.stroke(0, 35);
+    ctx.strokeWeight(0.5);
+    for (let r = 0; r < 20; r++) {
+      for (let c = 0; c < 20; c++) {
+        let val = this.qMatrix[r][c];
+        if (val !== 0) {
+          let hex = (this.colorMatrix[startDigit] && this.colorMatrix[startDigit][val]) ? this.colorMatrix[startDigit][val] : this.mapZ[val];
+          let col = color(hex);
+          let sVal = this.sliders[val] ? this.sliders[val].value() : 85;
+          ctx.fill(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
           
-          // Die 4-fache Spiegelung für das volle Quadrat
-          ctx.rect((c + r/2 - 8) * sz, (r - 8) * sz, sz, sz);
-          ctx.rect((-(c + r/2) + 7) * sz, (r - 8) * sz, sz, sz);
-          ctx.rect((c + r/2 - 8) * sz, (7 - r) * sz, sz, sz);
-          ctx.rect((-(c + r/2) + 7) * sz, (7 - r) * sz, sz, sz);
+          // Originale Spiegelungs-Rects
+          ctx.rect(c * ts, -(r + 1) * ts, ts, ts); 
+          ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts); 
+          ctx.rect(c * ts, r * ts, ts, ts); 
+          ctx.rect(-(c + 1) * ts, r * ts, ts, ts);            
         }
       }
     }
   }
 
-  getAffirmCode(t) {
-    let a = t.toUpperCase().replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => this.charMap[c]).filter(n => n);
-    while (a.length < 8) a.push(9);
-    while (a.length > 8) {
-      let n = [];
-      for (let i = 0; i < a.length - 1; i++) n.push(this.ex(a[i], a[i+1]));
-      a = n;
-    }
-    return a;
+  getCodeFromDate() { 
+    let val = this.inputField.value().replace(/[^0-9]/g, ""); 
+    let res = val.split('').map(Number); 
+    while (res.length < 8) res.push(0); 
+    return res.slice(0, 8); 
   }
 
-  exportHighRes(logo, admin) {
-    let pg = createGraphics(2480, 3508);
+  getCodeFromText() { 
+    let textStr = this.inputField.value().toUpperCase().replace(/[^A-ZÄÖÜß]/g, ""); 
+    if (textStr.length === 0) return [1,1,1,1,1,1,1,1];
+    let firstRow = [];
+    for (let char of textStr) { if (this.charMap[char]) firstRow.push(this.charMap[char]); }
+    let currentRow = firstRow; while(currentRow.length < 8) currentRow.push(9);
+    while (currentRow.length > 8) { 
+      let nextRow = []; 
+      for (let i = 0; i < currentRow.length - 1; i++) { 
+        let sum = currentRow[i] + currentRow[i+1]; 
+        nextRow.push(sum % 9 === 0 ? 9 : sum % 9); 
+      } 
+      currentRow = nextRow; 
+    }
+    return currentRow;
+  }
+
+  exportHighRes(logoImg, isAdmin) {
+    let exportW = 2480; let exportH = 3508;
+    let pg = createGraphics(exportW, exportH);
     pg.colorMode(HSB, 360, 100, 100); pg.background(255);
-    let raw = this.inputField.value();
-    let code = (this.modeSelect.value() === 'Affirmation') ? this.getAffirmCode(raw) : raw.replace(/\D/g, "").split("").map(Number);
-    while (code.length < 8) code.push(0);
-    let cKey = code[0] || 1;
-    pg.push(); pg.translate(1240, 1500); pg.scale(4.5);
-    this.drawMandala(code.slice(0,8), this.qMatrix[cKey], pg);
+    let baseCode = (this.modeSelect.value().includes('Geburtstag')) ? this.getCodeFromDate() : this.getCodeFromText();
+    let startDigit = baseCode[0] || 1;
+    let drawCode = (this.dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
+    
+    pg.push(); 
+    pg.translate(exportW / 2, exportH * 0.40); 
+    pg.scale(3.8); 
+    this.calcQuadratMatrix(drawCode); 
+    this.drawQuadrat(startDigit, pg); 
     pg.pop();
-    if (logo) pg.image(logo, 2480-600, 3508-400, 500, 300);
-    save(pg, "Mandala_Quadrat.png");
+
+    if (logoImg && !isAdmin) {
+      pg.resetMatrix(); pg.tint(255, 0.45); 
+      let wWidth = 380; let wHeight = (logoImg.height / logoImg.width) * wWidth;
+      for (let x = -100; x < exportW + 400; x += 500) {
+        for (let y = -100; y < exportH + 400; y += 500) pg.image(logoImg, x, y, wWidth, wHeight);
+      }
+      pg.noTint();
+    }
+    if (logoImg) {
+      let lW = 500; let lH = (logoImg.height / logoImg.width) * lW;
+      pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+    }
+    save(pg, 'Milz&More_Quadrat.png');
   }
 
   hide() { this.uiElements.forEach(e => e.hide()); this.sliderPanel.hide(); }

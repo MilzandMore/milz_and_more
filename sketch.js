@@ -1,58 +1,75 @@
-// MASTER CONTROL FOR MILZ & MORE APP
-let currentMode = 'Wabe'; // Start-Modus
-let mandalaWabe, mandalaRund, mandalaQuadrat;
+let currentApp = 'Wabe';
+let menuSelect;
 
 function preload() {
-  // Zentrales Laden des Logos für alle Module
-  logoImg = loadImage('logo.png');
+    // Zentrales Laden des Logos
+    logoImg = loadImage('logo.png');
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  colorMode(HSB, 360, 100, 100);
-  
-  // Navigation hinzufügen
-  createNavigation();
+    createCanvas(windowWidth, windowHeight);
+    
+    // 1. Initialisiere alle drei Apps (die umbenannten Setups)
+    setupWabe();
+    setupRund();
+    setupQuadrat();
 
-  // Initialisierung der drei Teil-Apps
-  // Hinweis: Ich habe deine Setups in Funktionen umgewandelt
-  initWabe(); 
-  initRund();
-  initQuadrat();
-  
-  showMode(currentMode);
+    // 2. Erstelle das Hauptmenü zur Auswahl
+    createMainMenu();
+
+    // 3. Initialer Status: Nur Wabe zeigen
+    switchApp('Wabe');
 }
 
-function createNavigation() {
-  let navGroup = createDiv("").style('position', 'fixed').style('top', '80px').style('left', '10px').style('z-index', '300');
-  let sel = createSelect().parent(navGroup).style('padding', '10px').style('border-radius', '5px').style('background', '#2c3e50').style('color', 'white');
-  sel.option('Wabe');
-  sel.option('Rund');
-  sel.option('Quadrat');
-  sel.changed(() => {
-    currentMode = sel.value();
-    showMode(currentMode);
-  });
+function createMainMenu() {
+    let navContainer = createDiv("").style('position', 'fixed').style('top', '15px').style('left', '10px').style('z-index', '1000');
+    
+    menuSelect = createSelect().parent(navContainer);
+    menuSelect.option('Wabe');
+    menuSelect.option('Rund');
+    menuSelect.option('Quadrat');
+    
+    // Style das Menü professionell
+    menuSelect.style('padding', '5px 10px').style('border-radius', '4px').style('background', '#ecf0f1').style('font-weight', 'bold');
+    
+    menuSelect.changed(() => {
+        switchApp(menuSelect.value());
+    });
 }
 
-function showMode(mode) {
-  // Verstecke alle Slider-Panels und Topbars der anderen Modi
-  // Zeige nur das Panel des gewählten Modus
-  [panelWabe, panelRund, panelQuadrat].forEach(p => p.hide());
-  [topWabe, topRund, topQuadrat].forEach(t => t.hide());
-  
-  if(mode === 'Wabe') { panelWabe.show(); topWabe.show(); }
-  if(mode === 'Rund') { panelRund.show(); topRund.show(); }
-  if(mode === 'Quadrat') { panelQuadrat.show(); topQuadrat.show(); }
-  redraw();
+function switchApp(appName) {
+    currentApp = appName;
+
+    // Alle Topbars und Slider-Panels verstecken
+    // (Hinweis: Stelle sicher, dass du in den 3 Dateien die Variablen topBar und sliderPanel 
+    // ebenfalls eindeutig benannt hast, z.B. topBarWabe, sliderPanelWabe)
+    
+    [topBarWabe, sliderPanelWabe].forEach(e => e.hide());
+    [topBarRund, sliderPanelRund].forEach(e => e.hide());
+    [topBarQuadrat, sliderPanelQuadrat].forEach(e => e.hide());
+
+    // Nur die aktive App zeigen
+    if (appName === 'Wabe') { topBarWabe.show(); sliderPanelWabe.show(); }
+    if (appName === 'Rund') { topBarRund.show(); sliderPanelRund.show(); }
+    if (appName === 'Quadrat') { topBarQuadrat.show(); sliderPanelQuadrat.show(); }
+    
+    redraw();
 }
 
 function draw() {
-  background(255);
-  if (currentMode === 'Wabe') drawWabe();
-  else if (currentMode === 'Rund') drawRund();
-  else if (currentMode === 'Quadrat') drawQuadrat();
+    background(255);
+    
+    // Führe nur die draw-Logik der gewählten App aus
+    if (currentApp === 'Wabe') drawWabe();
+    else if (currentApp === 'Rund') drawRund();
+    else if (currentApp === 'Quadrat') drawQuadrat();
 }
 
-// ... Hier folgen die drei originalen Codes, jeweils in ihre 
-// eigene draw-Funktion gekapselt ...
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    // Alle Layouts anpassen
+    updateLayoutWabe();
+    updateLayoutRund();
+    updateLayoutQuadrat();
+    redraw();
+}

@@ -1,23 +1,12 @@
 class MandalaQuadrat {
   constructor() {
-    this.qMatrix = [];
-    this.mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
-    this.colorMatrix = {
-      1: { 1: "#FF0000", 2: "#0000FF", 3: "#00FF00", 4: "#FFFF00", 5: "#00B0F0", 6: "#00FFFF", 7: "#FF66FF", 8: "#FF9900", 9: "#9900FF" },
-      2: { 1: "#0000FF", 2: "#00FF00", 3: "#FFFF00", 4: "#00B0F0", 5: "#00FFFF", 6: "#FF66FF", 7: "#FF9900", 8: "#9900FF", 9: "#FF0000" },
-      3: { 1: "#00FF00", 2: "#FFFF00", 3: "#00B0F0", 4: "#00FFFF", 5: "#FF66FF", 6: "#FF9900", 7: "#9900FF", 8: "#FF0000", 9: "#0000FF" },
-      4: { 1: "#FFFF00", 2: "#00B0F0", 3: "#00FFFF", 4: "#FF66FF", 5: "#FF9900", 6: "#9900FF", 7: "#FF0000", 8: "#0000FF", 9: "#00FF00" },
-      5: { 1: "#00B0F0", 2: "#00FFFF", 3: "#FF66FF", 4: "#FF9900", 5: "#9900FF", 6: "#FF0000", 7: "#0000FF", 8: "#00FF00", 9: "#FFFF00" },
-      6: { 1: "#00FFFF", 2: "#FF66FF", 3: "#FF9900", 4: "#9900FF", 5: "#FF0000", 6: "#0000FF", 7: "#00FF00", 8: "#FFFF00", 9: "#00B0F0" },
-      7: { 1: "#FF66FF", 2: "#FF9900", 3: "#9900FF", 4: "#FF0000", 5: "#0000FF", 6: "#00FF00", 7: "#FFFF00", 8: "#00B0F0", 9: "#00FFFF" },
-      8: { 1: "#FF9900", 2: "#9900FF", 3: "#FF0000", 4: "#0000FF", 5: "#00FF00", 6: "#FFFF00", 7: "#00B0F0", 8: "#00FFFF", 9: "#FF66FF" },
-      9: { 1: "#9900FF", 2: "#FF0000", 3: "#0000FF", 4: "#00FF00", 5: "#FFFF00", 6: "#00B0F0", 7: "#00FFFF", 8: "#FF66FF", 9: "#FF9900" }
-    };
+    // Einheitliche Palette (wie Rund & Wabe)
+    this.baseColors = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
     this.charMap = {
       'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,
       'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
     };
-    
+    this.qMatrix = [];
     this.uiElements = [];
     this.sliders = [];
     this.colorIndicators = [];
@@ -46,15 +35,21 @@ class MandalaQuadrat {
     this.inputField = createInput('15011987');
     createUIGroup("EINGABE", this.inputField, "75px", "140px");
 
+    // NEU: Code Anzeige (einheitlich mit den anderen Klassen)
+    this.codeDisplay = createSpan("00000000");
+    let cGroup = createUIGroup("CODE", null, "70px", "100px");
+    this.codeDisplay.parent(cGroup).style('font-family', 'monospace').style('font-size', isMobile ? '10px' : '14px').style('color', '#ecf0f1').style('margin-top', '5px');
+
     this.dirSelect = createSelect();
     this.dirSelect.option('Außen');
     this.dirSelect.option('Innen');
     createUIGroup("RICHTUNG", this.dirSelect, "65px", "100px");
 
+    // Slider Panel
     this.sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
     for (let i = 1; i <= 9; i++) {
-      let sRow = createDiv("").parent(this.sliderPanel).style('display','flex').style('align-items','center').style('gap','4px');
-      this.colorIndicators[i] = createDiv("").parent(sRow).style('width', '8px').style('height', '8px').style('border-radius', '50%');
+      let sRow = createDiv("").parent(this.sliderPanel).style('display','flex').style('align-items','center').style('gap','8px').style('margin-bottom', '4px');
+      this.colorIndicators[i] = createDiv("").parent(sRow).style('width', isMobile ? '10px' : '12px').style('height', isMobile ? '10px' : '12px').style('border-radius', '50%').style('border', '1px solid rgba(255,255,255,0.2)');
       this.sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
     }
 
@@ -66,39 +61,49 @@ class MandalaQuadrat {
     let isMobile = windowWidth < 600;
     if (isMobile) {
       this.sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
-        .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
+        .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px');
       for (let i = 1; i <= 9; i++) if(this.sliders[i]) this.sliders[i].style('width', '75px');
     } else {
       this.sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
         .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
-      for (let i = 1; i <= 9; i++) if(this.sliders[i]) this.sliders[i].style('width', '80px');
+      for (let i = 1; i <= 9; i++) if(this.sliders[i]) this.sliders[i].style('width', '100px');
     }
+  }
+
+  // Hilfsfunktion für die rotierende Farbmatrix
+  getColorMatrix(seed) {
+    let s = (seed === 0 || !seed) ? 1 : seed;
+    let shift = (s - 1) % 9;
+    return this.baseColors.slice(shift).concat(this.baseColors.slice(0, shift));
   }
 
   render() {
     let isMobile = windowWidth < 600;
     let baseCode = (this.modeSelect.value().includes('Geburtstag')) ? this.getCodeFromDate() : this.getCodeFromText();
-    let startDigit = baseCode[0] || 1;
+    
+    // Code Anzeige aktualisieren
+    if (this.codeDisplay) this.codeDisplay.html(baseCode.join(""));
+    
+    let seed = baseCode[0] || 1;
+    let currentColors = this.getColorMatrix(seed); // Rotiert basierend auf Code
     let drawCode = (this.dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
 
+    // Farbpunkte am Slider rotieren lassen
     for (let i = 1; i <= 9; i++) {
-      let hex = (this.colorMatrix[startDigit] && this.colorMatrix[startDigit][i]) ? this.colorMatrix[startDigit][i] : this.mapZ[i];
-      if(this.colorIndicators[i]) this.colorIndicators[i].style('background-color', hex);
+      if(this.colorIndicators[i]) this.colorIndicators[i].style('background-color', currentColors[i-1]);
     }
 
     push();
     let scaleFactor = (min(width, height) / 850) * (isMobile ? 0.80 : 0.95);
     let centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
-    let centerX = width / 2;
-    translate(centerX, centerY);
+    translate(width / 2, centerY);
     scale(scaleFactor);
 
     this.calcQuadratMatrix(drawCode);
-    this.drawQuadrat(startDigit);
+    this.drawQuadrat(currentColors); // Matrix übergeben
     pop();
   }
 
-  // --- ORIGINALE RECHENLOGIK UNVERÄNDERT ---
   ex(a, b) { 
     let s = (a || 0) + (b || 0); 
     return (s === 0) ? 0 : (s % 9 === 0 ? 9 : s % 9); 
@@ -129,7 +134,7 @@ class MandalaQuadrat {
     }
   }
 
-  drawQuadrat(startDigit, target) {
+  drawQuadrat(colors, target) {
     let ctx = target || window;
     let ts = 16;
     ctx.stroke(0, 35);
@@ -137,17 +142,19 @@ class MandalaQuadrat {
     for (let r = 0; r < 20; r++) {
       for (let c = 0; c < 20; c++) {
         let val = this.qMatrix[r][c];
-        if (val !== 0) {
-          let hex = (this.colorMatrix[startDigit] && this.colorMatrix[startDigit][val]) ? this.colorMatrix[startDigit][val] : this.mapZ[val];
+        if (val >= 1 && val <= 9) {
+          let hex = colors[val - 1];
           let col = color(hex);
           let sVal = this.sliders[val] ? this.sliders[val].value() : 85;
           ctx.fill(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
           
-          // Originale Spiegelungs-Rects
           ctx.rect(c * ts, -(r + 1) * ts, ts, ts); 
           ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts); 
           ctx.rect(c * ts, r * ts, ts, ts); 
-          ctx.rect(-(c + 1) * ts, r * ts, ts, ts);            
+          ctx.rect(-(c + 1) * ts, r * ts, ts, ts);             
+        } else if (val === 0) {
+          ctx.fill(255);
+          ctx.rect(c * ts, -(r + 1) * ts, ts, ts);
         }
       }
     }
@@ -177,36 +184,6 @@ class MandalaQuadrat {
     return currentRow;
   }
 
-  exportHighRes(logoImg, isAdmin) {
-    let exportW = 2480; let exportH = 3508;
-    let pg = createGraphics(exportW, exportH);
-    pg.colorMode(HSB, 360, 100, 100); pg.background(255);
-    let baseCode = (this.modeSelect.value().includes('Geburtstag')) ? this.getCodeFromDate() : this.getCodeFromText();
-    let startDigit = baseCode[0] || 1;
-    let drawCode = (this.dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
-    
-    pg.push(); 
-    pg.translate(exportW / 2, exportH * 0.40); 
-    pg.scale(3.8); 
-    this.calcQuadratMatrix(drawCode); 
-    this.drawQuadrat(startDigit, pg); 
-    pg.pop();
-
-    if (logoImg && !isAdmin) {
-      pg.resetMatrix(); pg.tint(255, 0.45); 
-      let wWidth = 380; let wHeight = (logoImg.height / logoImg.width) * wWidth;
-      for (let x = -100; x < exportW + 400; x += 500) {
-        for (let y = -100; y < exportH + 400; y += 500) pg.image(logoImg, x, y, wWidth, wHeight);
-      }
-      pg.noTint();
-    }
-    if (logoImg) {
-      let lW = 500; let lH = (logoImg.height / logoImg.width) * lW;
-      pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
-    }
-    save(pg, 'Milz&More_Quadrat.png');
-  }
-
-  hide() { this.uiElements.forEach(e => e.hide()); this.sliderPanel.hide(); }
-  show() { this.uiElements.forEach(e => e.show()); this.sliderPanel.show(); }
+  hide() { this.uiElements.forEach(e => e.style('display', 'none')); this.sliderPanel.style('display', 'none'); }
+  show() { this.uiElements.forEach(e => e.style('display', 'flex')); this.sliderPanel.style('display', 'flex'); if (windowWidth < 600) this.sliderPanel.style('display', 'grid'); }
 }

@@ -182,24 +182,6 @@ class MandalaRund {
     return this.baseColors.slice(shift).concat(this.baseColors.slice(0, shift));
   }
 
-  exportHighRes(logoImg, isAdmin) {
-    let exportW = 2480; let exportH = 3508; 
-    let pg = createGraphics(exportW, exportH);
-    pg.colorMode(HSB, 360, 100, 100); pg.background(255);
-    let sector = this.buildSector();
-    let currentColors = this.getColorMatrix(this.colorSeed);
-    let sc = int(this.sektS.value());
-    let angle = TWO_PI / sc;
-    pg.push(); pg.translate(exportW / 2, exportH * 0.40); pg.scale(3.2); 
-    for (let i = 0; i < sc; i++) { pg.push(); pg.rotate(i * angle); this.drawSector(sector, currentColors, pg); pg.pop(); }
-    pg.pop();
-    if (logoImg) {
-      let lW = 500; let lH = (logoImg.height / logoImg.width) * lW;
-      pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
-    }
-    save(pg, 'Milz&More_Rund.png');
-  }
-
   hide() { this.uiElements.forEach(e => e.hide()); this.sliderPanel.hide(); }
   show() { this.uiElements.forEach(e => e.show()); this.sliderPanel.show(); }
 }

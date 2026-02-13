@@ -3,38 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Milz & More Mandala Designer</title>
+  <title>Milz & More Mandala Generator</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
   
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background-color: #ffffff;
-      font-family: 'Inter', sans-serif;
-    }
-
-    /* Verhindert, dass die p5-Container sich gegenseitig verschieben */
-    div {
-      box-sizing: border-box;
-    }
-
-    /* Standard-Styling für die Dropdowns, damit sie nicht im Bild hängen */
-    select, input {
-      outline: none;
-    }
+    body { margin: 0; padding: 0; overflow: hidden; background-color: #f0f0f0; }
+    canvas { display: block; }
   </style>
 </head>
 <body>
 
-<script src="sketch.js?v=999"></script>
-<script src="mandala_wabe.js?v=999"></script>
-<script src="mandala_rund.js?v=999"></script>
-<script src="mandala_quadrat.js?v=999"></script>
+  <script src="mandala_wabe.js"></script>
+  <script src="mandala_rund.js"></script>
+  <script src="mandala_quadrat.js"></script>
   
+  <script src="sketch.js"></script>
+
 </body>
 </html>
-
-

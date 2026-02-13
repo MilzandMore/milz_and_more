@@ -1,5 +1,5 @@
 // ==========================================
-// SKETCH.JS - PROFESSIONELLE HAUPTSTEUERUNG
+// SKETCH.JS - FINALE HAUPTSTEUERUNG
 // ==========================================
 
 let logoImg;
@@ -10,20 +10,17 @@ let topBar;
 let uiContainer;
 
 function preload() {
-  // Logo laden mit Fallback
-  try {
-    logoImg = loadImage('logo.png');
-  } catch (e) {
-    console.log("Logo konnte nicht geladen werden.");
-  }
+  // Logo laden
+  logoImg = loadImage('logo.png');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
 
-  // 1. Die einheitliche TopBar erstellen
   let isMobile = windowWidth < 600;
+
+  // 1. Die einheitliche TopBar erstellen (Dunkler Balken oben)
   topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
     .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
     .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
@@ -38,36 +35,33 @@ function setup() {
   mainTypeSelect.option('Rund');
   mainTypeSelect.option('Wabe');
   
-  // Design des Form-Umschalters
   mainTypeSelect.style('background', '#e74c3c').style('color', '#fff').style('border', 'none')
     .style('border-radius', '4px').style('padding', isMobile ? '3px 5px' : '6px 8px')
     .style('font-weight', 'bold').style('cursor', 'pointer').style('height', isMobile ? '22px' : '32px');
 
-  // 3. Container für die spezifischen Einstellungen der Mandalas
+  // 3. Container für die spezifischen Einstellungen (hier klinken sich die Klassen ein)
   uiContainer = createDiv("").parent(topBar).style('display', 'flex').style('gap', isMobile ? '8px' : '20px').style('align-items', 'center');
 
-  // 4. Mandalas initialisieren
+  // 4. Mandalas als Objekte initialisieren
   mandalas['Quadrat'] = new MandalaQuadrat();
   mandalas['Rund'] = new MandalaRund();
   mandalas['Wabe'] = new MandalaWabe();
 
-  // Jedes Mandala baut seine UI in den uiContainer
+  // Jedes Mandala baut seine eigene UI in den uiContainer
   for (let key in mandalas) {
-    mandalas[key].init(uiContainer);
-    mandalas[key].hide(); 
+    mandalas[key].init(uiContainer); 
+    mandalas[key].hide(); // Am Anfang alle verstecken
   }
 
   mainTypeSelect.changed(switchMandala);
   
-  // Initialer Start
+  // Start mit Quadrat
   switchMandala();
 }
 
 function switchMandala() {
-  // Altes Mandala verstecken
   if (currentMandala) currentMandala.hide();
   
-  // Neues Mandala aktivieren
   let selected = mainTypeSelect.value();
   currentMandala = mandalas[selected];
   
@@ -84,12 +78,8 @@ function draw() {
     currentMandala.render();
   }
   
-  // Logo immer oben aufzeichnen
-  renderLogo();
-}
-
-function renderLogo() {
-  if (logoImg && logoImg.width > 0) {
+  // Logo einblenden
+  if (logoImg) {
     push();
     resetMatrix();
     let isMobile = windowWidth < 600;

@@ -1,71 +1,59 @@
-let currentApp = 'Wabe';
-let menuSelect;
+var currentApp = 'Wabe'; // Start-Modus
+var appSelect, logoImg, isAdmin = false;
 
 function preload() {
-    // Zentrales Laden des Logos
-    logoImg = loadImage('logo.png');
+  logoImg = loadImage('logo.png');
 }
 
 function setup() {
-  // Initialisiere alle Module (die Funktionen aus den anderen Dateien)
+  createCanvas(windowWidth, windowHeight);
+  colorMode(HSB, 360, 100, 100);
+  
+  var params = getURLParams();
+  if (params.access === 'milz_secret') isAdmin = true;
+
+  // Zentrales Auswahlmenü für die Mandala-Art
+  appSelect = createSelect().style('position', 'fixed').style('top', '10px').style('left', '10px').style('z-index', '300');
+  appSelect.option('Wabe');
+  appSelect.option('Rund');
+  appSelect.option('Quadrat');
+  appSelect.changed(switchApp);
+
+  // Initialisiere die UI der drei Unter-Apps
   setupWabe();
   setupRund();
   setupQuadrat();
+
+  switchApp(); // Setze initialen Status
+}
+
+function switchApp() {
+  currentApp = appSelect.value();
   
-  // Standardmäßig alle verstecken außer einem
-  // ... (deine Switch-Logik)
-}
+  // Alle UIs verstecken
+  topBarWabe.hide(); sliderPanelWabe.hide();
+  topBarRund.hide(); sliderPanelRund.hide();
+  topBarQuadrat.hide(); sliderPanelQuadrat.hide();
 
-function createMainMenu() {
-    let navContainer = createDiv("").style('position', 'fixed').style('top', '15px').style('left', '10px').style('z-index', '1000');
-    
-    menuSelect = createSelect().parent(navContainer);
-    menuSelect.option('Wabe');
-    menuSelect.option('Rund');
-    menuSelect.option('Quadrat');
-    
-    // Style das Menü professionell
-    menuSelect.style('padding', '5px 10px').style('border-radius', '4px').style('background', '#ecf0f1').style('font-weight', 'bold');
-    
-    menuSelect.changed(() => {
-        switchApp(menuSelect.value());
-    });
-}
-
-function switchApp(appName) {
-    currentApp = appName;
-
-    // Alle Topbars und Slider-Panels verstecken
-    // (Hinweis: Stelle sicher, dass du in den 3 Dateien die Variablen topBar und sliderPanel 
-    // ebenfalls eindeutig benannt hast, z.B. topBarWabe, sliderPanelWabe)
-    
-    [topBarWabe, sliderPanelWabe].forEach(e => e.hide());
-    [topBarRund, sliderPanelRund].forEach(e => e.hide());
-    [topBarQuadrat, sliderPanelQuadrat].forEach(e => e.hide());
-
-    // Nur die aktive App zeigen
-    if (appName === 'Wabe') { topBarWabe.show(); sliderPanelWabe.show(); }
-    if (appName === 'Rund') { topBarRund.show(); sliderPanelRund.show(); }
-    if (appName === 'Quadrat') { topBarQuadrat.show(); sliderPanelQuadrat.show(); }
-    
-    redraw();
+  // Nur die aktive UI zeigen
+  if (currentApp === 'Wabe') { topBarWabe.show(); sliderPanelWabe.show(); }
+  if (currentApp === 'Rund') { topBarRund.show(); sliderPanelRund.show(); }
+  if (currentApp === 'Quadrat') { topBarQuadrat.show(); sliderPanelQuadrat.show(); }
+  
+  redraw();
 }
 
 function draw() {
-    background(255);
-    
-    // Führe nur die draw-Logik der gewählten App aus
-    if (currentApp === 'Wabe') drawWabe();
-    else if (currentApp === 'Rund') drawRund();
-    else if (currentApp === 'Quadrat') drawQuadrat();
+  background(255);
+  // Rufe nur die Zeichenfunktion der gewählten App auf
+  if (currentApp === 'Wabe') drawWabe();
+  if (currentApp === 'Rund') drawRund();
+  if (currentApp === 'Quadrat') drawQuadrat();
 }
 
 function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
-    // Alle Layouts anpassen
-    updateLayoutWabe();
-    updateLayoutRund();
-    updateLayoutQuadrat();
-    redraw();
+  resizeCanvas(windowWidth, windowHeight);
+  updateLayoutWabe();
+  updateLayoutRund();
+  updateLayoutQuadrat();
 }
-

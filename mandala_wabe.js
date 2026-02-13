@@ -18,6 +18,18 @@ var charMap = {
 
 var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
+// Hilfsfunktion für die Matrix-Logik, die laut Screenshot fehlt
+function calcWabeMatrixLogic(path) {
+    var m = Array(17).fill().map(() => Array(17).fill(0));
+    for (var i = 0; i < 16; i++) m[16][i] = path[i % path.length];
+    for (var r = 15; r >= 1; r--) {
+        for (var i = 0; i < r; i++) {
+            m[r][i] = ex(m[r+1][i], m[r+1][i+1]);
+        }
+    }
+    return m;
+}
+
 var inputD, dirS, modeS, codeDisplay, sliders = [], colorIndicators = [], sliderPanel, topBar;
 var logoImg;
 var isAdmin = false;
@@ -89,7 +101,7 @@ function updateLayout() {
     if (isMobile) {
         sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
             .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
-        for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px'); // [cite: 2026-02-11]
+        for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px');
     } else {
         sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
             .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
@@ -141,11 +153,12 @@ function renderWabeKorrekt(code, cKey, target) {
     var sz = 16.2;
     ctx.stroke(0, 35);
     var path = (dirS.value().includes('innen')) ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
+    
+    // Hier nutzen wir nun die Logik-Funktion, damit der Error weggeht
+    var m = calcWabeMatrixLogic(path);
+
     for (var s = 0; s < 6; s++) {
         ctx.push(); ctx.rotate(s * PI / 3);
-        var m = Array(17).fill().map(() => Array(17).fill(0));
-        for (var i = 0; i < 16; i++) m[16][i] = path[i % path.length];
-        for (var r = 15; r >= 1; r--) for (var i = 0; i < r; i++) m[r][i] = ex(m[r+1][i], m[r+1][i+1]);
         for (var r = 1; r <= 16; r++) {
             for (var i = 0; i < r; i++) {
                 var val = m[r][i];

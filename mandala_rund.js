@@ -26,7 +26,6 @@ function setup() {
 
   var isMobile = windowWidth < 600;
 
-  // EINHEITLICHE TOPBAR (wie Quadrat/Wabe)
   var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
     .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
     .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
@@ -85,7 +84,7 @@ function updateLayout() {
   if (isMobile) {
     sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
       .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
-    for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px');
+    for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px'); // [cite: 2026-02-11]
   } else {
     sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
       .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
@@ -107,7 +106,6 @@ function draw() {
   }
 
   push();
-  // ZENTRIERUNG & GRÖSSE (Faktor von 0.85 auf 0.95 erhöht)
   var centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
   var centerX = width / 2; 
   translate(centerX, centerY);

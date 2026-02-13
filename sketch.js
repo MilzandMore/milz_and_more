@@ -1,5 +1,5 @@
 // ==========================================
-// SKETCH.JS - FINALE HAUPTSTEUERUNG
+// SKETCH.JS - FINALE ZENTRALSTEUERUNG
 // ==========================================
 
 let logoImg;
@@ -8,6 +8,7 @@ let mainTypeSelect;
 let mandalas = {};
 let topBar;
 let uiContainer;
+let isAdmin = false;
 
 function preload() {
   // Logo laden
@@ -17,10 +18,14 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
+  
+  // URL Parameter prüfen (für Admin-Modus ohne Wasserzeichen)
+  let params = getURLParams();
+  if (params.access === 'milz_secret') isAdmin = true;
 
   let isMobile = windowWidth < 600;
 
-  // 1. Die einheitliche TopBar erstellen (Dunkler Balken oben)
+  // 1. Die einheitliche TopBar erstellen
   topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
     .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
     .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
@@ -42,7 +47,19 @@ function setup() {
   // 3. Container für die spezifischen Einstellungen (hier klinken sich die Klassen ein)
   uiContainer = createDiv("").parent(topBar).style('display', 'flex').style('gap', isMobile ? '8px' : '20px').style('align-items', 'center');
 
-  // 4. Mandalas als Objekte initialisieren
+  // 4. Download Button (Universal für alle Mandalas)
+  let saveBtn = createButton('DOWNLOAD').parent(topBar)
+    .style('margin-left', 'auto').style('background', '#ffffff').style('color', '#2c3e50')
+    .style('border', 'none').style('font-weight', 'bold').style('border-radius', '4px')
+    .style('padding', isMobile ? '6px 8px' : '10px 16px').style('font-size', isMobile ? '9px' : '12px').style('cursor', 'pointer');
+  saveBtn.mousePressed(() => {
+    if (currentMandala && currentMandala.exportHighRes) {
+      currentMandala.exportHighRes(logoImg, isAdmin);
+    }
+  });
+
+  // 5. Mandalas als Objekte initialisieren
+  // WICHTIG: Die Klassen müssen in den anderen .js Dateien definiert sein!
   mandalas['Quadrat'] = new MandalaQuadrat();
   mandalas['Rund'] = new MandalaRund();
   mandalas['Wabe'] = new MandalaWabe();
@@ -50,18 +67,20 @@ function setup() {
   // Jedes Mandala baut seine eigene UI in den uiContainer
   for (let key in mandalas) {
     mandalas[key].init(uiContainer); 
-    mandalas[key].hide(); // Am Anfang alle verstecken
+    mandalas[key].hide(); 
   }
 
   mainTypeSelect.changed(switchMandala);
   
-  // Start mit Quadrat
+  // Start-Initialisierung
   switchMandala();
 }
 
 function switchMandala() {
+  // Altes Mandala verstecken
   if (currentMandala) currentMandala.hide();
   
+  // Neues Mandala aktivieren
   let selected = mainTypeSelect.value();
   currentMandala = mandalas[selected];
   
@@ -79,7 +98,7 @@ function draw() {
   }
   
   // Logo einblenden
-  if (logoImg) {
+  if (logoImg && logoImg.width > 0) {
     push();
     resetMatrix();
     let isMobile = windowWidth < 600;
@@ -93,6 +112,9 @@ function draw() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  if (currentMandala) currentMandala.updateLayout();
+  // Alle Mandalas anweisen, ihr Layout (z.B. Sliderbreiten) zu prüfen
+  for (let key in mandalas) {
+    mandalas[key].updateLayout();
+  }
   redraw();
 }

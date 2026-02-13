@@ -83,7 +83,6 @@ function updateLayoutWabe() {
     sliderPanelWabe.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
       .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
     
-    // Breite der mobilen Slider auf 75px [cite: 2026-02-11]
     for (var i = 1; i <= 9; i++) {
       if(slidersWabe[i]) slidersWabe[i].style('width', '75px');
     }

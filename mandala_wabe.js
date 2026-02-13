@@ -36,7 +36,7 @@ function setup() {
 
     var isMobile = windowWidth < 600;
 
-    // TOPBAR (DEIN ORIGINAL)
+    // EINHEITLICHE TOPBAR
     topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
         .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
         .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
@@ -90,7 +90,7 @@ function updateLayout() {
     if (isMobile) {
         sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
             .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
-        for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px'); // FIX: 75px
+        for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px');
     } else {
         sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
             .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
@@ -137,7 +137,7 @@ function draw() {
 
 function renderWabeKorrekt(code, cKey, target) {
     var ctx = target || window; 
-    var sz = 16.2; // Dein stabiler Originalwert
+    var sz = 16.2;
     ctx.stroke(0, 35);
     var path = (dirS.value().includes('innen')) ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
     for (var s = 0; s < 6; s++) {
@@ -152,7 +152,9 @@ function renderWabeKorrekt(code, cKey, target) {
                     var col = color(colorMatrix[cKey][val - 1]);
                     ctx.fill(hue(col), map(sliders[val].value(), 20, 100, 15, saturation(col)), map(sliders[val].value(), 20, 100, 98, brightness(col)));
                 } else ctx.fill(255);
-                var x = (i - (r - 1) / 2) * sz * sqrt(3), y = -(r - 1) * sz * 1.5;
+                // EXAKTE ORIGINAL-BERECHNUNG (GEHEILT)
+                var x = (i - (r - 1) / 2) * sz * sqrt(3);
+                var y = -(r - 1) * sz * 1.5;
                 ctx.beginShape(); for (var a = PI / 6; a < TWO_PI; a += PI / 3) ctx.vertex(x + cos(a) * sz, y + sin(a) * sz); ctx.endShape(CLOSE);
             }
         }

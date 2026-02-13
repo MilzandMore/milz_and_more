@@ -2,11 +2,9 @@
 let mainSelect;
 let currentDrawFunction = null;
 let logoImg;
-let isAdmin = false;
 
 // Globale UI-Referenzen
-let topBarWabe, sliderPanelWabe, topBarRund, sliderPanelRund, topBarQuadrat, sliderPanelQuadrat;
-let slidersWabe = [], slidersRund = [], slidersQuadrat = [];
+let topBarApp, sliderPanelApp;
 
 function preload() {
   logoImg = loadImage('logo.png');
@@ -16,22 +14,21 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
   
-  // Haupt-Umschalter jetzt ZENTRIERT oben, um nichts zu verdecken
-  mainSelect = createSelect();
-  let selectW = 100;
-  mainSelect.position(windowWidth/2 - selectW/2, 10);
+  // EIGENE LEISTE FÜR FORM-WAHL (Ganz oben)
+  let nav = createDiv("").style('position','fixed').style('top','0').style('left','0').style('width','100%')
+    .style('height','40px').style('background','#1a252f').style('display','flex').style('align-items','center')
+    .style('padding','0 10px').style('z-index','5000');
+  
+  createSpan("FORM: ").parent(nav).style('color','#fff').style('font-size','12px').style('margin-right','10px').style('font-weight','bold');
+  
+  mainSelect = createSelect().parent(nav);
   mainSelect.option('Wabe');
   mainSelect.option('Rund');
   mainSelect.option('Quadrat');
   mainSelect.selected('Wabe');
   mainSelect.changed(changeApp);
   
-  mainSelect.style('z-index', '3000');
-  mainSelect.style('padding', '6px');
-  mainSelect.style('border-radius', '4px');
-  mainSelect.style('background', '#ffffff');
-  mainSelect.style('border', '2px solid #2c3e50');
-  mainSelect.style('font-weight', 'bold');
+  mainSelect.style('background','#fff').style('border','none').style('border-radius','3px').style('padding','3px 10px');
 
   changeApp();
 }
@@ -45,10 +42,9 @@ function draw() {
 
 function changeApp() {
   removeAppUI();
-  // Neupositionierung bei App-Wechsel (falls Fenstergröße geändert)
-  mainSelect.position(windowWidth/2 - 50, 10);
-  
   let mode = mainSelect.value();
+  
+  // Jedes Mandala bekommt jetzt eine einheitliche Positionierung
   if (mode === 'Wabe' && typeof setupWabe === "function") {
     setupWabe(); currentDrawFunction = drawWabe;
   } else if (mode === 'Rund' && typeof setupRund === "function") {
@@ -61,13 +57,9 @@ function changeApp() {
 function removeAppUI() {
   let elements = selectAll('.app-ui');
   for (let el of elements) { el.remove(); }
-  topBarWabe = null; sliderPanelWabe = null;
-  topBarRund = null; sliderPanelRund = null;
-  topBarQuadrat = null; sliderPanelQuadrat = null;
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  mainSelect.position(windowWidth/2 - 50, 10);
   changeApp();
 }

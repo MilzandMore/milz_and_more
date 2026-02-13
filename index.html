@@ -1,22 +1,35 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="de">
 <head>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <meta charset="utf-8">
+    <title>Mandala Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    
+    <script src="mandala_rund.js"></script>
+    <script src="mandala_wabe.js"></script>
+    <script src="mandala_quadrat.js"></script>
+    
+    <script src="sketch.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-
-<script src="mandala_rund.js"></script>
-<script src="mandala_wabe.js"></script>
-<script src="mandala_quadrat.js"></script>
-
-<script src="sketch.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: #f0f0f0; }
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #f0f2f5; font-family: sans-serif; }
+        /* Das ist der wichtigste Teil für den 'appendChild' Fehler: */
+        #ui-bar { 
+            position: fixed; top: 0; left: 0; width: 100%; 
+            height: 60px; background: #2c3e50; display: flex; 
+            align-items: center; padding: 0 20px; gap: 15px; z-index: 100;
+        }
         canvas { display: block; }
     </style>
 </head>
 <body>
+    <div id="ui-bar">
+        <div style="color: white; font-weight: bold; margin-right: 10px;">FORM</div>
+        <select id="form-select" style="background: #34495e; color: white; border: none; padding: 5px; border-radius: 4px;">
+            <option value="Rund">Rund</option>
+            <option value="Wabe">Wabe</option>
+            <option value="Quadrat">Quadrat</option>
+        </select>
+    </div>
 </body>
 </html>
-
-

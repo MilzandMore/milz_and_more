@@ -1,11 +1,13 @@
-// 1. GLOBALE VARIABLEN - QUADRAT
-var inputFieldQuadrat, modeSelectQuadrat, dirSelectQuadrat, slidersQuadrat = [], colorIndicatorsQuadrat = [], sliderPanelQuadrat, topBarQuadrat;
-var qMatrixQuadrat = [];
-var codeDisplayQuadrat; 
+// 1. GLOBALE VARIABLEN
+var inputField, modeSelect, dirSelect, sliders = [], colorIndicators = [], sliderPanel;
+var qMatrix = [];
+var logoImg;
+var codeDisplay; 
+var isAdmin = false;
 
-const mapZQuadrat = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
+const mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
 
-var colorMatrixQuadrat = {
+var colorMatrix = {
   1: { 1: "#FF0000", 2: "#0000FF", 3: "#00FF00", 4: "#FFFF00", 5: "#00B0F0", 6: "#00FFFF", 7: "#FF66FF", 8: "#FF9900", 9: "#9900FF" },
   2: { 1: "#0000FF", 2: "#00FF00", 3: "#FFFF00", 4: "#00B0F0", 5: "#00FFFF", 6: "#FF66FF", 7: "#FF9900", 8: "#9900FF", 9: "#FF0000" },
   3: { 1: "#00FF00", 2: "#FFFF00", 3: "#00B0F0", 4: "#00FFFF", 5: "#FF66FF", 6: "#FF9900", 7: "#9900FF", 8: "#FF0000", 9: "#0000FF" },
@@ -17,22 +19,28 @@ var colorMatrixQuadrat = {
   9: { 1: "#9900FF", 2: "#FF0000", 3: "#0000FF", 4: "#00FF00", 5: "#FFFF00", 6: "#00B0F0", 7: "#00FFFF", 8: "#FF66FF", 9: "#FF9900" }
 };
 
-var charMapQuadrat = {
+var charMap = {
   'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,
   'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
 };
 
-function setupQuadrat() {
+function preload() { logoImg = loadImage('logo.png'); }
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  colorMode(HSB, 360, 100, 100);
+  var params = getURLParams();
+  if (params.access === 'milz_secret') isAdmin = true;
+
   var isMobile = windowWidth < 600;
 
-  // TOPBAR QUADRAT
-  topBarQuadrat = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
+  var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
     .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
     .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
     .style('align-items', 'center').style('box-sizing', 'border-box').style('height', isMobile ? '55px' : '75px');
 
-  function createUIGroupQuadrat(labelTxt, element, wMobile, wDesktop) {
-    var group = createDiv("").parent(topBarQuadrat).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
+  function createUIGroup(labelTxt, element, wMobile, wDesktop) {
+    var group = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
     createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#bdc3c7').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
     if (element) {
       element.parent(group).style('width', isMobile ? wMobile : wDesktop)
@@ -43,71 +51,72 @@ function setupQuadrat() {
     return group;
   }
 
-  modeSelectQuadrat = createSelect(); modeSelectQuadrat.option('Geburtstag'); modeSelectQuadrat.option('Text');
-  createUIGroupQuadrat("MODUS", modeSelectQuadrat, "80px", "110px");
+  modeSelect = createSelect(); modeSelect.option('Geburtstag'); modeSelect.option('Text');
+  createUIGroup("MODUS", modeSelect, "80px", "110px");
   
-  inputFieldQuadrat = createInput('15011987');
-  createUIGroupQuadrat("EINGABE", inputFieldQuadrat, "75px", "140px");
+  inputField = createInput('15011987');
+  createUIGroup("EINGABE", inputField, "75px", "140px");
   
-  var codeGroup = createUIGroupQuadrat("CODE", null, "auto", "auto");
-  codeDisplayQuadrat = createSpan("").parent(codeGroup).style('font-size', isMobile ? '11px' : '14px').style('color', '#ffffff').style('font-weight', '600').style('letter-spacing', '1px');
+  var codeGroup = createUIGroup("CODE", null, "auto", "auto");
+  codeDisplay = createSpan("").parent(codeGroup).style('font-size', isMobile ? '11px' : '14px').style('color', '#ffffff').style('font-weight', '600').style('letter-spacing', '1px');
 
-  dirSelectQuadrat = createSelect(); dirSelectQuadrat.option('Außen'); dirSelectQuadrat.option('Innen');
-  createUIGroupQuadrat("RICHTUNG", dirSelectQuadrat, "65px", "100px");
+  dirSelect = createSelect(); dirSelect.option('Außen'); dirSelect.option('Innen');
+  createUIGroup("RICHTUNG", dirSelect, "65px", "100px");
 
-  var saveBtn = createButton('DOWNLOAD').parent(topBarQuadrat)
+  var saveBtn = createButton('DOWNLOAD').parent(topBar)
    .style('margin-left', 'auto').style('background', '#ffffff').style('color', '#2c3e50')
    .style('border', 'none').style('font-weight', 'bold').style('border-radius', '4px')
    .style('padding', isMobile ? '6px 8px' : '10px 16px').style('font-size', isMobile ? '9px' : '12px').style('cursor', 'pointer');
-  saveBtn.mousePressed(exportHighResQuadrat);
+  saveBtn.mousePressed(exportHighRes);
 
-  sliderPanelQuadrat = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
+  sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
   for (var i = 1; i <= 9; i++) {
-    var sRow = createDiv("").parent(sliderPanelQuadrat).style('display','flex').style('align-items','center').style('gap','4px');
-    colorIndicatorsQuadrat[i] = createDiv("").parent(sRow).style('width', '8px').style('height', '8px').style('border-radius', '50%');
-    slidersQuadrat[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
+    var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','4px');
+    colorIndicators[i] = createDiv("").parent(sRow).style('width', '8px').style('height', '8px').style('border-radius', '50%');
+    sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
   }
 
-  updateLayoutQuadrat();
-  [modeSelectQuadrat, dirSelectQuadrat, inputFieldQuadrat].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
+  updateLayout();
+  [modeSelect, dirSelect, inputField].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
 }
 
-function updateLayoutQuadrat() {
+function updateLayout() {
   var isMobile = windowWidth < 600;
   if (isMobile) {
-    sliderPanelQuadrat.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
+    sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
       .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
-    for (var i = 1; i <= 9; i++) if(slidersQuadrat[i]) slidersQuadrat[i].style('width', '75px');
+    for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px'); // [cite: 2026-02-11]
   } else {
-    sliderPanelQuadrat.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
+    sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
       .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
-    for (var i = 1; i <= 9; i++) if(slidersQuadrat[i]) slidersQuadrat[i].style('width', '80px');
+    for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '80px');
   }
 }
 
-function drawQuadrat() {
+function draw() {
+  background(255);
   var isMobile = windowWidth < 600;
-  var baseCode = (modeSelectQuadrat.value().includes('Geburtstag')) ? getCodeFromDateQuadrat() : getCodeFromTextQuadrat();
+  var baseCode = (modeSelect.value().includes('Geburtstag')) ? getCodeFromDate() : getCodeFromText();
   var startDigit = baseCode[0] || 1;
-  var drawCode = (dirSelectQuadrat.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
+  var drawCode = (dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
   
-  if(codeDisplayQuadrat) codeDisplayQuadrat.html(baseCode.join(""));
+  if(codeDisplay) codeDisplay.html(baseCode.join(""));
 
   for (var i = 1; i <= 9; i++) {
-    var hex = (colorMatrixQuadrat[startDigit] && colorMatrixQuadrat[startDigit][i]) ? colorMatrixQuadrat[startDigit][i] : mapZQuadrat[i];
-    if(colorIndicatorsQuadrat[i]) colorIndicatorsQuadrat[i].style('background-color', hex);
+    var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][i]) ? colorMatrix[startDigit][i] : mapZ[i];
+    if(colorIndicators[i]) colorIndicators[i].style('background-color', hex);
   }
   
   push();
   var scaleFactor = (min(width, height) / 850) * (isMobile ? 0.80 : 0.95);
   var centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
-  var centerX = width / 2; 
+  var centerX = width / 2;
   
   translate(centerX, centerY);
   scale(scaleFactor);
   
-  calcQuadratMatrixLogic(drawCode); 
-  drawQuadratShape(startDigit);
+  calcQuadratMatrix(drawCode); 
+  drawQuadrat(startDigit);
   pop();
 
   if (logoImg && logoImg.width > 0) {
@@ -120,38 +129,38 @@ function drawQuadrat() {
   }
 }
 
-function drawQuadratShape(startDigit, target) {
+function drawQuadrat(startDigit, target) {
   var ctx = target || window;
   var ts = 16;
   ctx.stroke(0, 35);
   ctx.strokeWeight(0.5);
   for (var r = 0; r < 20; r++) {
     for (var c = 0; c < 20; c++) {
-      var val = qMatrixQuadrat[r][c];
+      var val = qMatrix[r][c];
       if (val !== 0) {
-        var hex = (colorMatrixQuadrat[startDigit] && colorMatrixQuadrat[startDigit][val]) ? colorMatrixQuadrat[startDigit][val] : mapZQuadrat[val];
+        var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val]) ? colorMatrix[startDigit][val] : mapZ[val];
         var col = color(hex);
-        var sVal = slidersQuadrat[val] ? slidersQuadrat[val].value() : 85;
+        var sVal = sliders[val] ? sliders[val].value() : 85;
         ctx.fill(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
         ctx.rect(c * ts, -(r + 1) * ts, ts, ts); ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts); 
-        ctx.rect(c * ts, r * ts, ts, ts); ctx.rect(-(c + 1) * ts, r * ts, ts, ts);                
+        ctx.rect(c * ts, r * ts, ts, ts); ctx.rect(-(c + 1) * ts, r * ts, ts, ts);        
       }
     }
   }
 }
 
-function exportHighResQuadrat() {
+function exportHighRes() {
   var exportW = 2480; var exportH = 3508;
   var pg = createGraphics(exportW, exportH);
   pg.colorMode(HSB, 360, 100, 100); pg.background(255);
-  var baseCode = (modeSelectQuadrat.value().includes('Geburtstag')) ? getCodeFromDateQuadrat() : getCodeFromTextQuadrat();
+  var baseCode = (modeSelect.value().includes('Geburtstag')) ? getCodeFromDate() : getCodeFromText();
   var startDigit = baseCode[0] || 1;
-  var drawCode = (dirSelectQuadrat.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
+  var drawCode = (dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
   pg.push(); 
   pg.translate(exportW / 2, exportH * 0.40); 
   pg.scale(3.8); 
-  calcQuadratMatrixLogic(drawCode); 
-  drawQuadratShape(startDigit, pg); 
+  calcQuadratMatrix(drawCode); 
+  drawQuadrat(startDigit, pg); 
   pg.pop();
 
   if (logoImg && !isAdmin) {
@@ -169,27 +178,25 @@ function exportHighResQuadrat() {
   save(pg, 'Milz&More_Quadrat.png');
 }
 
-function getCodeFromDateQuadrat() { var val = inputFieldQuadrat.value().replace(/[^0-9]/g, ""); var res = val.split('').map(Number); while (res.length < 8) res.push(0); return res.slice(0, 8); }
-
-function getCodeFromTextQuadrat() { 
-  var textStr = inputFieldQuadrat.value().toUpperCase().replace(/[^A-ZÄÖÜß]/g, ""); if (textStr.length === 0) return [1,1,1,1,1,1,1,1];
+function getCodeFromDate() { var val = inputField.value().replace(/[^0-9]/g, ""); var res = val.split('').map(Number); while (res.length < 8) res.push(0); return res.slice(0, 8); }
+function getCodeFromText() { 
+  var textStr = inputField.value().toUpperCase().replace(/[^A-ZÄÖÜß]/g, ""); if (textStr.length === 0) return [1,1,1,1,1,1,1,1];
   var firstRow = [];
-  for (var char of textStr) { if (charMapQuadrat[char]) firstRow.push(charMapQuadrat[char]); }
+  for (var char of textStr) { if (charMap[char]) firstRow.push(charMap[char]); }
   var currentRow = firstRow; while(currentRow.length < 8) currentRow.push(9);
   while (currentRow.length > 8) { var nextRow = []; for (var i = 0; i < currentRow.length - 1; i++) { var sum = currentRow[i] + currentRow[i+1]; nextRow.push(sum % 9 === 0 ? 9 : sum % 9); } currentRow = nextRow; }
   return currentRow;
 }
-
-function exQuadrat(a, b) { var s = (a || 0) + (b || 0); return (s === 0) ? 0 : (s % 9 === 0 ? 9 : s % 9); }
-
-function calcQuadratMatrixLogic(code) {
-  qMatrixQuadrat = Array(20).fill().map(() => Array(20).fill(0));
+function ex(a, b) { var s = (a || 0) + (b || 0); return (s === 0) ? 0 : (s % 9 === 0 ? 9 : s % 9); }
+function calcQuadratMatrix(code) {
+  qMatrix = Array(20).fill().map(() => Array(20).fill(0));
   var d = [code[0], code[1]], m = [code[2], code[3]], j1 = [code[4], code[5]], j2 = [code[6], code[7]];
-  function set2(r, c, v1, v2) { if (r >= 20 || c >= 20) return; qMatrixQuadrat[r][c] = v1; if(c+1 < 20) qMatrixQuadrat[r][c+1] = v2; if(r+1 < 20) qMatrixQuadrat[r+1][c] = v2; if(r+1 < 20 && c+1 < 20) qMatrixQuadrat[r+1][c+1] = v1; }
+  function set2(r, c, v1, v2) { if (r >= 20 || c >= 20) return; qMatrix[r][c] = v1; if(c+1 < 20) qMatrix[r][c+1] = v2; if(r+1 < 20) qMatrix[r+1][c] = v2; if(r+1 < 20 && c+1 < 20) qMatrix[r+1][c+1] = v1; }
   for(var i = 0; i < 8; i+=2) set2(i, i, d[0], d[1]);
   for(var i = 0; i < 6; i+=2) { set2(i, i+2, m[0], m[1]); set2(i+2, i, m[0], m[1]); }
   for(var i = 0; i < 4; i+=2) { set2(i, i+4, j1[0], j1[1]); set2(i+4, i, j1[0], j1[1]); }
   set2(0, 6, j2[0], j2[1]); set2(6, 0, j2[0], j2[1]);
-  for(var r = 0; r < 8; r++) { for(var c = 8; c < 20; c++) qMatrixQuadrat[r][c] = exQuadrat(qMatrixQuadrat[r][c-2], qMatrixQuadrat[r][c-1]); }
-  for(var c = 0; c < 20; c++) { for(var r = 8; r < 20; r++) qMatrixQuadrat[r][c] = exQuadrat(qMatrixQuadrat[r-2][c], qMatrixQuadrat[r-1][c]); }
+  for(var r = 0; r < 8; r++) { for(var c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c-2], qMatrix[r][c-1]); }
+  for(var c = 0; c < 20; c++) { for(var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r-2][c], qMatrix[r-1][c]); }
 }
+function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }

@@ -1,65 +1,94 @@
-// sketch.js - Die Zentralsteuerung
+// ==========================================
+// SKETCH.JS - PROFESSIONELLE HAUPTSTEUERUNG
+// ==========================================
+
 let logoImg;
-let currentMandala;
-let typeSelect;
+let currentMandala = null;
+let mainTypeSelect;
 let mandalas = {};
+let topBar;
+let uiContainer;
 
 function preload() {
-  logoImg = loadImage('logo.png');
+  // Logo laden mit Fallback
+  try {
+    logoImg = loadImage('logo.png');
+  } catch (e) {
+    console.log("Logo konnte nicht geladen werden.");
+  }
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
 
-  // Initialisiere die drei Module
+  // 1. Die einheitliche TopBar erstellen
+  let isMobile = windowWidth < 600;
+  topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
+    .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
+    .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
+    .style('align-items', 'center').style('box-sizing', 'border-box').style('height', isMobile ? '55px' : '75px');
+
+  // 2. Der Form-Umschalter (Ganz links)
+  let typeGroup = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column');
+  createSpan("FORM").parent(typeGroup).style('font-size', isMobile ? '8px' : '10px').style('color', '#bdc3c7').style('font-weight', 'bold').style('margin-bottom', '2px');
+  
+  mainTypeSelect = createSelect().parent(typeGroup);
+  mainTypeSelect.option('Quadrat');
+  mainTypeSelect.option('Rund');
+  mainTypeSelect.option('Wabe');
+  
+  // Design des Form-Umschalters
+  mainTypeSelect.style('background', '#e74c3c').style('color', '#fff').style('border', 'none')
+    .style('border-radius', '4px').style('padding', isMobile ? '3px 5px' : '6px 8px')
+    .style('font-weight', 'bold').style('cursor', 'pointer').style('height', isMobile ? '22px' : '32px');
+
+  // 3. Container für die spezifischen Einstellungen der Mandalas
+  uiContainer = createDiv("").parent(topBar).style('display', 'flex').style('gap', isMobile ? '8px' : '20px').style('align-items', 'center');
+
+  // 4. Mandalas initialisieren
   mandalas['Quadrat'] = new MandalaQuadrat();
   mandalas['Rund'] = new MandalaRund();
   mandalas['Wabe'] = new MandalaWabe();
 
-  // Erstelle den Haupt-Umschalter ganz links in der TopBar
-  // Wir erstellen einen Container für die Modul-UI-Elemente
-  let topBarContainer = createDiv("").id('topBarCustomUI').style('display', 'flex').style('gap', '10px').style('align-items', 'center');
-
-  // FORM-WAHL (Globaler Umschalter)
-  let typeGroup = createDiv("").style('display', 'flex').style('flex-direction', 'column');
-  createSpan("FORM").parent(typeGroup).style('font-size', '10px').style('color', '#bdc3c7').style('font-weight', 'bold');
-  typeSelect = createSelect().parent(typeGroup);
-  typeSelect.option('Quadrat');
-  typeSelect.option('Rund');
-  typeSelect.option('Wabe');
-  typeSelect.style('background', '#e74c3c').style('color', '#fff').style('border', 'none').style('border-radius', '4px').style('padding', '5px');
-  
-  typeSelect.changed(switchMandala);
-
-  // Initialisierung der Module (sie hängen ihre UI in die TopBar)
+  // Jedes Mandala baut seine UI in den uiContainer
   for (let key in mandalas) {
-    mandalas[key].init(topBarContainer);
-    mandalas[key].hide(); // Erstmal alle verstecken
+    mandalas[key].init(uiContainer);
+    mandalas[key].hide(); 
   }
 
-  // Start-Zustand
+  mainTypeSelect.changed(switchMandala);
+  
+  // Initialer Start
   switchMandala();
 }
 
 function switchMandala() {
+  // Altes Mandala verstecken
   if (currentMandala) currentMandala.hide();
-  currentMandala = mandalas[typeSelect.value()];
-  currentMandala.show();
-  updateLayout();
+  
+  // Neues Mandala aktivieren
+  let selected = mainTypeSelect.value();
+  currentMandala = mandalas[selected];
+  
+  if (currentMandala) {
+    currentMandala.show();
+    currentMandala.updateLayout();
+  }
   redraw();
 }
 
 function draw() {
+  background(255);
   if (currentMandala) {
     currentMandala.render();
-    
-    // Globales Logo-Rendering (damit es immer über allen Mandalas liegt)
-    renderGlobalLogo();
   }
+  
+  // Logo immer oben aufzeichnen
+  renderLogo();
 }
 
-function renderGlobalLogo() {
+function renderLogo() {
   if (logoImg && logoImg.width > 0) {
     push();
     resetMatrix();
@@ -74,12 +103,6 @@ function renderGlobalLogo() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  for (let key in mandalas) {
-    mandalas[key].updateLayout();
-  }
-  redraw();
-}
-
-function updateLayout() {
   if (currentMandala) currentMandala.updateLayout();
+  redraw();
 }

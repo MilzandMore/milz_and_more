@@ -9,7 +9,7 @@ var affirmMap = {
 var ex = (a,b) => (a + b) % 9 === 0 ? 9 : (a + b) % 9;
 
 var modeSelect, inputField, codeDisplay, sektS, richtungS, sliders = [], colorIndicators = [], sliderPanel;
-var logoImg;
+logoImg;
 var colorSeed = 1;
 var isAdmin = false;
 
@@ -150,3 +150,4 @@ function windowResized() {
 function exportHighRes() {
   // ... (Code wie in deiner Vorlage)
 }
+

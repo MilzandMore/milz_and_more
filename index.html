@@ -2,61 +2,39 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <title>Milz & More – Mandala App</title>
+  <title>Mandala App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- p5 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.dom.min.js"></script>
-
-  <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: 'Inter', sans-serif;
-      background: #ffffff;
-    }
-
-    #appNav {
+    body { margin: 0; overflow: hidden; background: #fff; }
+    .switcher {
       position: fixed;
-      bottom: 16px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 10px;
       z-index: 300;
     }
-
-    #appNav button {
-      background: #2c3e50;
+    .switcher button {
+      background: #111;
       color: #fff;
       border: none;
-      padding: 10px 14px;
       border-radius: 6px;
-      font-size: 12px;
+      padding: 8px 14px;
       cursor: pointer;
-      opacity: 0.9;
-    }
-
-    #appNav button.active {
-      background: #000;
-      opacity: 1;
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
 
-  <!-- App Navigation -->
-  <div id="appNav">
-    <button onclick="setApp('quadrat')">Quadrat</button>
-    <button onclick="setApp('rund')">Rund</button>
-    <button onclick="setApp('wabe')">Wabe</button>
-  </div>
+<div class="switcher">
+  <button onclick="switchSketch('quadrat')">Quadrat</button>
+  <button onclick="switchSketch('rund')">Rund</button>
+  <button onclick="switchSketch('wabe')">Wabe</button>
+</div>
 
-  <script src="sketch.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+<script src="sketch.js"></script>
 </body>
 </html>

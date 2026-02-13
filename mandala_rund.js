@@ -27,7 +27,7 @@ class MandalaRund {
     this.sliderPanel = createDiv("").style('position','fixed').style('background','rgba(44,62,80,0.98)').style('z-index','150');
     for (let i = 1; i <= 9; i++) {
       let r = createDiv("").parent(this.sliderPanel).style('display','flex').style('align-items','center').style('gap','4px');
-      this.colorIndicators[i] = createDiv("").parent(r).style('width','8px').style('height','8px').style('border-radius','50%');
+      this.colorIndicators[i] = createDiv("").parent(r).style('width','8px').style('height','8px').style('border-radius', '50%');
       this.sliders[i] = createSlider(20,100,85).parent(r).input(() => redraw());
     }
     this.updateLayout();
@@ -40,7 +40,7 @@ class MandalaRund {
       this.sliderPanel.style('top','auto').style('bottom','0').style('left','0').style('width','100%').style('display','grid').style('grid-template-columns','repeat(3,1fr)').style('padding','8px');
       for (let i = 1; i <= 9; i++) this.sliders[i].style('width', '75px');
     } else {
-      this.sliderPanel.style('bottom','auto').style('top','90px').style('left','0').style('width','auto').style('display','flex').style('flex-direction','column').style('padding','12px');
+      this.sliderPanel.style('bottom','auto').style('top', '90px').style('left','0').style('width','auto').style('display','flex').style('flex-direction','column').style('padding','12px');
       for (let i = 1; i <= 9; i++) this.sliders[i].style('width', '80px');
     }
   }
@@ -63,24 +63,44 @@ class MandalaRund {
     pop();
   }
 
+  // ORIGINAL RECHENLOGIK FÜR RUNDES MANDALA
   buildM(c) {
     let m = Array.from({length:16},(_,r)=>Array(r+1).fill(0));
     let base = [...c].reverse().concat(c);
-    for(let i=0;i<16;i++){ m[15][i]=base[i]; m[15-i][0]=base[i]; m[15-i][15-i]=base[i]; }
-    for(let r=14;r>=10;r--) for(let i=1;i<r;i++) m[r][i]=this.ex(m[r+1][i],m[r+1][i+1]);
+    for(let i=0;i<16;i++){ 
+       m[15][i]=base[i]; 
+       m[15-i][0]=base[i]; 
+       m[15-i][15-i]=base[i]; 
+    }
+    for(let r=14;r>=0;r--) {
+      for(let i=1;i<r;i++) {
+        m[r][i]=this.ex(m[r+1][i],m[r+1][i+1]);
+      }
+    }
     return m;
   }
 
   drawS(m, colors, target) {
     let ctx = target || window;
-    let step = 20; let h = tan(TWO_PI/int(this.sektS.value())/2)*step;
+    let sCount = int(this.sektS.value());
+    let step = 20; 
+    let h = tan(TWO_PI/sCount/2)*step;
     ctx.stroke(0,35);
-    for(let r=0;r<16;r++) for(let c=0;c<=r;c++){
-      let v = m[r][c];
-      if(v>0){
-        let b = color(colors[v-1]); let s = this.sliders[v].value();
-        ctx.fill(hue(b), map(s,20,100,15,saturation(b)), map(s,20,100,98,brightness(b)));
-        ctx.beginShape(); ctx.vertex(r*step,(c-r/2)*h*2); ctx.vertex((r+1)*step,(c-(r+1)/2)*h*2+h); ctx.vertex((r+2)*step,(c-r/2)*h*2); ctx.vertex((r+1)*step,(c-r/2)*h*2+h); ctx.endShape(CLOSE);
+    for(let r=0;r<16;r++) {
+      for(let c=0;c<=r;c++){
+        let v = m[r][c];
+        if(v>0){
+          let b = color(colors[v-1]); 
+          let sVal = this.sliders[v].value();
+          ctx.fill(hue(b), map(sVal,20,100,15,saturation(b)), map(sVal,20,100,98,brightness(b)));
+          
+          ctx.beginShape(); 
+          ctx.vertex(r*step,(c-r/2)*h*2); 
+          ctx.vertex((r+1)*step,(c-(r+1)/2)*h*2+h); 
+          ctx.vertex((r+2)*step,(c-r/2)*h*2); 
+          ctx.vertex((r+1)*step,(c-r/2)*h*2+h); 
+          ctx.endShape(CLOSE);
+        }
       }
     }
   }
@@ -95,7 +115,8 @@ class MandalaRund {
   exportHighRes(logo) {
     let pg = createGraphics(2480, 3508); pg.colorMode(HSB, 360, 100, 100); pg.background(255);
     pg.push(); pg.translate(1240, 1400); pg.scale(3.2);
-    let code = (this.modeSelect.value()==='Affirmation')?this.getAffCode(this.inputField.value()):this.inputField.value().replace(/\D/g,"").split("").map(Number);
+    let raw = this.inputField.value();
+    let code = (this.modeSelect.value()==='Affirmation')?this.getAffCode(raw):raw.replace(/\D/g,"").split("").map(Number);
     let shift=(code[0]||1)-1; let colors=this.baseColors.slice(shift).concat(this.baseColors.slice(0,shift));
     let s=int(this.sektS.value()); let m=this.buildM(code.slice(0,8));
     for(let i=0;i<s;i++){ pg.push(); pg.rotate(i*TWO_PI/s); this.drawS(m,colors,pg); pg.pop(); }

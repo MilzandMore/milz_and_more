@@ -1,5 +1,6 @@
 class MandalaQuadrat {
   constructor() {
+    // Deine Original-Matrix und Logik
     this.qMatrix = {
       1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
       2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
@@ -37,9 +38,9 @@ class MandalaQuadrat {
 
     this.sliderPanel = createDiv("").style('position','fixed').style('background','rgba(44,62,80,0.98)').style('z-index','150');
     for (let i = 1; i <= 9; i++) {
-      let r = createDiv("").parent(this.sliderPanel).style('display','flex').style('align-items','center').style('gap','4px');
+      let r = createDiv("").parent(this.sliderPanel).style('display','flex').style('align-items', 'center').style('gap','4px');
       this.colorIndicators[i] = createDiv("").parent(r).style('width','8px').style('height','8px').style('border-radius','50%');
-      this.sliders[i] = createSlider(20,100,85).parent(r).input(() => redraw());
+      this.sliders[i] = createSlider(20, 100, 85).parent(r).input(() => redraw());
     }
     
     this.updateLayout();
@@ -76,13 +77,24 @@ class MandalaQuadrat {
     pop();
   }
 
+  // DEINE ORIGINAL RECHENLOGIK FÜR DIE SPIEGELUNG
   drawMandala(code, colors, target) {
     let ctx = target || window;
     let m = Array(16).fill().map(() => Array(16).fill(0));
-    for (let i = 0; i < 8; i++) { m[0][i] = code[i]; m[0][15-i] = code[i]; }
-    for (let r = 1; r < 16; r++) {
-      for (let c = 0; c < 16 - r; c++) m[r][c] = this.ex(m[r-1][c], m[r-1][c+1]);
+    
+    // Erste Zeile füllen
+    for (let i = 0; i < 8; i++) { 
+      m[0][i] = code[i]; 
+      m[0][15-i] = code[i]; 
     }
+    
+    // Die Matrix berechnen
+    for (let r = 1; r < 16; r++) {
+      for (let c = 0; c < 16 - r; c++) {
+        m[r][c] = this.ex(m[r-1][c], m[r-1][c+1]);
+      }
+    }
+
     let sz = 15;
     ctx.stroke(0, 40);
     for (let r = 0; r < 16; r++) {
@@ -92,6 +104,8 @@ class MandalaQuadrat {
           let base = color(colors[v-1]);
           let s = this.sliders[v].value();
           ctx.fill(hue(base), map(s, 20, 100, 15, saturation(base)), map(s, 20, 100, 98, brightness(base)));
+          
+          // Die 4-fache Spiegelung für das volle Quadrat
           ctx.rect((c + r/2 - 8) * sz, (r - 8) * sz, sz, sz);
           ctx.rect((-(c + r/2) + 7) * sz, (r - 8) * sz, sz, sz);
           ctx.rect((c + r/2 - 8) * sz, (7 - r) * sz, sz, sz);
@@ -115,7 +129,8 @@ class MandalaQuadrat {
   exportHighRes(logo, admin) {
     let pg = createGraphics(2480, 3508);
     pg.colorMode(HSB, 360, 100, 100); pg.background(255);
-    let code = (this.modeSelect.value() === 'Affirmation') ? this.getAffirmCode(this.inputField.value()) : this.inputField.value().replace(/\D/g, "").split("").map(Number);
+    let raw = this.inputField.value();
+    let code = (this.modeSelect.value() === 'Affirmation') ? this.getAffirmCode(raw) : raw.replace(/\D/g, "").split("").map(Number);
     while (code.length < 8) code.push(0);
     let cKey = code[0] || 1;
     pg.push(); pg.translate(1240, 1500); pg.scale(4.5);

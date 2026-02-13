@@ -7,18 +7,13 @@ function preload() {
 }
 
 function setup() {
-    createCanvas(windowWidth, windowHeight);
-    
-    // 1. Initialisiere alle drei Apps (die umbenannten Setups)
-    setupWabe();
-    setupRund();
-    setupQuadrat();
-
-    // 2. Erstelle das Hauptmenü zur Auswahl
-    createMainMenu();
-
-    // 3. Initialer Status: Nur Wabe zeigen
-    switchApp('Wabe');
+  // Initialisiere alle Module (die Funktionen aus den anderen Dateien)
+  setupWabe();
+  setupRund();
+  setupQuadrat();
+  
+  // Standardmäßig alle verstecken außer einem
+  // ... (deine Switch-Logik)
 }
 
 function createMainMenu() {
@@ -73,3 +68,4 @@ function windowResized() {
     updateLayoutQuadrat();
     redraw();
 }
+

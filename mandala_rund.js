@@ -13,6 +13,7 @@ class MandalaRund {
 
   init(container) {
     let isMobile = windowWidth < 600;
+    
     const createUIGroup = (labelTxt, element, wMobile, wDesktop) => {
       let group = createDiv("").parent(container).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
       createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#bdc3c7').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
@@ -26,26 +27,43 @@ class MandalaRund {
       return group;
     };
 
+    // 1. MODUS
     this.modeSelect = createSelect();
     this.modeSelect.option('Geburtstag'); this.modeSelect.option('Affirmation');
     createUIGroup("MODUS", this.modeSelect, "80px", "110px");
 
+    // 2. EINGABE
     this.inputField = createInput("15011987");
     createUIGroup("EINGABE", this.inputField, "75px", "140px");
 
+    // 3. NEU: CODE ANZEIGE (Dein Wunsch)
+    this.codeDisplay = createSpan("00000000");
+    let cGroup = createUIGroup("CODE", null, "70px", "100px");
+    this.codeDisplay.parent(cGroup).style('font-family', 'monospace').style('font-size', isMobile ? '10px' : '14px').style('letter-spacing', '1px').style('color', '#ecf0f1').style('margin-top', '5px');
+
+    // 4. SEKTOR
     this.sektS = createSelect();
     ["6","8","10","12","13"].forEach(s => this.sektS.option(s, s)); this.sektS.selected("8");
     createUIGroup("SEKTOR", this.sektS, "40px", "60px");
 
+    // 5. RICHTUNG
     this.richtungS = createSelect(); 
     this.richtungS.option("Außen", "a"); this.richtungS.option("Innen", "b");
     this.richtungS.selected("a");
     createUIGroup("RICHTUNG", this.richtungS, "65px", "100px");
 
+    // SLIDER PANEL MIT FARB-PUNKTEN (Dein zweiter Wunsch)
     this.sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
     for (let i = 1; i <= 9; i++) {
-      let sRow = createDiv("").parent(this.sliderPanel).style('display','flex').style('align-items','center').style('gap','4px');
-      this.colorIndicators[i] = createDiv("").parent(sRow).style('width', '8px').style('height', '8px').style('border-radius', '50%');
+      let sRow = createDiv("").parent(this.sliderPanel).style('display','flex').style('align-items','center').style('gap','8px').style('margin-bottom', '4px');
+      
+      // Kleiner Farbkreis vor dem Slider
+      this.colorIndicators[i] = createDiv("").parent(sRow)
+        .style('width', isMobile ? '10px' : '12px')
+        .style('height', isMobile ? '10px' : '12px')
+        .style('border-radius', '50%')
+        .style('border', '1px solid rgba(255,255,255,0.2)');
+
       this.sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
     }
 
@@ -57,12 +75,12 @@ class MandalaRund {
     let isMobile = windowWidth < 600;
     if (isMobile) {
       this.sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
-        .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
+        .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px');
       for (let i = 1; i <= 9; i++) if(this.sliders[i]) this.sliders[i].style('width', '75px');
     } else {
       this.sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
         .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
-      for (let i = 1; i <= 9; i++) if(this.sliders[i]) this.sliders[i].style('width', '80px');
+      for (let i = 1; i <= 9; i++) if(this.sliders[i]) this.sliders[i].style('width', '100px');
     }
   }
 
@@ -71,9 +89,14 @@ class MandalaRund {
     let rawVal = this.inputField.value().trim();
     if (rawVal === "" || (this.modeSelect.value() === 'Geburtstag' && rawVal.replace(/\D/g, "").length === 0)) return;
 
-    let sector = this.buildSector();
+    let sector = this.buildSector(); // Hier wird der Code berechnet
     let currentColors = this.getColorMatrix(this.colorSeed);
     
+    // Update Farbpunkte & Code-Anzeige
+    for (let i = 1; i <= 9; i++) { 
+      if(this.colorIndicators[i]) this.colorIndicators[i].style('background-color', currentColors[i-1]); 
+    }
+
     push();
     let centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
     let centerX = width / 2; 
@@ -99,6 +122,10 @@ class MandalaRund {
     let raw = isAffirm ? this.codeFromAffirm(this.inputField.value()) : this.inputField.value().replace(/\D/g, "").split("").map(Number);
     while (raw.length < 8) raw.push(0);
     raw = raw.slice(0, 8);
+    
+    // CODE ANZEIGEN (Deine neue Option)
+    if (this.codeDisplay) this.codeDisplay.html(raw.join(""));
+    
     this.colorSeed = raw[0];
     
     let frame = (this.richtungS.value() === "b") ? [...raw].reverse() : [...raw];
@@ -147,13 +174,11 @@ class MandalaRund {
           let baseCol = color(colors[v - 1]);
           let sVal = this.sliders[v] ? this.sliders[v].value() : 85;
           ctx.fill(hue(baseCol), map(sVal, 20, 100, 15, saturation(baseCol)), map(sVal, 20, 100, 98, brightness(baseCol)));
-        } else ctx.fill(255); 
+        } else ctx.fill(255);
         
         ctx.beginShape(); 
-        ctx.vertex(x, y); 
-        ctx.vertex(x + step, y - h); 
-        ctx.vertex(x + step * 2, y); 
-        ctx.vertex(x + step, y + h); 
+        ctx.vertex(x, y); ctx.vertex(x + step, y - h); 
+        ctx.vertex(x + step * 2, y); ctx.vertex(x + step, y + h); 
         ctx.endShape(CLOSE);
       }
     }
@@ -176,6 +201,13 @@ class MandalaRund {
     return this.baseColors.slice(shift).concat(this.baseColors.slice(0, shift));
   }
 
-  hide() { this.uiElements.forEach(e => e.hide()); this.sliderPanel.hide(); }
-  show() { this.uiElements.forEach(e => e.show()); this.sliderPanel.show(); }
+  hide() { 
+    this.uiElements.forEach(e => e.style('display', 'none')); 
+    this.sliderPanel.style('display', 'none'); 
+  }
+  show() { 
+    this.uiElements.forEach(e => e.style('display', 'flex')); 
+    this.sliderPanel.style('display', 'flex'); 
+    if (windowWidth < 600) this.sliderPanel.style('display', 'grid');
+  }
 }

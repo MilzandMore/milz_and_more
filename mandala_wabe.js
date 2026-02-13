@@ -1,52 +1,35 @@
-// ==========================================
-// 1. MANDALA_WABE.JS - LOGIK & ZEICHNUNG
-// ==========================================
-
-/**
- * Hilfsfunktion für die numerologische Berechnung (1-9)
- */
 function exWabe(a, b) {
   var s = (a || 0) + (b || 0);
   return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
 }
 
-/**
- * Berechnet und zeichnet das Waben-Mandala
- */
 function renderWabeKorrektLogic(code, cKey, target) {
   var ctx = target || window;
-  var sz = 16.2; // Größe der einzelnen Wabe
+  var sz = 16.2; 
   ctx.stroke(0, 35);
   
-  // Pfad-Logik basierend auf der Richtung (Außen/Innen)
   var path = (dirSWabe.value().includes('innen')) 
     ? [...code, ...[...code].reverse()] 
     : [...[...code].reverse(), ...code];
 
-  // Zeichne 6 Sektoren für die hexagonale Symmetrie
   for (var s = 0; s < 6; s++) {
     ctx.push();
     ctx.rotate(s * PI / 3);
     
-    // Erstelle die numerologische Pyramide (Matrix)
     var m = Array(17).fill().map(() => Array(17).fill(0));
     for (var i = 0; i < 16; i++) m[16][i] = path[i % path.length];
     
-    // Berechne die Werte nach oben hin
     for (var r = 15; r >= 1; r--) {
       for (var i = 0; i < r; i++) {
         m[r][i] = exWabe(m[r+1][i], m[r+1][i+1]);
       }
     }
 
-    // Zeichne die Waben-Zellen
     for (var r = 1; r <= 16; r++) {
       for (var i = 0; i < r; i++) {
         var val = m[r][i];
         if (val >= 1 && val <= 9) {
           var col = color(colorMatrixWabe[cKey][val - 1]);
-          
-          // Slider-Werte für Sättigung und Helligkeit anwenden
           var sVal = slidersWabe[val] ? slidersWabe[val].value() : 85;
           ctx.fill(
             hue(col), 
@@ -57,7 +40,6 @@ function renderWabeKorrektLogic(code, cKey, target) {
           ctx.fill(255);
         }
 
-        // Hexagon-Positionierung
         var x = (i - (r - 1) / 2) * sz * sqrt(3);
         var y = -(r - 1) * sz * 1.5;
         
@@ -72,9 +54,6 @@ function renderWabeKorrektLogic(code, cKey, target) {
   }
 }
 
-/**
- * Wandelt Text (Affirmation) in einen 8-stelligen numerischen Code um
- */
 function getCodeFromTextWabe(textStr) {
   var charMapWabe = {
     'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,
@@ -86,10 +65,8 @@ function getCodeFromTextWabe(textStr) {
   
   var currentRow = cleanText.split("").map(c => charMapWabe[c]).filter(n => n);
   
-  // Auf mindestens 8 Stellen auffüllen
   while(currentRow.length < 8) currentRow.push(9);
   
-  // Pyramiden-Reduktion bis auf 8 Stellen
   while (currentRow.length > 8) {
     var nextRow = [];
     for (var i = 0; i < currentRow.length - 1; i++) {
@@ -100,16 +77,13 @@ function getCodeFromTextWabe(textStr) {
   return currentRow;
 }
 
-/**
- * Aktualisiert das Layout der Slider (Mobile/Desktop)
- */
 function updateLayoutWabe() {
   var isMobile = windowWidth < 600;
   if (isMobile) {
     sliderPanelWabe.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
       .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
     
-    // Breite der mobilen Slider auf 75px setzen [cite: 2026-02-11]
+    // Breite der mobilen Slider auf 75px [cite: 2026-02-11]
     for (var i = 1; i <= 9; i++) {
       if(slidersWabe[i]) slidersWabe[i].style('width', '75px');
     }

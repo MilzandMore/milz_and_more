@@ -5,32 +5,31 @@ let logoImg;
 let isAdmin = false;
 
 function preload() {
-  // Lädt das Logo für alle Unterprogramme
   logoImg = loadImage('logo.png');
 }
 
 function setup() {
-  // Erstellt die Grundfläche
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
-  angleMode(RADIANS);
-
-  // Der Haupt-Umschalter oben links
+  
+  // Der Haupt-Umschalter
   mainSelect = createSelect();
   mainSelect.position(10, 10);
   mainSelect.option('Wabe');
   mainSelect.option('Rund');
   mainSelect.option('Quadrat');
-  mainSelect.selected('Wabe'); // Startet mit Wabe
+  mainSelect.selected('Wabe');
   mainSelect.changed(changeApp);
-
-  mainSelect.style('z-index', '1000');
+  
+  // Styling des Hauptumschalters
+  mainSelect.style('z-index', '2000');
   mainSelect.style('padding', '5px');
   mainSelect.style('border-radius', '5px');
-  mainSelect.style('background', '#ecf0f1');
+  mainSelect.style('background', '#ffffff');
+  mainSelect.style('border', '2px solid #2c3e50');
   mainSelect.style('font-weight', 'bold');
 
-  // Initialer Start der ersten App
+  // Initialer Start
   changeApp();
 }
 
@@ -42,70 +41,56 @@ function draw() {
 }
 
 function changeApp() {
-  // 1. ALLE UI-Elemente aller Apps verstecken (Sicherheits-Reset)
-  hideAllUI();
+  // 1. RADIKALER RESET: Alle bestehenden UI-Elemente der Apps entfernen
+  removeAppUI();
 
   let mode = mainSelect.value();
 
-  // 2. Die gewählte App initialisieren (falls nötig) und anzeigen
+  // 2. Die gewählte App neu initialisieren
   if (mode === 'Wabe') {
     if (typeof setupWabe === "function") {
-      if (!topBarWabe) setupWabe();
-      showUIWabe();
+      setupWabe(); 
       currentDrawFunction = drawWabe;
     }
   } 
   else if (mode === 'Rund') {
     if (typeof setupRund === "function") {
-      if (!topBarRund) setupRund();
-      showUIRund();
+      setupRund();
       currentDrawFunction = drawRund;
     }
   } 
   else if (mode === 'Quadrat') {
     if (typeof setupQuadrat === "function") {
-      if (!topBarQuadrat) setupQuadrat();
-      showUIQuadrat();
+      setupQuadrat();
       currentDrawFunction = drawQuadrat;
     }
   }
+}
+
+function removeAppUI() {
+  // Sucht alle Divs, die von den Unterprogrammen erstellt wurden (TopBars und Panels)
+  // und entfernt sie komplett aus dem DOM, um Überlagerungen zu verhindern.
   
-  redraw();
-}
+  // Wir löschen die spezifischen Variablen, falls sie existieren
+  if (topBarWabe) { topBarWabe.remove(); topBarWabe = null; }
+  if (sliderPanelWabe) { sliderPanelWabe.remove(); sliderPanelWabe = null; }
+  
+  if (topBarRund) { topBarRund.remove(); topBarRund = null; }
+  if (sliderPanelRund) { sliderPanelRund.remove(); sliderPanelRund = null; }
+  
+  if (topBarQuadrat) { topBarQuadrat.remove(); topBarQuadrat = null; }
+  if (sliderPanelQuadrat) { sliderPanelQuadrat.remove(); sliderPanelQuadrat = null; }
 
-// HILFSFUNKTIONEN ZUM AUS- UND EINBLENDEN
-
-function hideAllUI() {
-  // Wabe
-  if (topBarWabe) topBarWabe.hide();
-  if (sliderPanelWabe) sliderPanelWabe.hide();
-  // Rund
-  if (topBarRund) topBarRund.hide();
-  if (sliderPanelRund) sliderPanelRund.hide();
-  // Quadrat
-  if (topBarQuadrat) topBarQuadrat.hide();
-  if (sliderPanelQuadrat) sliderPanelQuadrat.hide();
-}
-
-function showUIWabe() {
-  if (topBarWabe) topBarWabe.show();
-  if (sliderPanelWabe) sliderPanelWabe.show();
-}
-
-function showUIRund() {
-  if (topBarRund) topBarRund.show();
-  if (sliderPanelRund) sliderPanelRund.show();
-}
-
-function showUIQuadrat() {
-  if (topBarQuadrat) topBarQuadrat.show();
-  if (sliderPanelQuadrat) sliderPanelQuadrat.show();
+  // Setzt auch die Slider-Arrays zurück
+  slidersWabe = [];
+  slidersRund = [];
+  slidersQuadrat = [];
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  // Layouts anpassen, falls vorhanden
-  if (typeof updateLayoutWabe === "function") updateLayoutWabe();
-  if (typeof updateLayoutRund === "function") updateLayoutRund();
-  if (typeof updateLayoutQuadrat === "function") updateLayoutQuadrat();
+  // Bei Resize Layouts refreshen
+  if (typeof updateLayoutWabe === "function" && topBarWabe) updateLayoutWabe();
+  if (typeof updateLayoutRund === "function" && topBarRund) updateLayoutRund();
+  if (typeof updateLayoutQuadrat === "function" && topBarQuadrat) updateLayoutQuadrat();
 }

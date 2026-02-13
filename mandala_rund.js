@@ -200,13 +200,6 @@ class MandalaRund {
     save(pg, 'Milz&More_Rund.png');
   }
 
-  hide() { 
-    this.uiElements.forEach(e => e.hide()); 
-    this.sliderPanel.hide(); 
-  }
-  
-  show() { 
-    this.uiElements.forEach(e => e.show()); 
-    this.sliderPanel.show(); 
-  }
+  hide() { this.uiElements.forEach(e => e.hide()); this.sliderPanel.hide(); }
+  show() { this.uiElements.forEach(e => e.show()); this.sliderPanel.show(); }
 }

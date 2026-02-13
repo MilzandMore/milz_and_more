@@ -1,40 +1,16 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <title>Mandala App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body { margin: 0; overflow: hidden; background: #fff; }
-    .switcher {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 10px;
-      z-index: 300;
-    }
-    .switcher button {
-      background: #111;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 14px;
-      cursor: pointer;
-      font-size: 13px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milz & More Mandala App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
 </head>
 <body>
-
-<div class="switcher">
-  <button onclick="switchSketch('quadrat')">Quadrat</button>
-  <button onclick="switchSketch('rund')">Rund</button>
-  <button onclick="switchSketch('wabe')">Wabe</button>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
-<script src="sketch.js"></script>
+    <script src="mandala_wabe.js"></script>
+    <script src="mandala_rund.js"></script>
+    <script src="mandala_quadrat.js"></script>
+    <script src="sketch.js"></script>
 </body>
 </html>

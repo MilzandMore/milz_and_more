@@ -74,10 +74,6 @@ class MandalaRund {
     let sector = this.buildSector();
     let currentColors = this.getColorMatrix(this.colorSeed);
     
-    for (let i = 1; i <= 9; i++) { 
-      if(this.colorIndicators[i]) this.colorIndicators[i].style('background-color', currentColors[i-1]); 
-    }
-
     push();
     let centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
     let centerX = width / 2; 
@@ -151,9 +147,7 @@ class MandalaRund {
           let baseCol = color(colors[v - 1]);
           let sVal = this.sliders[v] ? this.sliders[v].value() : 85;
           ctx.fill(hue(baseCol), map(sVal, 20, 100, 15, saturation(baseCol)), map(sVal, 20, 100, 98, brightness(baseCol)));
-        } else {
-          ctx.fill(255);
-        }
+        } else ctx.fill(255); 
         
         ctx.beginShape(); 
         ctx.vertex(x, y); 

@@ -1,11 +1,11 @@
-/* Verhindert ungewolltes Scrollen */
+/* Verhindert Scrollen */
 body {
     margin: 0;
     padding: 0;
     overflow: hidden;
 }
 
-/* Fix für schmale Slider auf dem Handy */
+/* Fix für deine Slider auf dem Handy */
 @media (max-width: 600px) {
     input[type=range] {
         width: 75px !important;

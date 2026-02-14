@@ -1,11 +1,11 @@
-/* Grund-Reset */
+/* Verhindert Scrollen auf dem Handy */
 body {
     margin: 0;
     padding: 0;
     overflow: hidden;
 }
 
-/* Deine Farbregler - Breite 75px auf dem Smartphone */
+/* Deine Farbregler-Justierung: 75px Breite auf Mobilgeräten */
 @media (max-width: 600px) {
     input[type=range] {
         width: 75px !important;

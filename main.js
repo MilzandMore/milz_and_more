@@ -10,8 +10,13 @@ function setup() {
   colorMode(HSB, 360, 100, 100);
   var params = getURLParams();
   if (params.access === 'milz_secret') isAdmin = true;
-  var isMobile = windowWidth < 600;
+  
+  setupUI();
+  updateLayout();
+}
 
+function setupUI() {
+  var isMobile = windowWidth < 600;
   var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
     .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
     .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
@@ -54,7 +59,6 @@ function setup() {
     sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
   }
 
-  updateLayout();
   [shapeSelect, modeSelect, inputField, sektS, dirS].forEach(e => e.changed(redraw));
   inputField.input(redraw);
 }

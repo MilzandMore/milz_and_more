@@ -1,11 +1,11 @@
-/* Volle Fläche nutzen */
+/* Verhindert Scrollen */
 body {
     margin: 0;
     padding: 0;
     overflow: hidden;
 }
 
-/* Deine Farbregler - 75px Breite auf dem Handy */
+/* Deine Slider-Breite auf dem Smartphone (75px) */
 @media (max-width: 600px) {
     input[type=range] {
         width: 75px !important;

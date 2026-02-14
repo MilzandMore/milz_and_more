@@ -1,123 +1,194 @@
-var inputField, modeSelect, shapeSelect, dirS, sektS, codeDisplay, sliders = [], sliderPanel;
-var logoImg;
+// 1. GLOBALE KONSTANTEN & VARIABLEN - WABE
+var colorMatrixWabe = {
+    1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
+    2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
+    3: ["#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B"],
+    4: ["#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00"],
+    5: ["#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00"],
+    6: ["#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB"],
+    7: ["#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0"],
+    8: ["#FFA500", "#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB"],
+    9: ["#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500"]
+};
 
-var charMap = { 'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 };
+var charMapWabe = {
+    'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,
+    'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
+};
 
-function preload() {
-  // Lädt das Logo nur, wenn es existiert
-  logoImg = loadImage('logo.png', () => {}, () => console.log("Logo optional"));
-}
+var exWabe = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-  colorMode(HSB, 360, 100, 100);
-  setupUI(); 
-  updateLayout();
-}
+var inputDWabe, dirSWabe, modeSWabe, codeDisplayWabe, slidersWabe = [], colorIndicatorsWabe = [], sliderPanelWabe, topBarWabe;
 
-function setupUI() {
-  var isMobile = windowWidth < 600;
-  var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
-    .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
-    .style('gap', isMobile ? '8px' : '20px').style('z-index', '200').style('align-items', 'center').style('box-sizing', 'border-box').style('height', isMobile ? '55px' : '75px');
+function setupWabe() {
+    var isMobile = windowWidth < 600;
 
-  function createUIGroup(labelTxt, element, wMobile, wDesktop) {
-    var group = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
-    createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#bdc3c7').style('font-weight', 'bold');
-    if (element) {
-      element.parent(group).style('width', isMobile ? wMobile : wDesktop).style('background', '#34495e').style('color', '#fff').style('border', 'none').style('border-radius', '4px').style('height', isMobile ? '22px' : '32px');
+    // TOPBAR WABE
+    topBarWabe = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
+        .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
+        .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
+        .style('align-items', 'center').style('box-sizing', 'border-box').style('height', isMobile ? '55px' : '75px');
+
+    function createUIGroupWabe(labelTxt, element, wMobile, wDesktop) {
+        var group = createDiv("").parent(topBarWabe).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
+        createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#bdc3c7').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
+        if (element) {
+            element.parent(group).style('width', isMobile ? wMobile : wDesktop)
+                .style('font-size', isMobile ? '11px' : '13px').style('background', '#34495e').style('color', '#fff')
+                .style('border', 'none').style('border-radius', '4px').style('padding', isMobile ? '3px 5px' : '6px 8px')
+                .style('height', isMobile ? '22px' : '32px');
+        }
+        return group;
     }
-    return group;
-  }
 
-  shapeSelect = createSelect(); shapeSelect.option('Quadrat'); shapeSelect.option('Rund'); shapeSelect.option('Wabe');
-  createUIGroup("FORM", shapeSelect, "80px", "110px");
-  
-  modeSelect = createSelect(); modeSelect.option('Geburtstag'); modeSelect.option('Text');
-  createUIGroup("MODUS", modeSelect, "80px", "110px");
-  
-  inputField = createInput('15011987');
-  createUIGroup("EINGABE", inputField, "75px", "140px");
-  
-  var codeGroup = createUIGroup("CODE", null, "auto", "auto");
-  codeDisplay = createSpan("").parent(codeGroup).style('color', '#fff').style('font-family', 'monospace');
-  
-  sektS = createSelect(); ["6","8","10","12","13"].forEach(s => sektS.option(s)); sektS.selected("8");
-  createUIGroup("SEKTOR", sektS, "40px", "60px");
-  
-  dirS = createSelect(); dirS.option('Außen'); dirS.option('Innen');
-  createUIGroup("RICHTUNG", dirS, "65px", "100px");
+    modeSWabe = createSelect(); 
+    modeSWabe.option('Geburtstag'); modeSWabe.option('Affirmation');
+    createUIGroupWabe("MODUS", modeSWabe, "80px", "110px");
 
-  var saveBtn = createButton('DOWNLOAD').parent(topBar).style('background', '#fff').style('font-weight', 'bold').style('border', 'none').style('padding', '5px 10px').style('border-radius', '4px').style('cursor', 'pointer');
-  saveBtn.mousePressed(() => saveCanvas('Mandala', 'png'));
+    inputDWabe = createInput('15011987');
+    createUIGroupWabe("EINGABE", inputDWabe, "75px", "140px");
 
-  sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150');
-  for (var i = 1; i <= 9; i++) {
-    var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('padding','2px');
-    sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
-  }
-}
+    var codeGroup = createUIGroupWabe("CODE", null, "auto", "auto");
+    codeDisplayWabe = createSpan("").parent(codeGroup).style('font-size', isMobile ? '11px' : '14px').style('color', '#fff').style('font-weight', '600').style('letter-spacing', '1px');
 
-function updateLayout() {
-  var isMobile = windowWidth < 600;
-  if (isMobile) {
-    sliderPanel.style('bottom', '0').style('top', 'auto').style('left', '0').style('width', '100%').style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)');
-    for (var i = 1; i <= 9; i++) sliders[i].style('width', '75px');
-  } else {
-    sliderPanel.style('top', '90px').style('bottom', 'auto').style('left', '0').style('width', 'auto').style('display', 'block').style('padding', '10px');
-    for (var i = 1; i <= 9; i++) sliders[i].style('width', '80px');
-  }
-}
+    dirSWabe = createSelect(); 
+    dirSWabe.option('Außen', 'nach außen'); dirSWabe.option('Innen', 'nach innen');
+    createUIGroupWabe("RICHTUNG", dirSWabe, "65px", "100px");
 
-function draw() {
-  background(255);
-  var isMobile = windowWidth < 600;
-  var baseCode = getCode();
-  var startDigit = baseCode[0] || 1;
-  var drawCode = (dirS.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
-  
-  codeDisplay.html(baseCode.join(""));
-  
-  // SICHERE STEUERUNG DES SEKTOR-MENÜS
-  if (shapeSelect.value() === 'Rund') {
-    sektS.elt.parentElement.style.display = "flex";
-  } else {
-    sektS.elt.parentElement.style.display = "none";
-  }
+    var saveBtn = createButton('DOWNLOAD').parent(topBarWabe)
+        .style('margin-left', 'auto').style('background', '#ffffff').style('color', '#2c3e50')
+        .style('border', 'none').style('font-weight', 'bold').style('border-radius', '4px')
+        .style('padding', isMobile ? '6px 8px' : '10px 16px').style('font-size', isMobile ? '9px' : '12px').style('cursor', 'pointer');
+    saveBtn.mousePressed(exportHighResWabe);
 
-  push();
-  translate(width/2, height/2 + 20);
-  var sc = (min(width, height) / 900) * (isMobile ? 0.7 : 0.9);
-  scale(sc);
-  
-  // Diese Funktionen kommen aus deinen UNBERÜHRTEN Dateien:
-  if (shapeSelect.value() === 'Quadrat') renderQuadrat(drawCode, startDigit);
-  else if (shapeSelect.value() === 'Rund') renderRund(drawCode, startDigit);
-  else renderWabe(drawCode, startDigit);
-  pop();
-
-  if (logoImg) image(logoImg, 20, height - 80, 100, 100 * (logoImg.height / logoImg.width));
-}
-
-function getCode() {
-  var val = inputField.value();
-  if (modeSelect.value() === 'Geburtstag') {
-    var res = val.replace(/[^0-9]/g, "").split('').map(Number);
-    while (res.length < 8) res.push(0); return res.slice(0, 8);
-  } else {
-    var textStr = val.toUpperCase().replace(/[^A-ZÄÖÜß]/g, ""); 
-    if (textStr.length === 0) return [1,1,1,1,1,1,1,1];
-    var row = textStr.split("").map(c => charMap[c] || 1);
-    while(row.length < 8) row.push(9);
-    var ex = (a, b) => { var s = a + b; return s % 9 === 0 ? 9 : s % 9; };
-    while (row.length > 8) { 
-      var next = []; 
-      for (var i = 0; i < row.length - 1; i++) next.push(ex(row[i], row[i+1])); 
-      row = next; 
+    sliderPanelWabe = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
+    for (var i = 1; i <= 9; i++) {
+        var sRow = createDiv("").parent(sliderPanelWabe).style('display','flex').style('align-items','center').style('gap','4px');
+        colorIndicatorsWabe[i] = createDiv("").parent(sRow).style('width', '8px').style('height', '8px').style('border-radius', '50%');
+        slidersWabe[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
     }
-    return row;
-  }
+
+    updateLayoutWabe();
+    [inputDWabe, dirSWabe, modeSWabe].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
 }
 
-function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); }
+function updateLayoutWabe() {
+    var isMobile = windowWidth < 600;
+    if (isMobile) {
+        sliderPanelWabe.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
+            .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
+        for (var i = 1; i <= 9; i++) if(slidersWabe[i]) slidersWabe[i].style('width', '75px');
+    } else {
+        sliderPanelWabe.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
+            .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
+        for (var i = 1; i <= 9; i++) if(slidersWabe[i]) slidersWabe[i].style('width', '80px');
+    }
+}
 
+function drawWabe() {
+    var isMobile = windowWidth < 600;
+    var rawVal = inputDWabe.value().trim();
+    var isInvalid = (rawVal === "" || (modeSWabe.value() === 'Geburtstag' && rawVal.replace(/\D/g, "").length === 0));
+    if (isInvalid) return; 
+
+    var code = (modeSWabe.value() === 'Affirmation') ? getCodeFromTextWabe(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
+    while (code.length < 8) code.push(0);
+    code = code.slice(0, 8);
+    
+    if (code.every(v => v === 0)) return;
+    if(codeDisplayWabe) codeDisplayWabe.html(code.join(""));
+    
+    var cKey = code[0] || 1;
+    for (var i = 1; i <= 9; i++) {
+        colorIndicatorsWabe[i].style('background-color', colorMatrixWabe[cKey][i - 1]);
+    }
+
+    push();
+    var yOffset = isMobile ? -40 : 20; 
+    var centerX = width / 2;
+    translate(centerX, height / 2 + yOffset);
+    
+    var scaleFactor = (min(width, height) / 520) * (isMobile ? 0.45 : 0.48); 
+    scale(scaleFactor);
+    renderWabeKorrektLogic(code, cKey);
+    pop();
+
+    if (logoImg && logoImg.width > 0) {
+        push(); resetMatrix();
+        var lW = isMobile ? 55 : 150;
+        var lH = (logoImg.height / logoImg.width) * lW;
+        var logoY = isMobile ? height - 125 : height - lH - 25;
+        image(logoImg, 15, logoY, lW, lH); 
+        pop();
+    }
+}
+
+function renderWabeKorrektLogic(code, cKey, target) {
+    var ctx = target || window; 
+    var sz = 16.2;
+    ctx.stroke(0, 35);
+    var path = (dirSWabe.value().includes('innen')) ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
+    for (var s = 0; s < 6; s++) {
+        ctx.push(); ctx.rotate(s * PI / 3);
+        var m = Array(17).fill().map(() => Array(17).fill(0));
+        for (var i = 0; i < 16; i++) m[16][i] = path[i % path.length];
+        for (var r = 15; r >= 1; r--) for (var i = 0; i < r; i++) m[r][i] = exWabe(m[r+1][i], m[r+1][i+1]);
+        for (var r = 1; r <= 16; r++) {
+            for (var i = 0; i < r; i++) {
+                var val = m[r][i];
+                if (val >= 1 && val <= 9) {
+                    var col = color(colorMatrixWabe[cKey][val - 1]);
+                    ctx.fill(hue(col), map(slidersWabe[val].value(), 20, 100, 15, saturation(col)), map(slidersWabe[val].value(), 20, 100, 98, brightness(col)));
+                } else ctx.fill(255);
+                var x = (i - (r - 1) / 2) * sz * sqrt(3), y = -(r - 1) * sz * 1.5;
+                ctx.beginShape(); for (var a = PI / 6; a < TWO_PI; a += PI / 3) ctx.vertex(x + cos(a) * sz, y + sin(a) * sz); ctx.endShape(CLOSE);
+            }
+        }
+        ctx.pop();
+    }
+}
+
+function exportHighResWabe() {
+    var exportW = 2480; var exportH = 3508; 
+    var pg = createGraphics(exportW, exportH);
+    pg.colorMode(HSB, 360, 100, 100); pg.background(255);
+    var rawVal = inputDWabe.value().trim();
+    var code = (modeSWabe.value() === 'Affirmation') ? getCodeFromTextWabe(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
+    while (code.length < 8) code.push(0);
+    code = code.slice(0, 8);
+    var cKey = code[0] || 1;
+
+    pg.push();
+    pg.translate(exportW / 2, exportH * 0.40); 
+    pg.scale(2.4);
+    renderWabeKorrektLogic(code, cKey, pg);
+    pg.pop();
+
+    if (logoImg && !isAdmin) {
+        pg.resetMatrix(); pg.tint(255, 0.45);
+        var wWidth = 380; var wHeight = (logoImg.height / logoImg.width) * wWidth;
+        for (var x = -100; x < exportW + 400; x += 500) { 
+            for (var y = -100; y < exportH + 400; y += 500) pg.image(logoImg, x, y, wWidth, wHeight); 
+        }
+        pg.noTint();
+    }
+
+    if (logoImg) {
+        var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;
+        pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+    }
+    save(pg, 'Milz&More_Wabe.png');
+}
+
+function getCodeFromTextWabe(textStr) {
+    var cleanText = textStr.toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
+    if (cleanText.length === 0) return [0,0,0,0,0,0,0,0];
+    var currentRow = cleanText.split("").map(c => charMapWabe[c]).filter(n => n);
+    while(currentRow.length < 8) currentRow.push(9);
+    while (currentRow.length > 8) {
+        var nextRow = [];
+        for (var i = 0; i < currentRow.length - 1; i++) nextRow.push(exWabe(currentRow[i], currentRow[i+1]));
+        currentRow = nextRow;
+    }
+    return currentRow;
+}

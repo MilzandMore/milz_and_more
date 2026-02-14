@@ -1,14 +1,14 @@
 // MASTER SKETCH - Milz & More
-// HINWEIS: Wir deklarieren hier KEIN 'let logoImg' oder 'let isAdmin', 
-// da diese in deinen Mandala-Skripten bereits vorhanden sind.
-
-var mainSelect;
-var currentDrawFunction = null;
+// KEINE Variablen-Deklaration mit 'let', um Konflikte zu vermeiden.
 
 function preload() {
-  // Wir laden das Logo einfach global. Die Variable 'logoImg' 
-  // wird von deinen Unterprogrammen automatisch erkannt.
-  logoImg = loadImage('logo.png');
+  // Lädt das Logo global, ohne eine neue Variable zu erstellen.
+  // So greifen deine Original-Skripte direkt auf das Bild zu.
+  if (typeof logoImg === 'undefined') {
+    window.logoImg = loadImage('logo.png');
+  } else {
+    logoImg = loadImage('logo.png');
+  }
 }
 
 function setup() {
@@ -16,54 +16,51 @@ function setup() {
   colorMode(HSB, 360, 100, 100);
   angleMode(RADIANS);
 
-  // Der Umschalter für die Formen
-  mainSelect = createSelect();
-  mainSelect.position(20, 20); // Positioniert ihn so, dass er nicht deine Top-Bar verdeckt
-  mainSelect.option('Wabe');
-  mainSelect.option('Rund');
-  mainSelect.option('Quadrat');
-  mainSelect.selected('Wabe'); 
-  mainSelect.changed(changeApp);
+  // Der Umschalter - wir setzen ihn ganz dezent oben links hin.
+  window.mainSelect = createSelect();
+  window.mainSelect.position(10, 10);
+  window.mainSelect.option('Wabe');
+  window.mainSelect.option('Rund');
+  window.mainSelect.option('Quadrat');
+  window.mainSelect.selected('Wabe'); 
+  window.mainSelect.changed(changeApp);
   
-  // Höchster Z-Index, damit er immer klickbar bleibt
-  mainSelect.style('z-index', '99999');
+  // Z-Index extrem hoch, damit er über allem liegt, aber kein Styling!
+  window.mainSelect.style('z-index', '999999');
 
   changeApp();
 }
 
 function draw() {
-  // Wir zeichnen hier NICHTS selbst. Deine Original-Logik macht alles.
-  if (currentDrawFunction) {
-    currentDrawFunction();
+  // Ruft NUR deine Original-Funktionen auf.
+  if (window.currentDrawFunction) {
+    window.currentDrawFunction();
   }
 }
 
 function changeApp() {
-  // 1. Alle UI-Elemente verstecken
   hideAllUI();
+  let mode = window.mainSelect.value();
 
-  let mode = mainSelect.value();
-
-  // 2. Weiche zu deinen Original-Funktionen
   if (mode === 'Wabe') {
     if (typeof setupWabe === "function") {
       if (!window.topBarWabe) setupWabe();
       showUIWabe();
-      currentDrawFunction = drawWabe;
+      window.currentDrawFunction = drawWabe;
     }
   } 
   else if (mode === 'Rund') {
     if (typeof setupRund === "function") {
       if (!window.topBarRund) setupRund();
       showUIRund();
-      currentDrawFunction = drawRund;
+      window.currentDrawFunction = drawRund;
     }
   } 
   else if (mode === 'Quadrat') {
     if (typeof setupQuadrat === "function") {
       if (!window.topBarQuadrat) setupQuadrat();
       showUIQuadrat();
-      currentDrawFunction = drawQuadrat;
+      window.currentDrawFunction = drawQuadrat;
     }
   }
 }
@@ -78,18 +75,18 @@ function hideAllUI() {
 }
 
 function showUIWabe() {
-  if (window.topBarWabe) topBarWabe.show();
-  if (window.sliderPanelWabe) sliderPanelWabe.show();
+  if (window.topBarWabe) window.topBarWabe.show();
+  if (window.sliderPanelWabe) window.sliderPanelWabe.show();
 }
 
 function showUIRund() {
-  if (window.topBarRund) topBarRund.show();
-  if (window.sliderPanelRund) sliderPanelRund.show();
+  if (window.topBarRund) window.topBarRund.show();
+  if (window.sliderPanelRund) window.sliderPanelRund.show();
 }
 
 function showUIQuadrat() {
-  if (window.topBarQuadrat) topBarQuadrat.show();
-  if (window.sliderPanelQuadrat) sliderPanelQuadrat.show();
+  if (window.topBarQuadrat) window.topBarQuadrat.show();
+  if (window.sliderPanelQuadrat) window.sliderPanelQuadrat.show();
 }
 
 function windowResized() {

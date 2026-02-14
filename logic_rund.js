@@ -17,10 +17,12 @@ function renderRund(drawCode, startDigit, target) {
 function drawSectorRund(code, colors, ctx) {
   var step = 22;
   ctx.stroke(0, 30);
-  for (var r = 0; r < 12; r++) {
+  for (var r = 0; r < 15; r++) {
     var val = code[r % code.length];
-    var col = color(colors[val-1] || "#ccc");
-    ctx.fill(hue(col), map(sliders[val].value(), 20, 100, 15, saturation(col)), brightness(col));
-    ctx.ellipse(r * step, 0, step, step);
+    if (val > 0) {
+      var col = color(colors[val-1] || "#ccc");
+      ctx.fill(hue(col), map(sliders[val].value(), 20, 100, 15, saturation(col)), brightness(col));
+      ctx.ellipse(r * step, 0, step, step);
+    }
   }
 }

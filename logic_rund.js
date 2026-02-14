@@ -1,4 +1,4 @@
-// 1. GLOBALE KONSTANTEN & VARIABLEN (DEIN ORIGINAL)
+// 1. GLOBALE KONSTANTEN & VARIABLEN
 var baseColors = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
 
 var affirmMap = { 
@@ -8,7 +8,7 @@ var affirmMap = {
 
 var ex = (a,b) => (a + b) % 9 === 0 ? 9 : (a + b) % 9;
 
-var modeSelect, inputField, codeDisplay, sektS, richtungS, sliders = [], colorIndicators = [], sliderPanel, topBar;
+var modeSelect, inputField, codeDisplay, sektS, richtungS, sliders = [], colorIndicators = [], sliderPanel;
 var logoImg;
 var colorSeed = 1;
 var isAdmin = false;
@@ -20,15 +20,14 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
-  smooth(8);
   
   var params = getURLParams();
   if (params.access === 'milz_secret') isAdmin = true;
 
   var isMobile = windowWidth < 600;
 
-  // EINHEITLICHE TOPBAR
-  topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
+  // EINHEITLICHE TOPBAR (wie Quadrat/Wabe)
+  var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
     .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
     .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
     .style('align-items', 'center').style('box-sizing', 'border-box').style('height', isMobile ? '55px' : '75px');
@@ -108,6 +107,7 @@ function draw() {
   }
 
   push();
+  // ZENTRIERUNG & GRÖSSE (Faktor von 0.85 auf 0.95 erhöht)
   var centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
   var centerX = width / 2; 
   translate(centerX, centerY);
@@ -154,6 +154,40 @@ function drawSector(m, colors, target) {
   }
 }
 
+function exportHighRes() {
+  var exportW = 2480; var exportH = 3508; 
+  var pg = createGraphics(exportW, exportH);
+  pg.colorMode(HSB, 360, 100, 100); pg.background(255);
+  
+  var sector = buildSector();
+  var currentColors = getColorMatrix(colorSeed);
+  var sc = int(sektS.value());
+  var angle = TWO_PI / sc;
+
+  pg.push(); 
+  pg.translate(exportW / 2, exportH * 0.40); 
+  pg.scale(3.2); 
+  for (var i = 0; i < sc; i++) { 
+    pg.push(); pg.rotate(i * angle); drawSector(sector, currentColors, pg); pg.pop(); 
+  }
+  pg.pop();
+
+  if (logoImg && !isAdmin) {
+    pg.resetMatrix(); pg.tint(255, 0.45);
+    var wWidth = 380; var wHeight = (logoImg.height / logoImg.width) * wWidth;
+    for (var x = -100; x < exportW + 400; x += 500) {
+      for (var y = -100; y < exportH + 400; y += 500) pg.image(logoImg, x, y, wWidth, wHeight);
+    }
+    pg.noTint();
+  }
+
+  if (logoImg) {
+    var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;
+    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+  }
+  save(pg, 'Milz&More_Rund.png');
+}
+
 function buildSector() {
   var n = 16;
   var m = Array.from({length: n}, (_, r) => Array(r + 1).fill(0));
@@ -167,8 +201,6 @@ function buildSector() {
   var base = [...frame].reverse().concat(frame);
   for (var i = 0; i < 16; i++) m[15][i] = base[i];
   for (var i = 0; i < 16; i++) { var r = 15 - i; m[r][0] = base[i]; m[r][r] = base[i]; }
-  
-  // DEINE MANUELLE MATRIX-LOGIK
   for (var c = 1; c <= 13; c++) m[14][c] = ex(m[15][c], m[15][c + 1]);
   var c14 = (c, t) => t.forEach(([r, k]) => m[r][k] = m[14][c]);
   c14(1, [[2, 1]]); c14(2, [[3, 1], [3, 2], [13, 1], [13, 12]]); c14(3, [[4, 1], [4, 3], [12, 1], [12, 11]]);
@@ -188,28 +220,6 @@ function buildSector() {
   c11(4, [[11, 7], [8, 4]]); c11(5, [[10, 4], [10, 6], [9, 4], [9, 5]]);
   m[10][5] = ex(m[11][5], m[11][6]);
   return m;
-}
-
-function exportHighRes() {
-  var exportW = 2480; var exportH = 3508; 
-  var pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100); pg.background(255);
-  var sector = buildSector();
-  var currentColors = getColorMatrix(colorSeed);
-  var sc = int(sektS.value());
-  var angle = TWO_PI / sc;
-  pg.push(); 
-  pg.translate(exportW / 2, exportH * 0.40); 
-  pg.scale(3.2); 
-  for (var i = 0; i < sc; i++) { 
-    pg.push(); pg.rotate(i * angle); drawSector(sector, currentColors, pg); pg.pop(); 
-  }
-  pg.pop();
-  if (logoImg) {
-    var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;
-    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
-  }
-  save(pg, 'Milz&More_Rund.png');
 }
 
 function codeFromAffirm(text) {

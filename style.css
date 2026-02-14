@@ -1,81 +1,13 @@
-/* Grundstyling */
+/* Verhindert Scrollen auf dem Handy */
 body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #f8f9fa;
-    font-family: 'Inter', sans-serif;
 }
 
-/* Styling für das Haupt-Dropdown (mainSelect) */
-select {
-    appearance: none;
-    border: 2px solid #2c3e50 !important;
-    padding: 8px 30px 8px 15px !important;
-    font-size: 14px !important;
-    color: #2c3e50 !important;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-select:hover {
-    background-color: #ffffff !important;
-    border-color: #3498db !important;
-}
-
-/* Styling für die p5.js Slider & Panels */
-div {
-    /* Wir sprechen die Container-Divs deiner Apps an */
-    border-radius: 12px;
-}
-
-input[type=range] {
-    -webkit-appearance: none;
-    background: #dfe6e9;
-    height: 6px;
-    border-radius: 5px;
-    outline: none;
-    margin: 10px 0;
-}
-
-/* Mobil-Optimierung: Slider-Breite 75px */
+/* NUR die Slider-Breite für Mobilgeräte anpassen */
 @media (max-width: 600px) {
     input[type=range] {
         width: 75px !important;
     }
-    
-    /* Falls die Panels zu groß werden auf Mobile */
-    div {
-        scale: 0.9;
-        transform-origin: left top;
-    }
-}
-
-/* Slider-Knopf (Thumb) */
-input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    background: #3498db;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-/* Button-Styling innerhalb der Apps */
-button {
-    background: #2c3e50 !important;
-    color: white !important;
-    border: none !important;
-    padding: 8px 15px !important;
-    border-radius: 6px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: background 0.2s !important;
-}
-
-button:hover {
-    background: #34495e !important;
 }

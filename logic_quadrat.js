@@ -1,6 +1,4 @@
 var qMatrix = [];
-const mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
-
 var colorMatrixQuadrat = {
   1: { 1: "#FF0000", 2: "#0000FF", 3: "#00FF00", 4: "#FFFF00", 5: "#00B0F0", 6: "#00FFFF", 7: "#FF66FF", 8: "#FF9900", 9: "#9900FF" },
   2: { 1: "#0000FF", 2: "#00FF00", 3: "#FFFF00", 4: "#00B0F0", 5: "#00FFFF", 6: "#FF66FF", 7: "#FF9900", 8: "#9900FF", 9: "#FF0000" },
@@ -15,20 +13,17 @@ var colorMatrixQuadrat = {
 
 function renderQuadrat(drawCode, startDigit, target) {
   var ctx = target || window;
-  var ts = 16;
+  var ts = 18;
   calcQuadratMatrix(drawCode);
-  ctx.stroke(0, 35);
-  ctx.strokeWeight(0.5);
+  ctx.stroke(0, 30);
   for (var r = 0; r < 20; r++) {
     for (var c = 0; c < 20; c++) {
       var val = qMatrix[r][c];
       if (val !== 0) {
-        var hex = (colorMatrixQuadrat[startDigit] && colorMatrixQuadrat[startDigit][val]) ? colorMatrixQuadrat[startDigit][val] : mapZ[val];
-        var col = color(hex);
-        var sVal = sliders[val] ? sliders[val].value() : 85;
-        ctx.fill(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
-        ctx.rect(c * ts, -(r + 1) * ts, ts, ts); ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts); 
-        ctx.rect(c * ts, r * ts, ts, ts); ctx.rect(-(c + 1) * ts, r * ts, ts, ts);        
+        var col = color(colorMatrixQuadrat[startDigit][val] || "#ccc");
+        ctx.fill(hue(col), map(sliders[val].value(), 20, 100, 15, saturation(col)), brightness(col));
+        ctx.rect(c*ts, r*ts, ts, ts); ctx.rect(-(c+1)*ts, r*ts, ts, ts);
+        ctx.rect(c*ts, -(r+1)*ts, ts, ts); ctx.rect(-(c+1)*ts, -(r+1)*ts, ts, ts);
       }
     }
   }
@@ -36,13 +31,7 @@ function renderQuadrat(drawCode, startDigit, target) {
 
 function calcQuadratMatrix(code) {
   qMatrix = Array(20).fill().map(() => Array(20).fill(0));
-  var d = [code[0], code[1]], m = [code[2], code[3]], j1 = [code[4], code[5]], j2 = [code[6], code[7]];
-  function set2(r, c, v1, v2) { if (r >= 20 || c >= 20) return; qMatrix[r][c] = v1; if(c+1 < 20) qMatrix[r][c+1] = v2; if(r+1 < 20) qMatrix[r+1][c] = v2; if(r+1 < 20 && c+1 < 20) qMatrix[r+1][c+1] = v1; }
-  for(var i = 0; i < 8; i+=2) set2(i, i, d[0], d[1]);
-  for(var i = 0; i < 6; i+=2) { set2(i, i+2, m[0], m[1]); set2(i+2, i, m[0], m[1]); }
-  for(var i = 0; i < 4; i+=2) { set2(i, i+4, j1[0], j1[1]); set2(i+4, i, j1[0], j1[1]); }
-  set2(0, 6, j2[0], j2[1]); set2(6, 0, j2[0], j2[1]);
-  var exQ = (a, b) => { var s = (a || 0) + (b || 0); return (s === 0) ? 0 : (s % 9 === 0 ? 9 : s % 9); };
-  for(var r = 0; r < 8; r++) { for(var c = 8; c < 20; c++) qMatrix[r][c] = exQ(qMatrix[r][c-2], qMatrix[r][c-1]); }
-  for(var c = 0; c < 20; c++) { for(var r = 8; r < 20; r++) qMatrix[r][c] = exQ(qMatrix[r-2][c], qMatrix[r-1][c]); }
+  var ex = (a, b) => { var s = a + b; return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9); };
+  for(var i=0; i<8; i++) qMatrix[i][i] = code[i];
+  for(var r=0; r<20; r++) { for(var c=0; c<20; c++) { if(r>0 && c>0 && qMatrix[r][c]===0) qMatrix[r][c] = ex(qMatrix[r-1][c], qMatrix[r][c-1]); } }
 }

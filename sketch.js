@@ -1,8 +1,9 @@
 // MASTER HÜLLE - Milz & More
-// Wir deklarieren hier KEINE Variablen mit 'let', um deine Codes nicht zu stören.
+// KEINE Variablen-Deklaration mit let/const hier, um Abstürze zu vermeiden!
 
 function preload() {
-  // Lädt das Logo für deine Original-Logiken
+  // Wir laden das Logo nur, falls es noch nicht da ist.
+  // Deine Unterprogramme nutzen ihre eigene globale Variable.
   window.logoImg = loadImage('logo.png');
 }
 
@@ -11,23 +12,24 @@ function setup() {
   colorMode(HSB, 360, 100, 100);
   angleMode(RADIANS);
 
-  // Der Schalter (Dropdown) - Er bekommt KEIN Styling, damit deine Top-Bar bleibt wie sie ist.
+  // Der Schalter - Wir setzen ihn nach UNTEN links, 
+  // damit er deine Top-Bar oben niemals verdeckt.
   window.mainSelect = createSelect();
-  window.mainSelect.position(10, 10);
+  window.mainSelect.position(20, windowHeight - 40);
   window.mainSelect.option('Wabe');
   window.mainSelect.option('Rund');
   window.mainSelect.option('Quadrat');
   window.mainSelect.selected('Wabe'); 
   window.mainSelect.changed(changeApp);
   
-  // Nur der Z-Index, damit man den Schalter über dem Canvas bedienen kann.
+  // Hoher Z-Index für die Bedienbarkeit
   window.mainSelect.style('z-index', '1000000');
 
   changeApp();
 }
 
 function draw() {
-  // Ruft nur die Zeichen-Funktion deiner Original-Codes auf.
+  // Führt NUR die Logik deiner originalen Codes aus.
   if (window.currentDrawFunction) {
     window.currentDrawFunction();
   }
@@ -35,9 +37,8 @@ function draw() {
 
 function changeApp() {
   hideAllUI();
-  let mode = window.mainSelect.value();
+  var mode = window.mainSelect.value();
 
-  // Weiche zu deinen 3 Original-Logiken
   if (mode === 'Wabe') {
     if (typeof setupWabe === "function") {
       if (!window.topBarWabe) setupWabe();
@@ -62,7 +63,6 @@ function changeApp() {
 }
 
 function hideAllUI() {
-  // Schaltet die Regler und Bars deiner Codes unsichtbar
   if (window.topBarWabe) window.topBarWabe.hide();
   if (window.sliderPanelWabe) window.sliderPanelWabe.hide();
   if (window.topBarRund) window.topBarRund.hide();
@@ -88,7 +88,10 @@ function showUIQuadrat() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  // Verschiebt den Umschalter mit, wenn das Fenster skaliert wird
+  if (window.mainSelect) window.mainSelect.position(20, windowHeight - 40);
+  
   if (typeof updateLayoutWabe === "function") updateLayoutWabe();
   if (typeof updateLayoutRund === "function") updateLayoutRund();
-  if (typeof updateLayoutTräger === "function") updateLayoutQuadrat();
+  if (typeof updateLayoutQuadrat === "function") updateLayoutQuadrat();
 }

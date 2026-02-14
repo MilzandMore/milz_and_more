@@ -1,11 +1,4 @@
-/* Verhindert Scrollen auf dem Handy */
-body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-}
-
-/* NUR die Slider-Breite für Mobilgeräte anpassen */
+/* Nur die technische Korrektur für mobile Slider */
 @media (max-width: 600px) {
     input[type=range] {
         width: 75px !important;

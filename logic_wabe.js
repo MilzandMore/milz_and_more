@@ -1,4 +1,4 @@
-// 1. GLOBALE KONSTANTEN & VARIABLEN (DEIN ORIGINAL)
+// 1. GLOBALE KONSTANTEN & VARIABLEN
 var colorMatrix = {
     1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
     2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
@@ -36,7 +36,7 @@ function setup() {
 
     var isMobile = windowWidth < 600;
 
-    // EINHEITLICHE TOPBAR
+    // EINHEITLICHE TOPBAR (wie Quadrat/Rund)
     topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
         .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
         .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
@@ -101,7 +101,8 @@ function updateLayout() {
 function draw() {
     var isMobile = windowWidth < 600;
     var rawVal = inputD.value().trim();
-    if (rawVal === "" || (modeS.value() === 'Geburtstag' && rawVal.replace(/\D/g, "").length === 0)) return; 
+    var isInvalid = (rawVal === "" || (modeS.value() === 'Geburtstag' && rawVal.replace(/\D/g, "").length === 0));
+    if (isInvalid) return; 
 
     background(255);
     var code = (modeS.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
@@ -117,8 +118,10 @@ function draw() {
     }
 
     push();
+    // ZENTRIERUNG & GRÖSSE
     var yOffset = isMobile ? -40 : 20; 
-    translate(width / 2, height / 2 + yOffset);
+    var centerX = width / 2;
+    translate(centerX, height / 2 + yOffset);
     
     var scaleFactor = (min(width, height) / 520) * (isMobile ? 0.45 : 0.48); 
     scale(scaleFactor);
@@ -152,9 +155,7 @@ function renderWabeKorrekt(code, cKey, target) {
                     var col = color(colorMatrix[cKey][val - 1]);
                     ctx.fill(hue(col), map(sliders[val].value(), 20, 100, 15, saturation(col)), map(sliders[val].value(), 20, 100, 98, brightness(col)));
                 } else ctx.fill(255);
-                // EXAKTE ORIGINAL-BERECHNUNG (GEHEILT)
-                var x = (i - (r - 1) / 2) * sz * sqrt(3);
-                var y = -(r - 1) * sz * 1.5;
+                var x = (i - (r - 1) / 2) * sz * sqrt(3), y = -(r - 1) * sz * 1.5;
                 ctx.beginShape(); for (var a = PI / 6; a < TWO_PI; a += PI / 3) ctx.vertex(x + cos(a) * sz, y + sin(a) * sz); ctx.endShape(CLOSE);
             }
         }
@@ -177,6 +178,15 @@ function exportHighRes() {
     pg.scale(2.4);
     renderWabeKorrekt(code, cKey, pg);
     pg.pop();
+
+    if (logoImg && !isAdmin) {
+        pg.resetMatrix(); pg.tint(255, 0.45);
+        var wWidth = 380; var wHeight = (logoImg.height / logoImg.width) * wWidth;
+        for (var x = -100; x < exportW + 400; x += 500) { 
+            for (var y = -100; y < exportH + 400; y += 500) pg.image(logoImg, x, y, wWidth, wHeight); 
+        }
+        pg.noTint();
+    }
 
     if (logoImg) {
         var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;

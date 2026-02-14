@@ -1,12 +1,13 @@
 // MASTER SKETCH - Milz & More
-let mainSelect;
-let currentDrawFunction = null;
-let isAdmin = false;
+// HINWEIS: Wir deklarieren hier KEIN 'let logoImg' oder 'let isAdmin', 
+// da diese in deinen Mandala-Skripten bereits vorhanden sind.
+
+var mainSelect;
+var currentDrawFunction = null;
 
 function preload() {
-  // Wir laden das Bild, definieren aber keine neue 'let logoImg', 
-  // um den "already declared" Fehler zu vermeiden.
-  // Das Bild wird automatisch der globalen Variable in den Untermodulen zugewiesen.
+  // Wir laden das Logo einfach global. Die Variable 'logoImg' 
+  // wird von deinen Unterprogrammen automatisch erkannt.
   logoImg = loadImage('logo.png');
 }
 
@@ -15,34 +16,35 @@ function setup() {
   colorMode(HSB, 360, 100, 100);
   angleMode(RADIANS);
 
-  // Das Dropdown-Menü zur Steuerung
+  // Der Umschalter für die Formen
   mainSelect = createSelect();
-  mainSelect.position(10, 10);
+  mainSelect.position(20, 20); // Positioniert ihn so, dass er nicht deine Top-Bar verdeckt
   mainSelect.option('Wabe');
   mainSelect.option('Rund');
   mainSelect.option('Quadrat');
   mainSelect.selected('Wabe'); 
   mainSelect.changed(changeApp);
   
-  // Wir setzen nur den Z-Index, damit es bedienbar bleibt.
-  mainSelect.style('z-index', '10000');
+  // Höchster Z-Index, damit er immer klickbar bleibt
+  mainSelect.style('z-index', '99999');
 
-  // Start der App
   changeApp();
 }
 
 function draw() {
-  // Wir zeichnen hier NICHTS selbst. 
-  // Keine Hintergrundfarbe, kein Logo. Nur deine Original-Logik.
+  // Wir zeichnen hier NICHTS selbst. Deine Original-Logik macht alles.
   if (currentDrawFunction) {
     currentDrawFunction();
   }
 }
 
 function changeApp() {
+  // 1. Alle UI-Elemente verstecken
   hideAllUI();
+
   let mode = mainSelect.value();
 
+  // 2. Weiche zu deinen Original-Funktionen
   if (mode === 'Wabe') {
     if (typeof setupWabe === "function") {
       if (!window.topBarWabe) setupWabe();

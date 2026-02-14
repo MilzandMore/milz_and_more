@@ -2,42 +2,18 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lichtgitter Mandalas - Milz & More</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-    
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #ffffff;
-            font-family: 'Inter', sans-serif;
-        }
-        canvas {
-            display: block;
-        }
-        /* Versteckt Standard-Scrollbars der UI-Elemente falls nötig */
-        select, input {
-            outline: none;
-            cursor: pointer;
-        }
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #ffffff; font-family: sans-serif; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
     <script src="logic_quadrat.js"></script>
     <script src="logic_rund.js"></script>
     <script src="logic_wabe.js"></script>
-    
     <script src="main.js"></script>
-
-    <script>
-        // Kleiner Helper für die mobile Ansicht (verhindert Zoomen bei Doppelklick)
-        document.addEventListener('touchstart', function (event) {
-            if (event.touches.length > 1) {
-                event.preventDefault();
-            }
-        }, { passive: false });
-    </script>
 </body>
 </html>

@@ -1,20 +1,16 @@
 // MASTER SKETCH - Milz & More
 let mainSelect;
 let currentDrawFunction = null;
-let logoImg;
 let isAdmin = false;
 
-function preload() {
-  // Lädt das Logo zentral für die Unterprogramme
-  logoImg = loadImage('logo.png');
-}
+// Wir laden HIER kein Logo, da die Unterprogramme das bereits tun.
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  // Wir übernehmen die Modi, aber lassen die Unterprogramme den Rest machen
   colorMode(HSB, 360, 100, 100);
   angleMode(RADIANS);
 
-  // Der Haupt-Umschalter oben links
   mainSelect = createSelect();
   mainSelect.position(10, 10);
   mainSelect.option('Wabe');
@@ -22,16 +18,14 @@ function setup() {
   mainSelect.option('Quadrat');
   mainSelect.selected('Wabe'); 
   mainSelect.changed(changeApp);
-
-  // Minimales Styling, damit es nicht "klumpig" wirkt
   mainSelect.style('z-index', '1000');
 
   changeApp();
 }
 
 function draw() {
-  // KEIN background() und KEIN image() hier! 
-  // Das überlassen wir komplett den Unterprogrammen.
+  // KEIN Hintergrund, KEIN Logo. 
+  // Nur der Aufruf der aktiven Mandala-Logik.
   if (currentDrawFunction) {
     currentDrawFunction();
   }
@@ -41,6 +35,7 @@ function changeApp() {
   hideAllUI();
   let mode = mainSelect.value();
 
+  // Initialisierung der Unterprogramme
   if (mode === 'Wabe') {
     if (typeof setupWabe === "function") {
       if (!window.topBarWabe) setupWabe();
@@ -94,3 +89,4 @@ function windowResized() {
   if (typeof updateLayoutRund === "function") updateLayoutRund();
   if (typeof updateLayoutQuadrat === "function") updateLayoutQuadrat();
 }
+

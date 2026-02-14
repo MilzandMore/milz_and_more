@@ -1,34 +1,43 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mandala Generator</title>
+    <title>Lichtgitter Mandalas - Milz & More</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     
-    <script src="mandala_rund.js"></script>
-    <script src="mandala_wabe.js"></script>
-    <script src="mandala_quadrat.js"></script>
-    <script src="sketch.js"></script>
-
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background-color: #ffffff; font-family: sans-serif; }
-        #ui-bar { 
-            position: fixed; top: 0; left: 0; width: 100%; 
-            height: 60px; background: #2c3e50; display: flex; 
-            align-items: center; padding: 0 20px; gap: 15px; z-index: 100;
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #ffffff;
+            font-family: 'Inter', sans-serif;
         }
-        canvas { display: block; }
+        canvas {
+            display: block;
+        }
+        /* Versteckt Standard-Scrollbars der UI-Elemente falls nötig */
+        select, input {
+            outline: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <div id="ui-bar">
-        <div style="color: white; font-weight: bold; font-size: 10px;">FORM</div>
-        <select id="form-select" style="background: #34495e; color: white; border: none; padding: 5px; border-radius: 4px;">
-            <option value="Rund">Rund</option>
-            <option value="Wabe">Wabe</option>
-            <option value="Quadrat">Quadrat</option>
-        </select>
-    </div>
+    <script src="logic_quadrat.js"></script>
+    <script src="logic_rund.js"></script>
+    <script src="logic_wabe.js"></script>
+    
+    <script src="main.js"></script>
+
+    <script>
+        // Kleiner Helper für die mobile Ansicht (verhindert Zoomen bei Doppelklick)
+        document.addEventListener('touchstart', function (event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+    </script>
 </body>
 </html>

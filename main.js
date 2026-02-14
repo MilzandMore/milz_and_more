@@ -1,16 +1,17 @@
 var inputField, modeSelect, shapeSelect, dirS, sektS, codeDisplay, sliders = [], sliderPanel;
-var logoImg, isAdmin = false;
+var logoImg;
 
 var charMap = { 'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9 };
 
-function preload() { 
-  logoImg = loadImage('logo.png', () => {}, () => console.log("Logo optional")); 
+function preload() {
+  // Lädt das Logo nur, wenn es existiert
+  logoImg = loadImage('logo.png', () => {}, () => console.log("Logo optional"));
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
-  setupUI(); // Diese Funktion ist unten definiert
+  setupUI(); 
   updateLayout();
 }
 
@@ -39,7 +40,7 @@ function setupUI() {
   createUIGroup("EINGABE", inputField, "75px", "140px");
   
   var codeGroup = createUIGroup("CODE", null, "auto", "auto");
-  codeDisplay = createSpan("").parent(codeGroup).style('color', '#fff');
+  codeDisplay = createSpan("").parent(codeGroup).style('color', '#fff').style('font-family', 'monospace');
   
   sektS = createSelect(); ["6","8","10","12","13"].forEach(s => sektS.option(s)); sektS.selected("8");
   createUIGroup("SEKTOR", sektS, "40px", "60px");
@@ -47,7 +48,7 @@ function setupUI() {
   dirS = createSelect(); dirS.option('Außen'); dirS.option('Innen');
   createUIGroup("RICHTUNG", dirS, "65px", "100px");
 
-  var saveBtn = createButton('DOWNLOAD').parent(topBar).style('background', '#fff').style('border', 'none').style('padding', '5px 10px').style('border-radius', '4px').style('cursor', 'pointer');
+  var saveBtn = createButton('DOWNLOAD').parent(topBar).style('background', '#fff').style('font-weight', 'bold').style('border', 'none').style('padding', '5px 10px').style('border-radius', '4px').style('cursor', 'pointer');
   saveBtn.mousePressed(() => saveCanvas('Mandala', 'png'));
 
   sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.95)').style('z-index', '150');
@@ -77,7 +78,7 @@ function draw() {
   
   codeDisplay.html(baseCode.join(""));
   
-  // Sektor-Menü ein/ausblenden per CSS (vermeidet den .parent().hide Fehler)
+  // SICHERE STEUERUNG DES SEKTOR-MENÜS
   if (shapeSelect.value() === 'Rund') {
     sektS.elt.parentElement.style.display = "flex";
   } else {
@@ -89,7 +90,7 @@ function draw() {
   var sc = (min(width, height) / 900) * (isMobile ? 0.7 : 0.9);
   scale(sc);
   
-  // Ruft die Funktionen aus deinen unberührten Dateien auf
+  // Diese Funktionen kommen aus deinen UNBERÜHRTEN Dateien:
   if (shapeSelect.value() === 'Quadrat') renderQuadrat(drawCode, startDigit);
   else if (shapeSelect.value() === 'Rund') renderRund(drawCode, startDigit);
   else renderWabe(drawCode, startDigit);

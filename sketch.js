@@ -5,40 +5,33 @@ let logoImg;
 let isAdmin = false;
 
 function preload() {
-  // Lädt das Logo zentral
+  // Lädt das Logo zentral für die Unterprogramme
   logoImg = loadImage('logo.png');
 }
 
 function setup() {
-  // Erstellt die Grundfläche
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
   angleMode(RADIANS);
 
   // Der Haupt-Umschalter oben links
   mainSelect = createSelect();
-  mainSelect.position(20, 20);
+  mainSelect.position(10, 10);
   mainSelect.option('Wabe');
   mainSelect.option('Rund');
   mainSelect.option('Quadrat');
   mainSelect.selected('Wabe'); 
   mainSelect.changed(changeApp);
 
-  // Styling
+  // Minimales Styling, damit es nicht "klumpig" wirkt
   mainSelect.style('z-index', '1000');
-  mainSelect.style('padding', '8px');
-  mainSelect.style('border-radius', '5px');
-  mainSelect.style('background', '#ffffff');
-  mainSelect.style('border', '2px solid #2c3e50');
-  mainSelect.style('font-weight', 'bold');
 
-  // Initialer Start der ersten App
   changeApp();
 }
 
 function draw() {
-  // WICHTIG: Kein background(255) hier, wenn die Unterprogramme selbst den Hintergrund verwalten
-  // Wir rufen NUR die Funktion der Unterprogramme auf
+  // KEIN background() und KEIN image() hier! 
+  // Das überlassen wir komplett den Unterprogrammen.
   if (currentDrawFunction) {
     currentDrawFunction();
   }
@@ -50,21 +43,21 @@ function changeApp() {
 
   if (mode === 'Wabe') {
     if (typeof setupWabe === "function") {
-      if (typeof topBarWabe === "undefined" || !topBarWabe) setupWabe();
+      if (!window.topBarWabe) setupWabe();
       showUIWabe();
       currentDrawFunction = drawWabe;
     }
   } 
   else if (mode === 'Rund') {
     if (typeof setupRund === "function") {
-      if (typeof topBarRund === "undefined" || !topBarRund) setupRund();
+      if (!window.topBarRund) setupRund();
       showUIRund();
       currentDrawFunction = drawRund;
     }
   } 
   else if (mode === 'Quadrat') {
     if (typeof setupQuadrat === "function") {
-      if (typeof topBarQuadrat === "undefined" || !topBarQuadrat) setupQuadrat();
+      if (!window.topBarQuadrat) setupQuadrat();
       showUIQuadrat();
       currentDrawFunction = drawQuadrat;
     }

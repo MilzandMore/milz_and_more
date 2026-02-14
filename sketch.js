@@ -1,8 +1,8 @@
 // MASTER HÜLLE - Milz & More
-// Keine Variablen-Deklaration hier, um Logik-Konflikte zu vermeiden!
+// Wir deklarieren hier KEINE Variablen mit 'let', um deine Codes nicht zu stören.
 
 function preload() {
-  // Das Logo wird geladen, falls deine Codes die Variable 'logoImg' erwarten
+  // Lädt das Logo für deine Original-Logiken
   window.logoImg = loadImage('logo.png');
 }
 
@@ -11,7 +11,7 @@ function setup() {
   colorMode(HSB, 360, 100, 100);
   angleMode(RADIANS);
 
-  // Der Schalter zum Switchen zwischen den 3 Codes
+  // Der Schalter (Dropdown) - Er bekommt KEIN Styling, damit deine Top-Bar bleibt wie sie ist.
   window.mainSelect = createSelect();
   window.mainSelect.position(10, 10);
   window.mainSelect.option('Wabe');
@@ -20,14 +20,14 @@ function setup() {
   window.mainSelect.selected('Wabe'); 
   window.mainSelect.changed(changeApp);
   
-  // Z-Index hoch, damit man immer umschalten kann
+  // Nur der Z-Index, damit man den Schalter über dem Canvas bedienen kann.
   window.mainSelect.style('z-index', '1000000');
 
   changeApp();
 }
 
 function draw() {
-  // Ruft nur die Logik deiner Codes auf - keine eigene Maske!
+  // Ruft nur die Zeichen-Funktion deiner Original-Codes auf.
   if (window.currentDrawFunction) {
     window.currentDrawFunction();
   }
@@ -37,6 +37,7 @@ function changeApp() {
   hideAllUI();
   let mode = window.mainSelect.value();
 
+  // Weiche zu deinen 3 Original-Logiken
   if (mode === 'Wabe') {
     if (typeof setupWabe === "function") {
       if (!window.topBarWabe) setupWabe();
@@ -61,7 +62,7 @@ function changeApp() {
 }
 
 function hideAllUI() {
-  // Versteckt alle UI-Elemente deiner 3 Codes
+  // Schaltet die Regler und Bars deiner Codes unsichtbar
   if (window.topBarWabe) window.topBarWabe.hide();
   if (window.sliderPanelWabe) window.sliderPanelWabe.hide();
   if (window.topBarRund) window.topBarRund.hide();
@@ -89,6 +90,5 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   if (typeof updateLayoutWabe === "function") updateLayoutWabe();
   if (typeof updateLayoutRund === "function") updateLayoutRund();
-  if (typeof updateLayoutQuadrat === "function") updateLayoutQuadrat();
+  if (typeof updateLayoutTräger === "function") updateLayoutQuadrat();
 }
-

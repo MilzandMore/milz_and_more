@@ -1,4 +1,11 @@
-/* Nur die technische Korrektur für mobile Slider */
+/* Stellt sicher, dass die App den ganzen Bildschirm nutzt */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* NUR der Fix für die schmalen Slider auf dem Handy */
 @media (max-width: 600px) {
     input[type=range] {
         width: 75px !important;

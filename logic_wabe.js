@@ -7,18 +7,12 @@ function renderWabe(code, startDigit, target) {
     ctx.stroke(0, 30);
     for (var s = 0; s < 6; s++) {
         ctx.push(); ctx.rotate(s * PI / 3);
-        for (var r = 0; r < 12; r++) {
+        for (var r = 0; r < 10; r++) {
             var val = code[r % code.length];
-            if (val > 0) {
-              var col = color(currentColors[val-1] || "#ccc");
-              ctx.fill(hue(col), map(sliders[val].value(), 20, 100, 15, saturation(col)), brightness(col));
-              var x = r * sz * 1.5, y = 0;
-              ctx.beginShape(); 
-              for (var a = 0; a < TWO_PI; a += PI / 3) {
-                ctx.vertex(x + cos(a) * sz, y + sin(a) * sz);
-              }
-              ctx.endShape(CLOSE);
-            }
+            var col = color(currentColors[val-1] || "#ccc");
+            ctx.fill(hue(col), map(sliders[val].value(), 20, 100, 15, saturation(col)), brightness(col));
+            var x = r * sz * 1.5, y = 0;
+            ctx.beginShape(); for (var a = 0; a < TWO_PI; a += PI / 3) ctx.vertex(x + cos(a) * sz, y + sin(a) * sz); ctx.endShape(CLOSE);
         }
         ctx.pop();
     }

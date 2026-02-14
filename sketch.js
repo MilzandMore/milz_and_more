@@ -1,14 +1,9 @@
-// MASTER SKETCH - Milz & More
-// KEINE Variablen-Deklaration mit 'let', um Konflikte zu vermeiden.
+// MASTER HÜLLE - Milz & More
+// Keine Variablen-Deklaration hier, um Logik-Konflikte zu vermeiden!
 
 function preload() {
-  // Lädt das Logo global, ohne eine neue Variable zu erstellen.
-  // So greifen deine Original-Skripte direkt auf das Bild zu.
-  if (typeof logoImg === 'undefined') {
-    window.logoImg = loadImage('logo.png');
-  } else {
-    logoImg = loadImage('logo.png');
-  }
+  // Das Logo wird geladen, falls deine Codes die Variable 'logoImg' erwarten
+  window.logoImg = loadImage('logo.png');
 }
 
 function setup() {
@@ -16,7 +11,7 @@ function setup() {
   colorMode(HSB, 360, 100, 100);
   angleMode(RADIANS);
 
-  // Der Umschalter - wir setzen ihn ganz dezent oben links hin.
+  // Der Schalter zum Switchen zwischen den 3 Codes
   window.mainSelect = createSelect();
   window.mainSelect.position(10, 10);
   window.mainSelect.option('Wabe');
@@ -25,14 +20,14 @@ function setup() {
   window.mainSelect.selected('Wabe'); 
   window.mainSelect.changed(changeApp);
   
-  // Z-Index extrem hoch, damit er über allem liegt, aber kein Styling!
-  window.mainSelect.style('z-index', '999999');
+  // Z-Index hoch, damit man immer umschalten kann
+  window.mainSelect.style('z-index', '1000000');
 
   changeApp();
 }
 
 function draw() {
-  // Ruft NUR deine Original-Funktionen auf.
+  // Ruft nur die Logik deiner Codes auf - keine eigene Maske!
   if (window.currentDrawFunction) {
     window.currentDrawFunction();
   }
@@ -66,12 +61,13 @@ function changeApp() {
 }
 
 function hideAllUI() {
-  if (window.topBarWabe) topBarWabe.hide();
-  if (window.sliderPanelWabe) sliderPanelWabe.hide();
-  if (window.topBarRund) topBarRund.hide();
-  if (window.sliderPanelRund) sliderPanelRund.hide();
-  if (window.topBarQuadrat) topBarQuadrat.hide();
-  if (window.sliderPanelQuadrat) sliderPanelQuadrat.hide();
+  // Versteckt alle UI-Elemente deiner 3 Codes
+  if (window.topBarWabe) window.topBarWabe.hide();
+  if (window.sliderPanelWabe) window.sliderPanelWabe.hide();
+  if (window.topBarRund) window.topBarRund.hide();
+  if (window.sliderPanelRund) window.sliderPanelRund.hide();
+  if (window.topBarQuadrat) window.topBarQuadrat.hide();
+  if (window.sliderPanelQuadrat) window.sliderPanelQuadrat.hide();
 }
 
 function showUIWabe() {
@@ -95,3 +91,4 @@ function windowResized() {
   if (typeof updateLayoutRund === "function") updateLayoutRund();
   if (typeof updateLayoutQuadrat === "function") updateLayoutQuadrat();
 }
+

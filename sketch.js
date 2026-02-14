@@ -1,9 +1,8 @@
 // MASTER HÜLLE - Milz & More
-// KEINE Variablen-Deklaration mit let/const hier, um Abstürze zu vermeiden!
+// KEINE Variablen mehr mit 'let' deklarieren! Das verhindert die Abstürze.
 
 function preload() {
-  // Wir laden das Logo nur, falls es noch nicht da ist.
-  // Deine Unterprogramme nutzen ihre eigene globale Variable.
+  // Wir laden das Logo nur global. Deine Codes greifen dann darauf zu.
   window.logoImg = loadImage('logo.png');
 }
 
@@ -12,86 +11,73 @@ function setup() {
   colorMode(HSB, 360, 100, 100);
   angleMode(RADIANS);
 
-  // Der Schalter - Wir setzen ihn nach UNTEN links, 
-  // damit er deine Top-Bar oben niemals verdeckt.
+  // Der Schalter (Dropdown)
+  // Wir hängen ihn direkt an 'window', damit er keine lokale Variable braucht.
   window.mainSelect = createSelect();
-  window.mainSelect.position(20, windowHeight - 40);
+  
+  // POSITION: Ganz unten links, damit er deine Top-Bar niemals berührt
+  window.mainSelect.position(20, windowHeight - 50);
+  
   window.mainSelect.option('Wabe');
   window.mainSelect.option('Rund');
   window.mainSelect.option('Quadrat');
   window.mainSelect.selected('Wabe'); 
   window.mainSelect.changed(changeApp);
   
-  // Hoher Z-Index für die Bedienbarkeit
+  // Z-Index extrem hoch, damit er klickbar ist
   window.mainSelect.style('z-index', '1000000');
 
   changeApp();
 }
 
 function draw() {
-  // Führt NUR die Logik deiner originalen Codes aus.
+  // Ruft die Logik deiner originalen Codes auf.
   if (window.currentDrawFunction) {
     window.currentDrawFunction();
   }
 }
 
 function changeApp() {
-  hideAllUI();
-  var mode = window.mainSelect.value();
-
-  if (mode === 'Wabe') {
-    if (typeof setupWabe === "function") {
-      if (!window.topBarWabe) setupWabe();
-      showUIWabe();
-      window.currentDrawFunction = drawWabe;
-    }
-  } 
-  else if (mode === 'Rund') {
-    if (typeof setupRund === "function") {
-      if (!window.topBarRund) setupRund();
-      showUIRund();
-      window.currentDrawFunction = drawRund;
-    }
-  } 
-  else if (mode === 'Quadrat') {
-    if (typeof setupQuadrat === "function") {
-      if (!window.topBarQuadrat) setupQuadrat();
-      showUIQuadrat();
-      window.currentDrawFunction = drawQuadrat;
-    }
-  }
-}
-
-function hideAllUI() {
+  // Versteckt alle UI-Elemente deiner Codes beim Wechseln
   if (window.topBarWabe) window.topBarWabe.hide();
   if (window.sliderPanelWabe) window.sliderPanelWabe.hide();
   if (window.topBarRund) window.topBarRund.hide();
   if (window.sliderPanelRund) window.sliderPanelRund.hide();
   if (window.topBarQuadrat) window.topBarQuadrat.hide();
   if (window.sliderPanelQuadrat) window.sliderPanelQuadrat.hide();
-}
 
-function showUIWabe() {
-  if (window.topBarWabe) window.topBarWabe.show();
-  if (window.sliderPanelWabe) window.sliderPanelWabe.show();
-}
+  var mode = window.mainSelect.value();
 
-function showUIRund() {
-  if (window.topBarRund) window.topBarRund.show();
-  if (window.sliderPanelRund) window.sliderPanelRund.show();
-}
-
-function showUIQuadrat() {
-  if (window.topBarQuadrat) window.topBarQuadrat.show();
-  if (window.sliderPanelQuadrat) window.sliderPanelQuadrat.show();
+  // Weiche zu deinen 3 Original-Logiken
+  if (mode === 'Wabe') {
+    if (typeof setupWabe === "function") {
+      if (!window.topBarWabe) setupWabe();
+      if (window.topBarWabe) window.topBarWabe.show();
+      if (window.sliderPanelWabe) window.sliderPanelWabe.show();
+      window.currentDrawFunction = drawWabe;
+    }
+  } 
+  else if (mode === 'Rund') {
+    if (typeof setupRund === "function") {
+      if (!window.topBarRund) setupRund();
+      if (window.topBarRund) window.topBarRund.show();
+      if (window.sliderPanelRund) window.sliderPanelRund.show();
+      window.currentDrawFunction = drawRund;
+    }
+  } 
+  else if (mode === 'Quadrat') {
+    if (typeof setupQuadrat === "function") {
+      if (!window.topBarQuadrat) setupQuadrat();
+      if (window.topBarQuadrat) window.topBarQuadrat.show();
+      if (window.sliderPanelQuadrat) window.sliderPanelQuadrat.show();
+      window.currentDrawFunction = drawQuadrat;
+    }
+  }
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  // Verschiebt den Umschalter mit, wenn das Fenster skaliert wird
-  if (window.mainSelect) window.mainSelect.position(20, windowHeight - 40);
-  
-  if (typeof updateLayoutWabe === "function") updateLayoutWabe();
-  if (typeof updateLayoutRund === "function") updateLayoutRund();
-  if (typeof updateLayoutQuadrat === "function") updateLayoutQuadrat();
+  // Hält den Umschalter unten links, auch wenn das Fenster verkleinert wird
+  if (window.mainSelect) window.mainSelect.position(20, windowHeight - 50);
 }
+

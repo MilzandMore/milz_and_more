@@ -16,14 +16,20 @@ function renderQuadrat(drawCode, startDigit, target) {
   var ts = 18;
   calcQuadratMatrix(drawCode);
   ctx.stroke(0, 30);
+  ctx.rectMode(CENTER);
   for (var r = 0; r < 20; r++) {
     for (var c = 0; c < 20; c++) {
       var val = qMatrix[r][c];
       if (val !== 0) {
-        var col = color(colorMatrixQuadrat[startDigit][val] || "#ccc");
+        var colStr = colorMatrixQuadrat[startDigit] ? colorMatrixQuadrat[startDigit][val] : "#ccc";
+        var col = color(colStr);
         ctx.fill(hue(col), map(sliders[val].value(), 20, 100, 15, saturation(col)), brightness(col));
-        ctx.rect(c*ts, r*ts, ts, ts); ctx.rect(-(c+1)*ts, r*ts, ts, ts);
-        ctx.rect(c*ts, -(r+1)*ts, ts, ts); ctx.rect(-(c+1)*ts, -(r+1)*ts, ts, ts);
+        
+        // Zeichne in alle 4 Quadranten
+        ctx.rect(c*ts + ts/2, r*ts + ts/2, ts, ts); 
+        ctx.rect(-(c*ts + ts/2), r*ts + ts/2, ts, ts);
+        ctx.rect(c*ts + ts/2, -(r*ts + ts/2), ts, ts); 
+        ctx.rect(-(c*ts + ts/2), -(r*ts + ts/2), ts, ts);
       }
     }
   }
@@ -32,6 +38,16 @@ function renderQuadrat(drawCode, startDigit, target) {
 function calcQuadratMatrix(code) {
   qMatrix = Array(20).fill().map(() => Array(20).fill(0));
   var ex = (a, b) => { var s = a + b; return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9); };
+  
+  // Initialisierung mit Code auf der Diagonalen
   for(var i=0; i<8; i++) qMatrix[i][i] = code[i];
-  for(var r=0; r<20; r++) { for(var c=0; c<20; c++) { if(r>0 && c>0 && qMatrix[r][c]===0) qMatrix[r][c] = ex(qMatrix[r-1][c], qMatrix[r][c-1]); } }
+  
+  // Matrix füllen
+  for(var r=0; r<20; r++) { 
+    for(var c=0; c<20; c++) { 
+      if(r>0 && c>0 && qMatrix[r][c]===0) {
+        qMatrix[r][c] = ex(qMatrix[r-1][c], qMatrix[r][c-1]); 
+      }
+    } 
+  }
 }

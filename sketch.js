@@ -5,7 +5,7 @@ let logoImg;
 let isAdmin = false;
 
 function preload() {
-  // Lädt das Logo für alle Unterprogramme
+  // Lädt das Logo zentral
   logoImg = loadImage('logo.png');
 }
 
@@ -17,33 +17,28 @@ function setup() {
 
   // Der Haupt-Umschalter oben links
   mainSelect = createSelect();
-  mainSelect.position(20, 20); // Etwas mehr Abstand zum Rand
+  mainSelect.position(20, 20);
   mainSelect.option('Wabe');
   mainSelect.option('Rund');
   mainSelect.option('Quadrat');
   mainSelect.selected('Wabe'); 
   mainSelect.changed(changeApp);
 
-  // Styling via JS (zusätzlich zum CSS für garantierte Layering)
+  // Styling
   mainSelect.style('z-index', '1000');
-  
+  mainSelect.style('padding', '8px');
+  mainSelect.style('border-radius', '5px');
+  mainSelect.style('background', '#ffffff');
+  mainSelect.style('border', '2px solid #2c3e50');
+  mainSelect.style('font-weight', 'bold');
+
   // Initialer Start der ersten App
   changeApp();
 }
 
 function draw() {
-  background(255);
-  
-  // Falls ein Logo vorhanden ist, zeichnen wir es dezent unten rechts
-  if (logoImg) {
-    push();
-    imageMode(CORNER);
-    let logoW = 100;
-    let ratio = logoImg.height / logoImg.width;
-    image(logoImg, windowWidth - logoW - 20, windowHeight - (logoW * ratio) - 20, logoW, logoW * ratio);
-    pop();
-  }
-
+  // WICHTIG: Kein background(255) hier, wenn die Unterprogramme selbst den Hintergrund verwalten
+  // Wir rufen NUR die Funktion der Unterprogramme auf
   if (currentDrawFunction) {
     currentDrawFunction();
   }

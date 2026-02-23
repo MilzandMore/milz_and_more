@@ -1,8 +1,8 @@
 // MASTER HÜLLE - Milz & More
-// KEINE Variablen mehr mit 'let' deklarieren! Das verhindert die Abstürze.
+// Wir deklarieren hier KEINE Variablen mit let/const, um Abstürze zu vermeiden!
 
 function preload() {
-  // Wir laden das Logo nur global. Deine Codes greifen dann darauf zu.
+  // Lädt das Logo so, dass deine Original-Codes darauf zugreifen können
   window.logoImg = loadImage('logo.png');
 }
 
@@ -12,11 +12,10 @@ function setup() {
   angleMode(RADIANS);
 
   // Der Schalter (Dropdown)
-  // Wir hängen ihn direkt an 'window', damit er keine lokale Variable braucht.
   window.mainSelect = createSelect();
   
-  // POSITION: Ganz unten links, damit er deine Top-Bar niemals berührt
-  window.mainSelect.position(20, windowHeight - 50);
+  // POSITION: Unten links, damit er deine Top-Bar oben niemals verdeckt
+  window.mainSelect.position(20, windowHeight - 60);
   
   window.mainSelect.option('Wabe');
   window.mainSelect.option('Rund');
@@ -24,21 +23,21 @@ function setup() {
   window.mainSelect.selected('Wabe'); 
   window.mainSelect.changed(changeApp);
   
-  // Z-Index extrem hoch, damit er klickbar ist
-  window.mainSelect.style('z-index', '1000000');
+  // Hoher Z-Index für die Bedienbarkeit über dem Canvas
+  window.mainSelect.style('z-index', '999999');
 
   changeApp();
 }
 
 function draw() {
-  // Ruft die Logik deiner originalen Codes auf.
+  // Führt NUR die Logik deiner originalen Codes aus
   if (window.currentDrawFunction) {
     window.currentDrawFunction();
   }
 }
 
 function changeApp() {
-  // Versteckt alle UI-Elemente deiner Codes beim Wechseln
+  // Alle UI-Elemente deiner Codes verstecken (für den Wechsel)
   if (window.topBarWabe) window.topBarWabe.hide();
   if (window.sliderPanelWabe) window.sliderPanelWabe.hide();
   if (window.topBarRund) window.topBarRund.hide();
@@ -77,7 +76,6 @@ function changeApp() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  // Hält den Umschalter unten links, auch wenn das Fenster verkleinert wird
-  if (window.mainSelect) window.mainSelect.position(20, windowHeight - 50);
+  // Hält den Umschalter unten links fixiert
+  if (window.mainSelect) window.mainSelect.position(20, windowHeight - 60);
 }
-

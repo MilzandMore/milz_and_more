@@ -1,9 +1,8 @@
 // MASTER HÜLLE - Milz & More
-// HINWEIS: Hier wurden alle 'let'-Deklarationen entfernt, damit deine 
-// originalen Mandala-Skripte nicht mehr abstürzen.
+// KEINE let oder const Variablen hier, um Konflikte mit deinen Codes zu vermeiden!
 
 function preload() {
-  // Lädt das Logo global. Deine Logik-Codes greifen wie gewohnt darauf zu.
+  // Lädt das Logo global. Deine Mandala-Codes finden es automatisch.
   window.logoImg = loadImage('logo.png');
 }
 
@@ -12,10 +11,10 @@ function setup() {
   colorMode(HSB, 360, 100, 100);
   angleMode(RADIANS);
 
-  // Der Umschalter - Wir nutzen 'window', damit er keine Logik-Namen blockiert.
+  // Der Umschalter wird an das globale window-Objekt gebunden.
   window.mainSelect = createSelect();
   
-  // POSITION: Unten links, damit er deine originale Top-Bar nicht verdeckt.
+  // POSITION: Unten links, damit deine originale Top-Bar oben frei bleibt.
   window.mainSelect.position(20, windowHeight - 60);
   
   window.mainSelect.option('Wabe');
@@ -24,22 +23,21 @@ function setup() {
   window.mainSelect.selected('Wabe'); 
   window.mainSelect.changed(changeApp);
   
-  // Erhöhter Z-Index, damit er über dem Mandala bedienbar bleibt.
+  // Z-Index hoch, damit er über dem Canvas bleibt.
   window.mainSelect.style('z-index', '999999');
 
   changeApp();
 }
 
 function draw() {
-  // Diese Funktion ruft NUR deine originalen draw-Funktionen auf.
-  // KEINE eigene Zeichenlogik in dieser Datei!
+  // Führt NUR die Zeichen-Funktion deiner originalen Mandala-Dateien aus.
   if (window.currentDrawFunction) {
     window.currentDrawFunction();
   }
 }
 
 function changeApp() {
-  // Versteckt die UI-Elemente deiner Codes beim Umschalten.
+  // UI-Elemente deiner Codes verstecken
   if (window.topBarWabe) window.topBarWabe.hide();
   if (window.sliderPanelWabe) window.sliderPanelWabe.hide();
   if (window.topBarRund) window.topBarRund.hide();
@@ -49,7 +47,7 @@ function changeApp() {
 
   var mode = window.mainSelect.value();
 
-  // Weiche zu deinen 3 Original-Logiken.
+  // Weiche zu deinen 3 Original-Logiken
   if (mode === 'Wabe') {
     if (typeof setupWabe === "function") {
       if (!window.topBarWabe) setupWabe();
@@ -78,5 +76,7 @@ function changeApp() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  // Hält den Umschalter unten links fixiert.
   if (window.mainSelect) window.mainSelect.position(20, windowHeight - 60);
 }
+

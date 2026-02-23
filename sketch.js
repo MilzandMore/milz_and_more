@@ -1,8 +1,8 @@
 // MASTER HÜLLE - Milz & More
-// Wir deklarieren hier KEINE Variablen mit let/const, um Abstürze zu vermeiden!
+// KEINE Variablen-Deklaration mit let/const hier, um Abstürze zu vermeiden!
 
 function preload() {
-  // Lädt das Logo so, dass deine Original-Codes darauf zugreifen können
+  // Lädt das Logo global für deine Original-Codes
   window.logoImg = loadImage('logo.png');
 }
 
@@ -11,10 +11,10 @@ function setup() {
   colorMode(HSB, 360, 100, 100);
   angleMode(RADIANS);
 
-  // Der Schalter (Dropdown)
+  // Der Umschalter - wir nutzen 'window', damit es keine Konflikte gibt
   window.mainSelect = createSelect();
   
-  // POSITION: Unten links, damit er deine Top-Bar oben niemals verdeckt
+  // POSITION: Unten links, weit weg von deiner Top-Bar
   window.mainSelect.position(20, windowHeight - 60);
   
   window.mainSelect.option('Wabe');
@@ -23,21 +23,21 @@ function setup() {
   window.mainSelect.selected('Wabe'); 
   window.mainSelect.changed(changeApp);
   
-  // Hoher Z-Index für die Bedienbarkeit über dem Canvas
+  // Hoher Z-Index für die Bedienbarkeit
   window.mainSelect.style('z-index', '999999');
 
   changeApp();
 }
 
 function draw() {
-  // Führt NUR die Logik deiner originalen Codes aus
+  // Ruft NUR die Logik deiner originalen Codes auf
   if (window.currentDrawFunction) {
     window.currentDrawFunction();
   }
 }
 
 function changeApp() {
-  // Alle UI-Elemente deiner Codes verstecken (für den Wechsel)
+  // Versteckt UI-Elemente deiner Codes beim Wechseln
   if (window.topBarWabe) window.topBarWabe.hide();
   if (window.sliderPanelWabe) window.sliderPanelWabe.hide();
   if (window.topBarRund) window.topBarRund.hide();
@@ -76,6 +76,6 @@ function changeApp() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  // Hält den Umschalter unten links fixiert
+  // Hält den Umschalter unten links
   if (window.mainSelect) window.mainSelect.position(20, windowHeight - 60);
 }

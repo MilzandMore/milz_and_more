@@ -15,7 +15,7 @@ var isAdmin = false;
 
 function preload() {
   // Pfad angepasst für die Ordnerstruktur
-  logoImg = loadImage('../../assets/logo.png');
+  logoImg = loadImage('../../assets/Logo.png');
 }
 
 function setup() {

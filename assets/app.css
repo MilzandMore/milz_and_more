@@ -1,0 +1,10 @@
+/* App-weite Regeln */
+
+iframe {
+  pointer-events: auto;
+}
+
+/* optional: Sicherheit */
+iframe {
+  border: none;
+}

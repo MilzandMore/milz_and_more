@@ -2,16 +2,15 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
     <style>
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            overflow: hidden; background: #1a1a1a; 
-        }
+        body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #1a1a1a; }
         canvas { display: block; }
+        #p5_loading { color: white; text-align: center; margin-top: 20%; font-family: sans-serif; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
 </head>
 <body>
-    <script src="mandala.js"></script>
+    <div id="p5_loading">Mandala wird generiert...</div>
+    <script src="./mandala.js"></script>
 </body>
 </html>

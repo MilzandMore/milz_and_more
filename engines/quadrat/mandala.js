@@ -1,7 +1,10 @@
 function setup() {
-  // Erstellt die Leinwand passend zum Iframe-Fenster
-  let canvas = createCanvas(windowWidth, windowHeight);
-  canvas.parent(document.body); 
+  // Erstellt die Leinwand so groß wie das Fenster im Studio
+  createCanvas(windowWidth, windowHeight);
+  background(26); // Ein dunkles Grau, damit du siehst, dass es lädt
+}
+
+function draw() {
   
 // 1. GLOBALE VARIABLEN
 var inputField, modeSelect, dirSelect, sliders = [], colorIndicators = [], sliderPanel;

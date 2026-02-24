@@ -37,13 +37,7 @@ function setup() {
 
     var isMobile = windowWidth < 600;
 
-    // TOPBAR Design
-    topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
-        .style('background', '#252525').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
-        .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Segoe UI", sans-serif').style('z-index', '200')
-        .style('align-items', 'center').style('box-sizing', 'border-box').style('height', isMobile ? '55px' : '75px');
-
-    function createUIGroup(labelTxt, element, wMobile, wDesktop) {
+       function createUIGroup(labelTxt, element, wMobile, wDesktop) {
         var group = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
         createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#888').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
         if (element) {

@@ -1,11 +1,4 @@
-function setup() {
-  // Erstellt die Leinwand so groß wie das Fenster im Studio
-  createCanvas(windowWidth, windowHeight);
-  background(26); // Ein dunkles Grau, damit du siehst, dass es lädt
-}
-
-function draw() {
-    // 1. GLOBALE KONSTANTEN & VARIABLEN
+// 1. GLOBALE KONSTANTEN & VARIABLEN
 var colorMatrix = {
     1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
     2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
@@ -30,7 +23,8 @@ var logoImg;
 var isAdmin = false;
 
 function preload() {
-    logoImg = loadImage('logo.png');
+    // Pfad angepasst, um aus /engines/wabe/ nach /assets/ zu greifen
+    logoImg = loadImage('../../assets/logo.png');
 }
 
 function setup() {
@@ -43,19 +37,19 @@ function setup() {
 
     var isMobile = windowWidth < 600;
 
-    // EINHEITLICHE TOPBAR (wie Quadrat/Rund)
+    // TOPBAR Design
     topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
-        .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
-        .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
+        .style('background', '#252525').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
+        .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Segoe UI", sans-serif').style('z-index', '200')
         .style('align-items', 'center').style('box-sizing', 'border-box').style('height', isMobile ? '55px' : '75px');
 
     function createUIGroup(labelTxt, element, wMobile, wDesktop) {
         var group = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
-        createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#bdc3c7').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
+        createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#888').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
         if (element) {
             element.parent(group).style('width', isMobile ? wMobile : wDesktop)
-                .style('font-size', isMobile ? '11px' : '13px').style('background', '#34495e').style('color', '#fff')
-                .style('border', 'none').style('border-radius', '4px').style('padding', isMobile ? '3px 5px' : '6px 8px')
+                .style('font-size', isMobile ? '11px' : '13px').style('background', '#333').style('color', '#fff')
+                .style('border', '1px solid #444').style('border-radius', '4px').style('padding', isMobile ? '3px 5px' : '6px 8px')
                 .style('height', isMobile ? '22px' : '32px');
         }
         return group;
@@ -69,49 +63,51 @@ function setup() {
     createUIGroup("EINGABE", inputD, "75px", "140px");
 
     var codeGroup = createUIGroup("CODE", null, "auto", "auto");
-    codeDisplay = createSpan("").parent(codeGroup).style('font-size', isMobile ? '11px' : '14px').style('color', '#fff').style('font-weight', '600').style('letter-spacing', '1px');
+    codeDisplay = createSpan("").parent(codeGroup).style('font-size', isMobile ? '11px' : '14px').style('color', '#00d1b2').style('font-weight', '600');
 
     dirS = createSelect(); 
     dirS.option('Außen', 'nach außen'); dirS.option('Innen', 'nach innen');
     createUIGroup("RICHTUNG", dirS, "65px", "100px");
 
     var saveBtn = createButton('DOWNLOAD').parent(topBar)
-        .style('margin-left', 'auto').style('background', '#ffffff').style('color', '#2c3e50')
+        .style('margin-left', 'auto').style('background', '#00d1b2').style('color', '#fff')
         .style('border', 'none').style('font-weight', 'bold').style('border-radius', '4px')
         .style('padding', isMobile ? '6px 8px' : '10px 16px').style('font-size', isMobile ? '9px' : '12px').style('cursor', 'pointer');
     saveBtn.mousePressed(exportHighRes);
 
-    sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
+    sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(20, 20, 20, 0.95)').style('z-index', '150').style('border', '1px solid #333');
     for (var i = 1; i <= 9; i++) {
-        var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','4px');
-        colorIndicators[i] = createDiv("").parent(sRow).style('width', '8px').style('height', '8px').style('border-radius', '50%');
+        var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','8px').style('margin-bottom','4px');
+        colorIndicators[i] = createDiv("").parent(sRow).style('width', '12px').style('height', '12px').style('border-radius', '50%');
         sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
     }
 
     updateLayout();
-    [inputD, dirS, modeS].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
+    [inputD, dirS, modeS].forEach(e => {
+        if(e.input) e.input(() => redraw());
+        else e.changed(() => redraw());
+    });
 }
 
 function updateLayout() {
     var isMobile = windowWidth < 600;
     if (isMobile) {
         sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
-            .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
+            .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '10px').style('gap', '10px');
         for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px');
     } else {
-        sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
-            .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
-        for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '80px');
+        sliderPanel.style('bottom', 'auto').style('top', '100px').style('right', '20px').style('width', 'auto')
+            .style('display', 'flex').style('flex-direction', 'column').style('padding', '15px').style('border-radius', '8px');
+        for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '120px');
     }
 }
 
 function draw() {
     var isMobile = windowWidth < 600;
     var rawVal = inputD.value().trim();
-    var isInvalid = (rawVal === "" || (modeS.value() === 'Geburtstag' && rawVal.replace(/\D/g, "").length === 0));
-    if (isInvalid) return; 
+    if (rawVal === "") { background(26); return; }
 
-    background(255);
+    background(26); // Dunkler Hintergrund für das Studio
     var code = (modeS.value() === 'Affirmation') ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
     while (code.length < 8) code.push(0);
     code = code.slice(0, 8);
@@ -125,22 +121,18 @@ function draw() {
     }
 
     push();
-    // ZENTRIERUNG & GRÖSSE
-    var yOffset = isMobile ? -40 : 20; 
-    var centerX = width / 2;
-    translate(centerX, height / 2 + yOffset);
-    
-    var scaleFactor = (min(width, height) / 520) * (isMobile ? 0.45 : 0.48); 
+    var yOffset = isMobile ? -60 : 20; 
+    translate(width / 2, height / 2 + yOffset);
+    var scaleFactor = (min(width, height) / 520) * (isMobile ? 0.55 : 0.65); 
     scale(scaleFactor);
     renderWabeKorrekt(code, cKey);
     pop();
 
     if (logoImg && logoImg.width > 0) {
         push(); resetMatrix();
-        var lW = isMobile ? 55 : 150;
+        var lW = isMobile ? 80 : 150;
         var lH = (logoImg.height / logoImg.width) * lW;
-        var logoY = isMobile ? height - 125 : height - lH - 25;
-        image(logoImg, 15, logoY, lW, lH); 
+        image(logoImg, 20, height - lH - (isMobile ? 120 : 20), lW, lH); 
         pop();
     }
 }
@@ -148,7 +140,7 @@ function draw() {
 function renderWabeKorrekt(code, cKey, target) {
     var ctx = target || window; 
     var sz = 16.2;
-    ctx.stroke(0, 35);
+    ctx.stroke(0, 50);
     var path = (dirS.value().includes('innen')) ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
     for (var s = 0; s < 6; s++) {
         ctx.push(); ctx.rotate(s * PI / 3);
@@ -181,25 +173,16 @@ function exportHighRes() {
     var cKey = code[0] || 1;
 
     pg.push();
-    pg.translate(exportW / 2, exportH * 0.40); 
-    pg.scale(2.4);
+    pg.translate(exportW / 2, exportH * 0.45); 
+    pg.scale(3.5);
     renderWabeKorrekt(code, cKey, pg);
     pg.pop();
-
-    if (logoImg && !isAdmin) {
-        pg.resetMatrix(); pg.tint(255, 0.45);
-        var wWidth = 380; var wHeight = (logoImg.height / logoImg.width) * wWidth;
-        for (var x = -100; x < exportW + 400; x += 500) { 
-            for (var y = -100; y < exportH + 400; y += 500) pg.image(logoImg, x, y, wWidth, wHeight); 
-        }
-        pg.noTint();
-    }
 
     if (logoImg) {
         var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;
         pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
     }
-    save(pg, 'Milz&More_Wabe.png');
+    save(pg, 'Lebenscode_Wabe.png');
 }
 
 function getCodeFromText(textStr) {
@@ -216,6 +199,3 @@ function getCodeFromText(textStr) {
 }
 
 function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-}

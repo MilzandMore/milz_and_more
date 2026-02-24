@@ -24,7 +24,7 @@ var isAdmin = false;
 
 function preload() {
     // Pfad angepasst, um aus /engines/wabe/ nach /assets/ zu greifen
-    logoImg = loadImage('../../assets/Logo.png');
+    logoImg = loadImage('/assets/Logo.png');
 }
 
 function setup() {

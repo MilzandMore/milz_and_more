@@ -38,10 +38,10 @@
 
 <div id="content-container">
     <div id="welcome-screen">
-        <h1>Willkommen im Studio</h1>
-        <p>Wähle oben eine Form aus, um dein Mandala zu generieren.</p>
+        <h1>Willkommen im Mandala Studio</h1>
+        <p>Bitte wähle oben eine Form aus, um zu beginnen.</p>
     </div>
-    <iframe id="studio-frame" src=""></iframe>
+    <iframe id="studio-frame"></iframe>
 </div>
 
 <script>
@@ -52,10 +52,10 @@
         welcome.style.display = 'none';
         frame.style.display = 'block';
         
-        // Der Pfad muss EXAKT so sein wie in deinem GitHub-Ordner
-        const path = "engines/" + name + "/index.html";
-        console.log("Lade: " + path);
-        frame.src = path;
+        // Pfad: engines/ORDNERNAME/index.html
+        const targetUrl = "engines/" + name + "/index.html";
+        console.log("Lade Engine: " + targetUrl);
+        frame.src = targetUrl;
     }
 </script>
 

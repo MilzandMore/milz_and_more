@@ -1,4 +1,9 @@
-// 1. GLOBALE KONSTANTEN & VARIABLEN
+function setup() {
+  // Erstellt die Leinwand passend zum Iframe-Fenster
+  let canvas = createCanvas(windowWidth, windowHeight);
+  canvas.parent(document.body); 
+
+    // 1. GLOBALE KONSTANTEN & VARIABLEN
 var colorMatrix = {
     1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
     2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
@@ -209,3 +214,6 @@ function getCodeFromText(textStr) {
 }
 
 function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}

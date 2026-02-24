@@ -4,11 +4,21 @@
     <meta charset="UTF-8">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: #1a1a1a; }
-        canvas { display: block; }
-        /* Deine Mobile-Vorgabe */
-        input[type=range] { width: 75px !important; }
-    </style>
+    body, html { 
+        margin: 0; 
+        padding: 0; 
+        width: 100%; 
+        height: 100%; 
+        overflow: hidden; 
+        background: #1a1a1a; 
+    }
+    canvas { 
+        display: block; 
+        width: 100vw !important; 
+        height: 100vh !important; 
+    }
+    input[type=range] { width: 75px !important; }
+</style>
 </head>
 <body>
     <script src="mandala.js"></script>

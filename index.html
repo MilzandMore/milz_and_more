@@ -20,14 +20,13 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
             text-align: center; padding: 20px; box-sizing: border-box;
         }
-        .error-hint { margin-top: 20px; color: #ff686b; font-size: 0.9rem; display: none; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo-container">
-        <img src="assets/Logo.png" alt="Logo">
+        <img src="assets/logo.png" alt="Logo">
         <span>Lebenscode-<strong>Mandalas</strong></span>
     </div>
     <nav class="nav-btns">
@@ -38,17 +37,11 @@
 </header>
 
 <div id="content-container">
-    <div id="welcome-screen">
-        <h1>Willkommen im Studio</h1>
-        <p>Wähle oben eine Form aus, um dein Mandala zu generieren.</p>
-        <div id="debug-links">
-            <p style="font-size: 0.8rem; color: #666;">Falls nichts lädt, versuche die Direktlinks:</p>
-            <a href="engines/quadrat/index.html" style="color: #00d1b2;">Quadrat testen</a> | 
-            <a href="engines/rund/index.html" style="color: #00d1b2;">Rund testen</a> | 
-            <a href="engines/wabe/index.html" style="color: #00d1b2;">Wabe testen</a>
-        </div>
+    <div id="welcome-screen" id="welcome">
+        <h1>Mandala Studio</h1>
+        <p>Bitte wähle oben eine Form aus.</p>
     </div>
-    <iframe id="studio-frame" src=""></iframe>
+    <iframe id="studio-frame"></iframe>
 </div>
 
 <script>
@@ -59,10 +52,12 @@
         welcome.style.display = 'none';
         frame.style.display = 'block';
         
-        // Wir probieren den Pfad. ACHTUNG: Prüfe ob dein Ordner "engines" oder "Engines" heißt!
-        const path = "engines/" + name + "/index.html";
-        console.log("Versuche zu laden: " + path);
-        frame.src = path;
+        // WICHTIG: Der Pfad muss EXAKT so sein wie in deinem GitHub Repository
+        // Repository: milz_and_more -> Ordner: engines -> Ordner: quadrat -> index.html
+        const targetUrl = "engines/" + name + "/index.html";
+        
+        console.log("Lade Engine von: " + targetUrl);
+        frame.src = targetUrl;
     }
 </script>
 

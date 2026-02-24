@@ -1,11 +1,3 @@
-function setup() {
-  // Erstellt die Leinwand so groß wie das Fenster im Studio
-  createCanvas(windowWidth, windowHeight);
-  background(26); // Ein dunkles Grau, damit du siehst, dass es lädt
-}
-
-function draw() {
-  
 // 1. GLOBALE VARIABLEN
 var inputField, modeSelect, dirSelect, sliders = [], colorIndicators = [], sliderPanel;
 var qMatrix = [];
@@ -32,7 +24,10 @@ var charMap = {
   'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
 };
 
-function preload() { logoImg = loadImage('logo.png'); }
+function preload() { 
+    // Pfad für die Studio-Struktur angepasst
+    logoImg = loadImage('../../assets/logo.png'); 
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -42,25 +37,24 @@ function setup() {
 
   var isMobile = windowWidth < 600;
 
-  // EINHEITLICHE TOPBAR
+  // EINHEITLICHE TOPBAR (Studio Design)
   var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
-    .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
-    .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
+    .style('background', '#252525').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
+    .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Segoe UI", sans-serif').style('z-index', '200')
     .style('align-items', 'center').style('box-sizing', 'border-box').style('height', isMobile ? '55px' : '75px');
 
   function createUIGroup(labelTxt, element, wMobile, wDesktop) {
     var group = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
-    createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#bdc3c7').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
+    createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#888').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
     if (element) {
       element.parent(group).style('width', isMobile ? wMobile : wDesktop)
-        .style('font-size', isMobile ? '11px' : '13px').style('background', '#34495e').style('color', '#fff')
-        .style('border', 'none').style('border-radius', '4px').style('padding', isMobile ? '3px 5px' : '6px 8px')
+        .style('font-size', isMobile ? '11px' : '13px').style('background', '#333').style('color', '#fff')
+        .style('border', '1px solid #444').style('border-radius', '4px').style('padding', isMobile ? '3px 5px' : '6px 8px')
         .style('height', isMobile ? '22px' : '32px');
     }
     return group;
   }
 
-  // MODUS: GEBURTSTAG statt Geburt
   modeSelect = createSelect(); modeSelect.option('Geburtstag'); modeSelect.option('Text');
   createUIGroup("MODUS", modeSelect, "80px", "110px");
   
@@ -68,45 +62,47 @@ function setup() {
   createUIGroup("EINGABE", inputField, "75px", "140px");
   
   var codeGroup = createUIGroup("CODE", null, "auto", "auto");
-  codeDisplay = createSpan("").parent(codeGroup).style('font-size', isMobile ? '11px' : '14px').style('color', '#ffffff').style('font-weight', '600').style('letter-spacing', '1px');
+  codeDisplay = createSpan("").parent(codeGroup).style('font-size', isMobile ? '11px' : '14px').style('color', '#00d1b2').style('font-weight', '600').style('letter-spacing', '1px');
 
   dirSelect = createSelect(); dirSelect.option('Außen'); dirSelect.option('Innen');
   createUIGroup("RICHTUNG", dirSelect, "65px", "100px");
 
   var saveBtn = createButton('DOWNLOAD').parent(topBar)
-   .style('margin-left', 'auto').style('background', '#ffffff').style('color', '#2c3e50')
+   .style('margin-left', 'auto').style('background', '#00d1b2').style('color', '#fff')
    .style('border', 'none').style('font-weight', 'bold').style('border-radius', '4px')
    .style('padding', isMobile ? '6px 8px' : '10px 16px').style('font-size', isMobile ? '9px' : '12px').style('cursor', 'pointer');
   saveBtn.mousePressed(exportHighRes);
 
-  sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
+  sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(20, 20, 20, 0.95)').style('z-index', '150').style('border', '1px solid #333');
   for (var i = 1; i <= 9; i++) {
-    var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','4px');
-    colorIndicators[i] = createDiv("").parent(sRow).style('width', '8px').style('height', '8px').style('border-radius', '50%');
+    var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','8px').style('margin-bottom','4px');
+    colorIndicators[i] = createDiv("").parent(sRow).style('width', '12px').style('height', '12px').style('border-radius', '50%');
     sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
   }
 
   updateLayout();
-  [modeSelect, dirSelect, inputField].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
+  [modeSelect, dirSelect, inputField].forEach(e => e.input ? e.input(() => redraw()) : e.changed(() => redraw()));
 }
 
 function updateLayout() {
   var isMobile = windowWidth < 600;
   if (isMobile) {
     sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
-      .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
+      .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '10px').style('gap', '10px');
     for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px');
   } else {
-    sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
-      .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
-    for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '80px');
+    sliderPanel.style('bottom', 'auto').style('top', '100px').style('right', '20px').style('width', 'auto')
+      .style('display', 'flex').style('flex-direction', 'column').style('padding', '15px').style('border-radius', '8px');
+    for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '120px');
   }
 }
 
 function draw() {
-  background(255);
   var isMobile = windowWidth < 600;
-  // MODUS Abfrage angepasst auf Geburtstag
+  var rawVal = inputField.value().trim();
+  if (rawVal === "") { background(26); return; }
+
+  background(26); // Dunkler Studio Hintergrund
   var baseCode = (modeSelect.value().includes('Geburtstag')) ? getCodeFromDate() : getCodeFromText();
   var startDigit = baseCode[0] || 1;
   var drawCode = (dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
@@ -119,9 +115,9 @@ function draw() {
   }
   
   push();
-  var scaleFactor = (min(width, height) / 850) * (isMobile ? 0.80 : 0.95);
-  var centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
-  var centerX = width / 2; // Perfekt zentriert
+  var scaleFactor = (min(width, height) / 850) * (isMobile ? 0.70 : 0.90);
+  var centerY = isMobile ? height / 2 - 60 : height / 2 + 20;
+  var centerX = width / 2; 
   
   translate(centerX, centerY);
   scale(scaleFactor);
@@ -132,10 +128,9 @@ function draw() {
 
   if (logoImg && logoImg.width > 0) {
     push(); resetMatrix();
-    var lW = isMobile ? 55 : 150;
+    var lW = isMobile ? 80 : 150;
     var lH = (logoImg.height / logoImg.width) * lW;
-    var logoY = isMobile ? height - 125 : height - lH - 25;
-    image(logoImg, 15, logoY, lW, lH); 
+    image(logoImg, 20, height - lH - (isMobile ? 120 : 20), lW, lH); 
     pop();
   }
 }
@@ -143,7 +138,7 @@ function draw() {
 function drawQuadrat(startDigit, target) {
   var ctx = target || window;
   var ts = 16;
-  ctx.stroke(0, 35);
+  ctx.stroke(0, 50);
   ctx.strokeWeight(0.5);
   for (var r = 0; r < 20; r++) {
     for (var c = 0; c < 20; c++) {
@@ -154,7 +149,7 @@ function drawQuadrat(startDigit, target) {
         var sVal = sliders[val] ? sliders[val].value() : 85;
         ctx.fill(hue(col), map(sVal, 20, 100, 15, saturation(col)), map(sVal, 20, 100, 98, brightness(col)));
         ctx.rect(c * ts, -(r + 1) * ts, ts, ts); ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts); 
-        ctx.rect(c * ts, r * ts, ts, ts); ctx.rect(-(c + 1) * ts, r * ts, ts, ts);        
+        ctx.rect(c * ts, r * ts, ts, ts); ctx.rect(-(c + 1) * ts, r * ts, ts, ts);                
       }
     }
   }
@@ -168,25 +163,17 @@ function exportHighRes() {
   var startDigit = baseCode[0] || 1;
   var drawCode = (dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
   pg.push(); 
-  pg.translate(exportW / 2, exportH * 0.40); 
-  pg.scale(3.8); 
+  pg.translate(exportW / 2, exportH * 0.45); 
+  pg.scale(4.5); 
   calcQuadratMatrix(drawCode); 
   drawQuadrat(startDigit, pg); 
   pg.pop();
 
-  if (logoImg && !isAdmin) {
-    pg.resetMatrix(); pg.tint(255, 0.45); 
-    var wWidth = 380; var wHeight = (logoImg.height / logoImg.width) * wWidth;
-    for (var x = -100; x < exportW + 400; x += 500) {
-      for (var y = -100; y < exportH + 400; y += 500) pg.image(logoImg, x, y, wWidth, wHeight);
-    }
-    pg.noTint();
-  }
   if (logoImg) {
     var lW = 500; var lH = (logoImg.height / logoImg.width) * lW;
     pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
-  save(pg, 'Milz&More_Quadrat.png');
+  save(pg, 'Lebenscode_Quadrat.png');
 }
 
 function getCodeFromDate() { var val = inputField.value().replace(/[^0-9]/g, ""); var res = val.split('').map(Number); while (res.length < 8) res.push(0); return res.slice(0, 8); }
@@ -211,6 +198,3 @@ function calcQuadratMatrix(code) {
   for(var c = 0; c < 20; c++) { for(var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r-2][c], qMatrix[r-1][c]); }
 }
 function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-}

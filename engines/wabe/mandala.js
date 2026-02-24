@@ -1,8 +1,10 @@
 function setup() {
-  // Erstellt die Leinwand passend zum Iframe-Fenster
-  let canvas = createCanvas(windowWidth, windowHeight);
-  canvas.parent(document.body); 
+  // Erstellt die Leinwand so groß wie das Fenster im Studio
+  createCanvas(windowWidth, windowHeight);
+  background(26); // Ein dunkles Grau, damit du siehst, dass es lädt
+}
 
+function draw() {
     // 1. GLOBALE KONSTANTEN & VARIABLEN
 var colorMatrix = {
     1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],

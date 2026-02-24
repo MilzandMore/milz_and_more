@@ -1,3 +1,8 @@
+function setup() {
+  // Erstellt die Leinwand passend zum Iframe-Fenster
+  let canvas = createCanvas(windowWidth, windowHeight);
+  canvas.parent(document.body); 
+  
 // 1. GLOBALE VARIABLEN
 var inputField, modeSelect, dirSelect, sliders = [], colorIndicators = [], sliderPanel;
 var qMatrix = [];
@@ -203,3 +208,6 @@ function calcQuadratMatrix(code) {
   for(var c = 0; c < 20; c++) { for(var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r-2][c], qMatrix[r-1][c]); }
 }
 function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}

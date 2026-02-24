@@ -26,7 +26,7 @@ var charMap = {
 
 function preload() { 
     // Pfad für die Studio-Struktur angepasst
-    logoImg = loadImage('../../assets/logo.png'); 
+    logoImg = loadImage('../../assets/Logo.png'); 
 }
 
 function setup() {

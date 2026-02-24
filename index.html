@@ -1,23 +1,14 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <style>
-<style>
-<iframe src="https://irgendwas..."
-        width="..."
-        height="...">
-</iframe>
-</style>
-</style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lebenscode-Mandalas</title>
-    <link rel="stylesheet" href="assets/app.css">
     <style>
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #252525; border-bottom: 2px solid #333; z-index: 1000; }
         .logo-container { display: flex; align-items: center; gap: 12px; }
-        .logo-container img { height: 35px; }
+        .logo-container img { height: 40px; }
         .nav-btns button { background: #3d3d3d; color: white; border: none; padding: 10px 18px; margin-left: 8px; cursor: pointer; border-radius: 5px; font-weight: 500; transition: 0.3s; }
         .nav-btns button:hover { background: #00d1b2; }
         
@@ -29,15 +20,13 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
             text-align: center; padding: 20px; box-sizing: border-box;
         }
-        .debug-links { margin-top: 20px; font-size: 0.8rem; color: #555; }
-        .debug-links a { color: #00d1b2; text-decoration: none; margin: 0 5px; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo-container">
-        <img src="assets/Logo.png" alt="Logo">
+        <img src="assets/logo.png" alt="Logo">
         <span>Lebenscode-<strong>Mandalas</strong></span>
     </div>
     <nav class="nav-btns">
@@ -49,14 +38,8 @@
 
 <div id="content-container">
     <div id="welcome-screen">
-        <h1>Mandala Studio</h1>
-        <p>Wähle oben eine Form aus, um zu starten.</p>
-        <div class="debug-links">
-            Notfall-Direktlinks: 
-            <a href="engines/quadrat/index.html">Quadrat</a> | 
-            <a href="engines/rund/index.html">Rund</a> | 
-            <a href="engines/wabe/index.html">Wabe</a>
-        </div>
+        <h1>Willkommen im Studio</h1>
+        <p>Wähle oben eine Form aus, um dein Mandala zu generieren.</p>
     </div>
     <iframe id="studio-frame" src=""></iframe>
 </div>
@@ -66,16 +49,13 @@
         const frame = document.getElementById('studio-frame');
         const welcome = document.getElementById('welcome-screen');
         
-        if (!frame || !welcome) return;
-
         welcome.style.display = 'none';
         frame.style.display = 'block';
         
-        // Der Pfad muss EXAKT mit GitHub übereinstimmen (alles kleingeschrieben bei Ordnern)
-        const targetUrl = name + "/index.html";
-        
-        console.log("Versuche zu laden: " + targetUrl);
-        frame.src = targetUrl;
+        // Der Pfad muss EXAKT so sein wie in deinem GitHub-Ordner
+        const path = "engines/" + name + "/index.html";
+        console.log("Lade: " + path);
+        frame.src = path;
     }
 </script>
 

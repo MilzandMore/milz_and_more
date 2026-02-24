@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mandala Quadrat</title>
     <style>
-        body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #1a1a1a; display: flex; justify-content: center; align-items: center; }
+        /* Sorgt dafür, dass das Mandala das ganze Fenster füllt */
+        body { margin: 0; padding: 0; overflow: hidden; background: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; }
         canvas { display: block; }
-        #p5_loading { color: white; font-family: sans-serif; font-size: 1.2rem; position: absolute; }
     </style>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
 </head>
 <body>
-
-    <div id="p5_loading">Mandala wird generiert...</div>
 
     <script src="./mandala.js"></script>
 

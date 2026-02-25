@@ -1,1 +1,48 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lebenscode Mandala Studio</title>
 
+  <link rel="stylesheet" href="app.css" />
+</head>
+
+<body>
+
+<header>
+  <div class="logo">
+    <img src="assets/Logo.png" alt="Logo" />
+    <span>Lebenscode <strong>Mandalas</strong></span>
+  </div>
+
+  <nav>
+    <button onclick="loadEngine('quadrat')">Quadrat</button>
+    <button onclick="loadEngine('rund')">Rund</button>
+    <button onclick="loadEngine('wabe')">Wabe</button>
+  </nav>
+</header>
+
+<main>
+  <div id="welcome">
+    <h1>Mandala Studio</h1>
+    <p>Wähle oben eine Form aus.</p>
+  </div>
+
+  <iframe id="engine-frame"></iframe>
+</main>
+
+<script>
+function loadEngine(name) {
+  const frame = document.getElementById("engine-frame");
+  const welcome = document.getElementById("welcome");
+
+  welcome.style.display = "none";
+  frame.style.display = "block";
+
+  frame.src = "engines/" + name + "/index.html";
+}
+</script>
+
+</body>
+</html>

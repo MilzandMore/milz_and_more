@@ -3,19 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mandala Engine</title>
     <style>
-        /* Alles auf Null setzen, damit das Mandala Platz hat */
-        body { margin: 0; padding: 0; overflow: hidden; background: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background: #1a1a1a; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            color: white;
+            font-family: sans-serif;
+        }
         canvas { display: block; }
-        #p5_loading { color: #00d1b2; font-family: sans-serif; }
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
 </head>
 <body>
 
-    <div id="p5_loading">Mandala wird generiert...</div>
+    <div id="p5_loading">Mandala wird geladen...</div>
 
     <script src="./mandala.js"></script>
 

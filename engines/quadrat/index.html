@@ -1,43 +1,51 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Quadrat Mandala</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quadrat Engine</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
   <script defer src="mandala.js"></script>
 
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: #1a1a1a;
+      padding: 0;
+      background: #111;
       overflow: hidden;
-      color: white;
+      height: 100%;
     }
 
-    #logo {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      height: 40px;
-      opacity: 0.8;
-      z-index: 10;
-    }
-
+    /* Loading ist IN DER ENGINE, nicht im Parent */
     #loading {
       position: fixed;
       inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      font: 600 16px/1 Arial, sans-serif;
+      letter-spacing: 1px;
+      color: #fff;
+      background: #111;
+      z-index: 9999;
+    }
+
+    /* kleines Logo oben links (Engine-intern) */
+    #engine-logo {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      height: 40px;
+      opacity: 0.9;
+      z-index: 10000;
+      pointer-events: none;
     }
   </style>
 </head>
 
 <body>
-  <!-- LOGO -->
-  <img id="logo" src="../../assets/Logo.png" alt="Logo">
-
   <div id="loading">Loading…</div>
+  <img id="engine-logo" src="../../assets/Logo.png" alt="Logo" />
 </body>
 </html>

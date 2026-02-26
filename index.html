@@ -8,6 +8,7 @@
 </head>
 
 <body>
+
 <header>
   <div class="logo">
     <img src="assets/Logo.png" alt="Logo" />
@@ -15,9 +16,9 @@
   </div>
 
   <nav>
-    <button onclick="loadEngine('quadrat')">Quadrat</button>
-    <button onclick="loadEngine('rund')">Rund</button>
-    <button onclick="loadEngine('wabe')">Wabe</button>
+    <button class="engine-btn" data-engine="quadrat" onclick="loadEngine('quadrat')">Quadrat</button>
+    <button class="engine-btn" data-engine="rund" onclick="loadEngine('rund')">Rund</button>
+    <button class="engine-btn" data-engine="wabe" onclick="loadEngine('wabe')">Wabe</button>
   </nav>
 </header>
 
@@ -31,6 +32,12 @@
 </main>
 
 <script>
+function setActive(engineName) {
+  document.querySelectorAll(".engine-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.engine === engineName);
+  });
+}
+
 function loadEngine(name) {
   const frame = document.getElementById("engine-frame");
   const welcome = document.getElementById("welcome");
@@ -38,9 +45,15 @@ function loadEngine(name) {
   welcome.style.display = "none";
   frame.style.display = "block";
 
-  // Cache-Buster: zwingt GitHub Pages / Browser wirklich neu zu laden
+  setActive(name);
+
+  // Cache-Buster, damit immer die aktuelle Engine kommt
   frame.src = "engines/" + name + "/index.html?v=" + Date.now();
 }
+
+// Optional: beim Laden automatisch Quadrat starten
+// loadEngine('quadrat');
 </script>
+
 </body>
 </html>

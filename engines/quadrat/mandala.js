@@ -3,7 +3,8 @@ let ready = false;
 function setup() {
   const c = createCanvas(windowWidth, windowHeight);
   c.parent(document.body);
-
+const loading = document.getElementById("loading");
+if (loading) loading.style.display = "none";
   background(20);
   rectMode(CENTER);
   noFill();

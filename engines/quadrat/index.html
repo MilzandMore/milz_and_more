@@ -1,21 +1,27 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Quadrat Mandala</title>
 
-  <!-- p5.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-
-  <!-- Mandala Script -->
   <script defer src="mandala.js"></script>
 
   <style>
     body {
       margin: 0;
       background: #1a1a1a;
-      color: white;
       overflow: hidden;
+      color: white;
+    }
+
+    #logo {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      height: 40px;
+      opacity: 0.8;
+      z-index: 10;
     }
 
     #loading {
@@ -24,13 +30,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
-      letter-spacing: 1px;
     }
   </style>
 </head>
 
 <body>
+  <!-- LOGO -->
+  <img id="logo" src="../../assets/Logo.png" alt="Logo">
+
   <div id="loading">Loading…</div>
 </body>
 </html>

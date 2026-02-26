@@ -1,3 +1,11 @@
+function preload() {
+  console.log("🟢 preload läuft");
+  logoImg = loadImage(
+    'Logo.png',
+    () => console.log("✅ Logo geladen"),
+    () => console.log("❌ Logo FEHLT")
+  );
+}
 <!DOCTYPE html>
 <html lang="de">
 <head>

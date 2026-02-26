@@ -205,14 +205,13 @@ html,body{
   box-shadow: 0 20px 80px rgba(0,0,0,0.60);
 }
 
-/* Print-Look: Papier ohne Blur */
+/* Print-Look */
 .stage.paper{
   background:
     radial-gradient(900px 700px at 50% 40%, rgba(0,0,0,0.06), transparent 60%),
     linear-gradient(180deg, var(--paper2), var(--paper));
 }
 
-/* Dark-Look optional */
 .stage.dark{
   background:
     radial-gradient(800px 520px at 50% 42%, rgba(255,255,255,0.06), transparent 60%),
@@ -225,14 +224,12 @@ html,body{
   border:none;
   display:block;
   background: transparent;
-
-  /* KEIN Blur */
   filter:
     drop-shadow(0 18px 50px rgba(0,0,0,0.22))
     drop-shadow(0 2px 12px rgba(0,0,0,0.12));
 }
 
-/* Loading overlay: KEIN Blur, nur Overlay */
+/* Loading overlay */
 .loading{
   position:absolute;
   inset:0;
@@ -246,7 +243,6 @@ html,body{
   color: rgba(238,243,251,0.92);
 }
 
-/* Während Laden: keine Weichzeichnung, nur minimal dunkler */
 .stage.is-loading .engine-frame{
   opacity: 0.92;
 }

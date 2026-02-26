@@ -1,14 +1,11 @@
-console.log("Setup läuft");
-console.log(window.parent.document.getElementById("loading"));
 let ready = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  // 🔥 Loading im Parent-Dokument ausblenden
-  const loading = window.parent.document.getElementById("loading");
-  if (loading) loading.style.display = "none";
-}
+  // Loading sicher entfernen (liegt im selben Dokument)
+  const loading = document.getElementById("loading");
+  if (loading) loading.remove();
 
   ready = true;
 }
@@ -16,14 +13,25 @@ function setup() {
 function draw() {
   if (!ready) return;
 
-  translate(width / 2, height / 2);
-  rotate(frameCount * 0.005);
+  background(10);
 
-  strokeWeight(1);
-  rect(0, 0, 300, 300);
+  push();
+  translate(width / 2, height / 2);
+  rotate(frameCount * 0.01);
+  stroke(255);
+  strokeWeight(2);
+  noFill();
+  rectMode(CENTER);
+  rect(0, 0, 260, 260);
+  pop();
+
+  fill(255);
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(20);
+  text("QUADRAT LÄUFT ✅", width / 2, 60);
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  background(20);
 }

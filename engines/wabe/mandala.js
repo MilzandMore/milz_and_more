@@ -1,4 +1,3 @@
-alert("mandala.js wurde geladen");
 // 1. GLOBALE KONSTANTEN & VARIABLEN
 var colorMatrix = {
     1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
@@ -23,14 +22,19 @@ var inputD, dirS, modeS, codeDisplay, sliders = [], colorIndicators = [], slider
 var logoImg;
 var isAdmin = false;
 
+// ✅ FIX: Logo aus /assets laden (2 Ebenen hoch aus engines/wabe)
 function preload() {
-    logoImg = loadImage('logo.png');
+    logoImg = loadImage('../../assets/Logo.png');
 }
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
     colorMode(HSB, 360, 100, 100);
     smooth(8);
+
+    // ✅ FIX: Loading sicher entfernen (liegt in engines/wabe/index.html)
+    const loading = document.getElementById("loading");
+    if (loading) loading.remove();
     
     var params = getURLParams();
     if (params.access === 'milz_secret') isAdmin = true;
@@ -209,4 +213,8 @@ function getCodeFromText(textStr) {
     return currentRow;
 }
 
-function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }
+function windowResized() { 
+    resizeCanvas(windowWidth, windowHeight); 
+    updateLayout(); 
+    redraw(); 
+}

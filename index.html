@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Milz & More – Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=1" />
+  <title>Milz & More – Mandala Studio</title>
+  <link rel="stylesheet" href="app.css?v=900" />
 </head>
 
 <body>
@@ -17,40 +17,192 @@
       </div>
     </div>
 
+    <div class="controls">
+      <div class="field">
+        <label>Modus</label>
+        <select id="mode">
+          <option value="geburtstag">Geburtstag</option>
+          <option value="text">Text / Affirmation</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Eingabe</label>
+        <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT" />
+      </div>
+
+      <div class="field">
+        <label>Richtung</label>
+        <select id="direction">
+          <option value="aussen">Außen</option>
+          <option value="innen">Innen</option>
+        </select>
+      </div>
+
+      <div class="field" id="sectorWrap" style="display:none;">
+        <label>Sektor</label>
+        <select id="sector">
+          <option value="6">6</option>
+          <option value="8" selected>8</option>
+          <option value="10">10</option>
+          <option value="12">12</option>
+          <option value="13">13</option>
+        </select>
+      </div>
+
+      <button id="download" class="primary" type="button">Download</button>
+    </div>
+
     <nav class="engine-nav">
-      <button class="engine-btn" data-engine="quadrat" type="button">Quadrat</button>
+      <button class="engine-btn active" data-engine="quadrat" type="button">Quadrat</button>
       <button class="engine-btn" data-engine="rund" type="button">Rund</button>
       <button class="engine-btn" data-engine="wabe" type="button">Wabe</button>
     </nav>
   </header>
 
   <main class="app-main">
-    <div class="stage">
-      <iframe id="engine-frame" class="engine-frame" title="Mandala Engine"></iframe>
-    </div>
+    <aside class="slider-panel">
+      <div class="slider-title">Farbintensität</div>
+      <div id="sliders" class="sliders"></div>
+      <div class="hint">Tipp: Slider regeln Sättigung/Helligkeit je Ziffer.</div>
+    </aside>
+
+    <section class="stage">
+      <div id="loading" class="loading">Engine lädt…</div>
+      <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
+    </section>
   </main>
 
   <script>
-    const frame = document.getElementById("engine-frame");
+    // ---------- STATE ----------
+    const state = {
+      engine: "quadrat",
+      mode: "geburtstag",     // geburtstag | text
+      input: "15011987",
+      direction: "aussen",    // aussen | innen
+      sector: 8,              // nur rund
+      sliders: Array(10).fill(85), // index 1..9
+      isAdmin: false
+    };
 
-    function setActive(engineName) {
+    // optional: admin via URL ?access=milz_secret
+    const params = new URLSearchParams(location.search);
+    if (params.get("access") === "milz_secret") state.isAdmin = true;
+
+    const els = {
+      frame: document.getElementById("engineFrame"),
+      loading: document.getElementById("loading"),
+      mode: document.getElementById("mode"),
+      input: document.getElementById("input"),
+      direction: document.getElementById("direction"),
+      sectorWrap: document.getElementById("sectorWrap"),
+      sector: document.getElementById("sector"),
+      download: document.getElementById("download"),
+      sliders: document.getElementById("sliders")
+    };
+
+    // ---------- UI BUILD: 9 Slider ----------
+    function buildSliders() {
+      els.sliders.innerHTML = "";
+      for (let i = 1; i <= 9; i++) {
+        const row = document.createElement("div");
+        row.className = "slider-row";
+
+        const dot = document.createElement("div");
+        dot.className = "dot";
+        dot.id = "dot" + i;
+
+        const label = document.createElement("div");
+        label.className = "digit";
+        label.textContent = String(i);
+
+        const input = document.createElement("input");
+        input.type = "range";
+        input.min = "20";
+        input.max = "100";
+        input.value = String(state.sliders[i] ?? 85);
+        input.addEventListener("input", () => {
+          state.sliders[i] = Number(input.value);
+          pushStateToEngine();
+        });
+
+        row.appendChild(dot);
+        row.appendChild(label);
+        row.appendChild(input);
+        els.sliders.appendChild(row);
+      }
+    }
+
+    function setActiveEngineButton(engine) {
       document.querySelectorAll(".engine-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.engine === engineName);
+        btn.classList.toggle("active", btn.dataset.engine === engine);
       });
     }
 
-    function loadEngine(engineName) {
-      setActive(engineName);
-      frame.src = "engines/" + engineName + "/index.html?v=" + Date.now();
+    function updateConditionalFields() {
+      // Sektor nur für Rund
+      els.sectorWrap.style.display = (state.engine === "rund") ? "block" : "none";
     }
 
+    // ---------- ENGINE LOAD ----------
+    function loadEngine(engine) {
+      state.engine = engine;
+      setActiveEngineButton(engine);
+      updateConditionalFields();
+
+      els.loading.style.display = "grid";
+      // Cache-buster, damit GH Pages sicher neu lädt
+      els.frame.src = `engines/${engine}/index.html?v=${Date.now()}`;
+    }
+
+    // ---------- MESSAGING ----------
+    function pushStateToEngine() {
+      // iframe noch nicht bereit -> ignorieren (Engine sendet READY)
+      try {
+        els.frame.contentWindow.postMessage({ type: "SET_STATE", payload: state }, "*");
+      } catch (_) {}
+    }
+
+    function requestExport() {
+      try {
+        els.frame.contentWindow.postMessage({ type: "EXPORT", payload: state }, "*");
+      } catch (_) {}
+    }
+
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== "object") return;
+
+      if (msg.type === "READY") {
+        // Engine ist bereit, jetzt State reinpushen
+        els.loading.style.display = "none";
+        pushStateToEngine();
+      }
+
+      if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
+        // Engine gibt die aktuellen 9 Farben zurück, wir färben die Dots
+        for (let i = 1; i <= 9; i++) {
+          const dot = document.getElementById("dot" + i);
+          if (dot && msg.colors[i-1]) dot.style.background = msg.colors[i-1];
+        }
+      }
+    });
+
+    // ---------- UI EVENTS ----------
     document.querySelectorAll(".engine-btn").forEach(btn => {
       btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
     });
 
-    // Auto-start: lädt direkt Quadrat (Pro-App Feeling)
+    els.mode.addEventListener("change", () => { state.mode = els.mode.value; pushStateToEngine(); });
+    els.input.addEventListener("input",  () => { state.input = els.input.value; pushStateToEngine(); });
+    els.direction.addEventListener("change", () => { state.direction = els.direction.value; pushStateToEngine(); });
+    els.sector.addEventListener("change", () => { state.sector = Number(els.sector.value); pushStateToEngine(); });
+    els.download.addEventListener("click", requestExport);
+
+    // ---------- INIT ----------
+    buildSliders();
+    updateConditionalFields();
     loadEngine("quadrat");
   </script>
 </body>
-</html>
 </html>

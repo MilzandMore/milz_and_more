@@ -9,15 +9,8 @@
   <script defer src="mandala.js"></script>
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #111;
-      overflow: hidden;
-      height: 100%;
-    }
+    html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#111; }
 
-    /* Loading ist IN DER ENGINE, nicht im Parent */
     #loading {
       position: fixed;
       inset: 0;
@@ -31,7 +24,6 @@
       z-index: 9999;
     }
 
-    /* kleines Logo oben links (Engine-intern) */
     #engine-logo {
       position: fixed;
       top: 12px;
@@ -46,6 +38,6 @@
 
 <body>
   <div id="loading">Loading…</div>
-  <img id="engine-logo" src="../../assets/Logo.png" alt="Logo" />
+  <img id="engine-logo" src="../../assets/Logo.png" alt="Logo">
 </body>
 </html>

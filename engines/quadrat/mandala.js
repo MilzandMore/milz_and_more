@@ -3,7 +3,7 @@ let ready = false;
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  // Loading sicher entfernen (liegt im selben Dokument)
+  // Loading sicher entfernen (liegt im gleichen Dokument)
   const loading = document.getElementById("loading");
   if (loading) loading.remove();
 
@@ -29,7 +29,7 @@ function draw() {
   noStroke();
   textAlign(CENTER, CENTER);
   textSize(20);
-  text("QUADRAT LÄUFT ✅", width / 2, 60);
+  text("QUADRAT LÄUFT ✅", width / 2, 80);
 }
 
 function windowResized() {

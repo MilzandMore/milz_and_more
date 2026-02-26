@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lebenscode Mandala Studio</title>
-  <link rel="stylesheet" href="app.css" />
+  <title>Milz & More – Mandala Studio</title>
+  <link rel="stylesheet" href="app.css?v=1" />
 </head>
 
 <body>
@@ -25,18 +25,13 @@
   </header>
 
   <main class="app-main">
-    <section id="welcome" class="welcome">
-      <h1>Mandala Studio</h1>
-      <p>Wähle oben eine Form aus, um die Engine zu laden.</p>
-      <button class="primary" type="button" id="start-quadrat">Mit Quadrat starten</button>
-    </section>
-
-    <iframe id="engine-frame" class="engine-frame" title="Mandala Engine"></iframe>
+    <div class="stage">
+      <iframe id="engine-frame" class="engine-frame" title="Mandala Engine"></iframe>
+    </div>
   </main>
 
   <script>
     const frame = document.getElementById("engine-frame");
-    const welcome = document.getElementById("welcome");
 
     function setActive(engineName) {
       document.querySelectorAll(".engine-btn").forEach(btn => {
@@ -45,25 +40,17 @@
     }
 
     function loadEngine(engineName) {
-      welcome.style.display = "none";
-      frame.style.display = "block";
-
       setActive(engineName);
-
-      // Cache-Buster, damit immer die aktuelle Version geladen wird
       frame.src = "engines/" + engineName + "/index.html?v=" + Date.now();
     }
 
-    // Button-Klicks
     document.querySelectorAll(".engine-btn").forEach(btn => {
       btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
     });
 
-    document.getElementById("start-quadrat").addEventListener("click", () => loadEngine("quadrat"));
-
-    // Optional: direkt beim Laden starten (wenn du willst -> true)
-    const AUTO_START = false;
-    if (AUTO_START) loadEngine("quadrat");
+    // Auto-start: lädt direkt Quadrat (Pro-App Feeling)
+    loadEngine("quadrat");
   </script>
 </body>
+</html>
 </html>

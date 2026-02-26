@@ -1,33 +1,32 @@
-alert("mandala.js wurde geladen ✅");
-console.log("mandala.js läuft");
-}
+let ready = false;
 
 function setup() {
-  console.log("🟢 setup läuft");
+  const c = createCanvas(windowWidth, windowHeight);
+  c.parent(document.body);
 
-  createCanvas(windowWidth, windowHeight);
-  noLoop();
+  background(20);
+  rectMode(CENTER);
+  noFill();
+  stroke(255);
+
+  // Loading entfernen
+  const loading = document.getElementById("loading");
+  if (loading) loading.remove();
+
+  ready = true;
 }
 
 function draw() {
-  console.log("🟢 draw läuft");
+  if (!ready) return;
 
-  background(30);
+  translate(width / 2, height / 2);
+  rotate(frameCount * 0.005);
 
-  // Test-Text (ersetzt dein "Loading…")
-  fill(255);
-  textAlign(CENTER, CENTER);
-  textSize(32);
-  text("QUADRAT LÄUFT ✅", width / 2, height / 2);
-
-  // Logo optional anzeigen
-  if (logoImg) {
-    imageMode(CENTER);
-    image(logoImg, width / 2, height / 2 + 80, 120, 120);
-  }
+  strokeWeight(1);
+  rect(0, 0, 300, 300);
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  redraw();
+  background(20);
 }

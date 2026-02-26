@@ -1,4 +1,3 @@
-alert("mandala.js wurde geladen");
 // 1. GLOBALE KONSTANTEN & VARIABLEN
 var baseColors = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
 
@@ -14,13 +13,18 @@ var logoImg;
 var colorSeed = 1;
 var isAdmin = false;
 
+// ✅ FIX: Logo aus /assets laden (2 Ebenen hoch aus engines/rund)
 function preload() {
-  logoImg = loadImage('logo.png');
+  logoImg = loadImage('../../assets/Logo.png');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
+
+  // ✅ FIX: Loading sicher entfernen (liegt in engines/rund/index.html)
+  const loading = document.getElementById("loading");
+  if (loading) loading.remove();
   
   var params = getURLParams();
   if (params.access === 'milz_secret') isAdmin = true;
@@ -240,4 +244,8 @@ function getColorMatrix(seed) {
   return baseColors.slice(shift).concat(baseColors.slice(0, shift));
 }
 
-function windowResized() { resizeCanvas(windowWidth, windowHeight); updateLayout(); redraw(); }
+function windowResized() { 
+  resizeCanvas(windowWidth, windowHeight); 
+  updateLayout(); 
+  redraw(); 
+}

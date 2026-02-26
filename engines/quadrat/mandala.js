@@ -178,7 +178,7 @@ function exportHighRes() {
   pg.colorMode(HSB, 360, 100, 100);
   pg.background(255);
 
-  // Code
+  // Code wie gewohnt
   var baseCode = (modeSelect.value().includes('Geburtstag')) ? getCodeFromDate() : getCodeFromText();
   var startDigit = baseCode[0] || 1;
   var drawCode = (dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
@@ -188,12 +188,13 @@ function exportHighRes() {
   const ts = 16;
   const gridSize = 40 * ts; // 640px
 
-  // >>> HIER die eigentliche Fix-Änderung:
-  // Mehr Rand = kleineres Mandala
-  const marginX = 320; // größerer Rand links/rechts (macht es sichtbar kleiner)
-  const scale = (exportW - 2 * marginX) / gridSize; // z.B. ~2.875
+  // >>> WICHTIG: Zielbreite wie beim Rund-Export (optisch perfekt)
+  // Wenn du es NOCH kleiner willst: z.B. 1100 / 1000
+  const TARGET_WIDTH = 1200;
 
-  // Position etwas weiter nach oben, damit unten Wasserzeichen/Logo Luft haben
+  const scale = TARGET_WIDTH / gridSize;
+
+  // Positionierung (ähnlich wie Rund: etwas über Mitte, damit unten Logo/Wasserzeichen Luft haben)
   const centerX = exportW / 2;
   const centerY = exportH * 0.36;
 
@@ -209,17 +210,14 @@ function exportHighRes() {
   // Wasserzeichen (nur wenn NICHT Admin)
   if (logoImg && !isAdmin) {
     pg.resetMatrix();
-
-    // Wasserzeichen eher dezent, aber sichtbar:
-    // (tint alpha in p5 ist 0..255)
+    // dezenter aber sichtbar
     pg.tint(0, 0, 0, 28);
 
-    // Logo-Größe fürs Wasserzeichen
     var wWidth = 380;
     var wHeight = (logoImg.height / logoImg.width) * wWidth;
 
-    for (var x = -100; x < exportW + 400; x += 520) {
-      for (var y = -100; y < exportH + 400; y += 520) {
+    for (var x = -120; x < exportW + 400; x += 520) {
+      for (var y = -120; y < exportH + 400; y += 520) {
         pg.image(logoImg, x, y, wWidth, wHeight);
       }
     }
@@ -236,7 +234,6 @@ function exportHighRes() {
 
   save(pg, 'Milz&More_Quadrat.png');
 }
-
 function getCodeFromDate() {
   var val = inputField.value().replace(/[^0-9]/g, "");
   var res = val.split('').map(Number);

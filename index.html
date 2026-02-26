@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Milz & More – Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=900" />
+  <title>Lebenscode Mandala</title>
+  <link rel="stylesheet" href="app.css?v=901" />
 </head>
 
 <body>
@@ -12,8 +12,8 @@
     <div class="brand">
       <img class="brand-logo" src="assets/Logo.png" alt="Milz & More Logo" />
       <div class="brand-text">
-        <div class="brand-title">Milz & More</div>
-        <div class="brand-sub">Mandala Studio</div>
+        <div class="brand-title">Lebenscode Mandala</div>
+        <div class="brand-sub">von Milz & More</div>
       </div>
     </div>
 
@@ -74,18 +74,16 @@
   </main>
 
   <script>
-    // ---------- STATE ----------
     const state = {
       engine: "quadrat",
-      mode: "geburtstag",     // geburtstag | text
+      mode: "geburtstag",
       input: "15011987",
-      direction: "aussen",    // aussen | innen
-      sector: 8,              // nur rund
-      sliders: Array(10).fill(85), // index 1..9
+      direction: "aussen",
+      sector: 8,
+      sliders: Array(10).fill(85),
       isAdmin: false
     };
 
-    // optional: admin via URL ?access=milz_secret
     const params = new URLSearchParams(location.search);
     if (params.get("access") === "milz_secret") state.isAdmin = true;
 
@@ -101,7 +99,6 @@
       sliders: document.getElementById("sliders")
     };
 
-    // ---------- UI BUILD: 9 Slider ----------
     function buildSliders() {
       els.sliders.innerHTML = "";
       for (let i = 1; i <= 9; i++) {
@@ -140,33 +137,24 @@
     }
 
     function updateConditionalFields() {
-      // Sektor nur für Rund
       els.sectorWrap.style.display = (state.engine === "rund") ? "block" : "none";
     }
 
-    // ---------- ENGINE LOAD ----------
     function loadEngine(engine) {
       state.engine = engine;
       setActiveEngineButton(engine);
       updateConditionalFields();
 
       els.loading.style.display = "grid";
-      // Cache-buster, damit GH Pages sicher neu lädt
       els.frame.src = `engines/${engine}/index.html?v=${Date.now()}`;
     }
 
-    // ---------- MESSAGING ----------
     function pushStateToEngine() {
-      // iframe noch nicht bereit -> ignorieren (Engine sendet READY)
-      try {
-        els.frame.contentWindow.postMessage({ type: "SET_STATE", payload: state }, "*");
-      } catch (_) {}
+      try { els.frame.contentWindow.postMessage({ type: "SET_STATE", payload: state }, "*"); } catch (_) {}
     }
 
     function requestExport() {
-      try {
-        els.frame.contentWindow.postMessage({ type: "EXPORT", payload: state }, "*");
-      } catch (_) {}
+      try { els.frame.contentWindow.postMessage({ type: "EXPORT", payload: state }, "*"); } catch (_) {}
     }
 
     window.addEventListener("message", (ev) => {
@@ -174,13 +162,11 @@
       if (!msg || typeof msg !== "object") return;
 
       if (msg.type === "READY") {
-        // Engine ist bereit, jetzt State reinpushen
         els.loading.style.display = "none";
         pushStateToEngine();
       }
 
       if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
-        // Engine gibt die aktuellen 9 Farben zurück, wir färben die Dots
         for (let i = 1; i <= 9; i++) {
           const dot = document.getElementById("dot" + i);
           if (dot && msg.colors[i-1]) dot.style.background = msg.colors[i-1];
@@ -188,7 +174,6 @@
       }
     });
 
-    // ---------- UI EVENTS ----------
     document.querySelectorAll(".engine-btn").forEach(btn => {
       btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
     });
@@ -199,7 +184,6 @@
     els.sector.addEventListener("change", () => { state.sector = Number(els.sector.value); pushStateToEngine(); });
     els.download.addEventListener("click", requestExport);
 
-    // ---------- INIT ----------
     buildSliders();
     updateConditionalFields();
     loadEngine("quadrat");

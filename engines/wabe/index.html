@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wabe Engine</title>
+  <title>Engine</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
   <script defer src="mandala.js"></script>
 
   <style>
-    html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#111; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+    }
 
     #loading {
       position: fixed;
@@ -17,27 +23,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font: 600 16px/1 Arial, sans-serif;
-      letter-spacing: 1px;
-      color: #fff;
-      background: #111;
+      font: 700 14px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      letter-spacing: 0.6px;
+      color: rgba(255,255,255,0.85);
+      background: rgba(10,14,18,0.75);
+      backdrop-filter: blur(10px);
       z-index: 9999;
-    }
-
-    #engine-logo {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      height: 40px;
-      opacity: 0.9;
-      z-index: 10000;
-      pointer-events: none;
     }
   </style>
 </head>
 
 <body>
   <div id="loading">Loading…</div>
-  <img id="engine-logo" src="../../assets/Logo.png" alt="Logo">
 </body>
 </html>

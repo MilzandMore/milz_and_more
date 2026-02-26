@@ -1,16 +1,16 @@
+<!-- Datei: index.html (ROOT) — KOMPLETT -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=930" />
+  <link rel="stylesheet" href="app.css?v=940" />
 </head>
 
 <body>
   <header class="app-header">
     <div class="brand">
-      <!-- UI: Weißes Logo für dunklen Header -->
       <img class="brand-logo" src="assets/Logo.png" alt="Milz & More Logo" />
       <div class="brand-text">
         <div class="brand-title">Lebenscode Mandala</div>
@@ -90,12 +90,8 @@
       sector: 8,
       sliders: Array(10).fill(85),
       isAdmin: false,
-
-      // Export/Wasserzeichen: schwarzes Logo (für helle Export-Fläche)
-      exportLogo: "../../assets/Logo_black.png",
-
-      // NEU: Print Look on/off -> Engines können darauf reagieren
-      paperLook: true
+      paperLook: true,
+      exportLogo: "../../assets/Logo_black.png"
     };
 
     const params = new URLSearchParams(location.search);
@@ -114,6 +110,16 @@
       sliders: document.getElementById("sliders"),
       paperToggle: document.getElementById("paperToggle")
     };
+
+    function showLoading() {
+      els.loading.style.display = "grid";
+      els.stage.classList.add("is-loading"); // KEIN Blur – nur dezentes Overlay
+    }
+
+    function hideLoading() {
+      els.loading.style.display = "none";
+      els.stage.classList.remove("is-loading");
+    }
 
     function buildSliders() {
       els.sliders.innerHTML = "";
@@ -166,7 +172,19 @@
       setActiveEngineButton(engine);
       updateConditionalFields();
 
-      els.loading.style.display = "grid";
+      showLoading();
+
+      // Fallback: falls READY nicht kommt, nach 2.5s Overlay weg
+      const fallbackTimer = setTimeout(() => hideLoading(), 2500);
+
+      els.frame.onload = () => {
+        // onload heißt nur: HTML geladen. Wir lassen trotzdem READY Vorrang,
+        // aber nehmen das Overlay jetzt sicher weg.
+        clearTimeout(fallbackTimer);
+        hideLoading();
+        pushStateToEngine();
+      };
+
       els.frame.src = `engines/${engine}/index.html?v=${Date.now()}`;
     }
 
@@ -183,7 +201,7 @@
       if (!msg || typeof msg !== "object") return;
 
       if (msg.type === "READY") {
-        els.loading.style.display = "none";
+        hideLoading();
         pushStateToEngine();
       }
 

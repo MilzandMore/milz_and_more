@@ -1,13 +1,5 @@
-let logoImg;
-
-function preload() {
-  console.log("🟢 preload läuft");
-
-  logoImg = loadImage(
-    "Logo.png",
-    () => console.log("✅ Logo geladen"),
-    () => console.log("❌ Logo NICHT gefunden (aber Sketch läuft)")
-  );
+alert("mandala.js wurde geladen ✅");
+console.log("mandala.js läuft");
 }
 
 function setup() {

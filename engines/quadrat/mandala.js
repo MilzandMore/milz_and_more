@@ -1,7 +1,8 @@
 // =====================================================
 // QUADRAT ENGINE (läuft allein ODER eingebettet im iFrame)
 // - Im iFrame: KEINE eigene UI, Steuerung kommt von Parent (index.html root)
-// - Export: A4 2480x3508 mit "Rund-ähnlicher" Größenordnung + Logo/Wasserzeichen
+// - Optik: KEIN Stroke im Preview -> passt zu Rund/Wabe
+// - Export: A4 2480x3508, saubere Größe + Logo/Wasserzeichen
 // =====================================================
 
 /* ---------- GLOBALS ---------- */
@@ -54,29 +55,27 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
+  pixelDensity(2);
 
-  // Admin via URL (?access=milz_secret) funktioniert weiterhin
+  // Admin via URL (?access=milz_secret)
   var params = getURLParams();
   if (params.access === 'milz_secret') isAdmin = true;
 
-  // In embed mode: wir steuern alles über Parent -> noLoop + redraw nur bei Updates
   if (EMBED) {
     noLoop();
     window.addEventListener("message", onMessageFromParent);
-    // Parent informieren: Engine ist bereit
     try { window.parent.postMessage({ type: "READY" }, "*"); } catch(_) {}
     redraw();
   } else {
-    // Standalone: damit es nicht "leer" ist
     loop();
   }
 }
 
 /* ---------- DRAW ---------- */
 function draw() {
-  // Transparent im iFrame, sonst weiß (Standalone)
-  if (!EMBED) background(255);
-  else clear();
+  // In iFrame transparent (damit App-Hintergrund wirkt)
+  if (EMBED) clear();
+  else background(255);
 
   const isMobile = windowWidth < 600;
 
@@ -86,21 +85,21 @@ function draw() {
 
   push();
 
-  // In App zentrieren wir sauber in die Stage
   const scaleFactor = (min(width, height) / 850) * (isMobile ? 0.82 : 0.92);
-  const centerY = height / 2;
   const centerX = width / 2;
+  const centerY = height / 2;
 
   translate(centerX, centerY);
   scale(scaleFactor);
 
   calcQuadratMatrix(drawCode);
-  drawQuadrat(startDigit);
+
+  // ✅ WICHTIG: Keine Linien im Preview (damit es aussieht wie Rund/Wabe)
+  drawQuadrat(startDigit, null, { stroke: false });
 
   pop();
 
-  // In App KEIN Logo über dem Mandala (die App hat eigenes Branding)
-  // In Standalone dürfen wir es anzeigen
+  // Standalone Logo (nicht in der App)
   if (!EMBED && logoImg && logoImg.width > 0) {
     push(); resetMatrix();
     var lW = isMobile ? 55 : 150;
@@ -110,7 +109,7 @@ function draw() {
     pop();
   }
 
-  // Farben an Parent schicken für die Punkte neben den Slidern
+  // Farbpunkte an Parent senden
   if (EMBED) {
     try {
       const colors = [];
@@ -124,12 +123,18 @@ function draw() {
 }
 
 /* ---------- RENDER ---------- */
-function drawQuadrat(startDigit, target) {
+function drawQuadrat(startDigit, target, opts) {
   var ctx = target || window;
   var ts = 16;
 
-  ctx.stroke(0, 35);
-  ctx.strokeWeight(0.5);
+  const strokeOn = opts && opts.stroke === true;
+
+  if (strokeOn) {
+    ctx.stroke(0, 18);
+    ctx.strokeWeight(0.35);
+  } else {
+    ctx.noStroke(); // ✅ optisch wie Rund/Wabe
+  }
 
   for (var r = 0; r < 20; r++) {
     for (var c = 0; c < 20; c++) {
@@ -145,6 +150,7 @@ function drawQuadrat(startDigit, target) {
           map(sVal, 20, 100, 98, brightness(col))
         );
 
+        // 4 Quadranten
         ctx.rect(c * ts, -(r + 1) * ts, ts, ts);
         ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts);
         ctx.rect(c * ts, r * ts, ts, ts);
@@ -167,17 +173,11 @@ function exportHighRes() {
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
-  // Quadrat-Grid: Gesamtbreite = 40 * ts
   const ts = 16;
   const gridSize = 40 * ts; // 640
-
-  // ✅ Größe wie "Rund" (optisch ähnlich)
-  // Wenn du minimal größer willst -> 1500
-  const TARGET_WIDTH = 1400;
-
+  const TARGET_WIDTH = 1400; // gleiche Größenordnung wie Rund
   const sc = TARGET_WIDTH / gridSize;
 
-  // Positionierung: oben genug Luft, unten Logo + Wasserzeichen
   const centerX = exportW / 2;
   const centerY = exportH * 0.36;
 
@@ -186,17 +186,16 @@ function exportHighRes() {
   pg.scale(sc);
 
   calcQuadratMatrix(drawCode);
-  drawQuadrat(startDigit, pg);
+
+  // ✅ Export darf minimal Stroke haben (sauber), aber sehr dezent
+  drawQuadrat(startDigit, pg, { stroke: true });
 
   pg.pop();
 
   // Wasserzeichen (nur wenn NICHT Admin)
   if (logoImg && !isAdmin) {
     pg.resetMatrix();
-
-    // Logo ist hell -> wir tinten es dunkel, damit es auf Weiß sichtbar ist
-    // (funktioniert wenn Logo transparente Flächen hat)
-    pg.tint(0, 80); // Schwarz, weich
+    pg.tint(0, 80);
 
     const wWidth = 360;
     const wHeight = (logoImg.height / logoImg.width) * wWidth;
@@ -213,8 +212,6 @@ function exportHighRes() {
   // Logo unten rechts
   if (logoImg) {
     pg.resetMatrix();
-
-    // Auf weißem Papier soll es sichtbar sein -> leicht dunkler tint
     pg.tint(0, 210);
 
     const lW = 520;
@@ -228,18 +225,9 @@ function exportHighRes() {
 }
 
 /* ---------- INPUT HELPERS ---------- */
-function getMode() {
-  if (!EMBED) return "geburtstag";
-  return (extState.mode || "geburtstag");
-}
-function getInput() {
-  if (!EMBED) return "15011987";
-  return (extState.input ?? "15011987");
-}
-function getDirection() {
-  if (!EMBED) return "aussen";
-  return (extState.direction || "aussen");
-}
+function getMode() { return EMBED ? (extState.mode || "geburtstag") : "geburtstag"; }
+function getInput() { return EMBED ? (extState.input ?? "15011987") : "15011987"; }
+function getDirection() { return EMBED ? (extState.direction || "aussen") : "aussen"; }
 function getSlider(val) {
   if (!EMBED) return 85;
   const arr = extState.sliders || [];

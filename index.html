@@ -4,22 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=902" />
+  <link rel="stylesheet" href="app.css?v=930" />
 </head>
 
 <body>
   <header class="app-header">
     <div class="brand">
-      <!-- nutzt automatisch black logo, fällt zurück auf Logo.png -->
-      <img
-        class="brand-logo"
-        src="assets/Logo_black.png"
-        onerror="this.onerror=null; this.src='assets/Logo.png';"
-        alt="Milz & More Logo"
-      />
+      <!-- UI: Weißes Logo für dunklen Header -->
+      <img class="brand-logo" src="assets/Logo.png" alt="Milz & More Logo" />
       <div class="brand-text">
         <div class="brand-title">Lebenscode Mandala</div>
-        <div class="brand-sub">Milz & More</div>
+        <div class="brand-sub">von Milz & More</div>
       </div>
     </div>
 
@@ -59,11 +54,18 @@
       <button id="download" class="primary" type="button">Download</button>
     </div>
 
-    <nav class="engine-nav">
-      <button class="engine-btn active" data-engine="quadrat" type="button">Quadrat</button>
-      <button class="engine-btn" data-engine="rund" type="button">Rund</button>
-      <button class="engine-btn" data-engine="wabe" type="button">Wabe</button>
-    </nav>
+    <div class="right">
+      <label class="toggle">
+        <input id="paperToggle" type="checkbox" checked />
+        <span>Print-Look</span>
+      </label>
+
+      <nav class="engine-nav">
+        <button class="engine-btn active" data-engine="quadrat" type="button">Quadrat</button>
+        <button class="engine-btn" data-engine="rund" type="button">Rund</button>
+        <button class="engine-btn" data-engine="wabe" type="button">Wabe</button>
+      </nav>
+    </div>
   </header>
 
   <main class="app-main">
@@ -73,7 +75,7 @@
       <div class="hint">Tipp: Slider regeln Sättigung/Helligkeit je Ziffer.</div>
     </aside>
 
-    <section class="stage">
+    <section id="stage" class="stage paper">
       <div id="loading" class="loading">Engine lädt…</div>
       <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
     </section>
@@ -88,14 +90,19 @@
       sector: 8,
       sliders: Array(10).fill(85),
       isAdmin: false,
-      // NEU: welches Logo die Engine für Export/Wasserzeichen nutzen soll
-      exportLogo: "../../assets/Logo_black.png"
+
+      // Export/Wasserzeichen: schwarzes Logo (für helle Export-Fläche)
+      exportLogo: "../../assets/Logo_black.png",
+
+      // NEU: Print Look on/off -> Engines können darauf reagieren
+      paperLook: true
     };
 
     const params = new URLSearchParams(location.search);
     if (params.get("access") === "milz_secret") state.isAdmin = true;
 
     const els = {
+      stage: document.getElementById("stage"),
       frame: document.getElementById("engineFrame"),
       loading: document.getElementById("loading"),
       mode: document.getElementById("mode"),
@@ -104,7 +111,8 @@
       sectorWrap: document.getElementById("sectorWrap"),
       sector: document.getElementById("sector"),
       download: document.getElementById("download"),
-      sliders: document.getElementById("sliders")
+      sliders: document.getElementById("sliders"),
+      paperToggle: document.getElementById("paperToggle")
     };
 
     function buildSliders() {
@@ -146,6 +154,11 @@
 
     function updateConditionalFields() {
       els.sectorWrap.style.display = (state.engine === "rund") ? "block" : "none";
+    }
+
+    function applyPaperLook() {
+      els.stage.classList.toggle("paper", !!state.paperLook);
+      els.stage.classList.toggle("dark", !state.paperLook);
     }
 
     function loadEngine(engine) {
@@ -192,8 +205,15 @@
     els.sector.addEventListener("change", () => { state.sector = Number(els.sector.value); pushStateToEngine(); });
     els.download.addEventListener("click", requestExport);
 
+    els.paperToggle.addEventListener("change", () => {
+      state.paperLook = els.paperToggle.checked;
+      applyPaperLook();
+      pushStateToEngine();
+    });
+
     buildSliders();
     updateConditionalFields();
+    applyPaperLook();
     loadEngine("quadrat");
   </script>
 </body>

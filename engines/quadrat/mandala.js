@@ -1,3 +1,5 @@
+console.log("Setup läuft");
+console.log(window.parent.document.getElementById("loading"));
 let ready = false;
 
 function setup() {

@@ -2,12 +2,35 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>Quadrat Test</title>
+  <title>Quadrat Mandala</title>
 
-  <script src="mandala.js"></script>
+  <!-- p5.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+
+  <!-- Mandala Script -->
+  <script defer src="mandala.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #1a1a1a;
+      color: white;
+      overflow: hidden;
+    }
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Index geladen</h1>
+  <div id="loading">Loading…</div>
 </body>
 </html>

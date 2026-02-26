@@ -1,9 +1,28 @@
-// 1. GLOBALE VARIABLEN
-var inputField, modeSelect, dirSelect, sliders = [], colorIndicators = [], sliderPanel;
+// =====================================================
+// QUADRAT ENGINE (läuft allein ODER eingebettet im iFrame)
+// - Im iFrame: KEINE eigene UI, Steuerung kommt von Parent (index.html root)
+// - Export: A4 2480x3508 mit "Rund-ähnlicher" Größenordnung + Logo/Wasserzeichen
+// =====================================================
+
+/* ---------- GLOBALS ---------- */
 var qMatrix = [];
 var logoImg;
-var codeDisplay;
 var isAdmin = false;
+
+const EMBED = (() => {
+  try { return window.self !== window.top; } catch(e) { return true; }
+})();
+
+// Parent-State (kommt per postMessage)
+var extState = {
+  engine: "quadrat",
+  mode: "geburtstag",     // "geburtstag" | "text"
+  input: "15011987",
+  direction: "aussen",    // "aussen" | "innen"
+  sliders: Array(10).fill(85),
+  isAdmin: false,
+  paperLook: true
+};
 
 const mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
 
@@ -24,108 +43,65 @@ var charMap = {
   'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
 };
 
-// Logo liegt bei dir im assets-Ordner
-function preload() { logoImg = loadImage('../../assets/Logo.png'); }
+/* ---------- PRELOAD ---------- */
+function preload() {
+  // Logo liegt im Repo: assets/Logo.png
+  // Engine liegt in engines/quadrat -> 2 Ebenen hoch
+  logoImg = loadImage('../../assets/Logo.png');
+}
 
+/* ---------- SETUP ---------- */
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
+
+  // Admin via URL (?access=milz_secret) funktioniert weiterhin
   var params = getURLParams();
   if (params.access === 'milz_secret') isAdmin = true;
 
-  var isMobile = windowWidth < 600;
-
-  // EINHEITLICHE TOPBAR
-  var topBar = createDiv("").style('position', 'fixed').style('top', '0').style('left', '0').style('width', '100%')
-    .style('background', '#2c3e50').style('color', '#fff').style('display', 'flex').style('padding', isMobile ? '4px 8px' : '10px 20px')
-    .style('gap', isMobile ? '8px' : '20px').style('font-family', '"Inter", sans-serif').style('z-index', '200')
-    .style('align-items', 'center').style('box-sizing', 'border-box').style('height', isMobile ? '55px' : '75px');
-
-  function createUIGroup(labelTxt, element, wMobile, wDesktop) {
-    var group = createDiv("").parent(topBar).style('display', 'flex').style('flex-direction', 'column').style('justify-content', 'center');
-    createSpan(labelTxt).parent(group).style('font-size', isMobile ? '8px' : '10px').style('color', '#bdc3c7').style('text-transform', 'uppercase').style('font-weight', 'bold').style('margin-bottom', '2px');
-    if (element) {
-      element.parent(group).style('width', isMobile ? wMobile : wDesktop)
-        .style('font-size', isMobile ? '11px' : '13px').style('background', '#34495e').style('color', '#fff')
-        .style('border', 'none').style('border-radius', '4px').style('padding', isMobile ? '3px 5px' : '6px 8px')
-        .style('height', isMobile ? '22px' : '32px');
-    }
-    return group;
-  }
-
-  // MODUS
-  modeSelect = createSelect(); modeSelect.option('Geburtstag'); modeSelect.option('Text');
-  createUIGroup("MODUS", modeSelect, "80px", "110px");
-
-  inputField = createInput('15011987');
-  createUIGroup("EINGABE", inputField, "75px", "140px");
-
-  var codeGroup = createUIGroup("CODE", null, "auto", "auto");
-  codeDisplay = createSpan("").parent(codeGroup).style('font-size', isMobile ? '11px' : '14px').style('color', '#ffffff').style('font-weight', '600').style('letter-spacing', '1px');
-
-  dirSelect = createSelect(); dirSelect.option('Außen'); dirSelect.option('Innen');
-  createUIGroup("RICHTUNG", dirSelect, "65px", "100px");
-
-  var saveBtn = createButton('DOWNLOAD').parent(topBar)
-   .style('margin-left', 'auto').style('background', '#ffffff').style('color', '#2c3e50')
-   .style('border', 'none').style('font-weight', 'bold').style('border-radius', '4px')
-   .style('padding', isMobile ? '6px 8px' : '10px 16px').style('font-size', isMobile ? '9px' : '12px').style('cursor', 'pointer');
-  saveBtn.mousePressed(exportHighRes);
-
-  sliderPanel = createDiv("").style('position', 'fixed').style('background', 'rgba(44, 62, 80, 0.98)').style('z-index', '150');
-  for (var i = 1; i <= 9; i++) {
-    var sRow = createDiv("").parent(sliderPanel).style('display','flex').style('align-items','center').style('gap','4px');
-    colorIndicators[i] = createDiv("").parent(sRow).style('width', '8px').style('height', '8px').style('border-radius', '50%');
-    sliders[i] = createSlider(20, 100, 85).parent(sRow).input(() => redraw());
-  }
-
-  updateLayout();
-  [modeSelect, dirSelect, inputField].forEach(e => e.input ? e.input(redraw) : e.changed(redraw));
-}
-
-function updateLayout() {
-  var isMobile = windowWidth < 600;
-  if (isMobile) {
-    sliderPanel.style('top', 'auto').style('bottom', '0').style('left', '0').style('width', '100%')
-      .style('display', 'grid').style('grid-template-columns', 'repeat(3, 1fr)').style('padding', '8px 4px').style('gap', '4px');
-    for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '75px');
+  // In embed mode: wir steuern alles über Parent -> noLoop + redraw nur bei Updates
+  if (EMBED) {
+    noLoop();
+    window.addEventListener("message", onMessageFromParent);
+    // Parent informieren: Engine ist bereit
+    try { window.parent.postMessage({ type: "READY" }, "*"); } catch(_) {}
+    redraw();
   } else {
-    sliderPanel.style('bottom', 'auto').style('top', '90px').style('left', '0').style('width', 'auto')
-      .style('display', 'flex').style('flex-direction', 'column').style('padding', '12px').style('border-radius', '0 8px 8px 0');
-    for (var i = 1; i <= 9; i++) if(sliders[i]) sliders[i].style('width', '80px');
+    // Standalone: damit es nicht "leer" ist
+    loop();
   }
 }
 
+/* ---------- DRAW ---------- */
 function draw() {
-  background(255);
-  var isMobile = windowWidth < 600;
+  // Transparent im iFrame, sonst weiß (Standalone)
+  if (!EMBED) background(255);
+  else clear();
 
-  var params = getURLParams();
-  if (params.access === 'milz_secret') isAdmin = true;
+  const isMobile = windowWidth < 600;
 
-  var baseCode = (modeSelect.value().includes('Geburtstag')) ? getCodeFromDate() : getCodeFromText();
-  var startDigit = baseCode[0] || 1;
-  var drawCode = (dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
-
-  if(codeDisplay) codeDisplay.html(baseCode.join(""));
-
-  for (var i = 1; i <= 9; i++) {
-    var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][i]) ? colorMatrix[startDigit][i] : mapZ[i];
-    if(colorIndicators[i]) colorIndicators[i].style('background-color', hex);
-  }
+  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
+  const startDigit = baseCode[0] || 1;
+  const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
   push();
-  var scaleFactor = (min(width, height) / 850) * (isMobile ? 0.80 : 0.95);
-  var centerY = isMobile ? height / 2 - 40 : height / 2 + 20;
-  var centerX = width / 2;
+
+  // In App zentrieren wir sauber in die Stage
+  const scaleFactor = (min(width, height) / 850) * (isMobile ? 0.82 : 0.92);
+  const centerY = height / 2;
+  const centerX = width / 2;
+
   translate(centerX, centerY);
   scale(scaleFactor);
 
   calcQuadratMatrix(drawCode);
   drawQuadrat(startDigit);
+
   pop();
 
-  if (logoImg && logoImg.width > 0) {
+  // In App KEIN Logo über dem Mandala (die App hat eigenes Branding)
+  // In Standalone dürfen wir es anzeigen
+  if (!EMBED && logoImg && logoImg.width > 0) {
     push(); resetMatrix();
     var lW = isMobile ? 55 : 150;
     var lH = (logoImg.height / logoImg.width) * lW;
@@ -133,8 +109,21 @@ function draw() {
     image(logoImg, 15, logoY, lW, lH);
     pop();
   }
+
+  // Farben an Parent schicken für die Punkte neben den Slidern
+  if (EMBED) {
+    try {
+      const colors = [];
+      for (let i = 1; i <= 9; i++) {
+        let hex = (colorMatrix[startDigit] && colorMatrix[startDigit][i]) ? colorMatrix[startDigit][i] : mapZ[i];
+        colors.push(hex);
+      }
+      window.parent.postMessage({ type: "COLORS", colors }, "*");
+    } catch(_) {}
+  }
 }
 
+/* ---------- RENDER ---------- */
 function drawQuadrat(startDigit, target) {
   var ctx = target || window;
   var ts = 16;
@@ -148,8 +137,8 @@ function drawQuadrat(startDigit, target) {
       if (val !== 0) {
         var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val]) ? colorMatrix[startDigit][val] : mapZ[val];
         var col = color(hex);
-        var sVal = sliders[val] ? sliders[val].value() : 85;
 
+        var sVal = getSlider(val);
         ctx.fill(
           hue(col),
           map(sVal, 20, 100, 15, saturation(col)),
@@ -165,11 +154,7 @@ function drawQuadrat(startDigit, target) {
   }
 }
 
-/**
- * EXPORT (A4 2480x3508):
- * ✅ kleiner / mehr Rand
- * ✅ besser platziert
- */
+/* ---------- EXPORT (A4) ---------- */
 function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
@@ -178,29 +163,27 @@ function exportHighRes() {
   pg.colorMode(HSB, 360, 100, 100);
   pg.background(255);
 
-  // Code wie gewohnt
-  var baseCode = (modeSelect.value().includes('Geburtstag')) ? getCodeFromDate() : getCodeFromText();
-  var startDigit = baseCode[0] || 1;
-  var drawCode = (dirSelect.value().includes('Innen')) ? [...baseCode].reverse() : baseCode;
+  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
+  const startDigit = baseCode[0] || 1;
+  const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
-  // Quadrat-Grundmaß:
-  // drawQuadrat zeichnet 4 Quadranten à 20*ts -> Gesamtbreite 40*ts
+  // Quadrat-Grid: Gesamtbreite = 40 * ts
   const ts = 16;
-  const gridSize = 40 * ts; // 640px
+  const gridSize = 40 * ts; // 640
 
-  // >>> WICHTIG: Zielbreite wie beim Rund-Export (optisch perfekt)
-  // Wenn du es NOCH kleiner willst: z.B. 1100 / 1000
-  const TARGET_WIDTH = 1200;
+  // ✅ Größe wie "Rund" (optisch ähnlich)
+  // Wenn du minimal größer willst -> 1500
+  const TARGET_WIDTH = 1400;
 
-  const scale = TARGET_WIDTH / gridSize;
+  const sc = TARGET_WIDTH / gridSize;
 
-  // Positionierung (ähnlich wie Rund: etwas über Mitte, damit unten Logo/Wasserzeichen Luft haben)
+  // Positionierung: oben genug Luft, unten Logo + Wasserzeichen
   const centerX = exportW / 2;
   const centerY = exportH * 0.36;
 
   pg.push();
   pg.translate(centerX, centerY);
-  pg.scale(scale);
+  pg.scale(sc);
 
   calcQuadratMatrix(drawCode);
   drawQuadrat(startDigit, pg);
@@ -210,47 +193,75 @@ function exportHighRes() {
   // Wasserzeichen (nur wenn NICHT Admin)
   if (logoImg && !isAdmin) {
     pg.resetMatrix();
-    // dezenter aber sichtbar
-    pg.tint(0, 0, 0, 28);
 
-    var wWidth = 380;
-    var wHeight = (logoImg.height / logoImg.width) * wWidth;
+    // Logo ist hell -> wir tinten es dunkel, damit es auf Weiß sichtbar ist
+    // (funktioniert wenn Logo transparente Flächen hat)
+    pg.tint(0, 80); // Schwarz, weich
 
-    for (var x = -120; x < exportW + 400; x += 520) {
-      for (var y = -120; y < exportH + 400; y += 520) {
+    const wWidth = 360;
+    const wHeight = (logoImg.height / logoImg.width) * wWidth;
+
+    for (let x = -120; x < exportW + 400; x += 520) {
+      for (let y = -120; y < exportH + 400; y += 520) {
         pg.image(logoImg, x, y, wWidth, wHeight);
       }
     }
+
     pg.noTint();
   }
 
-  // Logo unten rechts (immer)
+  // Logo unten rechts
   if (logoImg) {
     pg.resetMatrix();
-    var lW = 520;
-    var lH = (logoImg.height / logoImg.width) * lW;
+
+    // Auf weißem Papier soll es sichtbar sein -> leicht dunkler tint
+    pg.tint(0, 210);
+
+    const lW = 520;
+    const lH = (logoImg.height / logoImg.width) * lW;
     pg.image(logoImg, exportW - lW - 110, exportH - lH - 110, lW, lH);
+
+    pg.noTint();
   }
 
   save(pg, 'Milz&More_Quadrat.png');
 }
-function getCodeFromDate() {
-  var val = inputField.value().replace(/[^0-9]/g, "");
+
+/* ---------- INPUT HELPERS ---------- */
+function getMode() {
+  if (!EMBED) return "geburtstag";
+  return (extState.mode || "geburtstag");
+}
+function getInput() {
+  if (!EMBED) return "15011987";
+  return (extState.input ?? "15011987");
+}
+function getDirection() {
+  if (!EMBED) return "aussen";
+  return (extState.direction || "aussen");
+}
+function getSlider(val) {
+  if (!EMBED) return 85;
+  const arr = extState.sliders || [];
+  const v = arr[val];
+  return (typeof v === "number") ? v : 85;
+}
+
+/* ---------- CODE GEN ---------- */
+function getCodeFromDate(str) {
+  var val = String(str || "").replace(/[^0-9]/g, "");
   var res = val.split('').map(Number);
   while (res.length < 8) res.push(0);
   return res.slice(0, 8);
 }
 
-function getCodeFromText() {
-  var textStr = inputField.value().toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
-  if (textStr.length === 0) return [1,1,1,1,1,1,1,1];
-
+function getCodeFromText(textStr) {
+  var t = String(textStr || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
+  if (t.length === 0) return [1,1,1,1,1,1,1,1];
   var firstRow = [];
-  for (var char of textStr) { if (charMap[char]) firstRow.push(charMap[char]); }
+  for (var char of t) { if (charMap[char]) firstRow.push(charMap[char]); }
   var currentRow = firstRow;
-
   while(currentRow.length < 8) currentRow.push(9);
-
   while (currentRow.length > 8) {
     var nextRow = [];
     for (var i = 0; i < currentRow.length - 1; i++) {
@@ -280,31 +291,40 @@ function calcQuadratMatrix(code) {
   }
 
   for(var i = 0; i < 8; i+=2) set2(i, i, d[0], d[1]);
-
-  for(var i = 0; i < 6; i+=2) {
-    set2(i, i+2, m[0], m[1]);
-    set2(i+2, i, m[0], m[1]);
-  }
-
-  for(var i = 0; i < 4; i+=2) {
-    set2(i, i+4, j1[0], j1[1]);
-    set2(i+4, i, j1[0], j1[1]);
-  }
-
-  set2(0, 6, j2[0], j2[1]);
-  set2(6, 0, j2[0], j2[1]);
+  for(var i = 0; i < 6; i+=2) { set2(i, i+2, m[0], m[1]); set2(i+2, i, m[0], m[1]); }
+  for(var i = 0; i < 4; i+=2) { set2(i, i+4, j1[0], j1[1]); set2(i+4, i, j1[0], j1[1]); }
+  set2(0, 6, j2[0], j2[1]); set2(6, 0, j2[0], j2[1]);
 
   for(var r = 0; r < 8; r++) {
     for(var c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c-2], qMatrix[r][c-1]);
   }
-
   for(var c = 0; c < 20; c++) {
     for(var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r-2][c], qMatrix[r-1][c]);
   }
 }
 
+/* ---------- MESSAGING ---------- */
+function onMessageFromParent(ev) {
+  const msg = ev.data;
+  if (!msg || typeof msg !== "object") return;
+
+  if (msg.type === "SET_STATE" && msg.payload) {
+    extState = Object.assign(extState, msg.payload);
+    if (msg.payload.isAdmin === true) isAdmin = true;
+    redraw();
+  }
+
+  if (msg.type === "EXPORT") {
+    if (msg.payload) {
+      extState = Object.assign(extState, msg.payload);
+      if (msg.payload.isAdmin === true) isAdmin = true;
+    }
+    exportHighRes();
+  }
+}
+
+/* ---------- RESIZE ---------- */
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  updateLayout();
-  redraw();
+  if (EMBED) redraw();
 }

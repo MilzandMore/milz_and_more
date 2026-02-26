@@ -1,18 +1,9 @@
-function preload() {
-  console.log("🟢 preload läuft");
-  logoImg = loadImage(
-    'Logo.png',
-    () => console.log("✅ Logo geladen"),
-    () => console.log("❌ Logo FEHLT")
-  );
-}
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lebenscode Mandala Studio</title>
-
   <link rel="stylesheet" href="app.css" />
 </head>
 
@@ -37,7 +28,7 @@ function preload() {
     <p>Wähle oben eine Form aus.</p>
   </div>
 
-  <iframe id="engine-frame"></iframe>
+  <iframe id="engine-frame" title="Mandala Engine"></iframe>
 </main>
 
 <script>
@@ -48,7 +39,8 @@ function loadEngine(name) {
   welcome.style.display = "none";
   frame.style.display = "block";
 
-  frame.src = "engines/" + name + "/index.html";
+  // Cache-Buster, damit GitHub Pages wirklich neu lädt
+  frame.src = "engines/" + name + "/index.html?v=" + Date.now();
 }
 </script>
 

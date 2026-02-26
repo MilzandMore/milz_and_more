@@ -57,10 +57,13 @@ window.addEventListener("message", (ev) => {
 
 // --------- P5 ----------
 function preload() {
-  // optional: watermark / export uses logo. App-Brand ist im Header, Engine braucht nur für Export.
-  logoImg = loadImage('../../assets/Logo.png');
+  const p = (APP && APP.exportLogo) ? APP.exportLogo : "../../assets/Logo_black.png";
+  logoImg = loadImage(
+    p,
+    () => {},
+    () => { logoImg = loadImage("../../assets/Logo.png"); }
+  );
 }
-
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);

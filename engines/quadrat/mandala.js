@@ -61,7 +61,7 @@ function setup() {
   }
 
   // MODUS: GEBURTSTAG statt Geburt
-  modeSelect = createSelect(); modeSelect.option('Geburtstag'); modeSelect.option('Text');
+  modeSelect = createSelect(); modeSelect.option('Geburtstag'); modeSelect.option('Affirmation');
   createUIGroup("MODUS", modeSelect, "80px", "110px");
   
   inputField = createInput('15011987');

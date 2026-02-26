@@ -41,7 +41,14 @@ window.addEventListener("message",(ev)=>{
   }
 });
 
-function preload(){ logoImg = loadImage('../../assets/Logo.png'); }
+function preload() {
+  const p = (APP && APP.exportLogo) ? APP.exportLogo : "../../assets/Logo_black.png";
+  logoImg = loadImage(
+    p,
+    () => {},
+    () => { logoImg = loadImage("../../assets/Logo.png"); }
+  );
+}
 
 function setup(){
   createCanvas(windowWidth, windowHeight);

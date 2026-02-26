@@ -1,3 +1,4 @@
+/* Datei: app.css (ROOT) — KOMPLETT */
 :root{
   --bgA: #07090e;
   --bgB: #0b0f14;
@@ -13,7 +14,6 @@
   --activeBg: #ffffff;
   --activeText: #0b0f14;
 
-  /* Papier-Ton: nicht reines Weiß -> edler */
   --paper: #f6f3ee;
   --paper2: #fbfaf7;
 }
@@ -205,14 +205,14 @@ html,body{
   box-shadow: 0 20px 80px rgba(0,0,0,0.60);
 }
 
-/* Print-Look (empfohlen) */
+/* Print-Look: Papier ohne Blur */
 .stage.paper{
   background:
-    radial-gradient(900px 700px at 50% 40%, rgba(0,0,0,0.05), transparent 60%),
+    radial-gradient(900px 700px at 50% 40%, rgba(0,0,0,0.06), transparent 60%),
     linear-gradient(180deg, var(--paper2), var(--paper));
 }
 
-/* Dark-Look (optional) */
+/* Dark-Look optional */
 .stage.dark{
   background:
     radial-gradient(800px 520px at 50% 42%, rgba(255,255,255,0.06), transparent 60%),
@@ -226,13 +226,13 @@ html,body{
   display:block;
   background: transparent;
 
-  /* Wichtig: edler Print-Schatten statt Neon */
+  /* KEIN Blur */
   filter:
     drop-shadow(0 18px 50px rgba(0,0,0,0.22))
     drop-shadow(0 2px 12px rgba(0,0,0,0.12));
 }
 
-/* Loading overlay */
+/* Loading overlay: KEIN Blur, nur Overlay */
 .loading{
   position:absolute;
   inset:0;
@@ -241,7 +241,12 @@ html,body{
   font-weight: 950;
   letter-spacing: 0.6px;
   z-index: 20;
-  background: rgba(7,9,14,0.25);
+  background: rgba(7,9,14,0.18);
   backdrop-filter: blur(10px);
   color: rgba(238,243,251,0.92);
+}
+
+/* Während Laden: keine Weichzeichnung, nur minimal dunkler */
+.stage.is-loading .engine-frame{
+  opacity: 0.92;
 }

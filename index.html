@@ -4,16 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=901" />
+  <link rel="stylesheet" href="app.css?v=902" />
 </head>
 
 <body>
   <header class="app-header">
     <div class="brand">
-      <img class="brand-logo" src="assets/Logo.png" alt="Milz & More Logo" />
+      <!-- nutzt automatisch black logo, fällt zurück auf Logo.png -->
+      <img
+        class="brand-logo"
+        src="assets/Logo_black.png"
+        onerror="this.onerror=null; this.src='assets/Logo.png';"
+        alt="Milz & More Logo"
+      />
       <div class="brand-text">
         <div class="brand-title">Lebenscode Mandala</div>
-        <div class="brand-sub">von Milz & More</div>
+        <div class="brand-sub">Milz & More</div>
       </div>
     </div>
 
@@ -81,7 +87,9 @@
       direction: "aussen",
       sector: 8,
       sliders: Array(10).fill(85),
-      isAdmin: false
+      isAdmin: false,
+      // NEU: welches Logo die Engine für Export/Wasserzeichen nutzen soll
+      exportLogo: "../../assets/Logo_black.png"
     };
 
     const params = new URLSearchParams(location.search);

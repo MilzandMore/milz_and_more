@@ -165,16 +165,42 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-// =====================================================
-// EXPORT (A4) – kräftiger + größer, an Rund angelehnt
-// =====================================================
-function exportHighRes() {
-  const exportW = 2480;
-  const exportH = 3508;
-
+function exportHighRes(){
+  const exportW=2480, exportH=3508;
   const pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100, 100);
+  pg.colorMode(HSB, 360, 100, 100);
   pg.background(255);
+
+  const sector = buildSector();
+  const currentColors = getColorMatrix(colorSeed);
+  const sc = int(APP.sector || 8);
+  const angle = TWO_PI / sc;
+
+  pg.push();
+  pg.translate(exportW/2, exportH*0.40);
+  pg.scale(3.2);
+  for(let i=0;i<sc;i++){
+    pg.push();
+    pg.rotate(i*angle);
+    drawSector(sector, currentColors, pg);
+    pg.pop();
+  }
+  pg.pop();
+
+  if(logoImg && !isAdmin){
+    pg.resetMatrix(); pg.tint(255,0.45);
+    const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
+    for(let x=-100;x<exportW+400;x+=500){
+      for(let y=-100;y<exportH+400;y+=500) pg.image(logoImg, x, y, wWidth, wHeight);
+    }
+    pg.noTint();
+  }
+
+  if(logoImg){
+    const lW=500, lH=(logoImg.height/logoImg.width)*lW;
+    pg.image(logoImg, exportW-lW-100, exportH-lH-100, lW, lH);
+  }
+
 
   const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
   const startDigit = baseCode[0] || 1;

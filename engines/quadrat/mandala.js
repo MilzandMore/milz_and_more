@@ -1,5 +1,6 @@
 // =====================================================
 // QUADRAT ENGINE – EMBED TRANSPARENT + GOLDEN EXPORT
+// (Zwischenlinien wieder AN wie vorher)
 // =====================================================
 
 var qMatrix = [];
@@ -46,6 +47,7 @@ var charMap = {
 };
 
 function preload() {
+  // immer das App-Logo aus /assets verwenden
   logoImg = loadImage('../../assets/Logo.png');
 }
 
@@ -66,7 +68,6 @@ function setup() {
 }
 
 function draw() {
-  // ✅ App-Hintergrund soll durchscheinen:
   if (EMBED) clear();
   else background(255);
 
@@ -76,7 +77,7 @@ function draw() {
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
-  // Farbpunkte ans Parent schicken
+  // Slider-Farben an Parent melden
   if (EMBED) {
     try {
       const colors = [];
@@ -90,14 +91,15 @@ function draw() {
 
   push();
 
+  // wie vorher: zentriert + skaliert
   const scaleFactor = (min(width, height) / 850) * (isMobile ? 0.82 : 0.92);
   translate(width / 2, height / 2);
   scale(scaleFactor);
 
   calcQuadratMatrix(drawCode);
 
-  // Preview: clean (wie Rund/Wabe)
-  drawQuadrat(startDigit, null, { stroke: false });
+  // ✅ Zwischenlinien wieder AN (wie früher)
+  drawQuadrat(startDigit, null, { stroke: true });
 
   pop();
 }
@@ -109,8 +111,8 @@ function drawQuadrat(startDigit, target, opts) {
   const strokeOn = opts && opts.stroke === true;
 
   if (strokeOn) {
-    ctx.stroke(0, 18);
-    ctx.strokeWeight(0.35);
+    ctx.stroke(0, 35);
+    ctx.strokeWeight(0.5);
   } else {
     ctx.noStroke();
   }
@@ -139,8 +141,8 @@ function drawQuadrat(startDigit, target, opts) {
 }
 
 // ✅ GOLDEN SECTION EXPORT (A4)
-// - Größe: Quadratbreite = A4-Breite / φ  (harmonisch)
-// - Position: Mittelpunkt auf y = 0.382 * Höhe (goldener Schnitt von oben)
+// - Größe: Quadratbreite = A4-Breite / φ
+// - Mittelpunkt y = 0.382 * Höhe
 function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
@@ -156,19 +158,19 @@ function exportHighRes() {
   calcQuadratMatrix(drawCode);
 
   const ts = 16;
-  const gridSize = 40 * ts; // 640 (Quadrat in Engine-Koordinaten)
+  const gridSize = 40 * ts; // 640
 
-  const targetSizePx = exportW / PHI; // ≈ 1533px
+  const targetSizePx = exportW / PHI; // ~1533
   const scale = targetSizePx / gridSize;
 
   const centerX = exportW / 2;
-  const centerY = exportH * (1 / (PHI * PHI)); // 0.382...
+  const centerY = exportH * (1 / (PHI * PHI)); // 0.382
 
   pg.push();
   pg.translate(centerX, centerY);
   pg.scale(scale);
 
-  // Export: minimaler Stroke für Druckqualität
+  // Export mit Linien (wie im Preview)
   drawQuadrat(startDigit, pg, { stroke: true });
 
   pg.pop();

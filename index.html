@@ -1,4 +1,3 @@
-<!-- Datei: index.html (ROOT) — KOMPLETT (mit „Failsafe“, damit NICHTS mehr weiß/leer sein kann) -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -6,31 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lebenscode Mandala</title>
 
-  <!-- Failsafe: falls app.css nicht lädt, siehst du trotzdem IMMER die App -->
-  <style>
-    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    body{background:#0b0f14;color:#eef3fb}
-    .failsafe{position:fixed;inset:0;display:grid;place-items:center;padding:24px;text-align:center}
-    .failsafe .box{max-width:760px;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:18px}
-    .failsafe h1{margin:0 0 10px;font-size:18px}
-    .failsafe p{margin:0 0 10px;opacity:.8;line-height:1.4}
-    .failsafe .small{font-size:12px;opacity:.7}
-  </style>
-
-  <!-- Deine echte Styles -->
-  <link rel="stylesheet" href="app.css?v=999" />
+  <link rel="stylesheet" href="app.css?v=1000" />
 </head>
 
 <body>
-  <!-- Failsafe-Overlay verschwindet automatisch, sobald JS läuft -->
-  <div id="failsafe" class="failsafe">
-    <div class="box">
-      <h1>Lebenscode Mandala lädt…</h1>
-      <p>Wenn du diese Box dauerhaft siehst, lädt dein <strong>index.html</strong> zwar, aber <strong>app.css</strong> oder das Script nicht.</p>
-      <div class="small">Tipp: Hard Refresh (Strg+F5) – danach muss die Oberfläche erscheinen.</div>
-    </div>
-  </div>
-
   <header class="app-header">
     <div class="brand">
       <img class="brand-logo" src="assets/Logo.png" alt="Milz & More Logo" />
@@ -104,16 +82,12 @@
   </main>
 
   <script>
-    // Failsafe ausblenden -> beweist: JS läuft
-    const fs = document.getElementById("failsafe");
-    if (fs) fs.style.display = "none";
-
     const state = {
       engine: "quadrat",
-      mode: "geburtstag",     // "geburtstag" | "text"
+      mode: "geburtstag",
       input: "15011987",
-      direction: "aussen",    // "aussen" | "innen"
-      sector: 8,              // nur Rund
+      direction: "aussen",
+      sector: 8,
       sliders: Array(10).fill(85),
       isAdmin: false,
       paperLook: true
@@ -206,7 +180,8 @@
         pushStateToEngine();
       };
 
-      els.frame.src = `engines/${engine}/index.html?v=${Date.now()}`;
+      // ✅ embed=1 erzwingt transparenten Engine-Hintergrund
+      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
     }
 
     function pushStateToEngine() {

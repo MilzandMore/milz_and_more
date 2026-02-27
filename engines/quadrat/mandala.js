@@ -1,25 +1,26 @@
 // =====================================================
-// QUADRAT ENGINE (läuft allein ODER eingebettet im iFrame)
-// - Im iFrame: KEINE eigene UI, Steuerung kommt von Parent (index.html root)
-// - Optik: KEIN Stroke im Preview -> passt zu Rund/Wabe
-// - Export: A4 2480x3508, saubere Größe + Logo/Wasserzeichen
+// QUADRAT ENGINE – EMBED TRANSPARENT + GOLDEN EXPORT
 // =====================================================
 
-/* ---------- GLOBALS ---------- */
 var qMatrix = [];
 var logoImg;
 var isAdmin = false;
 
-const EMBED = (() => {
-  try { return window.self !== window.top; } catch(e) { return true; }
-})();
+const PHI = 1.61803398875;
 
-// Parent-State (kommt per postMessage)
+function isEmbed() {
+  const p = new URLSearchParams(location.search);
+  if (p.get("embed") === "1") return true;
+  try { return window.self !== window.top; } catch(e) { return true; }
+}
+
+var EMBED = isEmbed();
+
 var extState = {
   engine: "quadrat",
-  mode: "geburtstag",     // "geburtstag" | "text"
+  mode: "geburtstag",
   input: "15011987",
-  direction: "aussen",    // "aussen" | "innen"
+  direction: "aussen",
   sliders: Array(10).fill(85),
   isAdmin: false,
   paperLook: true
@@ -44,20 +45,15 @@ var charMap = {
   'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
 };
 
-/* ---------- PRELOAD ---------- */
 function preload() {
-  // Logo liegt im Repo: assets/Logo.png
-  // Engine liegt in engines/quadrat -> 2 Ebenen hoch
   logoImg = loadImage('../../assets/Logo.png');
 }
 
-/* ---------- SETUP ---------- */
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
   pixelDensity(2);
 
-  // Admin via URL (?access=milz_secret)
   var params = getURLParams();
   if (params.access === 'milz_secret') isAdmin = true;
 
@@ -66,14 +62,11 @@ function setup() {
     window.addEventListener("message", onMessageFromParent);
     try { window.parent.postMessage({ type: "READY" }, "*"); } catch(_) {}
     redraw();
-  } else {
-    loop();
   }
 }
 
-/* ---------- DRAW ---------- */
 function draw() {
-  // In iFrame transparent (damit App-Hintergrund wirkt)
+  // ✅ App-Hintergrund soll durchscheinen:
   if (EMBED) clear();
   else background(255);
 
@@ -83,33 +76,7 @@ function draw() {
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
-  push();
-
-  const scaleFactor = (min(width, height) / 850) * (isMobile ? 0.82 : 0.92);
-  const centerX = width / 2;
-  const centerY = height / 2;
-
-  translate(centerX, centerY);
-  scale(scaleFactor);
-
-  calcQuadratMatrix(drawCode);
-
-  // ✅ WICHTIG: Keine Linien im Preview (damit es aussieht wie Rund/Wabe)
-  drawQuadrat(startDigit, null, { stroke: false });
-
-  pop();
-
-  // Standalone Logo (nicht in der App)
-  if (!EMBED && logoImg && logoImg.width > 0) {
-    push(); resetMatrix();
-    var lW = isMobile ? 55 : 150;
-    var lH = (logoImg.height / logoImg.width) * lW;
-    var logoY = isMobile ? height - 125 : height - lH - 25;
-    image(logoImg, 15, logoY, lW, lH);
-    pop();
-  }
-
-  // Farbpunkte an Parent senden
+  // Farbpunkte ans Parent schicken
   if (EMBED) {
     try {
       const colors = [];
@@ -120,9 +87,21 @@ function draw() {
       window.parent.postMessage({ type: "COLORS", colors }, "*");
     } catch(_) {}
   }
+
+  push();
+
+  const scaleFactor = (min(width, height) / 850) * (isMobile ? 0.82 : 0.92);
+  translate(width / 2, height / 2);
+  scale(scaleFactor);
+
+  calcQuadratMatrix(drawCode);
+
+  // Preview: clean (wie Rund/Wabe)
+  drawQuadrat(startDigit, null, { stroke: false });
+
+  pop();
 }
 
-/* ---------- RENDER ---------- */
 function drawQuadrat(startDigit, target, opts) {
   var ctx = target || window;
   var ts = 16;
@@ -133,7 +112,7 @@ function drawQuadrat(startDigit, target, opts) {
     ctx.stroke(0, 18);
     ctx.strokeWeight(0.35);
   } else {
-    ctx.noStroke(); // ✅ optisch wie Rund/Wabe
+    ctx.noStroke();
   }
 
   for (var r = 0; r < 20; r++) {
@@ -150,7 +129,6 @@ function drawQuadrat(startDigit, target, opts) {
           map(sVal, 20, 100, 98, brightness(col))
         );
 
-        // 4 Quadranten
         ctx.rect(c * ts, -(r + 1) * ts, ts, ts);
         ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts);
         ctx.rect(c * ts, r * ts, ts, ts);
@@ -160,7 +138,9 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-/* ---------- EXPORT (A4) ---------- */
+// ✅ GOLDEN SECTION EXPORT (A4)
+// - Größe: Quadratbreite = A4-Breite / φ  (harmonisch)
+// - Position: Mittelpunkt auf y = 0.382 * Höhe (goldener Schnitt von oben)
 function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
@@ -173,21 +153,22 @@ function exportHighRes() {
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
+  calcQuadratMatrix(drawCode);
+
   const ts = 16;
-  const gridSize = 40 * ts; // 640
-  const TARGET_WIDTH = 1400; // gleiche Größenordnung wie Rund
-  const sc = TARGET_WIDTH / gridSize;
+  const gridSize = 40 * ts; // 640 (Quadrat in Engine-Koordinaten)
+
+  const targetSizePx = exportW / PHI; // ≈ 1533px
+  const scale = targetSizePx / gridSize;
 
   const centerX = exportW / 2;
-  const centerY = exportH * 0.36;
+  const centerY = exportH * (1 / (PHI * PHI)); // 0.382...
 
   pg.push();
   pg.translate(centerX, centerY);
-  pg.scale(sc);
+  pg.scale(scale);
 
-  calcQuadratMatrix(drawCode);
-
-  // ✅ Export darf minimal Stroke haben (sauber), aber sehr dezent
+  // Export: minimaler Stroke für Druckqualität
   drawQuadrat(startDigit, pg, { stroke: true });
 
   pg.pop();
@@ -195,7 +176,7 @@ function exportHighRes() {
   // Wasserzeichen (nur wenn NICHT Admin)
   if (logoImg && !isAdmin) {
     pg.resetMatrix();
-    pg.tint(0, 80);
+    pg.tint(0, 70);
 
     const wWidth = 360;
     const wHeight = (logoImg.height / logoImg.width) * wWidth;
@@ -205,14 +186,13 @@ function exportHighRes() {
         pg.image(logoImg, x, y, wWidth, wHeight);
       }
     }
-
     pg.noTint();
   }
 
   // Logo unten rechts
   if (logoImg) {
     pg.resetMatrix();
-    pg.tint(0, 210);
+    pg.tint(0, 220);
 
     const lW = 520;
     const lH = (logoImg.height / logoImg.width) * lW;
@@ -224,7 +204,7 @@ function exportHighRes() {
   save(pg, 'Milz&More_Quadrat.png');
 }
 
-/* ---------- INPUT HELPERS ---------- */
+/* --------- state helpers --------- */
 function getMode() { return EMBED ? (extState.mode || "geburtstag") : "geburtstag"; }
 function getInput() { return EMBED ? (extState.input ?? "15011987") : "15011987"; }
 function getDirection() { return EMBED ? (extState.direction || "aussen") : "aussen"; }
@@ -235,7 +215,7 @@ function getSlider(val) {
   return (typeof v === "number") ? v : 85;
 }
 
-/* ---------- CODE GEN ---------- */
+/* --------- code gen --------- */
 function getCodeFromDate(str) {
   var val = String(str || "").replace(/[^0-9]/g, "");
   var res = val.split('').map(Number);
@@ -291,7 +271,7 @@ function calcQuadratMatrix(code) {
   }
 }
 
-/* ---------- MESSAGING ---------- */
+/* --------- messaging --------- */
 function onMessageFromParent(ev) {
   const msg = ev.data;
   if (!msg || typeof msg !== "object") return;
@@ -311,7 +291,6 @@ function onMessageFromParent(ev) {
   }
 }
 
-/* ---------- RESIZE ---------- */
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   if (EMBED) redraw();

@@ -1,11 +1,15 @@
 // =====================================================
 // QUADRAT ENGINE – EMBED TRANSPARENT + GOLDEN EXPORT
 // Zwischenlinien: FIX (HSB Alpha korrekt) ✅
+// OPTIK-ANGLEICHUNG an "RUND":
+// - MASKE (Preview) nutzt background(12) wie Rund (nicht embed)
+// - EXPORT bleibt A4, Golden-Placement bleibt
+// - Export: Logo_black als Wasserzeichen + Signatur (kräftiger + größer, ähnlich Rund-Spacing)
 // =====================================================
 
 var qMatrix = [];
-var logoImg;
-var logoImgBlack; // ✅ für Export
+var logoImg;        // fallback
+var logoImgBlack;   // ✅ für Export/Wasserzeichen
 var isAdmin = false;
 
 const PHI = 1.61803398875;
@@ -28,7 +32,11 @@ var extState = {
   paperLook: true
 };
 
-const mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
+const mapZ = {
+  1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B",
+  4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70",
+  7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2"
+};
 
 var colorMatrix = {
   1: { 1: "#FF0000", 2: "#0000FF", 3: "#00FF00", 4: "#FFFF00", 5: "#00B0F0", 6: "#00FFFF", 7: "#FF66FF", 8: "#FF9900", 9: "#9900FF" },
@@ -48,13 +56,18 @@ var charMap = {
 };
 
 function preload() {
+  // Fallback (falls black nicht lädt)
   logoImg = loadImage('../../assets/Logo.png');
-  logoImgBlack = loadImage('../../assets/Logo_black.png'); // ✅ schwarzes Logo
+  // ✅ Black Logo für Export / Wasserzeichen
+  logoImgBlack = loadImage('../../assets/Logo_black.png');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  // ✅ Wichtig: Alpha im HSB-Modus festlegen (0..100)
   colorMode(HSB, 360, 100, 100, 100);
+
   pixelDensity(2);
 
   var params = getURLParams();
@@ -69,8 +82,10 @@ function setup() {
 }
 
 function draw() {
+  // ✅ Preview-Maske wie beim RUND:
+  // Embed transparent, sonst dunkler Hintergrund (12)
   if (EMBED) clear();
-  else background(255);
+  else background(12);
 
   const isMobile = windowWidth < 600;
 
@@ -78,23 +93,41 @@ function draw() {
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
+  if (EMBED) {
+    try {
+      const colors = [];
+      for (let i = 1; i <= 9; i++) {
+        let hex = (colorMatrix[startDigit] && colorMatrix[startDigit][i]) ? colorMatrix[startDigit][i] : mapZ[i];
+        colors.push(hex);
+      }
+      window.parent.postMessage({ type: "COLORS", colors }, "*");
+    } catch(_) {}
+  }
+
   push();
+
   const scaleFactor = (min(width, height) / 850) * (isMobile ? 0.82 : 0.92);
   translate(width / 2, height / 2);
   scale(scaleFactor);
+
   calcQuadratMatrix(drawCode);
+
+  // ✅ Zwischenlinien sicher sichtbar
   drawQuadrat(startDigit, null, { stroke: true });
+
   pop();
 }
 
 function drawQuadrat(startDigit, target, opts) {
   var ctx = target || window;
   var ts = 16;
+
   const strokeOn = opts && opts.stroke === true;
 
   ctx.rectMode(CORNER);
 
   if (strokeOn) {
+    // ✅ Schwarz mit transparenter Alpha (HSB: 0,0,0)
     ctx.stroke(0, 0, 0, 35);
     ctx.strokeWeight(1);
   } else {
@@ -107,8 +140,8 @@ function drawQuadrat(startDigit, target, opts) {
       if (val !== 0) {
         var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val]) ? colorMatrix[startDigit][val] : mapZ[val];
         var col = color(hex);
-        var sVal = getSlider(val);
 
+        var sVal = getSlider(val);
         ctx.fill(
           hue(col),
           map(sVal, 20, 100, 15, saturation(col)),
@@ -125,9 +158,8 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-// ✅ GOLDEN EXPORT (optimiert + kräftiger)
+// ✅ GOLDEN SECTION EXPORT (A4) – Wasserzeichen + Signatur wie „RUND“ (nur kräftiger)
 function exportHighRes() {
-
   const exportW = 2480;
   const exportH = 3508;
 
@@ -142,13 +174,15 @@ function exportHighRes() {
   calcQuadratMatrix(drawCode);
 
   const ts = 16;
-  const gridSize = 40 * ts;
+  const gridSize = 40 * ts; // 640
 
-  const targetSizePx = exportW / PHI;
+  // Golden-Scale: Motivgröße orientiert am goldenen Schnitt
+  const targetSizePx = exportW / PHI; // ~1533
   const scale = targetSizePx / gridSize;
 
   const centerX = exportW / 2;
-  const centerY = exportH * (1 / (PHI * PHI));
+  // Golden-Placement: 0.382 (wie gehabt), optisch sehr nah am Rund (0.40)
+  const centerY = exportH * (1 / (PHI * PHI)); // 0.382
 
   pg.push();
   pg.translate(centerX, centerY);
@@ -156,24 +190,26 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
+  // ✅ Export-Logo: BLACK bevorzugt
   const exportLogo = logoImgBlack || logoImg;
 
-  // ===== Wasserzeichen (kräftiger + größer) =====
+  // ===== Wasserzeichen (kräftiger + größer, ähnlich Rund-Pattern) =====
   if (exportLogo && !isAdmin) {
-
+    pg.resetMatrix();
     pg.push();
     pg.colorMode(RGB, 255);
-    pg.tint(0, 0, 0, 30); // kräftiger
 
-    const tileW = Math.round(exportW / (PHI * 1.8));
-    const tileH = (exportLogo.height / exportLogo.width) * tileW;
+    // kräftiger als vorher
+    pg.tint(0, 0, 0, 42);
 
-    const stepX = Math.round(tileW * 1.35);
-    const stepY = Math.round(tileH * 1.6);
+    // ähnlich Rund (wWidth ~380), aber leicht größer
+    const wWidth = 440;
+    const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
 
-    for (let x = -stepX; x < exportW + stepX; x += stepX) {
-      for (let y = -stepY; y < exportH + stepY; y += stepY) {
-        pg.image(exportLogo, x, y, tileW, tileH);
+    // spacing ähnlich Rund (500), minimal dichter
+    for (let x = -120; x < exportW + 400; x += 460) {
+      for (let y = -120; y < exportH + 400; y += 460) {
+        pg.image(exportLogo, x, y, wWidth, wHeight);
       }
     }
 
@@ -181,18 +217,19 @@ function exportHighRes() {
     pg.pop();
   }
 
-  // ===== Signatur unten rechts (deutlich größer + kräftiger) =====
+  // ===== Signatur unten rechts (kräftiger + größer) =====
   if (exportLogo) {
-
+    pg.resetMatrix();
     pg.push();
     pg.colorMode(RGB, 255);
-    pg.tint(0, 0, 0, 80);
 
-    const pad = Math.round(exportW * 0.04);
-    const lW = Math.round(exportW / (PHI * 1.7));
+    pg.tint(0, 0, 0, 95);
+
+    const lW = 660; // größer als Rund (500)
     const lH = (exportLogo.height / exportLogo.width) * lW;
 
-    pg.image(exportLogo, exportW - lW - pad, exportH - lH - pad, lW, lH);
+    // ähnlich Rund-Padding
+    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
 
     pg.noTint();
     pg.pop();

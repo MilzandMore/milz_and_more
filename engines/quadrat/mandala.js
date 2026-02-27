@@ -1,15 +1,15 @@
 // =====================================================
-// QUADRAT ENGINE – EMBED TRANSPARENT + GOLDEN EXPORT
-// Zwischenlinien: FIX (HSB Alpha korrekt) ✅
-// OPTIK-ANGLEICHUNG an "RUND":
-// - MASKE (Preview) nutzt background(12) wie Rund (nicht embed)
-// - EXPORT bleibt A4, Golden-Placement bleibt
-// - Export: Logo_black als Wasserzeichen + Signatur (kräftiger + größer, ähnlich Rund-Spacing)
+// QUADRAT ENGINE – EMBED + EXPORT (OPTIK ANGLEICHUNG an RUND)
+// WICHTIG:
+// 1) MASKE: background(12) wie beim Rund (auch im Embed)
+// 2) EXPORT: nutzt Logo_black.png (mit Fallback auf Logo.png)
+// 3) EXPORT: Wasserzeichen + Signatur deutlich kräftiger & größer
+// 4) LOGIK (Matrix/Code/Sliders) bleibt unangetastet
 // =====================================================
 
 var qMatrix = [];
 var logoImg;        // fallback
-var logoImgBlack;   // ✅ für Export/Wasserzeichen
+var logoImgBlack;   // bevorzugt für Export
 var isAdmin = false;
 
 const PHI = 1.61803398875;
@@ -19,7 +19,6 @@ function isEmbed() {
   if (p.get("embed") === "1") return true;
   try { return window.self !== window.top; } catch(e) { return true; }
 }
-
 var EMBED = isEmbed();
 
 var extState = {
@@ -29,7 +28,9 @@ var extState = {
   direction: "aussen",
   sliders: Array(10).fill(85),
   isAdmin: false,
-  paperLook: true
+  paperLook: true,
+  // optional: parent kann exportLogo setzen (wie beim Rund)
+  // exportLogo: "../../assets/Logo_black.png"
 };
 
 const mapZ = {
@@ -55,17 +56,26 @@ var charMap = {
   'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
 };
 
+// -------- robust logo load (wie beim Rund) ----------
 function preload() {
-  // Fallback (falls black nicht lädt)
-  logoImg = loadImage('../../assets/Logo.png');
-  // ✅ Black Logo für Export / Wasserzeichen
-  logoImgBlack = loadImage('../../assets/Logo_black.png');
+  // wenn Parent "exportLogo" schickt, nutze das (sonst Standard)
+  const p = (extState && extState.exportLogo) ? extState.exportLogo : "../../assets/Logo_black.png";
+
+  // zuerst black versuchen
+  logoImgBlack = loadImage(
+    p,
+    () => {},
+    () => { logoImgBlack = null; }
+  );
+
+  // fallback immer laden (Logo.png)
+  logoImg = loadImage("../../assets/Logo.png");
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  // ✅ Wichtig: Alpha im HSB-Modus festlegen (0..100)
+  // ✅ HSB mit Alpha
   colorMode(HSB, 360, 100, 100, 100);
 
   pixelDensity(2);
@@ -82,10 +92,8 @@ function setup() {
 }
 
 function draw() {
-  // ✅ Preview-Maske wie beim RUND:
-  // Embed transparent, sonst dunkler Hintergrund (12)
-  if (EMBED) clear();
-  else background(12);
+  // ✅ ANGLEICHUNG an RUND: Immer dunkle Maske (auch im Embed)
+  background(12);
 
   const isMobile = windowWidth < 600;
 
@@ -112,7 +120,7 @@ function draw() {
 
   calcQuadratMatrix(drawCode);
 
-  // ✅ Zwischenlinien sicher sichtbar
+  // Zwischenlinien
   drawQuadrat(startDigit, null, { stroke: true });
 
   pop();
@@ -127,7 +135,6 @@ function drawQuadrat(startDigit, target, opts) {
   ctx.rectMode(CORNER);
 
   if (strokeOn) {
-    // ✅ Schwarz mit transparenter Alpha (HSB: 0,0,0)
     ctx.stroke(0, 0, 0, 35);
     ctx.strokeWeight(1);
   } else {
@@ -158,7 +165,9 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-// ✅ GOLDEN SECTION EXPORT (A4) – Wasserzeichen + Signatur wie „RUND“ (nur kräftiger)
+// =====================================================
+// EXPORT (A4) – kräftiger + größer, an Rund angelehnt
+// =====================================================
 function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
@@ -176,13 +185,12 @@ function exportHighRes() {
   const ts = 16;
   const gridSize = 40 * ts; // 640
 
-  // Golden-Scale: Motivgröße orientiert am goldenen Schnitt
   const targetSizePx = exportW / PHI; // ~1533
   const scale = targetSizePx / gridSize;
 
   const centerX = exportW / 2;
-  // Golden-Placement: 0.382 (wie gehabt), optisch sehr nah am Rund (0.40)
-  const centerY = exportH * (1 / (PHI * PHI)); // 0.382
+  // optisch nah an Rund (0.40), aber golden basiert (0.382)
+  const centerY = exportH * (1 / (PHI * PHI));
 
   pg.push();
   pg.translate(centerX, centerY);
@@ -190,25 +198,27 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  // ✅ Export-Logo: BLACK bevorzugt
+  // Logo Wahl
   const exportLogo = logoImgBlack || logoImg;
 
-  // ===== Wasserzeichen (kräftiger + größer, ähnlich Rund-Pattern) =====
+  // ===== Wasserzeichen (deutlich kräftiger + größer) =====
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
     pg.push();
     pg.colorMode(RGB, 255);
 
-    // kräftiger als vorher
-    pg.tint(0, 0, 0, 42);
+    // WICHTIG: Alpha in p5 ist 0..255
+    pg.tint(0, 0, 0, 70); // kräftig sichtbar
 
-    // ähnlich Rund (wWidth ~380), aber leicht größer
-    const wWidth = 440;
+    // größer als Rund
+    const wWidth = 520;
     const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
 
-    // spacing ähnlich Rund (500), minimal dichter
-    for (let x = -120; x < exportW + 400; x += 460) {
-      for (let y = -120; y < exportH + 400; y += 460) {
+    // dichter als Rund
+    const step = 470;
+
+    for (let x = -140; x < exportW + 500; x += step) {
+      for (let y = -140; y < exportH + 500; y += step) {
         pg.image(exportLogo, x, y, wWidth, wHeight);
       }
     }
@@ -223,12 +233,11 @@ function exportHighRes() {
     pg.push();
     pg.colorMode(RGB, 255);
 
-    pg.tint(0, 0, 0, 95);
+    pg.tint(0, 0, 0, 190); // richtig präsent
 
-    const lW = 660; // größer als Rund (500)
+    const lW = 760;
     const lH = (exportLogo.height / exportLogo.width) * lW;
 
-    // ähnlich Rund-Padding
     pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
 
     pg.noTint();

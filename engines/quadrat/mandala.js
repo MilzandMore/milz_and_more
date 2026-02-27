@@ -1,15 +1,32 @@
-// --------- STATE (kommt vom Parent) ----------
-let APP = {
+// =====================================================
+// QUADRAT ENGINE – EMBED TRANSPARENT + GOLDEN EXPORT
+// Zwischenlinien: FIX (HSB Alpha korrekt) ✅
+// =====================================================
+
+var qMatrix = [];
+var logoImg;
+var isAdmin = false;
+
+const PHI = 1.61803398875;
+
+function isEmbed() {
+  const p = new URLSearchParams(location.search);
+  if (p.get("embed") === "1") return true;
+  try { return window.self !== window.top; } catch(e) { return true; }
+}
+
+var EMBED = isEmbed();
+
+var extState = {
   engine: "quadrat",
-  mode: "geburtstag",      // geburtstag | text
+  mode: "geburtstag",
   input: "15011987",
-  direction: "aussen",     // aussen | innen
-  sector: 8,               // irrelevant hier
-  sliders: Array(10).fill(85), // 1..9
-  isAdmin: false
+  direction: "aussen",
+  sliders: Array(10).fill(85),
+  isAdmin: false,
+  paperLook: true
 };
 
-// --------- ORIGINAL DATA ----------
 const mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
 
 var colorMatrix = {
@@ -29,157 +46,195 @@ var charMap = {
   'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
 };
 
-let qMatrix = [];
-let logoImg;
-let isAdmin = false;
-
-// --------- ENGINE COMMS ----------
-function sendReady() {
-  if (window.parent) window.parent.postMessage({ type: "READY" }, "*");
-}
-function sendColors(colors) {
-  if (window.parent) window.parent.postMessage({ type: "COLORS", colors }, "*");
-}
-
-window.addEventListener("message", (ev) => {
-  const msg = ev.data;
-  if (!msg || typeof msg !== "object") return;
-  if (msg.type === "SET_STATE" && msg.payload) {
-    APP = msg.payload;
-    isAdmin = !!APP.isAdmin;
-    redraw();
-  }
-  if (msg.type === "EXPORT") {
-    if (msg.payload) { APP = msg.payload; isAdmin = !!APP.isAdmin; }
-    exportHighRes();
-  }
-});
-
-// --------- P5 ----------
 function preload() {
-  // optional: watermark / export uses logo. App-Brand ist im Header, Engine braucht nur für Export.
   logoImg = loadImage('../../assets/Logo.png');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  colorMode(HSB, 360, 100, 100);
-  noLoop();
-  sendReady();
-  redraw();
+
+  // ✅ Wichtig: Alpha im HSB-Modus festlegen (0..100)
+  colorMode(HSB, 360, 100, 100, 100);
+
+  pixelDensity(2);
+
+  var params = getURLParams();
+  if (params.access === 'milz_secret') isAdmin = true;
+
+  if (EMBED) {
+    noLoop();
+    window.addEventListener("message", onMessageFromParent);
+    try { window.parent.postMessage({ type: "READY" }, "*"); } catch(_) {}
+    redraw();
+  }
 }
 
 function draw() {
-  // Pro-Optik: dunkler Studio-Hintergrund statt Weiß
-  background(12);
+  if (EMBED) clear();
+  else background(255);
 
-  const baseCode = (APP.mode === "geburtstag") ? getCodeFromDate(APP.input) : getCodeFromText(APP.input);
+  const isMobile = windowWidth < 600;
+
+  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
   const startDigit = baseCode[0] || 1;
-  const drawCode = (APP.direction === "innen") ? [...baseCode].reverse() : baseCode;
+  const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
-  // Colors für Slider-Dots an Parent schicken
-  const colors = [];
-  for (let i = 1; i <= 9; i++) {
-    const hex = (colorMatrix[startDigit] && colorMatrix[startDigit][i]) ? colorMatrix[startDigit][i] : mapZ[i];
-    colors.push(hex);
+  if (EMBED) {
+    try {
+      const colors = [];
+      for (let i = 1; i <= 9; i++) {
+        let hex = (colorMatrix[startDigit] && colorMatrix[startDigit][i]) ? colorMatrix[startDigit][i] : mapZ[i];
+        colors.push(hex);
+      }
+      window.parent.postMessage({ type: "COLORS", colors }, "*");
+    } catch(_) {}
   }
-  sendColors(colors);
 
   push();
-  const isMobile = windowWidth < 600;
-  const scaleFactor = (min(width, height) / 850) * (isMobile ? 0.80 : 0.95);
-  const centerY = isMobile ? height / 2 - 10 : height / 2 + 10;
-  const centerX = width / 2;
 
-  translate(centerX, centerY);
+  const scaleFactor = (min(width, height) / 850) * (isMobile ? 0.82 : 0.92);
+  translate(width / 2, height / 2);
   scale(scaleFactor);
 
   calcQuadratMatrix(drawCode);
-  drawQuadrat(startDigit);
+
+  // ✅ Zwischenlinien sicher sichtbar
+  drawQuadrat(startDigit, null, { stroke: true });
+
   pop();
 }
 
-function drawQuadrat(startDigit, target) {
-  const ctx = target || window;
-  const ts = 16;
+function drawQuadrat(startDigit, target, opts) {
+  var ctx = target || window;
+  var ts = 16;
 
-  ctx.stroke(255, 18);
-  ctx.strokeWeight(0.6);
+  const strokeOn = opts && opts.stroke === true;
 
-  for (let r = 0; r < 20; r++) {
-    for (let c = 0; c < 20; c++) {
-      const val = qMatrix[r][c];
+  ctx.rectMode(CORNER);
+
+  if (strokeOn) {
+    // ✅ Schwarz mit transparenter Alpha (HSB: 0,0,0)
+    ctx.stroke(0, 0, 0, 35);
+    ctx.strokeWeight(1);
+  } else {
+    ctx.noStroke();
+  }
+
+  for (var r = 0; r < 20; r++) {
+    for (var c = 0; c < 20; c++) {
+      var val = qMatrix[r][c];
       if (val !== 0) {
-        const hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val]) ? colorMatrix[startDigit][val] : mapZ[val];
-        const col = color(hex);
+        var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val]) ? colorMatrix[startDigit][val] : mapZ[val];
+        var col = color(hex);
 
-        const sVal = (APP.sliders && APP.sliders[val]) ? APP.sliders[val] : 85;
+        var sVal = getSlider(val);
         ctx.fill(
           hue(col),
           map(sVal, 20, 100, 15, saturation(col)),
-          map(sVal, 20, 100, 98, brightness(col))
+          map(sVal, 20, 100, 98, brightness(col)),
+          100
         );
 
-        ctx.rect(c * ts, -(r + 1) * ts, ts, ts); ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts);
-        ctx.rect(c * ts, r * ts, ts, ts);        ctx.rect(-(c + 1) * ts, r * ts, ts, ts);
+        ctx.rect(c * ts, -(r + 1) * ts, ts, ts);
+        ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts);
+        ctx.rect(c * ts, r * ts, ts, ts);
+        ctx.rect(-(c + 1) * ts, r * ts, ts, ts);
       }
     }
   }
 }
 
+// ✅ GOLDEN SECTION EXPORT (A4)
 function exportHighRes() {
-  const exportW = 2480, exportH = 3508;
+  const exportW = 2480;
+  const exportH = 3508;
+
   const pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100);
+  pg.colorMode(HSB, 360, 100, 100, 100);
   pg.background(255);
 
-  const baseCode = (APP.mode === "geburtstag") ? getCodeFromDate(APP.input) : getCodeFromText(APP.input);
+  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
   const startDigit = baseCode[0] || 1;
-  const drawCode = (APP.direction === "innen") ? [...baseCode].reverse() : baseCode;
+  const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
+
+  calcQuadratMatrix(drawCode);
+
+  const ts = 16;
+  const gridSize = 40 * ts; // 640
+
+  const targetSizePx = exportW / PHI; // ~1533
+  const scale = targetSizePx / gridSize;
+
+  const centerX = exportW / 2;
+  const centerY = exportH * (1 / (PHI * PHI)); // 0.382
 
   pg.push();
-  pg.translate(exportW / 2, exportH * 0.40);
-  pg.scale(3.8);
-  calcQuadratMatrix(drawCode);
-  drawQuadrat(startDigit, pg);
+  pg.translate(centerX, centerY);
+  pg.scale(scale);
+
+  drawQuadrat(startDigit, pg, { stroke: true });
+
   pg.pop();
 
   if (logoImg && !isAdmin) {
-    pg.resetMatrix(); pg.tint(255, 0.45);
-    const wWidth = 380; const wHeight = (logoImg.height / logoImg.width) * wWidth;
-    for (let x = -100; x < exportW + 400; x += 500) {
-      for (let y = -100; y < exportH + 400; y += 500) pg.image(logoImg, x, y, wWidth, wHeight);
+    pg.resetMatrix();
+    pg.tint(0, 0, 0, 18);
+
+    const wWidth = 360;
+    const wHeight = (logoImg.height / logoImg.width) * wWidth;
+
+    for (let x = -120; x < exportW + 400; x += 520) {
+      for (let y = -120; y < exportH + 400; y += 520) {
+        pg.image(logoImg, x, y, wWidth, wHeight);
+      }
     }
     pg.noTint();
   }
 
   if (logoImg) {
-    const lW = 500; const lH = (logoImg.height / logoImg.width) * lW;
-    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+    pg.resetMatrix();
+    pg.tint(0, 0, 0, 45);
+
+    const lW = 520;
+    const lH = (logoImg.height / logoImg.width) * lW;
+    pg.image(logoImg, exportW - lW - 110, exportH - lH - 110, lW, lH);
+
+    pg.noTint();
   }
 
   save(pg, 'Milz&More_Quadrat.png');
 }
 
-// ---- helpers ----
-function getCodeFromDate(value) {
-  const val = String(value || "").replace(/[^0-9]/g, "");
-  const res = val.split('').map(Number);
+/* --------- state helpers --------- */
+function getMode() { return EMBED ? (extState.mode || "geburtstag") : "geburtstag"; }
+function getInput() { return EMBED ? (extState.input ?? "15011987") : "15011987"; }
+function getDirection() { return EMBED ? (extState.direction || "aussen") : "aussen"; }
+function getSlider(val) {
+  if (!EMBED) return 85;
+  const arr = extState.sliders || [];
+  const v = arr[val];
+  return (typeof v === "number") ? v : 85;
+}
+
+/* --------- code gen --------- */
+function getCodeFromDate(str) {
+  var val = String(str || "").replace(/[^0-9]/g, "");
+  var res = val.split('').map(Number);
   while (res.length < 8) res.push(0);
   return res.slice(0, 8);
 }
 
-function getCodeFromText(value) {
-  const textStr = String(value || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
-  if (textStr.length === 0) return [1,1,1,1,1,1,1,1];
-  let firstRow = [];
-  for (const ch of textStr) if (charMap[ch]) firstRow.push(charMap[ch]);
-  let currentRow = firstRow;
-  while (currentRow.length < 8) currentRow.push(9);
+function getCodeFromText(textStr) {
+  var t = String(textStr || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
+  if (t.length === 0) return [1,1,1,1,1,1,1,1];
+  var firstRow = [];
+  for (var char of t) { if (charMap[char]) firstRow.push(charMap[char]); }
+  var currentRow = firstRow;
+  while(currentRow.length < 8) currentRow.push(9);
   while (currentRow.length > 8) {
-    const nextRow = [];
-    for (let i = 0; i < currentRow.length - 1; i++) {
-      const sum = currentRow[i] + currentRow[i+1];
+    var nextRow = [];
+    for (var i = 0; i < currentRow.length - 1; i++) {
+      var sum = currentRow[i] + currentRow[i+1];
       nextRow.push(sum % 9 === 0 ? 9 : sum % 9);
     }
     currentRow = nextRow;
@@ -188,32 +243,56 @@ function getCodeFromText(value) {
 }
 
 function ex(a, b) {
-  const s = (a || 0) + (b || 0);
+  var s = (a || 0) + (b || 0);
   return (s === 0) ? 0 : (s % 9 === 0 ? 9 : s % 9);
 }
 
 function calcQuadratMatrix(code) {
   qMatrix = Array(20).fill().map(() => Array(20).fill(0));
-  const d  = [code[0], code[1]], m  = [code[2], code[3]], j1 = [code[4], code[5]], j2 = [code[6], code[7]];
+  var d = [code[0], code[1]], m = [code[2], code[3]], j1 = [code[4], code[5]], j2 = [code[6], code[7]];
 
   function set2(r, c, v1, v2) {
     if (r >= 20 || c >= 20) return;
     qMatrix[r][c] = v1;
-    if (c+1 < 20) qMatrix[r][c+1] = v2;
-    if (r+1 < 20) qMatrix[r+1][c] = v2;
-    if (r+1 < 20 && c+1 < 20) qMatrix[r+1][c+1] = v1;
+    if(c+1 < 20) qMatrix[r][c+1] = v2;
+    if(r+1 < 20) qMatrix[r+1][c] = v2;
+    if(r+1 < 20 && c+1 < 20) qMatrix[r+1][c+1] = v1;
   }
 
-  for (let i = 0; i < 8; i+=2) set2(i, i, d[0], d[1]);
-  for (let i = 0; i < 6; i+=2) { set2(i, i+2, m[0], m[1]); set2(i+2, i, m[0], m[1]); }
-  for (let i = 0; i < 4; i+=2) { set2(i, i+4, j1[0], j1[1]); set2(i+4, i, j1[0], j1[1]); }
+  for(var i = 0; i < 8; i+=2) set2(i, i, d[0], d[1]);
+  for(var i = 0; i < 6; i+=2) { set2(i, i+2, m[0], m[1]); set2(i+2, i, m[0], m[1]); }
+  for(var i = 0; i < 4; i+=2) { set2(i, i+4, j1[0], j1[1]); set2(i+4, i, j1[0], j1[1]); }
   set2(0, 6, j2[0], j2[1]); set2(6, 0, j2[0], j2[1]);
 
-  for (let r = 0; r < 8; r++) for (let c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c-2], qMatrix[r][c-1]);
-  for (let c = 0; c < 20; c++) for (let r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r-2][c], qMatrix[r-1][c]);
+  for(var r = 0; r < 8; r++) {
+    for(var c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c-2], qMatrix[r][c-1]);
+  }
+  for(var c = 0; c < 20; c++) {
+    for(var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r-2][c], qMatrix[r-1][c]);
+  }
+}
+
+/* --------- messaging --------- */
+function onMessageFromParent(ev) {
+  const msg = ev.data;
+  if (!msg || typeof msg !== "object") return;
+
+  if (msg.type === "SET_STATE" && msg.payload) {
+    extState = Object.assign(extState, msg.payload);
+    if (msg.payload.isAdmin === true) isAdmin = true;
+    redraw();
+  }
+
+  if (msg.type === "EXPORT") {
+    if (msg.payload) {
+      extState = Object.assign(extState, msg.payload);
+      if (msg.payload.isAdmin === true) isAdmin = true;
+    }
+    exportHighRes();
+  }
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  redraw();
+  if (EMBED) redraw();
 }

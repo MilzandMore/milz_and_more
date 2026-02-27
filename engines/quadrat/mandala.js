@@ -1,10 +1,9 @@
 // =====================================================
-// QUADRAT ENGINE – EMBED + EXPORT (OPTIK ANGLEICHUNG an RUND)
-// WICHTIG:
-// 1) MASKE: background(12) wie beim Rund (auch im Embed)
-// 2) EXPORT: nutzt Logo_black.png (mit Fallback auf Logo.png)
-// 3) EXPORT: Wasserzeichen + Signatur deutlich kräftiger & größer
-// 4) LOGIK (Matrix/Code/Sliders) bleibt unangetastet
+// QUADRAT ENGINE – FIX: Wasserzeichen doppelt (Export)
+// Ursache: Du hast den RUND-Exportblock in exportHighRes() stehen lassen
+// Lösung: exportHighRes() nur 1x korrekt für QUADRAT (ohne buildSector/drawSector/APP)
+// MASKE: dark background(12) wie RUND
+// EXPORT: A4 + Golden placement + BLACK watermark + BLACK signature
 // =====================================================
 
 var qMatrix = [];
@@ -29,7 +28,7 @@ var extState = {
   sliders: Array(10).fill(85),
   isAdmin: false,
   paperLook: true,
-  // optional: parent kann exportLogo setzen (wie beim Rund)
+  // optional: parent kann exportLogo setzen:
   // exportLogo: "../../assets/Logo_black.png"
 };
 
@@ -58,17 +57,16 @@ var charMap = {
 
 // -------- robust logo load (wie beim Rund) ----------
 function preload() {
-  // wenn Parent "exportLogo" schickt, nutze das (sonst Standard)
   const p = (extState && extState.exportLogo) ? extState.exportLogo : "../../assets/Logo_black.png";
 
-  // zuerst black versuchen
+  // black bevorzugt
   logoImgBlack = loadImage(
     p,
     () => {},
     () => { logoImgBlack = null; }
   );
 
-  // fallback immer laden (Logo.png)
+  // fallback immer laden
   logoImg = loadImage("../../assets/Logo.png");
 }
 
@@ -92,7 +90,7 @@ function setup() {
 }
 
 function draw() {
-  // ✅ ANGLEICHUNG an RUND: Immer dunkle Maske (auch im Embed)
+  // ✅ Preview wie RUND
   background(12);
 
   const isMobile = windowWidth < 600;
@@ -120,7 +118,6 @@ function draw() {
 
   calcQuadratMatrix(drawCode);
 
-  // Zwischenlinien
   drawQuadrat(startDigit, null, { stroke: true });
 
   pop();
@@ -165,43 +162,18 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-function exportHighRes(){
-  const exportW=2480, exportH=3508;
+// =====================================================
+// ✅ EXPORT – NUR EINMAL Wasserzeichen/Logo (keine doppelten Blöcke)
+// =====================================================
+function exportHighRes() {
+  const exportW = 2480;
+  const exportH = 3508;
+
   const pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100);
+  pg.colorMode(HSB, 360, 100, 100, 100);
   pg.background(255);
 
-  const sector = buildSector();
-  const currentColors = getColorMatrix(colorSeed);
-  const sc = int(APP.sector || 8);
-  const angle = TWO_PI / sc;
-
-  pg.push();
-  pg.translate(exportW/2, exportH*0.40);
-  pg.scale(3.2);
-  for(let i=0;i<sc;i++){
-    pg.push();
-    pg.rotate(i*angle);
-    drawSector(sector, currentColors, pg);
-    pg.pop();
-  }
-  pg.pop();
-
-  if(logoImg && !isAdmin){
-    pg.resetMatrix(); pg.tint(255,0.45);
-    const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
-    for(let x=-100;x<exportW+400;x+=500){
-      for(let y=-100;y<exportH+400;y+=500) pg.image(logoImg, x, y, wWidth, wHeight);
-    }
-    pg.noTint();
-  }
-
-  if(logoImg){
-    const lW=500, lH=(logoImg.height/logoImg.width)*lW;
-    pg.image(logoImg, exportW-lW-100, exportH-lH-100, lW, lH);
-  }
-
-
+  // ---- Quadrat Motiv rendern ----
   const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
@@ -215,8 +187,7 @@ function exportHighRes(){
   const scale = targetSizePx / gridSize;
 
   const centerX = exportW / 2;
-  // optisch nah an Rund (0.40), aber golden basiert (0.382)
-  const centerY = exportH * (1 / (PHI * PHI));
+  const centerY = exportH * (1 / (PHI * PHI)); // 0.382
 
   pg.push();
   pg.translate(centerX, centerY);
@@ -224,27 +195,24 @@ function exportHighRes(){
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  // Logo Wahl
+  // ---- Logo wählen ----
   const exportLogo = logoImgBlack || logoImg;
 
-  // ===== Wasserzeichen (deutlich kräftiger + größer) =====
+  // ---- Wasserzeichen 1x ----
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
     pg.push();
     pg.colorMode(RGB, 255);
 
-    // WICHTIG: Alpha in p5 ist 0..255
-    pg.tint(0, 0, 0, 70); // kräftig sichtbar
+    // kräftiger (0..255)
+    pg.tint(0, 0, 0, 70);
 
-    // größer als Rund
     const wWidth = 520;
     const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
 
-    // dichter als Rund
-    const step = 470;
-
-    for (let x = -140; x < exportW + 500; x += step) {
-      for (let y = -140; y < exportH + 500; y += step) {
+    // spacing
+    for (let x = -140; x < exportW + 500; x += 470) {
+      for (let y = -140; y < exportH + 500; y += 470) {
         pg.image(exportLogo, x, y, wWidth, wHeight);
       }
     }
@@ -253,13 +221,13 @@ function exportHighRes(){
     pg.pop();
   }
 
-  // ===== Signatur unten rechts (kräftiger + größer) =====
+  // ---- Signatur 1x ----
   if (exportLogo) {
     pg.resetMatrix();
     pg.push();
     pg.colorMode(RGB, 255);
 
-    pg.tint(0, 0, 0, 190); // richtig präsent
+    pg.tint(0, 0, 0, 190);
 
     const lW = 760;
     const lH = (exportLogo.height / exportLogo.width) * lW;

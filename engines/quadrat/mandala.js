@@ -4,8 +4,8 @@
 // =====================================================
 
 var qMatrix = [];
-var logoImg;          // (falls du es woanders brauchst)
-var logoImgBlack;     // ✅ NEU: für Export/Wasserzeichen
+var logoImg;
+var logoImgBlack; // ✅ für Export
 var isAdmin = false;
 
 const PHI = 1.61803398875;
@@ -48,19 +48,13 @@ var charMap = {
 };
 
 function preload() {
-  // falls du das farbige Logo irgendwo brauchst, lass es drin
   logoImg = loadImage('../../assets/Logo.png');
-
-  // ✅ NEU: schwarzes Logo für Export (Wasserzeichen + Signatur)
-  logoImgBlack = loadImage('../../assets/Logo_black.png');
+  logoImgBlack = loadImage('../../assets/Logo_black.png'); // ✅ schwarzes Logo
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  // ✅ Wichtig: Alpha im HSB-Modus festlegen (0..100)
   colorMode(HSB, 360, 100, 100, 100);
-
   pixelDensity(2);
 
   var params = getURLParams();
@@ -84,41 +78,23 @@ function draw() {
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
-  if (EMBED) {
-    try {
-      const colors = [];
-      for (let i = 1; i <= 9; i++) {
-        let hex = (colorMatrix[startDigit] && colorMatrix[startDigit][i]) ? colorMatrix[startDigit][i] : mapZ[i];
-        colors.push(hex);
-      }
-      window.parent.postMessage({ type: "COLORS", colors }, "*");
-    } catch(_) {}
-  }
-
   push();
-
   const scaleFactor = (min(width, height) / 850) * (isMobile ? 0.82 : 0.92);
   translate(width / 2, height / 2);
   scale(scaleFactor);
-
   calcQuadratMatrix(drawCode);
-
-  // ✅ Zwischenlinien sicher sichtbar
   drawQuadrat(startDigit, null, { stroke: true });
-
   pop();
 }
 
 function drawQuadrat(startDigit, target, opts) {
   var ctx = target || window;
   var ts = 16;
-
   const strokeOn = opts && opts.stroke === true;
 
   ctx.rectMode(CORNER);
 
   if (strokeOn) {
-    // ✅ Schwarz mit transparenter Alpha (HSB: 0,0,0)
     ctx.stroke(0, 0, 0, 35);
     ctx.strokeWeight(1);
   } else {
@@ -131,8 +107,8 @@ function drawQuadrat(startDigit, target, opts) {
       if (val !== 0) {
         var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val]) ? colorMatrix[startDigit][val] : mapZ[val];
         var col = color(hex);
-
         var sVal = getSlider(val);
+
         ctx.fill(
           hue(col),
           map(sVal, 20, 100, 15, saturation(col)),
@@ -149,8 +125,9 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-// ✅ GOLDEN SECTION EXPORT (A4) – mit BLACK Logo Wasserzeichen + Signatur
+// ✅ GOLDEN EXPORT (optimiert + kräftiger)
 function exportHighRes() {
+
   const exportW = 2480;
   const exportH = 3508;
 
@@ -165,13 +142,13 @@ function exportHighRes() {
   calcQuadratMatrix(drawCode);
 
   const ts = 16;
-  const gridSize = 40 * ts; // 640
+  const gridSize = 40 * ts;
 
-  const targetSizePx = exportW / PHI; // ~1533
+  const targetSizePx = exportW / PHI;
   const scale = targetSizePx / gridSize;
 
   const centerX = exportW / 2;
-  const centerY = exportH * (1 / (PHI * PHI)); // 0.382
+  const centerY = exportH * (1 / (PHI * PHI));
 
   pg.push();
   pg.translate(centerX, centerY);
@@ -179,28 +156,21 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  // ✅ Export-Logo auswählen: black bevorzugt
   const exportLogo = logoImgBlack || logoImg;
 
-  // ✅ Wasserzeichen (BLACK) – zarter & gleichmäßiger
+  // ===== Wasserzeichen (kräftiger + größer) =====
   if (exportLogo && !isAdmin) {
-    pg.resetMatrix();
 
-    // Tint in RGB, damit es wirklich wie ein Print-Wasserzeichen wirkt
     pg.push();
     pg.colorMode(RGB, 255);
+    pg.tint(0, 0, 0, 30); // kräftiger
 
-    // sehr zart
-    pg.tint(0, 0, 0, 16);
-
-    const tileW = Math.round(exportW / (PHI * 2.25));  // golden-basierte Größe
+    const tileW = Math.round(exportW / (PHI * 1.8));
     const tileH = (exportLogo.height / exportLogo.width) * tileW;
 
-    // spacing sauber + ruhig
-    const stepX = Math.round(tileW * 1.55);
-    const stepY = Math.round(tileH * 1.85);
+    const stepX = Math.round(tileW * 1.35);
+    const stepY = Math.round(tileH * 1.6);
 
-    // leicht außerhalb starten, damit nix „abbricht“
     for (let x = -stepX; x < exportW + stepX; x += stepX) {
       for (let y = -stepY; y < exportH + stepY; y += stepY) {
         pg.image(exportLogo, x, y, tileW, tileH);
@@ -211,16 +181,15 @@ function exportHighRes() {
     pg.pop();
   }
 
-  // ✅ Signatur unten rechts (BLACK) – Größe nach goldenem Schnitt
+  // ===== Signatur unten rechts (deutlich größer + kräftiger) =====
   if (exportLogo) {
-    pg.resetMatrix();
 
     pg.push();
     pg.colorMode(RGB, 255);
-    pg.tint(0, 0, 0, 55);
+    pg.tint(0, 0, 0, 80);
 
-    const pad = Math.round(exportW * 0.045); // ~112px bei 2480
-    const lW = Math.round(exportW / (PHI * 2.2)); // ~690px (edel, nicht zu dominant)
+    const pad = Math.round(exportW * 0.04);
+    const lW = Math.round(exportW / (PHI * 1.7));
     const lH = (exportLogo.height / exportLogo.width) * lW;
 
     pg.image(exportLogo, exportW - lW - pad, exportH - lH - pad, lW, lH);

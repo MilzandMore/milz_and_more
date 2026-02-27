@@ -4,7 +4,8 @@
 // =====================================================
 
 var qMatrix = [];
-var logoImg;
+var logoImg;          // (falls du es woanders brauchst)
+var logoImgBlack;     // ✅ NEU: für Export/Wasserzeichen
 var isAdmin = false;
 
 const PHI = 1.61803398875;
@@ -47,7 +48,11 @@ var charMap = {
 };
 
 function preload() {
+  // falls du das farbige Logo irgendwo brauchst, lass es drin
   logoImg = loadImage('../../assets/Logo.png');
+
+  // ✅ NEU: schwarzes Logo für Export (Wasserzeichen + Signatur)
+  logoImgBlack = loadImage('../../assets/Logo_black.png');
 }
 
 function setup() {
@@ -144,7 +149,7 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-// ✅ GOLDEN SECTION EXPORT (A4)
+// ✅ GOLDEN SECTION EXPORT (A4) – mit BLACK Logo Wasserzeichen + Signatur
 function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
@@ -171,35 +176,57 @@ function exportHighRes() {
   pg.push();
   pg.translate(centerX, centerY);
   pg.scale(scale);
-
   drawQuadrat(startDigit, pg, { stroke: true });
-
   pg.pop();
 
-  if (logoImg && !isAdmin) {
+  // ✅ Export-Logo auswählen: black bevorzugt
+  const exportLogo = logoImgBlack || logoImg;
+
+  // ✅ Wasserzeichen (BLACK) – zarter & gleichmäßiger
+  if (exportLogo && !isAdmin) {
     pg.resetMatrix();
-    pg.tint(0, 0, 0, 18);
 
-    const wWidth = 360;
-    const wHeight = (logoImg.height / logoImg.width) * wWidth;
+    // Tint in RGB, damit es wirklich wie ein Print-Wasserzeichen wirkt
+    pg.push();
+    pg.colorMode(RGB, 255);
 
-    for (let x = -120; x < exportW + 400; x += 520) {
-      for (let y = -120; y < exportH + 400; y += 520) {
-        pg.image(logoImg, x, y, wWidth, wHeight);
+    // sehr zart
+    pg.tint(0, 0, 0, 16);
+
+    const tileW = Math.round(exportW / (PHI * 2.25));  // golden-basierte Größe
+    const tileH = (exportLogo.height / exportLogo.width) * tileW;
+
+    // spacing sauber + ruhig
+    const stepX = Math.round(tileW * 1.55);
+    const stepY = Math.round(tileH * 1.85);
+
+    // leicht außerhalb starten, damit nix „abbricht“
+    for (let x = -stepX; x < exportW + stepX; x += stepX) {
+      for (let y = -stepY; y < exportH + stepY; y += stepY) {
+        pg.image(exportLogo, x, y, tileW, tileH);
       }
     }
+
     pg.noTint();
+    pg.pop();
   }
 
-  if (logoImg) {
+  // ✅ Signatur unten rechts (BLACK) – Größe nach goldenem Schnitt
+  if (exportLogo) {
     pg.resetMatrix();
-    pg.tint(0, 0, 0, 45);
 
-    const lW = 520;
-    const lH = (logoImg.height / logoImg.width) * lW;
-    pg.image(logoImg, exportW - lW - 110, exportH - lH - 110, lW, lH);
+    pg.push();
+    pg.colorMode(RGB, 255);
+    pg.tint(0, 0, 0, 55);
+
+    const pad = Math.round(exportW * 0.045); // ~112px bei 2480
+    const lW = Math.round(exportW / (PHI * 2.2)); // ~690px (edel, nicht zu dominant)
+    const lH = (exportLogo.height / exportLogo.width) * lW;
+
+    pg.image(exportLogo, exportW - lW - pad, exportH - lH - pad, lW, lH);
 
     pg.noTint();
+    pg.pop();
   }
 
   save(pg, 'Milz&More_Quadrat.png');

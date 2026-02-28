@@ -1,4 +1,8 @@
 console.log("QUADRAT LOADED ✅");
+window.onerror = function (msg, src, line, col, err) {
+  console.error("🔥 JS ERROR:", msg, "at", line + ":" + col, src);
+  if (err) console.error(err);
+};
 var qMatrix = [];
 var logoImg;
 var logoImgBlack;

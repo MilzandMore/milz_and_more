@@ -160,30 +160,40 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  // EXAKT wie im anderen Modell: logoImg verwenden
-  if (logoImg && !isAdmin) {
-    pg.resetMatrix();
-    pg.tint(255, 115); // statt 0.45 -> sichtbar und stabil
+ function exportHighRes(){
+  const exportW=2480, exportH=3508;
+  const pg = createGraphics(exportW, exportH);
+  pg.colorMode(HSB, 360, 100, 100);
+  pg.background(255);
 
-    const wWidth = 380;
-    const wHeight = (logoImg.height / logoImg.width) * wWidth;
+  const sector = buildSector();
+  const currentColors = getColorMatrix(colorSeed);
+  const sc = int(APP.sector || 8);
+  const angle = TWO_PI / sc;
 
-    for (let x = -100; x < exportW + 400; x += 500) {
-      for (let y = -100; y < exportH + 400; y += 500) {
-        pg.image(logoImg, x, y, wWidth, wHeight);
-      }
+  pg.push();
+  pg.translate(exportW/2, exportH*0.40);
+  pg.scale(3.2);
+  for(let i=0;i<sc;i++){
+    pg.push();
+    pg.rotate(i*angle);
+    drawSector(sector, currentColors, pg);
+    pg.pop();
+  }
+  pg.pop();
+
+  if(logoImg && !isAdmin){
+    pg.resetMatrix(); pg.tint(255,0.45);
+    const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
+    for(let x=-100;x<exportW+400;x+=500){
+      for(let y=-100;y<exportH+400;y+=500) pg.image(logoImg, x, y, wWidth, wHeight);
     }
-
     pg.noTint();
   }
 
-  if (logoImg) {
-    pg.resetMatrix();
-
-    const lW = 500;
-    const lH = (logoImg.height / logoImg.width) * lW;
-
-    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+  if(logoImg){
+    const lW=500, lH=(logoImg.height/logoImg.width)*lW;
+    pg.image(logoImg, exportW-lW-100, exportH-lH-100, lW, lH);
   }
 
   save(pg, 'Milz&More_Quadrat.png');

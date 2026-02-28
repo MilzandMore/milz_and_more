@@ -216,7 +216,7 @@ function exportHighRes() {
     pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
 
-  save(pg, 'Milz&More_Quadrat.png');
+  save(pg.canvas, 'Milz&More_Quadrat.png');
 }
 
 /* --------- state helpers --------- */

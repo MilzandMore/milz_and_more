@@ -162,27 +162,32 @@ function exportHighRes() {
 
   const exportLogo = logoImgBlack || logoImg;
 
-  // Wasserzeichen: kleiner + kein Überlappen (größerer Abstand + versetzte Reihen)
+  // Wasserzeichen: kleiner, luftiger, sauber versetzt
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
     pg.push();
     pg.colorMode(RGB, 255);
 
-    pg.tint(0, 0, 0, 70);
+    // dezenter
+    pg.tint(0, 0, 0, 45);
 
-    const wWidth = 320; // ✅ kleiner als vorher (380) -> weniger "Balken"
+    // kleineres Wasserzeichen
+    const wWidth = 220;
     const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
 
-    const stepX = 560;  // ✅ mehr Luft horizontal
-    const stepY = 560;  // ✅ mehr Luft vertikal
+    // mehr Abstand, damit nichts überlappt
+    const stepX = 700;
+    const stepY = 520;
 
-    // versetzte Reihen, damit keine "Linien" entstehen
+    // Start leicht außerhalb der Zeichenfläche
     let row = 0;
-    for (let y = -140; y < exportH + 500; y += stepY) {
+    for (let y = -80; y < exportH + wHeight; y += stepY) {
       const xOffset = (row % 2 === 0) ? 0 : Math.round(stepX / 2);
-      for (let x = -140; x < exportW + 500; x += stepX) {
+
+      for (let x = -120; x < exportW + wWidth; x += stepX) {
         pg.image(exportLogo, x + xOffset, y, wWidth, wHeight);
       }
+
       row++;
     }
 

@@ -132,79 +132,37 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-function exportHighRes() {
-  const exportW = 2480;
-  const exportH = 3508;
-
+function exportHighRes(){
+  const exportW=2480, exportH=3508;
   const pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100, 100);
+  pg.colorMode(HSB, 360, 100, 100);
   pg.background(255);
 
-  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
-  const startDigit = baseCode[0] || 1;
-  const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
+  const rawVal = String(APP.input||"").trim();
+  let code = (APP.mode==="text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g,"").split('').map(Number);
+  while(code.length<8) code.push(0);
+  code = code.slice(0,8);
 
-  calcQuadratMatrix(drawCode);
-
-  const ts = 16;
-  const gridSize = 40 * ts; // 640
-  const targetSizePx = exportW / PHI; // ~1533
-  const scale = targetSizePx / gridSize;
-
-  const centerX = exportW / 2;
-  const centerY = exportH * (1 / (PHI * PHI)); // 0.382
+  const cKey = code[0] || 1;
 
   pg.push();
-  pg.translate(centerX, centerY);
-  pg.scale(scale);
-  drawQuadrat(startDigit, pg, { stroke: true });
+  pg.translate(exportW/2, exportH*0.40);
+  pg.scale(2.4);
+  renderWabeKorrekt(code, cKey, pg);
   pg.pop();
 
-  const exportLogo = logoImgBlack || logoImg;
-
-  // Wasserzeichen: kleiner + kein Überlappen (größerer Abstand + versetzte Reihen)
-  if (exportLogo && !isAdmin) {
-    pg.resetMatrix();
-    pg.push();
-    pg.colorMode(RGB, 255);
-
-    pg.tint(0, 0, 0, 70);
-
-    const wWidth = 320; // ✅ kleiner als vorher (380) -> weniger "Balken"
-    const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
-
-    const stepX = 560;  // ✅ mehr Luft horizontal
-    const stepY = 560;  // ✅ mehr Luft vertikal
-
-    // versetzte Reihen, damit keine "Linien" entstehen
-    let row = 0;
-    for (let y = -140; y < exportH + 500; y += stepY) {
-      const xOffset = (row % 2 === 0) ? 0 : Math.round(stepX / 2);
-      for (let x = -140; x < exportW + 500; x += stepX) {
-        pg.image(exportLogo, x + xOffset, y, wWidth, wHeight);
-      }
-      row++;
+  if(logoImg && !isAdmin){
+    pg.resetMatrix(); pg.tint(255, 0.45);
+    const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
+    for(let x=-100;x<exportW+400;x+=500){
+      for(let y=-100;y<exportH+400;y+=500) pg.image(logoImg, x, y, wWidth, wHeight);
     }
-
     pg.noTint();
-    pg.pop();
   }
 
-  // Signatur unten rechts
-  if (exportLogo) {
-    pg.resetMatrix();
-    pg.push();
-    pg.colorMode(RGB, 255);
-
-    pg.tint(0, 0, 0, 190);
-
-    const lW = 760;
-    const lH = (exportLogo.height / exportLogo.width) * lW;
-
-    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
-
-    pg.noTint();
-    pg.pop();
+  if(logoImg){
+    const lW=500, lH=(logoImg.height/logoImg.width)*lW;
+    pg.image(logoImg, exportW-lW-100, exportH-lH-100, lW, lH);
   }
 
   save(pg, 'Milz&More_Quadrat.png');

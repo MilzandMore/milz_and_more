@@ -37,8 +37,10 @@ var colorMatrix = {
 };
 
 var charMap = {
-  'A': 1, 'J': 1, 'S': 1, 'Ä': 1, 'B': 2, 'K': 2, 'T': 2, 'Ö': 2, 'C': 3, 'L': 3, 'U': 3, 'Ü': 3, 'D': 4, 'M': 4, 'V': 4, 'ß': 4,
-  'E': 5, 'N': 5, 'W': 5, 'F': 6, 'O': 6, 'X': 6, 'G': 7, 'P': 7, 'Y': 7, 'H': 8, 'Q': 8, 'Z': 8, 'I': 9, 'R': 9
+  'A': 1, 'J': 1, 'S': 1, 'Ä': 1, 'B': 2, 'K': 2, 'T': 2, 'Ö': 2,
+  'C': 3, 'L': 3, 'U': 3, 'Ü': 3, 'D': 4, 'M': 4, 'V': 4, 'ß': 4,
+  'E': 5, 'N': 5, 'W': 5, 'F': 6, 'O': 6, 'X': 6, 'G': 7, 'P': 7,
+  'Y': 7, 'H': 8, 'Q': 8, 'Z': 8, 'I': 9, 'R': 9
 };
 
 function preload() {
@@ -160,29 +162,35 @@ function exportHighRes() {
 
   const exportLogo = logoImgBlack || logoImg;
 
-  // Wasserzeichen: Logo kleiner wie beim RUND-Export (wWidth=380, step=500)
+  // Wasserzeichen: kleiner + kein Überlappen (größerer Abstand + versetzte Reihen)
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
     pg.push();
     pg.colorMode(RGB, 255);
 
-    // kräftig, aber nicht erschlagend (0..255)
     pg.tint(0, 0, 0, 70);
 
-    const wWidth = 380; // ✅ kleiner wie gewünscht (wie Rund)
+    const wWidth = 320; // ✅ kleiner als vorher (380) -> weniger "Balken"
     const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
 
-    for (let x = -100; x < exportW + 400; x += 500) {
-      for (let y = -100; y < exportH + 400; y += 500) {
-        pg.image(exportLogo, x, y, wWidth, wHeight);
+    const stepX = 560;  // ✅ mehr Luft horizontal
+    const stepY = 560;  // ✅ mehr Luft vertikal
+
+    // versetzte Reihen, damit keine "Linien" entstehen
+    let row = 0;
+    for (let y = -140; y < exportH + 500; y += stepY) {
+      const xOffset = (row % 2 === 0) ? 0 : Math.round(stepX / 2);
+      for (let x = -140; x < exportW + 500; x += stepX) {
+        pg.image(exportLogo, x + xOffset, y, wWidth, wHeight);
       }
+      row++;
     }
 
     pg.noTint();
     pg.pop();
   }
 
-  // Signatur unten rechts (bleibt größer/präsenter)
+  // Signatur unten rechts
   if (exportLogo) {
     pg.resetMatrix();
     pg.push();

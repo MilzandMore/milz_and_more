@@ -69,7 +69,7 @@ function setup() {
   pixelDensity(2);
 
   var params = getURLParams();
-  if (params.access === 'milz_secret') isAdmin = true;
+  if (params.access === "milz_secret") isAdmin = true;
 
   if (EMBED) {
     noLoop();
@@ -189,34 +189,40 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  // Wasserzeichen: identisch zu Rund + Wabe
-  if (logoImg && !isAdmin) {
+  const exportLogo = logoImgBlack || logoImg;
+
+  if (exportLogo && !isAdmin) {
     pg.resetMatrix();
+    pg.push();
+    pg.colorMode(RGB, 255);
     pg.tint(255, 0.45);
 
     const wWidth = 380;
-    const wHeight = (logoImg.height / logoImg.width) * wWidth;
+    const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
 
     for (let x = -100; x < exportW + 400; x += 500) {
       for (let y = -100; y < exportH + 400; y += 500) {
-        pg.image(logoImg, x, y, wWidth, wHeight);
+        pg.image(exportLogo, x, y, wWidth, wHeight);
       }
     }
 
     pg.noTint();
+    pg.pop();
   }
 
-  // Logo unten rechts: identisch zu Rund + Wabe
-  if (logoImg) {
+  if (exportLogo) {
     pg.resetMatrix();
+    pg.push();
+    pg.colorMode(RGB, 255);
 
     const lW = 500;
-    const lH = (logoImg.height / logoImg.width) * lW;
+    const lH = (exportLogo.height / exportLogo.width) * lW;
 
-    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
+    pg.pop();
   }
 
-  save(pg.canvas, 'Milz&More_Quadrat.png');
+  save(pg, "Milz&More_Quadrat.png");
 }
 
 /* --------- state helpers --------- */
@@ -242,7 +248,7 @@ function getSlider(val) {
 /* --------- code gen --------- */
 function getCodeFromDate(str) {
   var val = String(str || "").replace(/[^0-9]/g, "");
-  var res = val.split('').map(Number);
+  var res = val.split("").map(Number);
   while (res.length < 8) res.push(0);
   return res.slice(0, 8);
 }
@@ -278,10 +284,11 @@ function ex(a, b) {
 
 function calcQuadratMatrix(code) {
   qMatrix = Array(20).fill().map(() => Array(20).fill(0));
-  var d = [code[0], code[1]],
-      m = [code[2], code[3]],
-      j1 = [code[4], code[5]],
-      j2 = [code[6], code[7]];
+
+  var d = [code[0], code[1]];
+  var m = [code[2], code[3]];
+  var j1 = [code[4], code[5]];
+  var j2 = [code[6], code[7]];
 
   function set2(r, c, v1, v2) {
     if (r >= 20 || c >= 20) return;
@@ -292,14 +299,17 @@ function calcQuadratMatrix(code) {
   }
 
   for (var i = 0; i < 8; i += 2) set2(i, i, d[0], d[1]);
+
   for (var i = 0; i < 6; i += 2) {
     set2(i, i + 2, m[0], m[1]);
     set2(i + 2, i, m[0], m[1]);
   }
+
   for (var i = 0; i < 4; i += 2) {
     set2(i, i + 4, j1[0], j1[1]);
     set2(i + 4, i, j1[0], j1[1]);
   }
+
   set2(0, 6, j2[0], j2[1]);
   set2(6, 0, j2[0], j2[1]);
 

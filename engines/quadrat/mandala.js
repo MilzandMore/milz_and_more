@@ -22,7 +22,17 @@ var extState = {
   paperLook: true
 };
 
-const mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
+const mapZ = {
+  1: "#FFD670",
+  2: "#DEAAFF",
+  3: "#FF686B",
+  4: "#7A5BEC",
+  5: "#74FB92",
+  6: "#E9FF70",
+  7: "#C0FDFF",
+  8: "#B2C9FF",
+  9: "#FFCBF2"
+};
 
 var colorMatrix = {
   1: { 1: "#FF0000", 2: "#0000FF", 3: "#00FF00", 4: "#FFFF00", 5: "#00B0F0", 6: "#00FFFF", 7: "#FF66FF", 8: "#FF9900", 9: "#9900FF" },
@@ -37,14 +47,19 @@ var colorMatrix = {
 };
 
 var charMap = {
-  'A': 1, 'J': 1, 'S': 1, 'Ä': 1, 'B': 2, 'K': 2, 'T': 2, 'Ö': 2,
-  'C': 3, 'L': 3, 'U': 3, 'Ü': 3, 'D': 4, 'M': 4, 'V': 4, 'ß': 4,
-  'E': 5, 'N': 5, 'W': 5, 'F': 6, 'O': 6, 'X': 6, 'G': 7, 'P': 7,
-  'Y': 7, 'H': 8, 'Q': 8, 'Z': 8, 'I': 9, 'R': 9
+  'A': 1, 'J': 1, 'S': 1, 'Ä': 1,
+  'B': 2, 'K': 2, 'T': 2, 'Ö': 2,
+  'C': 3, 'L': 3, 'U': 3, 'Ü': 3,
+  'D': 4, 'M': 4, 'V': 4, 'ß': 4,
+  'E': 5, 'N': 5, 'W': 5,
+  'F': 6, 'O': 6, 'X': 6,
+  'G': 7, 'P': 7, 'Y': 7,
+  'H': 8, 'Q': 8, 'Z': 8,
+  'I': 9, 'R': 9
 };
 
 function preload() {
-  logoImgBlack = loadImage("../../assets/Logo_black.png", () => { }, () => { logoImgBlack = null; });
+  logoImgBlack = loadImage("../../assets/Logo_black.png", () => {}, () => { logoImgBlack = null; });
   logoImg = loadImage("../../assets/Logo.png");
 }
 
@@ -59,7 +74,7 @@ function setup() {
   if (EMBED) {
     noLoop();
     window.addEventListener("message", onMessageFromParent);
-    try { window.parent.postMessage({ type: "READY" }, "*"); } catch (_) { }
+    try { window.parent.postMessage({ type: "READY" }, "*"); } catch (_) {}
     redraw();
   }
 }
@@ -69,19 +84,26 @@ function draw() {
 
   const isMobile = windowWidth < 600;
 
-  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
+  const baseCode = (getMode() === "geburtstag")
+    ? getCodeFromDate(getInput())
+    : getCodeFromText(getInput());
+
   const startDigit = baseCode[0] || 1;
-  const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
+  const drawCode = (getDirection() === "innen")
+    ? [...baseCode].reverse()
+    : baseCode;
 
   if (EMBED) {
     try {
       const colors = [];
       for (let i = 1; i <= 9; i++) {
-        let hex = (colorMatrix[startDigit] && colorMatrix[startDigit][i]) ? colorMatrix[startDigit][i] : mapZ[i];
+        let hex = (colorMatrix[startDigit] && colorMatrix[startDigit][i])
+          ? colorMatrix[startDigit][i]
+          : mapZ[i];
         colors.push(hex);
       }
       window.parent.postMessage({ type: "COLORS", colors }, "*");
-    } catch (_) { }
+    } catch (_) {}
   }
 
   push();
@@ -112,7 +134,9 @@ function drawQuadrat(startDigit, target, opts) {
     for (var c = 0; c < 20; c++) {
       var val = qMatrix[r][c];
       if (val !== 0) {
-        var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val]) ? colorMatrix[startDigit][val] : mapZ[val];
+        var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val])
+          ? colorMatrix[startDigit][val]
+          : mapZ[val];
         var col = color(hex);
 
         var sVal = getSlider(val);
@@ -140,9 +164,14 @@ function exportHighRes() {
   pg.colorMode(HSB, 360, 100, 100, 100);
   pg.background(255);
 
-  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
+  const baseCode = (getMode() === "geburtstag")
+    ? getCodeFromDate(getInput())
+    : getCodeFromText(getInput());
+
   const startDigit = baseCode[0] || 1;
-  const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
+  const drawCode = (getDirection() === "innen")
+    ? [...baseCode].reverse()
+    : baseCode;
 
   calcQuadratMatrix(drawCode);
 
@@ -160,66 +189,49 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
- function exportHighRes(){
-  const exportW=2480, exportH=3508;
-  const pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100);
-  pg.background(255);
+  // Wasserzeichen: identisch zu Rund + Wabe
+  if (logoImg && !isAdmin) {
+    pg.resetMatrix();
+    pg.tint(255, 0.45);
 
-  const sector = buildSector();
-  const currentColors = getColorMatrix(colorSeed);
-  const sc = int(APP.sector || 8);
-  const angle = TWO_PI / sc;
+    const wWidth = 380;
+    const wHeight = (logoImg.height / logoImg.width) * wWidth;
 
-  pg.push();
-  pg.translate(exportW/2, exportH*0.40);
-  pg.scale(3.2);
-  for(let i=0;i<sc;i++){
-    pg.push();
-    pg.rotate(i*angle);
-    drawSector(sector, currentColors, pg);
-    pg.pop();
-  }
-  pg.pop();
-
-  if(logoImg && !isAdmin){
-    pg.resetMatrix(); pg.tint(255,0.45);
-    const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
-    for(let x=-100;x<exportW+400;x+=500){
-      for(let y=-100;y<exportH+400;y+=500) pg.image(logoImg, x, y, wWidth, wHeight);
+    for (let x = -100; x < exportW + 400; x += 500) {
+      for (let y = -100; y < exportH + 400; y += 500) {
+        pg.image(logoImg, x, y, wWidth, wHeight);
+      }
     }
+
     pg.noTint();
   }
 
-  if(logoImg){
-    const lW=500, lH=(logoImg.height/logoImg.width)*lW;
-    pg.image(logoImg, exportW-lW-100, exportH-lH-100, lW, lH);
-  }
-
-  save(pg, 'Milz&More_Quadrat.png');
-}
-
-  // Signatur unten rechts mit deinen Originalwerten
-  if (exportLogo) {
+  // Logo unten rechts: identisch zu Rund + Wabe
+  if (logoImg) {
     pg.resetMatrix();
-    pg.push();
-    pg.colorMode(RGB, 255);
 
     const lW = 500;
-    const lH = (exportLogo.height / exportLogo.width) * lW;
+    const lH = (logoImg.height / logoImg.width) * lW;
 
-    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
-
-    pg.pop();
+    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
 
   save(pg, 'Milz&More_Quadrat.png');
 }
 
 /* --------- state helpers --------- */
-function getMode() { return EMBED ? (extState.mode || "geburtstag") : "geburtstag"; }
-function getInput() { return EMBED ? (extState.input ?? "15011987") : "15011987"; }
-function getDirection() { return EMBED ? (extState.direction || "aussen") : "aussen"; }
+function getMode() {
+  return EMBED ? (extState.mode || "geburtstag") : "geburtstag";
+}
+
+function getInput() {
+  return EMBED ? (extState.input ?? "15011987") : "15011987";
+}
+
+function getDirection() {
+  return EMBED ? (extState.direction || "aussen") : "aussen";
+}
+
 function getSlider(val) {
   if (!EMBED) return 85;
   const arr = extState.sliders || [];
@@ -238,10 +250,15 @@ function getCodeFromDate(str) {
 function getCodeFromText(textStr) {
   var t = String(textStr || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
   if (t.length === 0) return [1, 1, 1, 1, 1, 1, 1, 1];
+
   var firstRow = [];
-  for (var char of t) { if (charMap[char]) firstRow.push(charMap[char]); }
+  for (var char of t) {
+    if (charMap[char]) firstRow.push(charMap[char]);
+  }
+
   var currentRow = firstRow;
   while (currentRow.length < 8) currentRow.push(9);
+
   while (currentRow.length > 8) {
     var nextRow = [];
     for (var i = 0; i < currentRow.length - 1; i++) {
@@ -250,6 +267,7 @@ function getCodeFromText(textStr) {
     }
     currentRow = nextRow;
   }
+
   return currentRow;
 }
 
@@ -260,7 +278,10 @@ function ex(a, b) {
 
 function calcQuadratMatrix(code) {
   qMatrix = Array(20).fill().map(() => Array(20).fill(0));
-  var d = [code[0], code[1]], m = [code[2], code[3]], j1 = [code[4], code[5]], j2 = [code[6], code[7]];
+  var d = [code[0], code[1]],
+      m = [code[2], code[3]],
+      j1 = [code[4], code[5]],
+      j2 = [code[6], code[7]];
 
   function set2(r, c, v1, v2) {
     if (r >= 20 || c >= 20) return;
@@ -271,15 +292,27 @@ function calcQuadratMatrix(code) {
   }
 
   for (var i = 0; i < 8; i += 2) set2(i, i, d[0], d[1]);
-  for (var i = 0; i < 6; i += 2) { set2(i, i + 2, m[0], m[1]); set2(i + 2, i, m[0], m[1]); }
-  for (var i = 0; i < 4; i += 2) { set2(i, i + 4, j1[0], j1[1]); set2(i + 4, i, j1[0], j1[1]); }
-  set2(0, 6, j2[0], j2[1]); set2(6, 0, j2[0], j2[1]);
+  for (var i = 0; i < 6; i += 2) {
+    set2(i, i + 2, m[0], m[1]);
+    set2(i + 2, i, m[0], m[1]);
+  }
+  for (var i = 0; i < 4; i += 2) {
+    set2(i, i + 4, j1[0], j1[1]);
+    set2(i + 4, i, j1[0], j1[1]);
+  }
+  set2(0, 6, j2[0], j2[1]);
+  set2(6, 0, j2[0], j2[1]);
 
   for (var r = 0; r < 8; r++) {
-    for (var c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c - 2], qMatrix[r][c - 1]);
+    for (var c = 8; c < 20; c++) {
+      qMatrix[r][c] = ex(qMatrix[r][c - 2], qMatrix[r][c - 1]);
+    }
   }
+
   for (var c = 0; c < 20; c++) {
-    for (var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r - 2][c], qMatrix[r - 1][c]);
+    for (var r = 8; r < 20; r++) {
+      qMatrix[r][c] = ex(qMatrix[r - 2][c], qMatrix[r - 1][c]);
+    }
   }
 }
 

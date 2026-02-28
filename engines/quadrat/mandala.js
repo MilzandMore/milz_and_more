@@ -56,6 +56,7 @@ function setup() {
   var params = getURLParams();
   if (params.access === 'milz_secret') isAdmin = true;
 
+  // WICHTIG: Listener wieder wie in deinem Original nur im Embed
   if (EMBED) {
     noLoop();
     window.addEventListener("message", onMessageFromParent);
@@ -147,12 +148,12 @@ function exportHighRes() {
   calcQuadratMatrix(drawCode);
 
   const ts = 16;
-  const gridSize = 40 * ts; // 640
-  const targetSizePx = exportW / PHI; // ~1533
+  const gridSize = 40 * ts;
+  const targetSizePx = exportW / PHI;
   const scale = targetSizePx / gridSize;
 
   const centerX = exportW / 2;
-  const centerY = exportH * (1 / (PHI * PHI)); // 0.382
+  const centerY = exportH * (1 / (PHI * PHI));
 
   pg.push();
   pg.translate(centerX, centerY);
@@ -160,51 +161,33 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
+  // exakt EIN Logo-Objekt für Export
   const exportLogo = logoImgBlack || logoImg;
 
-  // Wasserzeichen: kleiner + kein Überlappen (größerer Abstand + versetzte Reihen)
+  // Wasserzeichen: identisch zu Rund/Wabe
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
-    pg.push();
-    pg.colorMode(RGB, 255);
+    pg.tint(255, 0.45);
 
-    pg.tint(0, 0, 0, 70);
-
-    const wWidth = 320; // ✅ kleiner als vorher (380) -> weniger "Balken"
+    const wWidth = 380;
     const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
 
-    const stepX = 560;  // ✅ mehr Luft horizontal
-    const stepY = 560;  // ✅ mehr Luft vertikal
-
-    // versetzte Reihen, damit keine "Linien" entstehen
-    let row = 0;
-    for (let y = -140; y < exportH + 500; y += stepY) {
-      const xOffset = (row % 2 === 0) ? 0 : Math.round(stepX / 2);
-      for (let x = -140; x < exportW + 500; x += stepX) {
-        pg.image(exportLogo, x + xOffset, y, wWidth, wHeight);
+    for (let x = -100; x < exportW + 400; x += 500) {
+      for (let y = -100; y < exportH + 400; y += 500) {
+        pg.image(exportLogo, x, y, wWidth, wHeight);
       }
-      row++;
     }
-
     pg.noTint();
-    pg.pop();
   }
 
-  // Signatur unten rechts
+  // Signatur unten rechts: identisch zu Rund/Wabe
   if (exportLogo) {
     pg.resetMatrix();
-    pg.push();
-    pg.colorMode(RGB, 255);
 
-    pg.tint(0, 0, 0, 190);
-
-    const lW = 760;
+    const lW = 500;
     const lH = (exportLogo.height / exportLogo.width) * lW;
 
     pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
-
-    pg.noTint();
-    pg.pop();
   }
 
   save(pg, 'Milz&More_Quadrat.png');
@@ -300,4 +283,4 @@ function onMessageFromParent(ev) {
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   if (EMBED) redraw();
-}  kannst du mir den teil im Code anzeigen, der genau dafür verantwortlich ist?
+}

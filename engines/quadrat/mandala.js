@@ -207,12 +207,12 @@ function exportHighRes() {
     // kräftiger (0..255)
     pg.tint(0, 0, 0, 70);
 
-    const wWidth = 520;
+    const wWidth = 380;
     const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
 
     // spacing
-    for (let x = -140; x < exportW + 500; x += 470) {
-      for (let y = -140; y < exportH + 500; y += 470) {
+    for (let x = -100; x < exportW + 400; x += 500) {
+      for (let y = -100; y < exportH + 400; y += 500) {
         pg.image(exportLogo, x, y, wWidth, wHeight);
       }
     }

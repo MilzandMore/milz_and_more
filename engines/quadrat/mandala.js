@@ -1,14 +1,6 @@
-// =====================================================
-// QUADRAT ENGINE – FIX: Wasserzeichen doppelt (Export)
-// Ursache: Du hast den RUND-Exportblock in exportHighRes() stehen lassen
-// Lösung: exportHighRes() nur 1x korrekt für QUADRAT (ohne buildSector/drawSector/APP)
-// MASKE: dark background(12) wie RUND
-// EXPORT: A4 + Golden placement + BLACK watermark + BLACK signature
-// =====================================================
-
 var qMatrix = [];
-var logoImg;        // fallback
-var logoImgBlack;   // bevorzugt für Export
+var logoImg;
+var logoImgBlack;
 var isAdmin = false;
 
 const PHI = 1.61803398875;
@@ -16,7 +8,7 @@ const PHI = 1.61803398875;
 function isEmbed() {
   const p = new URLSearchParams(location.search);
   if (p.get("embed") === "1") return true;
-  try { return window.self !== window.top; } catch(e) { return true; }
+  try { return window.self !== window.top; } catch (e) { return true; }
 }
 var EMBED = isEmbed();
 
@@ -27,16 +19,10 @@ var extState = {
   direction: "aussen",
   sliders: Array(10).fill(85),
   isAdmin: false,
-  paperLook: true,
-  // optional: parent kann exportLogo setzen:
-  // exportLogo: "../../assets/Logo_black.png"
+  paperLook: true
 };
 
-const mapZ = {
-  1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B",
-  4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70",
-  7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2"
-};
+const mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
 
 var colorMatrix = {
   1: { 1: "#FF0000", 2: "#0000FF", 3: "#00FF00", 4: "#FFFF00", 5: "#00B0F0", 6: "#00FFFF", 7: "#FF66FF", 8: "#FF9900", 9: "#9900FF" },
@@ -51,31 +37,18 @@ var colorMatrix = {
 };
 
 var charMap = {
-  'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,
-  'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
+  'A': 1, 'J': 1, 'S': 1, 'Ä': 1, 'B': 2, 'K': 2, 'T': 2, 'Ö': 2, 'C': 3, 'L': 3, 'U': 3, 'Ü': 3, 'D': 4, 'M': 4, 'V': 4, 'ß': 4,
+  'E': 5, 'N': 5, 'W': 5, 'F': 6, 'O': 6, 'X': 6, 'G': 7, 'P': 7, 'Y': 7, 'H': 8, 'Q': 8, 'Z': 8, 'I': 9, 'R': 9
 };
 
-// -------- robust logo load (wie beim Rund) ----------
 function preload() {
-  const p = (extState && extState.exportLogo) ? extState.exportLogo : "../../assets/Logo_black.png";
-
-  // black bevorzugt
-  logoImgBlack = loadImage(
-    p,
-    () => {},
-    () => { logoImgBlack = null; }
-  );
-
-  // fallback immer laden
+  logoImgBlack = loadImage("../../assets/Logo_black.png", () => { }, () => { logoImgBlack = null; });
   logoImg = loadImage("../../assets/Logo.png");
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  // ✅ HSB mit Alpha
   colorMode(HSB, 360, 100, 100, 100);
-
   pixelDensity(2);
 
   var params = getURLParams();
@@ -84,13 +57,12 @@ function setup() {
   if (EMBED) {
     noLoop();
     window.addEventListener("message", onMessageFromParent);
-    try { window.parent.postMessage({ type: "READY" }, "*"); } catch(_) {}
+    try { window.parent.postMessage({ type: "READY" }, "*"); } catch (_) { }
     redraw();
   }
 }
 
 function draw() {
-  // ✅ Preview wie RUND
   background(12);
 
   const isMobile = windowWidth < 600;
@@ -107,26 +79,22 @@ function draw() {
         colors.push(hex);
       }
       window.parent.postMessage({ type: "COLORS", colors }, "*");
-    } catch(_) {}
+    } catch (_) { }
   }
 
   push();
-
   const scaleFactor = (min(width, height) / 850) * (isMobile ? 0.82 : 0.92);
   translate(width / 2, height / 2);
   scale(scaleFactor);
 
   calcQuadratMatrix(drawCode);
-
   drawQuadrat(startDigit, null, { stroke: true });
-
   pop();
 }
 
 function drawQuadrat(startDigit, target, opts) {
   var ctx = target || window;
   var ts = 16;
-
   const strokeOn = opts && opts.stroke === true;
 
   ctx.rectMode(CORNER);
@@ -162,9 +130,6 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-// =====================================================
-// ✅ EXPORT – NUR EINMAL Wasserzeichen/Logo (keine doppelten Blöcke)
-// =====================================================
 function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
@@ -173,7 +138,6 @@ function exportHighRes() {
   pg.colorMode(HSB, 360, 100, 100, 100);
   pg.background(255);
 
-  // ---- Quadrat Motiv rendern ----
   const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
@@ -182,7 +146,6 @@ function exportHighRes() {
 
   const ts = 16;
   const gridSize = 40 * ts; // 640
-
   const targetSizePx = exportW / PHI; // ~1533
   const scale = targetSizePx / gridSize;
 
@@ -195,22 +158,20 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  // ---- Logo wählen ----
   const exportLogo = logoImgBlack || logoImg;
 
-  // ---- Wasserzeichen 1x ----
+  // Wasserzeichen: Logo kleiner wie beim RUND-Export (wWidth=380, step=500)
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
     pg.push();
     pg.colorMode(RGB, 255);
 
-    // kräftiger (0..255)
+    // kräftig, aber nicht erschlagend (0..255)
     pg.tint(0, 0, 0, 70);
 
-    const wWidth = 380;
+    const wWidth = 380; // ✅ kleiner wie gewünscht (wie Rund)
     const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
 
-    // spacing
     for (let x = -100; x < exportW + 400; x += 500) {
       for (let y = -100; y < exportH + 400; y += 500) {
         pg.image(exportLogo, x, y, wWidth, wHeight);
@@ -221,7 +182,7 @@ function exportHighRes() {
     pg.pop();
   }
 
-  // ---- Signatur 1x ----
+  // Signatur unten rechts (bleibt größer/präsenter)
   if (exportLogo) {
     pg.resetMatrix();
     pg.push();
@@ -262,15 +223,15 @@ function getCodeFromDate(str) {
 
 function getCodeFromText(textStr) {
   var t = String(textStr || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
-  if (t.length === 0) return [1,1,1,1,1,1,1,1];
+  if (t.length === 0) return [1, 1, 1, 1, 1, 1, 1, 1];
   var firstRow = [];
   for (var char of t) { if (charMap[char]) firstRow.push(charMap[char]); }
   var currentRow = firstRow;
-  while(currentRow.length < 8) currentRow.push(9);
+  while (currentRow.length < 8) currentRow.push(9);
   while (currentRow.length > 8) {
     var nextRow = [];
     for (var i = 0; i < currentRow.length - 1; i++) {
-      var sum = currentRow[i] + currentRow[i+1];
+      var sum = currentRow[i] + currentRow[i + 1];
       nextRow.push(sum % 9 === 0 ? 9 : sum % 9);
     }
     currentRow = nextRow;
@@ -290,21 +251,21 @@ function calcQuadratMatrix(code) {
   function set2(r, c, v1, v2) {
     if (r >= 20 || c >= 20) return;
     qMatrix[r][c] = v1;
-    if(c+1 < 20) qMatrix[r][c+1] = v2;
-    if(r+1 < 20) qMatrix[r+1][c] = v2;
-    if(r+1 < 20 && c+1 < 20) qMatrix[r+1][c+1] = v1;
+    if (c + 1 < 20) qMatrix[r][c + 1] = v2;
+    if (r + 1 < 20) qMatrix[r + 1][c] = v2;
+    if (r + 1 < 20 && c + 1 < 20) qMatrix[r + 1][c + 1] = v1;
   }
 
-  for(var i = 0; i < 8; i+=2) set2(i, i, d[0], d[1]);
-  for(var i = 0; i < 6; i+=2) { set2(i, i+2, m[0], m[1]); set2(i+2, i, m[0], m[1]); }
-  for(var i = 0; i < 4; i+=2) { set2(i, i+4, j1[0], j1[1]); set2(i+4, i, j1[0], j1[1]); }
+  for (var i = 0; i < 8; i += 2) set2(i, i, d[0], d[1]);
+  for (var i = 0; i < 6; i += 2) { set2(i, i + 2, m[0], m[1]); set2(i + 2, i, m[0], m[1]); }
+  for (var i = 0; i < 4; i += 2) { set2(i, i + 4, j1[0], j1[1]); set2(i + 4, i, j1[0], j1[1]); }
   set2(0, 6, j2[0], j2[1]); set2(6, 0, j2[0], j2[1]);
 
-  for(var r = 0; r < 8; r++) {
-    for(var c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c-2], qMatrix[r][c-1]);
+  for (var r = 0; r < 8; r++) {
+    for (var c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c - 2], qMatrix[r][c - 1]);
   }
-  for(var c = 0; c < 20; c++) {
-    for(var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r-2][c], qMatrix[r-1][c]);
+  for (var c = 0; c < 20; c++) {
+    for (var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r - 2][c], qMatrix[r - 1][c]);
   }
 }
 

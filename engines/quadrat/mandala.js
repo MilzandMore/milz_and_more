@@ -22,17 +22,7 @@ var extState = {
   paperLook: true
 };
 
-const mapZ = {
-  1: "#FFD670",
-  2: "#DEAAFF",
-  3: "#FF686B",
-  4: "#7A5BEC",
-  5: "#74FB92",
-  6: "#E9FF70",
-  7: "#C0FDFF",
-  8: "#B2C9FF",
-  9: "#FFCBF2"
-};
+const mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
 
 var colorMatrix = {
   1: { 1: "#FF0000", 2: "#0000FF", 3: "#00FF00", 4: "#FFFF00", 5: "#00B0F0", 6: "#00FFFF", 7: "#FF66FF", 8: "#FF9900", 9: "#9900FF" },
@@ -170,15 +160,12 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  // gleiches Logo-Verhalten wie vorher beibehalten
+  // Gleiches Verhalten wie in deinem Code beibehalten
   const exportLogo = logoImgBlack || logoImg;
 
-  // Wasserzeichen: gleiche Werte wie Rund + Wabe
+  // Wasserzeichen mit denselben Werten wie Rund + Wabe
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
-    pg.push();
-    pg.colorMode(RGB, 255);
-
     pg.tint(255, 0.45);
 
     const wWidth = 380;
@@ -191,21 +178,14 @@ function exportHighRes() {
     }
 
     pg.noTint();
-    pg.pop();
   }
 
-  // Signatur unten rechts: gleiche Werte wie Rund + Wabe
+  // Signatur unten rechts mit denselben Werten wie Rund + Wabe
   if (exportLogo) {
-    pg.resetMatrix();
-    pg.push();
-    pg.colorMode(RGB, 255);
-
     const lW = 500;
     const lH = (exportLogo.height / exportLogo.width) * lW;
 
     pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
-
-    pg.pop();
   }
 
   save(pg, 'Milz&More_Quadrat.png');

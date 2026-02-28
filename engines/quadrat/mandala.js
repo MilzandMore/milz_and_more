@@ -22,7 +22,17 @@ var extState = {
   paperLook: true
 };
 
-const mapZ = { 1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B", 4: "#7A5BEC", 5: "#74FB92", 6: "#E9FF70", 7: "#C0FDFF", 8: "#B2C9FF", 9: "#FFCBF2" };
+const mapZ = {
+  1: "#FFD670",
+  2: "#DEAAFF",
+  3: "#FF686B",
+  4: "#7A5BEC",
+  5: "#74FB92",
+  6: "#E9FF70",
+  7: "#C0FDFF",
+  8: "#B2C9FF",
+  9: "#FFCBF2"
+};
 
 var colorMatrix = {
   1: { 1: "#FF0000", 2: "#0000FF", 3: "#00FF00", 4: "#FFFF00", 5: "#00B0F0", 6: "#00FFFF", 7: "#FF66FF", 8: "#FF9900", 9: "#9900FF" },
@@ -160,23 +170,31 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-pg.tint(255, 0.45);
+  // gleiches Logo-Verhalten wie vorher beibehalten
+  const exportLogo = logoImgBlack || logoImg;
 
-const wWidth = 380;
-const wHeight = (logoImg.height / logoImg.width) * wWidth;
+  // Wasserzeichen: gleiche Werte wie Rund + Wabe
+  if (exportLogo && !isAdmin) {
+    pg.resetMatrix();
+    pg.push();
+    pg.colorMode(RGB, 255);
 
-for (let x = -100; x < exportW + 400; x += 500) {
-  for (let y = -100; y < exportH + 400; y += 500) {
-    pg.image(logoImg, x, y, wWidth, wHeight);
+    pg.tint(255, 0.45);
+
+    const wWidth = 380;
+    const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
+
+    for (let x = -100; x < exportW + 400; x += 500) {
+      for (let y = -100; y < exportH + 400; y += 500) {
+        pg.image(exportLogo, x, y, wWidth, wHeight);
+      }
+    }
+
+    pg.noTint();
+    pg.pop();
   }
-}
 
-const lW = 500;
-const lH = (logoImg.height / logoImg.width) * lW;
-pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
-}
-
-  // Signatur unten rechts mit deinen Originalwerten
+  // Signatur unten rechts: gleiche Werte wie Rund + Wabe
   if (exportLogo) {
     pg.resetMatrix();
     pg.push();
@@ -283,4 +301,4 @@ function onMessageFromParent(ev) {
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   if (EMBED) redraw();
-} hier der erste Code, der nicht mit den beiden anderen übereinstimmt, die anderen folgen sogleich
+}

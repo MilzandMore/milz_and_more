@@ -71,9 +71,11 @@ function setup() {
   var params = getURLParams();
   if (params.access === "milz_secret") isAdmin = true;
 
+  // immer registrieren, nicht nur im Embed
+  window.addEventListener("message", onMessageFromParent);
+
   if (EMBED) {
     noLoop();
-    window.addEventListener("message", onMessageFromParent);
     try { window.parent.postMessage({ type: "READY" }, "*"); } catch (_) {}
     redraw();
   }
@@ -156,6 +158,34 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
+function downloadGraphics(pg, filename) {
+  const canvasEl = pg && (pg.elt || pg.canvas);
+  if (!canvasEl) return;
+
+  if (canvasEl.toBlob) {
+    canvasEl.toBlob(function(blob) {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, "image/png");
+    return;
+  }
+
+  const url = canvasEl.toDataURL("image/png");
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
@@ -177,8 +207,7 @@ function exportHighRes() {
 
   const ts = 16;
   const gridSize = 40 * ts;
-  const targetSizePx = exportW / PHI;
-  const scale = targetSizePx / gridSize;
+  const scale = (exportW / PHI) / gridSize;
 
   const centerX = exportW / 2;
   const centerY = exportH * (1 / (PHI * PHI));
@@ -191,6 +220,7 @@ function exportHighRes() {
 
   const exportLogo = logoImgBlack || logoImg;
 
+  // Wasserzeichen identisch zu Rund + Wabe
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
     pg.push();
@@ -210,6 +240,7 @@ function exportHighRes() {
     pg.pop();
   }
 
+  // Logo unten rechts identisch zu Rund + Wabe
   if (exportLogo) {
     pg.resetMatrix();
     pg.push();
@@ -222,7 +253,7 @@ function exportHighRes() {
     pg.pop();
   }
 
-  save(pg, "Milz&More_Quadrat.png");
+  downloadGraphics(pg, "Milz&More_Quadrat.png");
 }
 
 /* --------- state helpers --------- */

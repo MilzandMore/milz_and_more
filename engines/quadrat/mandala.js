@@ -160,28 +160,34 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  const exportLogo = logoImgBlack || logoImg;
-
-  // Wasserzeichen mit deinen Originalwerten
-  if (exportLogo && !isAdmin) {
+  // EXAKT wie im anderen Modell: logoImg verwenden
+  if (logoImg && !isAdmin) {
     pg.resetMatrix();
-    pg.push();
-    pg.colorMode(RGB, 255);
-
-    pg.tint(255, 0.45);
+    pg.tint(255, 115); // statt 0.45 -> sichtbar und stabil
 
     const wWidth = 380;
-    const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
+    const wHeight = (logoImg.height / logoImg.width) * wWidth;
 
     for (let x = -100; x < exportW + 400; x += 500) {
       for (let y = -100; y < exportH + 400; y += 500) {
-        pg.image(exportLogo, x, y, wWidth, wHeight);
+        pg.image(logoImg, x, y, wWidth, wHeight);
       }
     }
 
     pg.noTint();
-    pg.pop();
   }
+
+  if (logoImg) {
+    pg.resetMatrix();
+
+    const lW = 500;
+    const lH = (logoImg.height / logoImg.width) * lW;
+
+    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+  }
+
+  save(pg, 'Milz&More_Quadrat.png');
+}
 
   // Signatur unten rechts mit deinen Originalwerten
   if (exportLogo) {

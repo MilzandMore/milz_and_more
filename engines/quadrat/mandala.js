@@ -1,3 +1,4 @@
+console.log("QUADRAT LOADED ✅");
 var qMatrix = [];
 var logoImg;
 var logoImgBlack;

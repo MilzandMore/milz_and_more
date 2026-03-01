@@ -49,18 +49,9 @@ var charMap = {
   'Y': 7, 'H': 8, 'Q': 8, 'Z': 8, 'I': 9, 'R': 9
 };
 
+/* ====== WICHTIG: kein blockierendes preload ====== */
 function preload() {
-  logoImgBlack = loadImage(
-    "../../assets/Logo_black.png",
-    () => {},
-    () => { logoImgBlack = null; }
-  );
-
-  logoImg = loadImage(
-    "../../assets/Logo.png",
-    () => {},
-    () => { logoImg = null; }
-  );
+  // absichtlich leer – damit p5 niemals bei "Loading..." hängen bleibt
 }
 
 function setup() {
@@ -207,16 +198,8 @@ function exportHighRes() {
 
   const exportLogo = logoImgBlack || logoImg;
 
- // --- Wasserzeichen & Signatur ---
-const exportLogo = logoImgBlack || logoImg;
-
-console.log("ExportLogo:", exportLogo);
-console.log("isAdmin:", isAdmin);
-
-if (exportLogo) {
-
-  // Wasserzeichen (nur wenn kein Admin)
-  if (!isAdmin) {
+  // Wasserzeichen
+  if (exportLogo && !isAdmin) {
     pg.resetMatrix();
     pg.tint(255, 0.45);
 
@@ -228,18 +211,16 @@ if (exportLogo) {
         pg.image(exportLogo, x, y, wWidth, wHeight);
       }
     }
-
     pg.noTint();
   }
 
-  // Signatur unten rechts (immer wenn Logo existiert)
-  pg.resetMatrix();
-
-  const lW = 500;
-  const lH = (exportLogo.height / exportLogo.width) * lW;
-
-  pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
-}
+  // Signatur unten rechts
+  if (exportLogo) {
+    pg.resetMatrix();
+    const lW = 500;
+    const lH = (exportLogo.height / exportLogo.width) * lW;
+    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
+  }
 
   save(pg, 'Milz&More_Quadrat.png');
 }

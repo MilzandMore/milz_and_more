@@ -25,8 +25,19 @@ var charMap = {
 };
 
 function preload() {
-  logoImgBlack = loadImage("../../assets/Logo_black.png");
-  logoImg = loadImage("../../assets/Logo.png");
+  // Erst schwarz versuchen, wenn das nicht geht -> null lassen (damit kein Freeze)
+  logoImgBlack = loadImage(
+    "../../assets/Logo_black.png",
+    () => {},
+    () => { logoImgBlack = null; }
+  );
+
+  // Farbig versuchen, wenn das nicht geht -> null lassen
+  logoImg = loadImage(
+    "../../assets/Logo.png",
+    () => {},
+    () => { logoImg = null; }
+  );
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);

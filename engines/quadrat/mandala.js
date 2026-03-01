@@ -50,11 +50,16 @@ var charMap = {
 };
 
 function preload() {
-  const p = (APP && APP.exportLogo) ? APP.exportLogo : "../../assets/Logo_black.png";
-  logoImg = loadImage(
-    p,
+  logoImgBlack = loadImage(
+    "../../assets/Logo_black.png",
     () => {},
-    () => { logoImg = loadImage("../../assets/Logo.png"); }
+    () => { logoImgBlack = null; }
+  );
+
+  logoImg = loadImage(
+    "../../assets/Logo.png",
+    () => {},
+    () => { logoImg = null; }
   );
 }
 
@@ -170,46 +175,64 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-function exportHighRes(){
-  const exportW=2480, exportH=3508;
+/* ====== Export (Werte wie Rund/Wabe) ====== */
+function exportHighRes() {
+  const exportW = 2480;
+  const exportH = 3508;
+
   const pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100);
+  pg.colorMode(HSB, 360, 100, 100, 100);
   pg.background(255);
 
-  const rawVal = String(APP.input||"").trim();
-  let code = (APP.mode==="text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g,"").split('').map(Number);
-  while(code.length<8) code.push(0);
-  code = code.slice(0,8);
+  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
+  const startDigit = baseCode[0] || 1;
+  const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
-  const cKey = code[0] || 1;
+  calcQuadratMatrix(drawCode);
+
+  // Größe/Position wie du’s vorher hattest (goldener Schnitt)
+  const ts = 16;
+  const gridSize = 40 * ts;
+  const targetSizePx = exportW / PHI;
+  const scale = targetSizePx / gridSize;
+
+  const centerX = exportW / 2;
+  const centerY = exportH * (1 / (PHI * PHI));
 
   pg.push();
-  pg.translate(exportW/2, exportH*0.40);
-  pg.scale(2.4);
-  renderWabeKorrekt(code, cKey, pg);
+  pg.translate(centerX, centerY);
+  pg.scale(scale);
+  drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
- const exportLogo = logoImgBlack || logoImg;
+  const exportLogo = logoImgBlack || logoImg;
 
-// Wasserzeichen
-if (exportLogo && !isAdmin) {
-  pg.resetMatrix();
-  pg.tint(255, 0.45);
+ // --- Wasserzeichen & Signatur ---
+const exportLogo = logoImgBlack || logoImg;
 
-  const wWidth = 380;
-  const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
+console.log("ExportLogo:", exportLogo);
+console.log("isAdmin:", isAdmin);
 
-  for (let x = -100; x < exportW + 400; x += 500) {
-    for (let y = -100; y < exportH + 400; y += 500) {
-      pg.image(exportLogo, x, y, wWidth, wHeight);
+if (exportLogo) {
+
+  // Wasserzeichen (nur wenn kein Admin)
+  if (!isAdmin) {
+    pg.resetMatrix();
+    pg.tint(255, 0.45);
+
+    const wWidth = 380;
+    const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
+
+    for (let x = -100; x < exportW + 400; x += 500) {
+      for (let y = -100; y < exportH + 400; y += 500) {
+        pg.image(exportLogo, x, y, wWidth, wHeight);
+      }
     }
+
+    pg.noTint();
   }
 
-  pg.noTint();
-}
-
-// Signatur
-if (exportLogo) {
+  // Signatur unten rechts (immer wenn Logo existiert)
   pg.resetMatrix();
 
   const lW = 500;

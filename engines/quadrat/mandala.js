@@ -57,8 +57,6 @@ function preload() {
     () => { logoImg = loadImage("../../assets/Logo.png"); }
   );
 }
-/ absichtlich leer – damit p5 niemals bei "Loading..." hängen bleibt
-}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);

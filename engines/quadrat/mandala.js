@@ -166,60 +166,40 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-/* ====== Export (Werte wie Rund/Wabe) ====== */
-function exportHighRes() {
-  const exportW = 2480;
-  const exportH = 3508;
-
+function exportHighRes(){
+  const exportW=2480, exportH=3508;
   const pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100, 100);
+  pg.colorMode(HSB, 360, 100, 100);
   pg.background(255);
 
-  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
-  const startDigit = baseCode[0] || 1;
-  const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
-
-  calcQuadratMatrix(drawCode);
-
-  // Größe/Position wie du’s vorher hattest (goldener Schnitt)
-  const ts = 16;
-  const gridSize = 40 * ts;
-  const targetSizePx = exportW / PHI;
-  const scale = targetSizePx / gridSize;
-
-  const centerX = exportW / 2;
-  const centerY = exportH * (1 / (PHI * PHI));
+  const sector = buildSector();
+  const currentColors = getColorMatrix(colorSeed);
+  const sc = int(APP.sector || 8);
+  const angle = TWO_PI / sc;
 
   pg.push();
-  pg.translate(centerX, centerY);
-  pg.scale(scale);
-  drawQuadrat(startDigit, pg, { stroke: true });
+  pg.translate(exportW/2, exportH*0.40);
+  pg.scale(3.2);
+  for(let i=0;i<sc;i++){
+    pg.push();
+    pg.rotate(i*angle);
+    drawSector(sector, currentColors, pg);
+    pg.pop();
+  }
   pg.pop();
 
-  const exportLogo = logoImgBlack || logoImg;
-
-  // Wasserzeichen
-  if (exportLogo && !isAdmin) {
-    pg.resetMatrix();
-    pg.tint(255, 0.45);
-
-    const wWidth = 380;
-    const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
-
-    for (let x = -100; x < exportW + 400; x += 500) {
-      for (let y = -100; y < exportH + 400; y += 500) {
-        pg.image(exportLogo, x, y, wWidth, wHeight);
-      }
+  if(logoImg && !isAdmin){
+    pg.resetMatrix(); pg.tint(255,0.45);
+    const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
+    for(let x=-100;x<exportW+400;x+=500){
+      for(let y=-100;y<exportH+400;y+=500) pg.image(logoImg, x, y, wWidth, wHeight);
     }
     pg.noTint();
   }
 
-  // Signatur unten rechts
-  if (exportLogo) {
-    pg.resetMatrix();
-    const lW = 500;
-    const lH = (exportLogo.height / exportLogo.width) * lW;
-    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
+  if(logoImg){
+    const lW=500, lH=(logoImg.height/logoImg.width)*lW;
+    pg.image(logoImg, exportW-lW-100, exportH-lH-100, lW, lH);
   }
 
   save(pg, 'Milz&More_Quadrat.png');

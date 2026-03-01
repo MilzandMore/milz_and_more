@@ -24,8 +24,10 @@ var charMap = {
   'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
 };
 
-function preload() { logoImg = loadImage('logo.png'); }
-
+function preload() {
+  logoImgBlack = loadImage("../../assets/Logo_black.png");
+  logoImg = loadImage("../../assets/Logo.png");
+}
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);

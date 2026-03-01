@@ -189,19 +189,34 @@ function exportHighRes(){
   renderWabeKorrekt(code, cKey, pg);
   pg.pop();
 
-  if(logoImg && !isAdmin){
-    pg.resetMatrix(); pg.tint(255, 0.45);
-    const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
-    for(let x=-100;x<exportW+400;x+=500){
-      for(let y=-100;y<exportH+400;y+=500) pg.image(logoImg, x, y, wWidth, wHeight);
+ const exportLogo = logoImgBlack || logoImg;
+
+// Wasserzeichen
+if (exportLogo && !isAdmin) {
+  pg.resetMatrix();
+  pg.tint(255, 0.45);
+
+  const wWidth = 380;
+  const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
+
+  for (let x = -100; x < exportW + 400; x += 500) {
+    for (let y = -100; y < exportH + 400; y += 500) {
+      pg.image(exportLogo, x, y, wWidth, wHeight);
     }
-    pg.noTint();
   }
 
-  if(logoImg){
-    const lW=500, lH=(logoImg.height/logoImg.width)*lW;
-    pg.image(logoImg, exportW-lW-100, exportH-lH-100, lW, lH);
-  }
+  pg.noTint();
+}
+
+// Signatur
+if (exportLogo) {
+  pg.resetMatrix();
+
+  const lW = 500;
+  const lH = (exportLogo.height / exportLogo.width) * lW;
+
+  pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
+}
 
   save(pg, 'Milz&More_Quadrat.png');
 }

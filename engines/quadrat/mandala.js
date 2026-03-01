@@ -49,9 +49,15 @@ var charMap = {
   'Y': 7, 'H': 8, 'Q': 8, 'Z': 8, 'I': 9, 'R': 9
 };
 
-/* ====== WICHTIG: kein blockierendes preload ====== */
 function preload() {
-  // absichtlich leer – damit p5 niemals bei "Loading..." hängen bleibt
+  const p = (APP && APP.exportLogo) ? APP.exportLogo : "../../assets/Logo_black.png";
+  logoImg = loadImage(
+    p,
+    () => {},
+    () => { logoImg = loadImage("../../assets/Logo.png"); }
+  );
+}
+/ absichtlich leer – damit p5 niemals bei "Loading..." hängen bleibt
 }
 
 function setup() {

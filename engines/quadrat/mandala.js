@@ -176,24 +176,21 @@ function exportHighRes(){
   pg.colorMode(HSB, 360, 100, 100);
   pg.background(255);
 
-  const sector = buildSector();
-  const currentColors = getColorMatrix(colorSeed);
-  const sc = int(APP.sector || 8);
-  const angle = TWO_PI / sc;
+  const rawVal = String(APP.input||"").trim();
+  let code = (APP.mode==="text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g,"").split('').map(Number);
+  while(code.length<8) code.push(0);
+  code = code.slice(0,8);
+
+  const cKey = code[0] || 1;
 
   pg.push();
   pg.translate(exportW/2, exportH*0.40);
-  pg.scale(3.2);
-  for(let i=0;i<sc;i++){
-    pg.push();
-    pg.rotate(i*angle);
-    drawSector(sector, currentColors, pg);
-    pg.pop();
-  }
+  pg.scale(2.4);
+  renderWabeKorrekt(code, cKey, pg);
   pg.pop();
 
   if(logoImg && !isAdmin){
-    pg.resetMatrix(); pg.tint(255,0.45);
+    pg.resetMatrix(); pg.tint(255, 0.45);
     const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
     for(let x=-100;x<exportW+400;x+=500){
       for(let y=-100;y<exportH+400;y+=500) pg.image(logoImg, x, y, wWidth, wHeight);

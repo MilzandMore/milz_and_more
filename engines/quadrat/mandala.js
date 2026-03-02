@@ -97,7 +97,7 @@ function loadImageFallback(urls, cb) {
 
 /* ====== Logo helpers (für Export) ====== */
 function getExportLogo() {
-  // ✅ wie bei den anderen: Farbe bevorzugen, Schwarz nur fallback
+  // ✅ Farbe bevorzugen, Schwarz nur fallback
   return logoImg || logoImgBlack;
 }
 
@@ -211,7 +211,6 @@ async function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  // ✅ WICHTIG: auf Logo warten (weil async geladen)
   const exportLogo = await waitForLogo(5000);
 
   // Wasserzeichen
@@ -315,17 +314,23 @@ function onMessageFromParent(ev) {
 
   if (msg.type === "SET_STATE" && msg.payload) {
     extState = Object.assign(extState, msg.payload);
-    // ✅ nicht sticky: immer sauber setzen
-    isAdmin = !!extState.isAdmin;
+
+    // ✅ Admin nur wenn explizit true (nicht sticky)
+    isAdmin = (msg.payload && msg.payload.isAdmin === true);
+
     redraw();
   }
 
   if (msg.type === "EXPORT") {
     if (msg.payload) {
       extState = Object.assign(extState, msg.payload);
-      // ✅ nicht sticky: immer sauber setzen
-      isAdmin = !!extState.isAdmin;
+
+      // ✅ Admin nur wenn explizit true (nicht sticky)
+      isAdmin = (msg.payload && msg.payload.isAdmin === true);
+    } else {
+      isAdmin = false;
     }
+
     exportHighRes(); // async ist ok
   }
 }

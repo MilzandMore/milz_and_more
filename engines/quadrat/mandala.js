@@ -1,10 +1,10 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED (watermark+signature aligned to wabe/rund)");
+console.log("QUADRAT mandala.js LOADED (watermark+signature aligned) v=1001");
 
 var qMatrix = [];
-var logoImg = null;       // wird wie bei Wabe/Rund genutzt (dunkles Logo)
-var logoImgColor = null;  // optional (falls du später farbig willst)
+var logoImg = null;       // export logo (dunkel)
+var logoImgColor = null;  // optional (hell/farbig)
 var isAdmin = false;
 
 const PHI = 1.61803398875;
@@ -52,10 +52,9 @@ var charMap = {
 };
 
 /* ====== WICHTIG: kein blockierendes preload ====== */
-function preload() {
-  // absichtlich leer – damit p5 niemals bei "Loading..." hängen bleibt
-}
+function preload() {}
 
+/* ====== Setup ====== */
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100, 100);
@@ -72,7 +71,7 @@ function setup() {
 }
 
 function loadLogosAsync() {
-  // ✅ exakt wie im assets-Ordner (case-sensitive!)
+  // ✅ case-sensitive: exakt wie im assets-Ordner
   const blackCandidates = [
     "../../assets/Logo_black.png",
     "/milz_and_more/assets/Logo_black.png"
@@ -82,7 +81,6 @@ function loadLogosAsync() {
     "/milz_and_more/assets/Logo.png"
   ];
 
-  // Wie bei Wabe/Rund: logoImg ist das, was für Export genutzt wird
   loadImageFallback(blackCandidates, (img) => { logoImg = img; });
   loadImageFallback(colorCandidates, (img) => { logoImgColor = img; });
 }
@@ -109,6 +107,7 @@ function waitForLogo(maxMs = 5000) {
   });
 }
 
+/* ====== Draw (Preview) ====== */
 function draw() {
   background(12);
 
@@ -177,7 +176,7 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-/* ====== Export (identisch zu Wabe/Rund in Watermark+Signatur) ====== */
+/* ====== Export (Watermark+Signatur aligned to Wabe/Rund + Y shift) ====== */
 async function exportHighRes() {
   const exportW = 2480, exportH = 3508;
   const pg = createGraphics(exportW, exportH);
@@ -206,19 +205,33 @@ async function exportHighRes() {
 
   const exportLogo = await waitForLogo(5000);
 
-  // Watermark: identisch zu Wabe/Rund
+  // --- Watermark (same settings as Wabe/Rund) + shift up ---
   if (exportLogo && !isAdmin) {
-    pg.resetMatrix(); pg.tint(255, 0.45);
-    const wWidth = 380, wHeight = (exportLogo.height / exportLogo.width) * wWidth;
+    pg.resetMatrix();
+    pg.tint(255, 0.45);
+
+    const wWidth = 380;
+    const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
+
+    const yShift = -180; // ✅ nach oben (negativ = höher)
+
     for (let x = -100; x < exportW + 400; x += 500) {
-      for (let y = -100; y < exportH + 400; y += 500) pg.image(exportLogo, x, y, wWidth, wHeight);
+      for (let y = -100; y < exportH + 400; y += 500) {
+        pg.image(exportLogo, x, y + yShift, wWidth, wHeight);
+      }
     }
     pg.noTint();
   }
 
-  // Signatur: identisch zu Wabe/Rund
+  // --- Signatur unten rechts: volle Sichtbarkeit (dunkles Logo) ---
+  // Wichtig: kein Tint vom Watermark übernehmen
   if (exportLogo) {
-    const lW = 500, lH = (exportLogo.height / exportLogo.width) * lW;
+    pg.resetMatrix();
+    pg.noTint();
+
+    const lW = 500;
+    const lH = (exportLogo.height / exportLogo.width) * lW;
+
     pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
 

@@ -155,23 +155,30 @@ function drawQuadrat(startDigit, target, opts) {
   for (var r = 0; r < 20; r++) {
     for (var c = 0; c < 20; c++) {
       var val = qMatrix[r][c];
-      if (val !== 0) {
-        var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val]) ? colorMatrix[startDigit][val] : mapZ[val];
-        var col = color(hex);
 
+      if (val !== 0) {
+        var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val])
+          ? colorMatrix[startDigit][val]
+          : mapZ[val];
+
+        var col = color(hex);
         var sVal = getSlider(val);
+
         ctx.fill(
           hue(col),
           map(sVal, 20, 100, 15, saturation(col)),
           map(sVal, 20, 100, 98, brightness(col)),
           100
         );
-
-        ctx.rect(c * ts, -(r + 1) * ts, ts, ts);
-        ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts);
-        ctx.rect(c * ts, r * ts, ts, ts);
-        ctx.rect(-(c + 1) * ts, r * ts, ts, ts);
+      } else {
+        // ✅ Nuller grundsätzlich weiß
+        ctx.fill(0, 0, 100);  // HSB → Weiß
       }
+
+      ctx.rect(c * ts, -(r + 1) * ts, ts, ts);
+      ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts);
+      ctx.rect(c * ts, r * ts, ts, ts);
+      ctx.rect(-(c + 1) * ts, r * ts, ts, ts);
     }
   }
 }

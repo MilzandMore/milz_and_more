@@ -216,7 +216,7 @@ async function exportHighRes() {
   // Wasserzeichen
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
-    pg.tint(255, 0.45);
+    pg.tint(255, 45);
 
     const wWidth = 380;
     const wHeight = (exportLogo.height / exportLogo.width) * wWidth;

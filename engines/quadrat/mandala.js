@@ -72,13 +72,12 @@ function setup() {
 function loadLogosAsync() {
   const candidatesBlack = [
     "../../assets/Logo_black.png",
-    "/milz_and_more/assets/Logo_black.png",
-    "/milz_and_more/assets/logo_black.png"
+    "/milz_and_more/assets/Logo_black.png"
   ];
+
   const candidatesColor = [
     "../../assets/Logo.png",
-    "/milz_and_more/assets/Logo.png",
-    "/milz_and_more/assets/logo.png"
+    "/milz_and_more/assets/Logo.png"
   ];
 
   loadImageFallback(candidatesBlack, (img) => { logoImgBlack = img; });

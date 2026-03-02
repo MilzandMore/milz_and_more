@@ -183,6 +183,26 @@ async function exportHighRes(){
   save(pg,'Milz&More_Quadrat.png');
 }
 
+/* --- Messaging (FIX) --- */
+function onMessageFromParent(ev) {
+  const msg = ev.data;
+  if (!msg || typeof msg !== "object") return;
+
+  if (msg.type === "SET_STATE" && msg.payload) {
+    extState = Object.assign(extState, msg.payload);
+    isAdmin = !!extState.isAdmin;
+    redraw();
+  }
+
+  if (msg.type === "EXPORT") {
+    if (msg.payload) {
+      extState = Object.assign(extState, msg.payload);
+      isAdmin = !!extState.isAdmin;
+    }
+    exportHighRes(); // async ok
+  }
+}
+
 /* --- Helpers --- */
 function getInput(){return EMBED?extState.input:"15011987";}
 function getCodeFromDate(str){
@@ -208,4 +228,9 @@ function calcQuadratMatrix(code){
     if(r+1<20&&c+1<20)qMatrix[r+1][c+1]=v1;
   }
   for(var i=0;i<8;i+=2)set2(i,i,d[0],d[1]);
+}
+
+function windowResized(){
+  resizeCanvas(windowWidth, windowHeight);
+  if (EMBED) redraw();
 }

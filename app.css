@@ -384,3 +384,132 @@ html,body{
     border-radius: 12px;
   }
 }
+/* =========================
+   MOBILE + SLIDER SHEET
+   ========================= */
+.mobile-only{ display:none; }
+.desktop-only{ display:block; }
+
+body.no-scroll{ overflow:hidden !important; }
+
+.slider-sheet{
+  display:none;
+}
+
+/* Mobile Layout */
+@media (max-width: 900px){
+  html,body{
+    overflow:auto;
+    height:auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-only{ display:inline-flex; }
+  .desktop-only{ display:none; }
+
+  .app-header{
+    position: sticky;
+    top:0;
+    height:auto;
+    flex-wrap: wrap;
+    gap:10px;
+  }
+
+  .brand{
+    min-width:0;
+    flex: 1 1 100%;
+  }
+
+  .controls{
+    min-width:0;
+    flex: 1 1 100%;
+    width:100%;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .right{
+    width:100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .engine-nav{
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .app-main{
+    position: relative;
+    top:0; left:0; right:0; bottom:auto;
+    grid-template-columns: 1fr;
+    padding:12px;
+  }
+
+  .stage{
+    min-height: 60vh;
+  }
+  .engine-frame{
+    height: 60vh;
+    min-height: 420px;
+  }
+
+  /* Bottom Sheet aktivieren */
+  .slider-sheet{
+    display:block;
+    position:fixed;
+    inset:0;
+    z-index: 10000;
+    pointer-events:none;
+  }
+
+  .slider-sheet__backdrop{
+    position:absolute;
+    inset:0;
+    background: rgba(0,0,0,0.45);
+    opacity:0;
+    transition: opacity 160ms ease;
+  }
+
+  .slider-sheet__panel{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    background: rgba(12,16,22,0.92);
+    border-top: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px 18px 0 0;
+    max-height: 72vh;
+    transform: translateY(105%);
+    transition: transform 200ms ease;
+    box-shadow: 0 -20px 60px rgba(0,0,0,0.55);
+    backdrop-filter: blur(14px);
+    overflow:hidden;
+  }
+
+  .slider-sheet__header{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.10);
+  }
+  .slider-sheet__title{
+    font-weight: 950;
+    letter-spacing: 0.2px;
+  }
+
+  .slider-sheet__body{
+    padding: 12px 14px 18px;
+    overflow:auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .slider-sheet.open{
+    pointer-events:auto;
+  }
+  .slider-sheet.open .slider-sheet__backdrop{
+    opacity:1;
+  }
+  .slider-sheet.open .slider-sheet__panel{
+    transform: translateY(0);
+  }
+}

@@ -1,8 +1,10 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
+console.log("QUADRAT mandala.js LOADED (watermark+signature aligned to wabe/rund)");
+
 var qMatrix = [];
-var logoImg = null;
-var logoImgBlack = null;
+var logoImg = null;       // wird wie bei Wabe/Rund genutzt (dunkles Logo)
+var logoImgColor = null;  // optional (falls du später farbig willst)
 var isAdmin = false;
 
 const PHI = 1.61803398875;
@@ -70,18 +72,19 @@ function setup() {
 }
 
 function loadLogosAsync() {
-  // ✅ case-sensitive: exakt wie im assets-Ordner
-  const candidatesBlack = [
+  // ✅ exakt wie im assets-Ordner (case-sensitive!)
+  const blackCandidates = [
     "../../assets/Logo_black.png",
     "/milz_and_more/assets/Logo_black.png"
   ];
-  const candidatesColor = [
+  const colorCandidates = [
     "../../assets/Logo.png",
     "/milz_and_more/assets/Logo.png"
   ];
 
-  loadImageFallback(candidatesBlack, (img) => { logoImgBlack = img; });
-  loadImageFallback(candidatesColor, (img) => { logoImg = img; });
+  // Wie bei Wabe/Rund: logoImg ist das, was für Export genutzt wird
+  loadImageFallback(blackCandidates, (img) => { logoImg = img; });
+  loadImageFallback(colorCandidates, (img) => { logoImgColor = img; });
 }
 
 function loadImageFallback(urls, cb) {
@@ -94,30 +97,11 @@ function loadImageFallback(urls, cb) {
   tryNext();
 }
 
-/* ====== Logo helpers (für Export) ====== */
-function getExportLogo() {
-  // “irgendein” Logo (für Fallback)
-  return logoImg || logoImgBlack;
-}
-
 function waitForLogo(maxMs = 5000) {
   return new Promise((resolve) => {
     const start = Date.now();
     const tick = () => {
-      const l = getExportLogo();
-      if (l) return resolve(l);
-      if (Date.now() - start > maxMs) return resolve(null);
-      setTimeout(tick, 50);
-    };
-    tick();
-  });
-}
-
-function waitForLogoBlack(maxMs = 5000) {
-  return new Promise((resolve) => {
-    const start = Date.now();
-    const tick = () => {
-      if (logoImgBlack) return resolve(logoImgBlack);
+      if (logoImg) return resolve(logoImg);
       if (Date.now() - start > maxMs) return resolve(null);
       setTimeout(tick, 50);
     };
@@ -193,13 +177,11 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-/* ====== Export (Werte wie Rund/Wabe) ====== */
+/* ====== Export (identisch zu Wabe/Rund in Watermark+Signatur) ====== */
 async function exportHighRes() {
-  const exportW = 2480;
-  const exportH = 3508;
-
+  const exportW = 2480, exportH = 3508;
   const pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100, 100);
+  pg.colorMode(HSB, 360, 100, 100);
   pg.background(255);
 
   const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
@@ -222,49 +204,22 @@ async function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  // Logos (async)
   const exportLogo = await waitForLogo(5000);
-  const blackLogo = (await waitForLogoBlack(5000)) || null;
 
-  // --- Wasserzeichen: immer dunkel, nach oben verschoben ---
-  const wmLogo = blackLogo || exportLogo;
-
-  if (wmLogo && !isAdmin) {
-    pg.resetMatrix();
-    pg.tint(255, 45);
-
-    const wWidth = 380;
-    const wHeight = (wmLogo.height / wmLogo.width) * wWidth;
-
-    const step = 500;
-    const xStart = -100;
-    const yStart = -100;
-
-    // ✅ nach oben schieben (negativ = höher)
-    const yShift = -180;
-
-    for (let x = xStart; x < exportW + 400; x += step) {
-      for (let y = yStart; y < exportH + 400; y += step) {
-        pg.image(wmLogo, x, y + yShift, wWidth, wHeight);
-      }
+  // Watermark: identisch zu Wabe/Rund
+  if (exportLogo && !isAdmin) {
+    pg.resetMatrix(); pg.tint(255, 0.45);
+    const wWidth = 380, wHeight = (exportLogo.height / exportLogo.width) * wWidth;
+    for (let x = -100; x < exportW + 400; x += 500) {
+      for (let y = -100; y < exportH + 400; y += 500) pg.image(exportLogo, x, y, wWidth, wHeight);
     }
     pg.noTint();
   }
 
-  // --- Signatur unten rechts: immer dunkel & voll sichtbar ---
-  const sigLogo = blackLogo || exportLogo;
-
-  if (sigLogo) {
-    pg.resetMatrix();
-    pg.noTint();
-    pg.tint(255, 255);
-
-    const lW = 560;
-    const lH = (sigLogo.height / sigLogo.width) * lW;
-
-    pg.image(sigLogo, exportW - lW - 90, exportH - lH - 90, lW, lH);
-
-    pg.noTint();
+  // Signatur: identisch zu Wabe/Rund
+  if (exportLogo) {
+    const lW = 500, lH = (exportLogo.height / exportLogo.width) * lW;
+    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
 
   save(pg, 'Milz&More_Quadrat.png');
@@ -355,7 +310,7 @@ function onMessageFromParent(ev) {
     } else {
       isAdmin = false;
     }
-    exportHighRes(); // async ok
+    exportHighRes();
   }
 }
 

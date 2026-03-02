@@ -249,267 +249,136 @@ html,body{
 /* =========================
    MOBILE FIX (<= 900px)
    ========================= */
+/* =========================
+   PRO MOBILE UI (<= 900px)
+   ========================= */
 @media (max-width: 900px){
 
-  /* Mobile muss scrollen dürfen */
-  html, body{
-    overflow: auto;
-    height: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Header wird höher und darf umbrechen */
-  .app-header{
-    position: sticky; /* statt fixed (mobile-friendly) */
-    top: 0;
-    height: auto;
-    padding: 10px 12px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  /* Brand darf nicht 260px blockieren */
-  .brand{
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-  .brand-logo{
-    height: 30px;
-    max-width: 140px;
-  }
-
-  /* Controls im Header: wrap + volle Breite */
-  .controls{
-    min-width: 0;
-    flex: 1 1 100%;
-    width: 100%;
-    align-items: stretch;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  /* Inputs/Selects nehmen ganze Zeilen wenn nötig */
-  .field{
-    flex: 1 1 140px;
-    min-width: 140px;
-  }
-  .field input, .field select{
-    width: 100%;
-  }
-
-  /* Right-Cluster (Toggle + Tabs) auch umbrechen */
-  .right{
-    width: 100%;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: space-between;
-  }
-  .toggle{
-    flex: 0 0 auto;
-  }
-  .engine-nav{
-    flex: 1 1 auto;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .engine-btn{
-    flex: 0 0 auto;
-  }
-
-  /* MAIN: von 2 Spalten auf 1 Spalte */
-  .app-main{
-    position: relative;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: auto;
-
-    padding: 12px;
-    display: grid;
-    grid-template-columns: 1fr;  /* ✅ statt 280px 1fr */
-    gap: 12px;
-
-    /* damit unter sticky header nichts abgeschnitten wird */
-    margin-top: 0;
-  }
-
-  /* Stage: große, stabile Vorschaufläche */
-  .stage{
-    width: 100%;
-    min-height: 56vh;           /* ✅ damit Mandala sichtbar bleibt */
-    border-radius: 18px;
-  }
-
-  /* iframe muss zwingend Höhe haben */
-  .engine-frame{
-    width: 100%;
-    height: 56vh;               /* ✅ statt 100% in einem kollabierenden Container */
-    min-height: 420px;
-  }
-
-  /* Slider Panel kommt unter die Stage und darf scrollen */
-  .slider-panel{
-    order: 3;
-    width: 100%;
-    max-height: 38vh;
-    overflow: auto;             /* ✅ sonst wird’s riesig */
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Slider Zeilen etwas kompakter */
-  .slider-row{
-    grid-template-columns: 14px 18px 1fr;
-    gap: 8px;
-  }
-
-  /* Loading Overlay bleibt ok */
-  .loading{
-    font-size: 14px;
-    padding: 16px;
-    text-align: center;
-  }
-}
-
-/* =========================
-   EXTRA SMALL (<= 420px)
-   ========================= */
-@media (max-width: 420px){
-  .engine-frame{
-    height: 60vh;
-    min-height: 380px;
-  }
-  .primary, .engine-btn{
-    height: 36px;
-    border-radius: 12px;
-  }
-}
-/* =========================
-   MOBILE + SLIDER SHEET
-   ========================= */
-.mobile-only{ display:none; }
-.desktop-only{ display:block; }
-
-body.no-scroll{ overflow:hidden !important; }
-
-.slider-sheet{
-  display:none;
-}
-
-/* Mobile Layout */
-@media (max-width: 900px){
   html,body{
     overflow:auto;
     height:auto;
     -webkit-overflow-scrolling: touch;
   }
 
-  .mobile-only{ display:inline-flex; }
-  .desktop-only{ display:none; }
-
+  /* Header: kompakter, weniger "Formular" */
   .app-header{
     position: sticky;
     top:0;
+    z-index:9999;
     height:auto;
+    padding: 10px 12px 12px;
+    gap: 10px;
     flex-wrap: wrap;
-    gap:10px;
+    background: linear-gradient(180deg, rgba(12,16,22,0.96), rgba(12,16,22,0.78));
   }
 
+  /* Brand: eine Zeile, kleiner */
   .brand{
     min-width:0;
     flex: 1 1 100%;
+    gap: 10px;
   }
+  .brand-logo{ height: 26px; max-width: 120px; }
+  .brand-title{
+    font-size: 16px;
+    font-weight: 950;
+    letter-spacing: 0.2px;
+  }
+  .brand-sub{ display:none; }
 
+  /* Controls: als sauberes Grid (2 Spalten) */
   .controls{
     min-width:0;
     flex: 1 1 100%;
     width:100%;
-    flex-wrap: wrap;
-    align-items: stretch;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: end;
   }
 
+  /* Reihenfolge: Modus | Eingabe, Richtung | (Sektor), Download | Farben */
+  .controls .field{ margin:0; }
+
+  .field label{
+    font-size: 10px;
+    letter-spacing: 0.35px;
+    opacity: 0.9;
+  }
+
+  .field input, .field select{
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  /* Download prominent */
+  .primary{
+    height: 42px;
+    border-radius: 14px;
+    font-weight: 950;
+    box-shadow: 0 12px 26px rgba(0,0,0,0.35);
+    grid-column: 1 / 2;
+  }
+
+  /* "Farben" Button im gleichen Stil wie Tabs */
+  .mobile-only{
+    display:inline-flex;
+    height: 42px;
+    border-radius: 14px;
+    align-items:center;
+    justify-content:center;
+    font-weight: 950;
+    grid-column: 2 / 3;
+  }
+
+  /* Right: Toggle + Engine-Tabs als eigene Zeile */
   .right{
     width:100%;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-
-  .engine-nav{
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  .app-main{
-    position: relative;
-    top:0; left:0; right:0; bottom:auto;
-    grid-template-columns: 1fr;
-    padding:12px;
-  }
-
-  .stage{
-    min-height: 60vh;
-  }
-  .engine-frame{
-    height: 60vh;
-    min-height: 420px;
-  }
-
-  /* Bottom Sheet aktivieren */
-  .slider-sheet{
-    display:block;
-    position:fixed;
-    inset:0;
-    z-index: 10000;
-    pointer-events:none;
-  }
-
-  .slider-sheet__backdrop{
-    position:absolute;
-    inset:0;
-    background: rgba(0,0,0,0.45);
-    opacity:0;
-    transition: opacity 160ms ease;
-  }
-
-  .slider-sheet__panel{
-    position:absolute;
-    left:0; right:0; bottom:0;
-    background: rgba(12,16,22,0.92);
-    border-top: 1px solid rgba(255,255,255,0.12);
-    border-radius: 18px 18px 0 0;
-    max-height: 72vh;
-    transform: translateY(105%);
-    transition: transform 200ms ease;
-    box-shadow: 0 -20px 60px rgba(0,0,0,0.55);
-    backdrop-filter: blur(14px);
-    overflow:hidden;
-  }
-
-  .slider-sheet__header{
     display:flex;
     align-items:center;
     justify-content: space-between;
-    padding: 12px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.10);
+    gap: 10px;
   }
-  .slider-sheet__title{
+
+  /* Toggle wirkt wie ein kleiner Chip, nicht wie ein Fremdkörper */
+  .toggle{
+    padding: 8px 10px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .toggle input{
+    width: 18px;
+    height: 18px;
+    transform:none;
+  }
+
+  /* Engine Tabs: Segmented Control */
+  .engine-nav{
+    display:flex;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+  .engine-btn{
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 12px;
+    background: transparent;
+    border: 1px solid transparent;
     font-weight: 950;
-    letter-spacing: 0.2px;
+  }
+  .engine-btn.active{
+    background: #fff;
+    color: #0b0f14;
+    border-color: rgba(0,0,0,0.10);
   }
 
-  .slider-sheet__body{
-    padding: 12px 14px 18px;
-    overflow:auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .slider-sheet.open{
-    pointer-events:auto;
-  }
-  .slider-sheet.open .slider-sheet__backdrop{
-    opacity:1;
-  }
-  .slider-sheet.open .slider-sheet__panel{
-    transform: translateY(0);
-  }
-}
+  /* MAIN: 1 Spalte */
+  .app-main{
+    position: relative;
+    top:0; left:0; right:

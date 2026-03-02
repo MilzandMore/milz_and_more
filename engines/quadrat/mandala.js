@@ -70,11 +70,11 @@ function setup() {
 }
 
 function loadLogosAsync() {
+  // ✅ case-sensitive: exakt wie im assets-Ordner
   const candidatesBlack = [
     "../../assets/Logo_black.png",
     "/milz_and_more/assets/Logo_black.png"
   ];
-
   const candidatesColor = [
     "../../assets/Logo.png",
     "/milz_and_more/assets/Logo.png"
@@ -96,7 +96,7 @@ function loadImageFallback(urls, cb) {
 
 /* ====== Logo helpers (für Export) ====== */
 function getExportLogo() {
-  // ✅ Farbe bevorzugen, Schwarz nur fallback
+  // “irgendein” Logo (für Fallback)
   return logoImg || logoImgBlack;
 }
 
@@ -106,6 +106,18 @@ function waitForLogo(maxMs = 5000) {
     const tick = () => {
       const l = getExportLogo();
       if (l) return resolve(l);
+      if (Date.now() - start > maxMs) return resolve(null);
+      setTimeout(tick, 50);
+    };
+    tick();
+  });
+}
+
+function waitForLogoBlack(maxMs = 5000) {
+  return new Promise((resolve) => {
+    const start = Date.now();
+    const tick = () => {
+      if (logoImgBlack) return resolve(logoImgBlack);
       if (Date.now() - start > maxMs) return resolve(null);
       setTimeout(tick, 50);
     };
@@ -210,36 +222,51 @@ async function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-const exportLogo = await waitForLogo(5000);
+  // Logos (async)
+  const exportLogo = await waitForLogo(5000);
+  const blackLogo = (await waitForLogoBlack(5000)) || null;
 
-// ✅ Wasserzeichen IMMER dunkel (falls verfügbar)
-const wmLogo = logoImgBlack || exportLogo;
+  // --- Wasserzeichen: immer dunkel, nach oben verschoben ---
+  const wmLogo = blackLogo || exportLogo;
 
-// Wasserzeichen
-if (wmLogo && !isAdmin) {
-  pg.resetMatrix();
-  pg.tint(255, 45);
+  if (wmLogo && !isAdmin) {
+    pg.resetMatrix();
+    pg.tint(255, 45);
 
-  const wWidth = 380;
-  const wHeight = (wmLogo.height / wmLogo.width) * wWidth;
+    const wWidth = 380;
+    const wHeight = (wmLogo.height / wmLogo.width) * wWidth;
 
-  for (let x = -100; x < exportW + 400; x += 500) {
-    for (let y = -100; y < exportH + 400; y += 500) {
-      pg.image(wmLogo, x, y, wWidth, wHeight);
+    const step = 500;
+    const xStart = -100;
+    const yStart = -100;
+
+    // ✅ nach oben schieben (negativ = höher)
+    const yShift = -180;
+
+    for (let x = xStart; x < exportW + 400; x += step) {
+      for (let y = yStart; y < exportH + 400; y += step) {
+        pg.image(wmLogo, x, y + yShift, wWidth, wHeight);
+      }
     }
+    pg.noTint();
   }
-  pg.noTint();
-}
 
-// Signatur unten rechts: immer das "normale" Logo bevorzugen
-const sigLogo = logoImg || exportLogo;
+  // --- Signatur unten rechts: immer dunkel & voll sichtbar ---
+  const sigLogo = blackLogo || exportLogo;
 
-if (sigLogo) {
-  pg.resetMatrix();
-  const lW = 500;
-  const lH = (sigLogo.height / sigLogo.width) * lW;
-  pg.image(sigLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
-}
+  if (sigLogo) {
+    pg.resetMatrix();
+    pg.noTint();
+    pg.tint(255, 255);
+
+    const lW = 560;
+    const lH = (sigLogo.height / sigLogo.width) * lW;
+
+    pg.image(sigLogo, exportW - lW - 90, exportH - lH - 90, lW, lH);
+
+    pg.noTint();
+  }
+
   save(pg, 'Milz&More_Quadrat.png');
 }
 
@@ -317,24 +344,18 @@ function onMessageFromParent(ev) {
 
   if (msg.type === "SET_STATE" && msg.payload) {
     extState = Object.assign(extState, msg.payload);
-
-    // ✅ Admin nur wenn explizit true (nicht sticky)
     isAdmin = (msg.payload && msg.payload.isAdmin === true);
-
     redraw();
   }
 
   if (msg.type === "EXPORT") {
     if (msg.payload) {
       extState = Object.assign(extState, msg.payload);
-
-      // ✅ Admin nur wenn explizit true (nicht sticky)
       isAdmin = (msg.payload && msg.payload.isAdmin === true);
     } else {
       isAdmin = false;
     }
-
-    exportHighRes(); // async ist ok
+    exportHighRes(); // async ok
   }
 }
 

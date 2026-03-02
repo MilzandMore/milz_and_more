@@ -1,15 +1,14 @@
 // --------- STATE (kommt vom Parent) ----------
 let APP = {
   engine: "rund",
-  mode: "geburtstag",      // geburtstag | text (text = affirmation)
+  mode: "geburtstag",
   input: "15011987",
-  direction: "aussen",     // aussen | innen
+  direction: "aussen",
   sector: 8,
   sliders: Array(10).fill(85),
   isAdmin: false
 };
 
-// original constants
 var baseColors = ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"];
 
 var affirmMap = { 
@@ -67,7 +66,6 @@ function draw(){
   const sector = buildSector();
   const currentColors = getColorMatrix(colorSeed);
 
-  // dot colors
   sendColors(currentColors);
 
   push();
@@ -90,6 +88,9 @@ function draw(){
   pop();
 }
 
+/* =========================================================
+   0er-Felder immer weiß + Linien überall sichtbar
+   ========================================================= */
 function drawSector(m, colors, target){
   const ctx = target || window;
   const step = 20;
@@ -97,7 +98,8 @@ function drawSector(m, colors, target){
   const angle = TWO_PI / sc;
   const h = tan(angle/2) * step;
 
-  ctx.stroke(255, 18);
+  // Linien aktiv
+  ctx.stroke(0, 0, 0, 35);
   ctx.strokeWeight(0.6);
 
   for(let r=0;r<m.length;r++){
@@ -106,16 +108,18 @@ function drawSector(m, colors, target){
       const x = r*step;
       const y = (c - r/2) * h * 2;
 
-      if(v>=1 && v<=9){
+      if(v >= 1 && v <= 9){
         const baseCol = color(colors[v-1]);
         const sVal = (APP.sliders && APP.sliders[v]) ? APP.sliders[v] : 85;
+
         ctx.fill(
           hue(baseCol),
           map(sVal, 20, 100, 15, saturation(baseCol)),
           map(sVal, 20, 100, 98, brightness(baseCol))
         );
       } else {
-        ctx.fill(12);
+        // 0er immer weiß
+        ctx.fill(0, 0, 100);
       }
 
       ctx.beginShape();
@@ -128,6 +132,7 @@ function drawSector(m, colors, target){
   }
 }
 
+/* ===================== EXPORT ===================== */
 function exportHighRes(){
   const exportW=2480, exportH=3508;
   const pg = createGraphics(exportW, exportH);
@@ -151,15 +156,19 @@ function exportHighRes(){
   pg.pop();
 
   if(logoImg && !isAdmin){
-    pg.resetMatrix(); pg.tint(255,0.45);
+    pg.resetMatrix(); 
+    pg.tint(255,0.45);
     const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
     for(let x=-100;x<exportW+400;x+=500){
-      for(let y=-100;y<exportH+400;y+=500) pg.image(logoImg, x, y, wWidth, wHeight);
+      for(let y=-100;y<exportH+400;y+=500)
+        pg.image(logoImg, x, y, wWidth, wHeight);
     }
     pg.noTint();
   }
 
   if(logoImg){
+    pg.resetMatrix();
+    pg.noTint();
     const lW=500, lH=(logoImg.height/logoImg.width)*lW;
     pg.image(logoImg, exportW-lW-100, exportH-lH-100, lW, lH);
   }
@@ -167,6 +176,7 @@ function exportHighRes(){
   save(pg, 'Milz&More_Rund.png');
 }
 
+/* ===================== MATRIX ===================== */
 function buildSector(){
   const n=16;
   const m = Array.from({length:n}, (_,r)=>Array(r+1).fill(0));
@@ -185,40 +195,12 @@ function buildSector(){
   for(let i=0;i<16;i++) m[15][i] = base[i];
   for(let i=0;i<16;i++){ const r=15-i; m[r][0]=base[i]; m[r][r]=base[i]; }
 
-  for(let c=1;c<=13;c++) m[14][c]=ex(m[15][c], m[15][c+1]);
-  const c14=(c,t)=>t.forEach(([r,k])=>m[r][k]=m[14][c]);
-  c14(1, [[2,1]]);
-  c14(2, [[3,1],[3,2],[13,1],[13,12]]);
-  c14(3, [[4,1],[4,3],[12,1],[12,11]]);
-  c14(4, [[5,1],[5,4],[11,1],[11,10]]);
-  c14(5, [[6,1],[6,5],[10,1],[10,9]]);
-  c14(6, [[7,1],[7,6],[9,1],[9,8]]);
-  c14(7, [[8,1],[8,7]]);
+  for(let r=14;r>=0;r--){
+    for(let c=1;c<r;c++){
+      m[r][c]=ex(m[r+1][c], m[r+1][c+1]);
+    }
+  }
 
-  for(let c=2;c<=10;c++) m[13][c]=ex(m[14][c], m[14][c+1]);
-  const c13=(c,t)=>t.forEach(([r,k])=>m[r][k]=m[13][c]);
-  c13(2, [[4,2],[13,11]]);
-  c13(3, [[12,2],[12,10],[5,2],[5,3]]);
-  c13(4, [[11,2],[11,9],[6,4],[6,2]]);
-  c13(5, [[10,2],[10,8],[7,5],[7,2]]);
-  c13(6, [[9,2],[9,7],[8,6],[8,2]]);
-
-  for(let j=3;j<=8;j++) m[12][j]=ex(m[13][j], m[13][j+1]);
-  const c12=(c,t)=>t.forEach(([r,k])=>m[r][k]=m[12][c]);
-  c12(3, [[12,9],[6,3]]);
-  c12(4, [[11,3],[11,8],[7,4],[7,3]]);
-  c12(5, [[10,3],[10,7],[8,5],[8,3]]);
-  c12(6, [[9,3],[9,6]]);
-
-  m[11][4]=ex(m[12][4], m[12][5]);
-  m[11][5]=ex(m[12][5], m[12][6]);
-  m[11][6]=ex(m[12][6], m[12][7]);
-
-  const c11=(c,t)=>t.forEach(([r,k])=>m[r][k]=m[11][c]);
-  c11(4, [[11,7],[8,4]]);
-  c11(5, [[10,4],[10,6],[9,4],[9,5]]);
-
-  m[10][5]=ex(m[11][5], m[11][6]);
   return m;
 }
 

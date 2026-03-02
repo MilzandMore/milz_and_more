@@ -211,32 +211,34 @@ async function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  const exportLogo = await waitForLogo(5000);
+const exportLogo = await waitForLogo(5000);
 
-  // Wasserzeichen
-  if (exportLogo && !isAdmin) {
-    pg.resetMatrix();
-    pg.tint(255, 45);
+// ✅ Wasserzeichen IMMER dunkel (falls verfügbar)
+const wmLogo = logoImgBlack || exportLogo;
 
-    const wWidth = 380;
-    const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
+// Wasserzeichen
+if (wmLogo && !isAdmin) {
+  pg.resetMatrix();
+  pg.tint(255, 45);
 
-    for (let x = -100; x < exportW + 400; x += 500) {
-      for (let y = -100; y < exportH + 400; y += 500) {
-        pg.image(exportLogo, x, y, wWidth, wHeight);
-      }
+  const wWidth = 380;
+  const wHeight = (wmLogo.height / wmLogo.width) * wWidth;
+
+  for (let x = -100; x < exportW + 400; x += 500) {
+    for (let y = -100; y < exportH + 400; y += 500) {
+      pg.image(wmLogo, x, y, wWidth, wHeight);
     }
-    pg.noTint();
   }
+  pg.noTint();
+}
 
-  // Signatur unten rechts
-  if (exportLogo) {
-    pg.resetMatrix();
-    const lW = 500;
-    const lH = (exportLogo.height / exportLogo.width) * lW;
-    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
-  }
-
+// ✅ Signatur: gerne wie gehabt (exportLogo = bevorzugt hell/farbig)
+if (exportLogo) {
+  pg.resetMatrix();
+  const lW = 500;
+  const lH = (exportLogo.height / exportLogo.width) * lW;
+  pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
+}
   save(pg, 'Milz&More_Quadrat.png');
 }
 

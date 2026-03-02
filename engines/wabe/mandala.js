@@ -55,6 +55,7 @@ function preload() {
     () => { logoImg = loadImage("../../assets/Logo.png"); }
   );
 }
+
 function setup(){
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
@@ -78,7 +79,6 @@ function draw(){
 
   const cKey = code[0] || 1;
 
-  // dot colors
   sendColors(colorMatrix[cKey]);
 
   push();
@@ -97,6 +97,7 @@ function renderWabeKorrekt(code, cKey, target){
   const ctx = target || window;
   const sz = 16.2;
 
+  // Zwischenlinien (wie vorher)
   ctx.stroke(255, 18);
   ctx.strokeWeight(0.6);
 
@@ -116,6 +117,7 @@ function renderWabeKorrekt(code, cKey, target){
     for(let r=1;r<=16;r++){
       for(let i=0;i<r;i++){
         const val = m[r][i];
+
         if(val>=1 && val<=9){
           const col = color(colorMatrix[cKey][val-1]);
           const sVal = (APP.sliders && APP.sliders[val]) ? APP.sliders[val] : 85;
@@ -125,7 +127,8 @@ function renderWabeKorrekt(code, cKey, target){
             map(sVal, 20, 100, 98, brightness(col))
           );
         } else {
-          ctx.fill(12);
+          // ✅ Nuller immer weiß (statt Hintergrund/Schwarz)
+          ctx.fill(0, 0, 100);
         }
 
         const x = (i - (r - 1) / 2) * sz * sqrt(3);
@@ -170,6 +173,7 @@ function exportHighRes(){
   }
 
   if(logoImg){
+    pg.resetMatrix(); pg.noTint();
     const lW=500, lH=(logoImg.height/logoImg.width)*lW;
     pg.image(logoImg, exportW-lW-100, exportH-lH-100, lW, lH);
   }

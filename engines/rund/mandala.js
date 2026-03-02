@@ -160,7 +160,7 @@ function exportHighRes(){
     pg.tint(255,0.45);
     const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
     for(let x=-100;x<exportW+400;x+=500){
-      for(let y=-100;y<exportH+400;y+=500)
+      for(let y=-400;y<exportH+400;y+=500)
         pg.image(logoImg, x, y, wWidth, wHeight);
     }
     pg.noTint();

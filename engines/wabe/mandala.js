@@ -98,7 +98,7 @@ function renderWabeKorrekt(code, cKey, target){
   const sz = 16.2;
 
   // Zwischenlinien (wie vorher)
-  ctx.stroke(255, 18);
+  ctx.stroke(0, 0, 0, 35);
   ctx.strokeWeight(0.6);
 
   const path = (APP.direction === "innen")

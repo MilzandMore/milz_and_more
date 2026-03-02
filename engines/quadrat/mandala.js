@@ -121,7 +121,7 @@ function drawQuadrat(startDigit, target, opts) {
 
   if (strokeOn) {
     ctx.stroke(0, 0, 0, 35);
-    ctx.strokeWeight(1);
+    ctx.strokeWeight(0.6);
   } else {
     ctx.noStroke();
   }

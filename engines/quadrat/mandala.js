@@ -231,12 +231,14 @@ if (wmLogo && !isAdmin) {
   pg.noTint();
 }
 
-// ✅ Signatur: gerne wie gehabt (exportLogo = bevorzugt hell/farbig)
-if (exportLogo) {
+// Signatur unten rechts: immer das "normale" Logo bevorzugen
+const sigLogo = logoImg || exportLogo;
+
+if (sigLogo) {
   pg.resetMatrix();
   const lW = 500;
-  const lH = (exportLogo.height / exportLogo.width) * lW;
-  pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
+  const lH = (sigLogo.height / sigLogo.width) * lW;
+  pg.image(sigLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
 }
   save(pg, 'Milz&More_Quadrat.png');
 }

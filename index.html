@@ -2,10 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Lebenscode Mandala</title>
 
-  <link rel="stylesheet" href="app.css?v=1000" />
+  <link rel="stylesheet" href="app.css?v=1001" />
 </head>
 
 <body>
@@ -51,6 +51,9 @@
       </div>
 
       <button id="download" class="primary" type="button">Download</button>
+
+      <!-- ✅ Mobile Button: öffnet Slider Panel als Bottom Sheet -->
+      <button id="openSliders" class="engine-btn mobile-only" type="button">Farben</button>
     </div>
 
     <div class="right">
@@ -67,7 +70,8 @@
   </header>
 
   <main class="app-main">
-    <aside class="slider-panel">
+    <!-- Desktop Sidebar bleibt -->
+    <aside class="slider-panel desktop-only" id="sliderPanelDesktop">
       <div class="slider-title">Farbintensität</div>
       <div id="sliders" class="sliders"></div>
       <div class="hint">Tipp: Slider regeln Sättigung/Helligkeit je Ziffer.</div>
@@ -78,6 +82,21 @@
       <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
     </section>
   </main>
+
+  <!-- ✅ Mobile Bottom Sheet für Slider -->
+  <div id="sliderSheet" class="slider-sheet">
+    <div class="slider-sheet__backdrop" id="sliderBackdrop"></div>
+    <div class="slider-sheet__panel">
+      <div class="slider-sheet__header">
+        <div class="slider-sheet__title">Farbintensität</div>
+        <button id="closeSliders" class="engine-btn" type="button">Schließen</button>
+      </div>
+      <div class="slider-sheet__body">
+        <div id="slidersMobile" class="sliders"></div>
+        <div class="hint">Tipp: Slider regeln Sättigung/Helligkeit je Ziffer.</div>
+      </div>
+    </div>
+  </div>
 
   <script>
     const state = {
@@ -105,7 +124,12 @@
       sector: document.getElementById("sector"),
       download: document.getElementById("download"),
       sliders: document.getElementById("sliders"),
-      paperToggle: document.getElementById("paperToggle")
+      slidersMobile: document.getElementById("slidersMobile"),
+      paperToggle: document.getElementById("paperToggle"),
+      openSliders: document.getElementById("openSliders"),
+      closeSliders: document.getElementById("closeSliders"),
+      sliderSheet: document.getElementById("sliderSheet"),
+      sliderBackdrop: document.getElementById("sliderBackdrop")
     };
 
     function showLoading() {
@@ -117,15 +141,15 @@
       els.stage.classList.remove("is-loading");
     }
 
-    function buildSliders() {
-      els.sliders.innerHTML = "";
+    function buildSlidersInto(containerEl) {
+      containerEl.innerHTML = "";
       for (let i = 1; i <= 9; i++) {
         const row = document.createElement("div");
         row.className = "slider-row";
 
         const dot = document.createElement("div");
         dot.className = "dot";
-        dot.id = "dot" + i;
+        dot.id = containerEl.id + "_dot" + i;
 
         const label = document.createElement("div");
         label.className = "digit";
@@ -144,12 +168,18 @@
         row.appendChild(dot);
         row.appendChild(label);
         row.appendChild(input);
-        els.sliders.appendChild(row);
+        containerEl.appendChild(row);
       }
+    }
+
+    function buildSliders() {
+      buildSlidersInto(els.sliders);
+      buildSlidersInto(els.slidersMobile);
     }
 
     function setActiveEngineButton(engine) {
       document.querySelectorAll(".engine-btn").forEach(btn => {
+        if (!btn.dataset.engine) return;
         btn.classList.toggle("active", btn.dataset.engine === engine);
       });
     }
@@ -178,7 +208,6 @@
         pushStateToEngine();
       };
 
-      // ✅ embed=1 erzwingt transparenten Engine-Hintergrund
       els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
     }
 
@@ -188,6 +217,15 @@
 
     function requestExport() {
       try { els.frame.contentWindow.postMessage({ type: "EXPORT", payload: state }, "*"); } catch (_) {}
+    }
+
+    function openSheet(){
+      els.sliderSheet.classList.add("open");
+      document.body.classList.add("no-scroll");
+    }
+    function closeSheet(){
+      els.sliderSheet.classList.remove("open");
+      document.body.classList.remove("no-scroll");
     }
 
     window.addEventListener("message", (ev) => {
@@ -200,14 +238,18 @@
       }
 
       if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
+        // Desktop + Mobile Dots aktualisieren
         for (let i = 1; i <= 9; i++) {
-          const dot = document.getElementById("dot" + i);
-          if (dot && msg.colors[i-1]) dot.style.background = msg.colors[i-1];
+          const dot1 = document.getElementById("sliders_dot" + i);
+          const dot2 = document.getElementById("slidersMobile_dot" + i);
+          if (dot1 && msg.colors[i-1]) dot1.style.background = msg.colors[i-1];
+          if (dot2 && msg.colors[i-1]) dot2.style.background = msg.colors[i-1];
         }
       }
     });
 
     document.querySelectorAll(".engine-btn").forEach(btn => {
+      if (!btn.dataset.engine) return;
       btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
     });
 
@@ -222,6 +264,10 @@
       applyPaperLook();
       pushStateToEngine();
     });
+
+    els.openSliders.addEventListener("click", openSheet);
+    els.closeSliders.addEventListener("click", closeSheet);
+    els.sliderBackdrop.addEventListener("click", closeSheet);
 
     buildSliders();
     applyPaperLook();

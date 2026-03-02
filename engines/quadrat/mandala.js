@@ -59,7 +59,6 @@ function setup() {
   colorMode(HSB, 360, 100, 100, 100);
   pixelDensity(2);
 
-  // Logos asynchron laden (ohne preload-blocking)
   loadLogosAsync();
 
   if (EMBED) {
@@ -96,6 +95,24 @@ function loadImageFallback(urls, cb) {
   tryNext();
 }
 
+/* ====== Logo helpers (für Export) ====== */
+function getExportLogo() {
+  return logoImgBlack || logoImg;
+}
+
+function waitForLogo(maxMs = 2000) {
+  return new Promise((resolve) => {
+    const start = Date.now();
+    const tick = () => {
+      const l = getExportLogo();
+      if (l) return resolve(l);
+      if (Date.now() - start > maxMs) return resolve(null);
+      setTimeout(tick, 50);
+    };
+    tick();
+  });
+}
+
 function draw() {
   background(12);
 
@@ -105,7 +122,6 @@ function draw() {
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
 
-  // Farben an Parent melden
   if (EMBED) {
     try {
       const colors = [];
@@ -127,7 +143,6 @@ function draw() {
   pop();
 }
 
-/* ====== Zeichnen ====== */
 function drawQuadrat(startDigit, target, opts) {
   var ctx = target || window;
   var ts = 16;
@@ -167,7 +182,7 @@ function drawQuadrat(startDigit, target, opts) {
 }
 
 /* ====== Export (Werte wie Rund/Wabe) ====== */
-function exportHighRes() {
+async function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
 
@@ -181,7 +196,6 @@ function exportHighRes() {
 
   calcQuadratMatrix(drawCode);
 
-  // Größe/Position wie du’s vorher hattest (goldener Schnitt)
   const ts = 16;
   const gridSize = 40 * ts;
   const targetSizePx = exportW / PHI;
@@ -196,7 +210,8 @@ function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  const exportLogo = logoImgBlack || logoImg;
+  // ✅ WICHTIG: auf Logo warten (weil async geladen)
+  const exportLogo = await waitForLogo(2000);
 
   // Wasserzeichen
   if (exportLogo && !isAdmin) {
@@ -225,7 +240,7 @@ function exportHighRes() {
   save(pg, 'Milz&More_Quadrat.png');
 }
 
-/* ====== State helpers ====== */
+/* --------- state helpers --------- */
 function getMode() { return EMBED ? (extState.mode || "geburtstag") : "geburtstag"; }
 function getInput() { return EMBED ? (extState.input ?? "15011987") : "15011987"; }
 function getDirection() { return EMBED ? (extState.direction || "aussen") : "aussen"; }
@@ -236,7 +251,7 @@ function getSlider(val) {
   return (typeof v === "number") ? v : 85;
 }
 
-/* ====== Code gen ====== */
+/* --------- code gen --------- */
 function getCodeFromDate(str) {
   var val = String(str || "").replace(/[^0-9]/g, "");
   var res = val.split('').map(Number);
@@ -292,7 +307,7 @@ function calcQuadratMatrix(code) {
   }
 }
 
-/* ====== Messaging ====== */
+/* --------- messaging --------- */
 function onMessageFromParent(ev) {
   const msg = ev.data;
   if (!msg || typeof msg !== "object") return;
@@ -308,7 +323,7 @@ function onMessageFromParent(ev) {
       extState = Object.assign(extState, msg.payload);
       if (msg.payload.isAdmin === true) isAdmin = true;
     }
-    exportHighRes();
+    exportHighRes(); // async ist ok
   }
 }
 

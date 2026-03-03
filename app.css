@@ -369,6 +369,10 @@ html,body{
 /* =========================
    PORTAL (Startseite) — FULL BLEED
    ========================= */
+/* =========================
+   PORTAL (Startseite) — GOLD PILLS
+   ========================= */
+
 .portal-body{
   overflow: auto !important;
   height: auto !important;
@@ -378,7 +382,7 @@ html,body{
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 36px 18px;
+  padding: 34px 18px;
 }
 
 .portal-card{
@@ -387,17 +391,13 @@ html,body{
   border: none;
   background: transparent;
   box-shadow: none;
-  backdrop-filter: none;
 }
 
 .portal-logo{
-  width: min(720px, 92vw);
+  width: min(760px, 94vw);
   height: auto;
   display: block;
-  margin: 0 auto 18px;
-  image-rendering: auto;
-  -webkit-font-smoothing: antialiased;
-  transform: translateZ(0);
+  margin: 0 auto 8px;     /* dicht zum Slogan */
   filter: none;
 }
 
@@ -406,73 +406,94 @@ html,body{
   font-weight: 900;
   letter-spacing: 0.22em;
   font-size: 12px;
-  color: rgba(238,243,251,0.78);
+  color: rgba(255, 225, 160, 0.85);
   text-transform: uppercase;
-  margin: 10px 0 18px;
+  margin: 0 auto 26px;    /* mehr Luft zu Buttons */
 }
 
-.portal-sub{ display:none; }
-
 .portal-actions{
-  width: min(680px, 100%);
+  width: min(560px, 100%); /* kleiner als vorher */
   margin: 0 auto;
   display: grid;
   gap: 12px;
 }
 
-.portal-btn{
-  display: flex;
-  align-items: center;
+/* “Gold Premium” Pill Button */
+.portal-pill{
+  position: relative;
+  display:flex;
+  align-items:center;
   justify-content: space-between;
   gap: 14px;
 
   width: 100%;
+  height: 54px;           /* klein & hochwertig */
+  padding: 0 18px;
   border-radius: 18px;
-  padding: 16px 16px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.05);
+
+  border: 1px solid rgba(255, 210, 120, 0.55);
+  background:
+    radial-gradient(120px 80px at 18% 30%, rgba(255,255,255,0.28), transparent 70%),
+    radial-gradient(260px 140px at 70% 70%, rgba(255, 200, 90, 0.18), transparent 65%),
+    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+
   color: rgba(238,243,251,0.92);
-
+  text-decoration:none;
   font-weight: 950;
-  text-decoration: none;
-  cursor: pointer;
 
-  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+  box-shadow:
+    0 18px 60px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.14);
+
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
 }
 
-.portal-btn:hover{
-  background: rgba(255,255,255,0.08);
+.portal-pill::after{
+  content:"";
+  position:absolute;
+  inset: 2px;
+  border-radius: 16px;
+  pointer-events:none;
+  background: radial-gradient(340px 120px at 30% 0%, rgba(255, 225, 160, 0.18), transparent 65%);
+  opacity: 0.9;
+}
+
+.portal-pill:hover{
   transform: translateY(-1px);
-  border-color: rgba(255,255,255,0.20);
+  border-color: rgba(255, 225, 160, 0.75);
+  background:
+    radial-gradient(120px 80px at 18% 30%, rgba(255,255,255,0.32), transparent 70%),
+    radial-gradient(260px 140px at 70% 70%, rgba(255, 200, 90, 0.22), transparent 65%),
+    linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.04));
 }
 
-.portal-btn__hint{
+.portal-pill__hint{
   font-weight: 900;
   font-size: 12px;
-  color: rgba(238,243,251,0.55);
+  color: rgba(255, 225, 160, 0.78);
+  text-transform: lowercase;
+  opacity: 0.95;
 }
 
-.portal-btn--primary{
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.22);
+.portal-pill--primary{
+  border-color: rgba(255, 225, 160, 0.85);
 }
 
-.portal-btn--disabled{
-  opacity: 0.5;
+.portal-pill--disabled{
+  opacity: 0.52;
   cursor: not-allowed;
+  border-color: rgba(255,255,255,0.16);
 }
-
-.portal-foot{
-  margin-top: 16px;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(238,243,251,0.45);
+.portal-pill--disabled .portal-pill__hint{
+  color: rgba(238,243,251,0.60);
 }
 
 @media (max-width: 520px){
-  .portal{ padding: 28px 14px; }
-  .portal-tagline{ letter-spacing: 0.18em; }
-  .portal-btn{ padding: 13px 12px; border-radius: 16px; }
+  .portal{ padding: 26px 14px; }
+  .portal-tagline{ letter-spacing: 0.18em; font-size: 11px; margin-bottom: 22px; }
+  .portal-actions{ width: min(520px, 100%); }
+  .portal-pill{ height: 52px; border-radius: 16px; padding: 0 14px; }
+  .portal-pill::after{ border-radius: 14px; }
 }
 
 /* SAFETY: Formen-Auswahl immer sichtbar */

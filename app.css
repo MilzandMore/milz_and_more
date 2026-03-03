@@ -252,6 +252,9 @@ html,body{
 /* =========================
    PRO MOBILE UI (<= 900px)
    ========================= */
+/* =========================
+   CLEAN MOBILE FACE
+   ========================= */
 @media (max-width: 900px){
 
   html,body{
@@ -260,125 +263,51 @@ html,body{
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Header: kompakter, weniger "Formular" */
+  /* HEADER SLIM */
   .app-header{
     position: sticky;
     top:0;
-    z-index:9999;
+    padding: 10px 14px;
     height:auto;
-    padding: 10px 12px 12px;
-    gap: 10px;
-    flex-wrap: wrap;
-    background: linear-gradient(180deg, rgba(12,16,22,0.96), rgba(12,16,22,0.78));
+    flex-wrap: nowrap;
+    justify-content: space-between;
   }
 
-  /* Brand: eine Zeile, kleiner */
+  .controls{
+    display:none; /* ❗ Desktop-Formular komplett weg */
+  }
+
   .brand{
     min-width:0;
-    flex: 1 1 100%;
-    gap: 10px;
+    flex:0 0 auto;
   }
-  .brand-logo{ height: 26px; max-width: 120px; }
+
+  .brand-logo{
+    height:28px;
+  }
+
   .brand-title{
-    font-size: 16px;
-    font-weight: 950;
-    letter-spacing: 0.2px;
-  }
-  .brand-sub{ display:none; }
-
-  /* Controls: als sauberes Grid (2 Spalten) */
-  .controls{
-    min-width:0;
-    flex: 1 1 100%;
-    width:100%;
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    align-items: end;
+    font-size:16px;
   }
 
-  /* Reihenfolge: Modus | Eingabe, Richtung | (Sektor), Download | Farben */
-  .controls .field{ margin:0; }
-
-  .field label{
-    font-size: 10px;
-    letter-spacing: 0.35px;
-    opacity: 0.9;
-  }
-
-  .field input, .field select{
-    height: 42px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.12);
-  }
-
-  /* Download prominent */
-  .primary{
-    height: 42px;
-    border-radius: 14px;
-    font-weight: 950;
-    box-shadow: 0 12px 26px rgba(0,0,0,0.35);
-    grid-column: 1 / 2;
-  }
-
-  /* "Farben" Button im gleichen Stil wie Tabs */
-  .mobile-only{
-    display:inline-flex;
-    height: 42px;
-    border-radius: 14px;
-    align-items:center;
-    justify-content:center;
-    font-weight: 950;
-    grid-column: 2 / 3;
-  }
-
-  /* Right: Toggle + Engine-Tabs als eigene Zeile */
   .right{
-    width:100%;
-    display:flex;
-    align-items:center;
-    justify-content: space-between;
-    gap: 10px;
+    flex:0 0 auto;
   }
 
-  /* Toggle wirkt wie ein kleiner Chip, nicht wie ein Fremdkörper */
-  .toggle{
-    padding: 8px 10px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.12);
-  }
-  .toggle input{
-    width: 18px;
-    height: 18px;
-    transform:none;
-  }
-
-  /* Engine Tabs: Segmented Control */
-  .engine-nav{
-    display:flex;
-    gap: 6px;
-    padding: 6px;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.10);
-  }
-  .engine-btn{
-    height: 38px;
-    padding: 0 14px;
-    border-radius: 12px;
-    background: transparent;
-    border: 1px solid transparent;
-    font-weight: 950;
-  }
-  .engine-btn.active{
-    background: #fff;
-    color: #0b0f14;
-    border-color: rgba(0,0,0,0.10);
-  }
-
-  /* MAIN: 1 Spalte */
+  /* MAIN EINSPALTIG */
   .app-main{
-    position: relative;
-    top:0; left:0; right:
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  /* STAGE bleibt groß */
+  .stage{
+    min-height: 68vh;
+    border-radius: 22px;
+  }
+
+  .engine-frame{
+    height: 68vh;
+    min-height: 500px;
+  }
+}

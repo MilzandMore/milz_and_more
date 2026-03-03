@@ -1,4 +1,5 @@
 /* Datei: app.css (ROOT) — KOMPLETT */
+
 :root{
   --bgA: #07090e;
   --bgB: #0b0f14;
@@ -34,6 +35,11 @@ html,body{
     linear-gradient(180deg, var(--bgA), var(--bgB));
 }
 
+/* Helpers */
+.mobile-only{ display:none; }
+.desktop-only{ display:block; }
+.no-scroll{ overflow:hidden !important; }
+
 /* HEADER */
 .app-header{
   position:fixed;
@@ -54,6 +60,13 @@ html,body{
   align-items:center;
   gap:10px;
   min-width: 260px;
+}
+.brand-link{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-decoration:none;
+  color:inherit;
 }
 .brand-logo{
   height: 38px;
@@ -246,14 +259,9 @@ html,body{
 .stage.is-loading .engine-frame{
   opacity: 0.92;
 }
+
 /* =========================
-   MOBILE FIX (<= 900px)
-   ========================= */
-/* =========================
-   PRO MOBILE UI (<= 900px)
-   ========================= */
-/* =========================
-   CLEAN MOBILE FACE
+   MOBILE (<= 900px) — sauber & professionell
    ========================= */
 @media (max-width: 900px){
 
@@ -263,62 +271,104 @@ html,body{
     -webkit-overflow-scrolling: touch;
   }
 
-  /* HEADER SLIM */
   .app-header{
     position: sticky;
     top:0;
-    padding: 10px 14px;
     height:auto;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-  }
-
-  .controls{
-    display:none; /* ❗ Desktop-Formular komplett weg */
+    padding: 10px 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-end;
   }
 
   .brand{
-    min-width:0;
-    flex:0 0 auto;
+    min-width: 0;
+    flex: 1 1 auto;
   }
-
-  .brand-logo{
-    height:28px;
-  }
-
-  .brand-title{
-    font-size:16px;
-  }
+  .brand-logo{ height: 30px; max-width: 160px; }
+  .brand-title{ font-size: 14px; }
 
   .right{
-    flex:0 0 auto;
+    flex: 0 0 auto;
+    gap: 10px;
   }
 
-  /* MAIN EINSPALTIG */
+  /* Controls bleiben sichtbar, aber als Grid */
+  .controls{
+    order: 3;
+    width: 100%;
+    min-width: 0;
+    display:flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .field{ flex: 1 1 150px; }
+  .primary{ flex: 1 1 150px; }
+
+  .mobile-only{ display:inline-flex; }
+  .desktop-only{ display:none !important; }
+
   .app-main{
     grid-template-columns: 1fr;
-    padding: 14px;
+    padding: 12px;
   }
 
-  /* STAGE bleibt groß */
   .stage{
-    min-height: 68vh;
+    min-height: 64vh;
     border-radius: 22px;
   }
 
   .engine-frame{
-    height: 68vh;
-    min-height: 500px;
+    height: 64vh;
+    min-height: 420px;
   }
 }
+
 /* =========================
-   PORTAL (Startseite)
+   Mobile Bottom Sheet (Farben)
    ========================= */
+.slider-sheet{
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+}
+.slider-sheet.open{
+  display: block;
+}
+.slider-sheet__backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(6px);
+}
+.slider-sheet__panel{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  border-radius: 18px 18px 0 0;
+  background: rgba(12,16,22,0.98);
+  border-top: 1px solid rgba(255,255,255,0.14);
+  padding: 14px;
+  max-height: 70vh;
+  overflow:auto;
+}
+.slider-sheet__header{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.slider-sheet__title{
+  font-weight: 950;
+  letter-spacing: 0.2px;
+}
 
 /* =========================
    PORTAL (Startseite) — FULL BLEED
    ========================= */
-
 .portal-body{
   overflow: auto !important;
   height: auto !important;
@@ -331,7 +381,6 @@ html,body{
   padding: 36px 18px;
 }
 
-/* ❌ keine Card mehr */
 .portal-card{
   width: min(860px, 100%);
   padding: 0;
@@ -341,18 +390,15 @@ html,body{
   backdrop-filter: none;
 }
 
-/* Logo groß, aber ohne "matschige" Effekte */
 .portal-logo{
   width: min(720px, 92vw);
   height: auto;
   display: block;
   margin: 0 auto 18px;
-
-  /* weniger Artefakte */
   image-rendering: auto;
   -webkit-font-smoothing: antialiased;
   transform: translateZ(0);
-  filter: none; /* ❗ drop-shadow raus, macht PNG schnell pixelig */
+  filter: none;
 }
 
 .portal-tagline{
@@ -365,9 +411,7 @@ html,body{
   margin: 10px 0 18px;
 }
 
-.portal-sub{
-  display: none; /* optional: erstmal weg, sehr clean */
-}
+.portal-sub{ display:none; }
 
 .portal-actions{
   width: min(680px, 100%);
@@ -376,7 +420,6 @@ html,body{
   gap: 12px;
 }
 
-/* Buttons edler, weniger "UI" */
 .portal-btn{
   display: flex;
   align-items: center;
@@ -409,7 +452,6 @@ html,body{
   color: rgba(238,243,251,0.55);
 }
 
-/* Primary: NICHT weiß (wir bleiben premium-dark + gold vibe) */
 .portal-btn--primary{
   background: rgba(255,255,255,0.08);
   border-color: rgba(255,255,255,0.22);
@@ -427,16 +469,12 @@ html,body{
   color: rgba(238,243,251,0.45);
 }
 
-/* Mobile Feinschliff */
 @media (max-width: 520px){
-  .portal-card{ padding: 20px 16px 16px; }
+  .portal{ padding: 28px 14px; }
   .portal-tagline{ letter-spacing: 0.18em; }
   .portal-btn{ padding: 13px 12px; border-radius: 16px; }
 }
-/* SAFETY: Formen-Auswahl immer sichtbar auf Tool-Seite */
-.app-header .engine-nav { 
-  display: flex !important; 
-}
-.app-header .right { 
-  display: flex !important; 
-}
+
+/* SAFETY: Formen-Auswahl immer sichtbar */
+.app-header .engine-nav { display:flex !important; }
+.app-header .right { display:flex !important; }

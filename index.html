@@ -1,1 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Milz & More</title>
 
+  <link rel="stylesheet" href="app.css?v=1100" />
+</head>
+
+<body class="portal-body">
+  <main class="portal">
+    <div class="portal-card">
+      <img class="portal-logo" src="assets/Logo.png" alt="Milz & More" />
+
+      <div class="portal-tagline">DEIN DESIGN. DEIN URSPRUNG. DEIN WEG.</div>
+
+      <div class="portal-sub">
+        Werkzeuge zur Erinnerung an dein wahres Selbst.
+      </div>
+
+      <div class="portal-actions">
+        <a class="portal-btn portal-btn--primary" href="lebenscode.html">
+          Lebenscode Mandala
+          <span class="portal-btn__hint">öffnen</span>
+        </a>
+
+        <button class="portal-btn portal-btn--disabled" type="button" disabled>
+          Edelstein Generator
+          <span class="portal-btn__hint">in Vorbereitung</span>
+        </button>
+
+        <button class="portal-btn portal-btn--disabled" type="button" disabled>
+          Human Design Chart
+          <span class="portal-btn__hint">in Vorbereitung</span>
+        </button>
+      </div>
+
+      <footer class="portal-foot">
+        © <span id="year"></span> Milz & More
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

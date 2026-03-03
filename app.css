@@ -311,3 +311,120 @@ html,body{
     min-height: 500px;
   }
 }
+/* =========================
+   PORTAL (Startseite)
+   ========================= */
+
+.portal-body{
+  overflow: auto; /* Portal darf scrollen */
+}
+
+.portal{
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+}
+
+.portal-card{
+  width: min(720px, 100%);
+  border-radius: 22px;
+  padding: 26px 22px 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  box-shadow: 0 24px 90px rgba(0,0,0,0.60);
+  backdrop-filter: blur(12px);
+}
+
+.portal-logo{
+  width: min(520px, 100%);
+  height: auto;
+  display: block;
+  margin: 0 auto 14px;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.65));
+}
+
+.portal-tagline{
+  text-align: center;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  font-size: 11px;
+  color: rgba(238,243,251,0.80);
+  text-transform: uppercase;
+  margin: 8px 0 10px;
+}
+
+.portal-sub{
+  text-align: center;
+  color: rgba(238,243,251,0.72);
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 18px;
+}
+
+.portal-actions{
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.portal-btn{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  width: 100%;
+  border-radius: 16px;
+  padding: 14px 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(238,243,251,0.92);
+
+  font-weight: 950;
+  text-decoration: none;
+  cursor: pointer;
+
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.portal-btn:hover{
+  background: rgba(255,255,255,0.10);
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.portal-btn__hint{
+  font-weight: 900;
+  font-size: 12px;
+  color: rgba(238,243,251,0.62);
+}
+
+.portal-btn--primary{
+  background: rgba(255,255,255,0.92);
+  color: #0b0f14;
+  border-color: rgba(0,0,0,0.18);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+}
+.portal-btn--primary .portal-btn__hint{
+  color: rgba(11,15,20,0.60);
+}
+
+.portal-btn--disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.portal-foot{
+  margin-top: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(238,243,251,0.52);
+}
+
+/* Mobile Feinschliff */
+@media (max-width: 520px){
+  .portal-card{ padding: 20px 16px 16px; }
+  .portal-tagline{ letter-spacing: 0.18em; }
+  .portal-btn{ padding: 13px 12px; border-radius: 16px; }
+}

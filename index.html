@@ -5,19 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Milz & More</title>
 
-  <link rel="stylesheet" href="app.css?v=1302" />
+  <link rel="stylesheet" href="app.css?v=1201" />
 </head>
 
 <body class="portal-body">
-
   <main class="portal">
     <div class="portal-card">
 
       <img class="portal-logo" src="assets/Logo_gold.png" alt="Milz & More" />
 
       <div class="portal-tagline">DEIN DESIGN. DEIN URSPRUNG. DEIN WEG.</div>
-
-      <div class="portal-spacer" aria-hidden="true"></div>
+      <div class="portal-spacer"></div>
 
       <div class="portal-actions">
         <a class="portal-pill portal-pill--primary" href="lebenscode.html">
@@ -25,26 +23,23 @@
           <span class="portal-pill__hint">öffnen</span>
         </a>
 
-        <div class="portal-pill portal-pill--disabled" aria-disabled="true">
+        <button class="portal-pill portal-pill--disabled" type="button" disabled>
           <span>New Project</span>
           <span class="portal-pill__hint">coming soon</span>
-        </div>
+        </button>
 
-        <div class="portal-pill portal-pill--disabled" aria-disabled="true">
+        <button class="portal-pill portal-pill--disabled" type="button" disabled>
           <span>New Project</span>
           <span class="portal-pill__hint">coming soon</span>
-        </div>
+        </button>
       </div>
-
-      <footer class="portal-foot">
-        © <span id="year"></span> Milz & More
-      </footer>
 
     </div>
   </main>
 
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+    // optional – nur falls du das Footer-Jahr später wieder willst
+    // document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 </body>
 </html>

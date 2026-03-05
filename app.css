@@ -481,3 +481,52 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
 /* SAFETY: Formen-Auswahl immer sichtbar */
 .app-header .engine-nav { display:flex !important; }
 .app-header .right { display:flex !important; }
+/* =========================
+   PORTAL — DESKTOP FIX (am Ende der app.css einfügen)
+   ========================= */
+
+/* Wichtig: Portal-Regeln NUR für die Startseite */
+body.portal-body{
+  overflow: hidden;
+}
+
+/* Desktop: alles in einem Screen, sauber zentriert */
+@media (min-width: 901px){
+  body.portal-body .portal{
+    height: 100vh;
+    width: 100%;
+    display: grid;
+    place-items: center;
+    padding: 24px 18px;
+  }
+
+  body.portal-body .portal-card{
+    width: min(980px, 100%);
+    display: grid;
+    justify-items: center;
+  }
+
+  /* ✅ Logo auf Desktop zuverlässig begrenzen */
+  body.portal-body .portal-logo{
+    width: min(760px, 72vw);
+    max-width: 760px;
+    max-height: 260px;      /* <- harte Grenze, damit es NIE eskaliert */
+    height: auto;
+    object-fit: contain;
+    margin: 0 0 10px 0;
+    display: block;
+  }
+
+  /* ✅ Slogan direkt unterm Logo, danach Luft */
+  body.portal-body .portal-tagline{
+    margin: 0;
+  }
+
+  body.portal-body .portal-spacer{
+    height: clamp(28px, 5vh, 80px);
+  }
+
+  body.portal-body .portal-actions{
+    width: min(560px, 100%);
+  }
+}

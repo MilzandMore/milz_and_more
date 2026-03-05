@@ -552,3 +552,8 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
 .app-header .right{
   display:flex !important;
 }
+/* Header Logo-only */
+.brand-title,
+.brand-sub{
+  display:none;
+}

@@ -5,42 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Milz & More</title>
 
-<link rel="stylesheet" href="app.css?v=1200">
+  <link rel="stylesheet" href="app.css?v=1301" />
 </head>
 
-<body class="tool-body">
+<!-- ✅ WICHTIG: portal-body (nicht tool-body) -->
+<body class="portal-body">
+
   <main class="portal">
-    <div class="portal">
-  <div class="portal-card">
+    <div class="portal-card">
 
-    <img class="portal-logo" src="assets/Logo_gold.png" alt="Milz & More" />
+      <img class="portal-logo" src="assets/Logo_gold.png" alt="Milz & More" />
 
-    <div class="portal-tagline">DEIN DESIGN. DEIN URSPRUNG. DEIN WEG.</div>
-<div class="portal-tagline">DEIN DESIGN. DEIN URSPRUNG. DEIN WEG.</div>
-<div class="portal-spacer"></div>
-    
-    <div class="portal-actions">
-      <a class="portal-pill portal-pill--primary" href="lebenscode.html">
-        <span>Lebenscode Mandala</span>
-        <span class="portal-pill__hint">öffnen</span>
-      </a>
+      <!-- ✅ nur EINMAL -->
+      <div class="portal-tagline">DEIN DESIGN. DEIN URSPRUNG. DEIN WEG.</div>
 
-      <button class="portal-pill portal-pill--disabled" type="button" disabled>
-        <span>New Project</span>
-        <span class="portal-pill__hint">coming soon</span>
-      </button>
+      <!-- ✅ Abstand nach unten -->
+      <div class="portal-spacer" aria-hidden="true"></div>
 
-      <button class="portal-pill portal-pill--disabled" type="button" disabled>
-        <span>New Project</span>
-        <span class="portal-pill__hint">coming soon</span>
-      </button>
-    </div>
+      <div class="portal-actions">
+        <a class="portal-pill portal-pill--primary" href="lebenscode.html">
+          <span>Lebenscode Mandala</span>
+          <span class="portal-pill__hint">öffnen</span>
+        </a>
 
-  </div>
-</div>
+        <!-- disabled als DIV (Button wäre auch ok, aber DIV ist “sauberer”, weil eh keine Aktion) -->
+        <div class="portal-pill portal-pill--disabled" aria-disabled="true">
+          <span>New Project</span>
+          <span class="portal-pill__hint">coming soon</span>
+        </div>
+
+        <div class="portal-pill portal-pill--disabled" aria-disabled="true">
+          <span>New Project</span>
+          <span class="portal-pill__hint">coming soon</span>
+        </div>
+      </div>
+
+      <!-- Optional: Footer – wenn du ihn NICHT willst, einfach diesen Block löschen -->
       <footer class="portal-foot">
         © <span id="year"></span> Milz & More
       </footer>
+
     </div>
   </main>
 

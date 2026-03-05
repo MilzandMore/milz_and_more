@@ -270,37 +270,49 @@ html,body{
 .stage.is-loading .engine-frame{ opacity: 0.92; }
 
 /* =========================
-   MOBILE (<= 900px) — App sauber
+   MOBILE (<= 900px) — App sauber (CSS OHNE Nesting)
    ========================= */
 @media (max-width: 900px){
 
-  html,body{
-    overflow:auto;
-    height:auto;
+  html, body{
+    overflow: auto;
+    height: auto;
     -webkit-overflow-scrolling: touch;
   }
 
- .app-header{
-  height:86px;
-   
+  .app-header{
+    height: auto;
+    padding: 10px 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
   .brand{
     min-width: 0;
     flex: 1 1 auto;
   }
-  .brand-logo{ height: 30px; max-width: 160px; }
-  .brand-title{ font-size: 14px; }
+
+  .brand-logo{
+    height: 44px;        /* Logo mobil größer, aber nicht zu riesig */
+    width: auto;
+    max-width: none;
+  }
+
+  .brand-title{
+    font-size: 14px;
+  }
 
   .right{
     flex: 0 0 auto;
     gap: 10px;
   }
 
-  /* Controls sichtbar als Grid */
   .controls{
     order: 3;
     width: 100%;
     min-width: 0;
-    display:flex;
+    display: flex;
     flex-wrap: wrap;
     gap: 10px;
     align-items: flex-end;
@@ -309,8 +321,8 @@ html,body{
   .field{ flex: 1 1 150px; }
   .primary{ flex: 1 1 150px; }
 
-  .mobile-only{ display:inline-flex; }
-  .desktop-only{ display:none !important; }
+  .mobile-only{ display: inline-flex; }
+  .desktop-only{ display: none !important; }
 
   .app-main{
     grid-template-columns: 1fr;

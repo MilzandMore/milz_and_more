@@ -540,10 +540,15 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
   body.portal-body .portal-logo{
     width: min(760px, 70vw);
     max-width: 760px;
-    max-height: 260px;   /* ✅ harter Stop */
+    max-height: 260px;
   }
 }
 
 /* SAFETY: Formen-Auswahl immer sichtbar */
-.app-header .engine-nav { display:flex !important; }
-.app-header .right { display:flex !important; }
+.app-header .engine-nav{
+  display:flex !important;
+}
+
+.app-header .right{
+  display:flex !important;
+}

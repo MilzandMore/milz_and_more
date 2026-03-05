@@ -1,4 +1,4 @@
-/* Datei: app.css (ROOT) — KOMPLETT (FIXED + SCOPED) */
+/* Datei: app.css (ROOT) — KOMPLETT (fix: portal scoped, no collisions) */
 
 :root{
   --bgA: #07090e;
@@ -41,7 +41,7 @@ html,body{
 .no-scroll{ overflow:hidden !important; }
 
 /* =========================
-   TOOL UI (Lebenscode)
+   TOOL / APP (Lebenscode)
    ========================= */
 
 /* HEADER */
@@ -65,6 +65,7 @@ html,body{
   gap:10px;
   min-width: 260px;
 }
+
 .brand-link{
   display:flex;
   align-items:center;
@@ -73,7 +74,6 @@ html,body{
   color:inherit;
 }
 
-/* ✅ Tool-Logo (klein im Header) */
 .brand-logo{
   height: 38px;
   width:auto;
@@ -262,13 +262,10 @@ html,body{
   backdrop-filter: blur(10px);
   color: rgba(238,243,251,0.92);
 }
-
-.stage.is-loading .engine-frame{
-  opacity: 0.92;
-}
+.stage.is-loading .engine-frame{ opacity: 0.92; }
 
 /* =========================
-   MOBILE (<= 900px) — Tool UI
+   MOBILE (<= 900px) — App sauber
    ========================= */
 @media (max-width: 900px){
 
@@ -300,7 +297,7 @@ html,body{
     gap: 10px;
   }
 
-  /* Controls bleiben sichtbar, aber als Grid */
+  /* Controls sichtbar als Grid */
   .controls{
     order: 3;
     width: 100%;
@@ -342,9 +339,8 @@ html,body{
   z-index: 99999;
   display: none;
 }
-.slider-sheet.open{
-  display: block;
-}
+.slider-sheet.open{ display: block; }
+
 .slider-sheet__backdrop{
   position:absolute;
   inset:0;
@@ -373,87 +369,63 @@ html,body{
   letter-spacing: 0.2px;
 }
 
-/* SAFETY: Formen-Auswahl immer sichtbar */
-.app-header .engine-nav { display:flex !important; }
-.app-header .right { display:flex !important; }
-
 /* =========================
-   PORTAL (Startseite) — SCOPED
+   PORTAL (Startseite) — NUR auf body.portal-body
    ========================= */
-/* ✅ Portal Styles greifen NUR wenn body.portal-body gesetzt ist */
-
-/* =========================
-   PORTAL (Startseite) — SCOPED (FIXED)
-   ========================= */
-/* ✅ Portal Styles greifen NUR wenn body.portal-body gesetzt ist */
-
-.portal-body{
-  overflow: auto !important;          /* ✅ WICHTIG: nicht abschneiden */
-  height: auto !important;
-  -webkit-overflow-scrolling: touch;
+body.portal-body{
+  overflow: hidden;              /* Startseite soll nicht seitlich “wackeln” */
 }
 
-.portal-body .portal{
-  min-height: 100svh;                  /* mobile-safe viewport */
+body.portal-body .portal{
+  height: 100svh;
   display: grid;
   place-items: center;
   padding: 18px 14px;
   text-align: center;
-
-  /* ✅ falls doch minimal zu hoch: Portal selbst darf scrollen */
-  overflow: auto;
 }
 
-.portal-body .portal-card{
+body.portal-body .portal-card{
   width: min(860px, 100%);
   display: grid;
   justify-items: center;
-
-  /* ✅ damit Buttons nie “unten rausfallen” */
-  padding-bottom: 18px;
 }
 
-/* Logo: scharf + responsive – aber NICHT zu groß */
-.portal-body .portal-logo{
-  width: min(780px, 92vw);
+/* ✅ Logo: begrenzt, damit Buttons im Viewport bleiben */
+body.portal-body .portal-logo{
+  width: min(760px, 92vw);
   height: auto;
-
-  /* ✅ HIER ist der Haupt-Fix: kleiner, damit alles ins Viewport passt */
-  max-height: 28svh;                   /* vorher 38svh -> zu groß */
+  max-height: 26svh;            /* wichtig: sonst frisst es den Screen */
   object-fit: contain;
-
   margin: 0 auto 8px;
 
-  filter: none !important;
-  transform: none !important;
+  filter: none;
+  transform: none;
   backface-visibility: hidden;
 }
 
-/* Slogan dicht unter Logo */
-.portal-body .portal-tagline{
+/* ✅ Slogan direkt unter Logo */
+body.portal-body .portal-tagline{
   font-weight: 900;
   letter-spacing: 0.22em;
   font-size: 12px;
-  color: rgba(255, 225, 160, 0.90);
+  color: rgba(255, 225, 160, 0.92);
   text-transform: uppercase;
-
-  margin: 0;                           /* dicht unterm Logo */
+  margin: 0;
 }
 
-/* Viel Luft zwischen Slogan und Buttons */
-.portal-body .portal-spacer{
-  height: clamp(22px, 7svh, 86px);
+/* ✅ Luft nach dem Slogan zu den Buttons */
+body.portal-body .portal-spacer{
+  height: clamp(22px, 7svh, 90px);
   width: 1px;
 }
 
-/* Buttons: kompakt + premium */
-.portal-body .portal-actions{
+body.portal-body .portal-actions{
   width: min(520px, 100%);
   display: grid;
   gap: 10px;
 }
 
-.portal-body .portal-pill{
+body.portal-body .portal-pill{
   display:flex;
   align-items:center;
   justify-content: space-between;
@@ -481,30 +453,33 @@ html,body{
   transition: transform 140ms ease, border-color 140ms ease;
 }
 
-.portal-body .portal-pill:hover{
+body.portal-body .portal-pill:hover{
   transform: translateY(-1px);
   border-color: rgba(255, 225, 160, 0.90);
 }
 
-.portal-body .portal-pill__hint{
+body.portal-body .portal-pill__hint{
   font-size: 11px;
   font-weight: 800;
   color: rgba(255,225,160,0.78);
 }
 
-.portal-body .portal-pill--disabled{
+body.portal-body .portal-pill--disabled{
   opacity: 0.52;
   cursor: not-allowed;
   border-color: rgba(255,255,255,0.15);
 }
-.portal-body .portal-pill--disabled .portal-pill__hint{
+body.portal-body .portal-pill--disabled .portal-pill__hint{
   color: rgba(238,243,251,0.52);
 }
 
-/* Kleine Screens noch tighter */
 @media (max-width: 420px){
-  .portal-body .portal-logo{ max-height: 24svh; }   /* noch kleiner */
-  .portal-body .portal-tagline{ font-size: 11px; letter-spacing: 0.18em; }
-  .portal-body .portal-pill{ height: 44px; font-size: 13px; }
-  .portal-body .portal-spacer{ height: clamp(18px, 6svh, 70px); }
+  body.portal-body .portal-logo{ max-height: 22svh; }
+  body.portal-body .portal-tagline{ font-size: 11px; letter-spacing: 0.18em; }
+  body.portal-body .portal-pill{ height: 44px; font-size: 13px; }
+  body.portal-body .portal-spacer{ height: clamp(18px, 6svh, 70px); }
 }
+
+/* SAFETY: Formen-Auswahl immer sichtbar */
+.app-header .engine-nav { display:flex !important; }
+.app-header .right { display:flex !important; }

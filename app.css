@@ -542,3 +542,39 @@ body.portal-body{
     width: min(560px, 100%);
   }
 }
+/* =========================
+   PORTAL (Startseite) — Desktop Clamp
+   ========================= */
+@media (min-width: 901px){
+  body.portal-body .portal{
+    height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 28px 18px;
+    text-align: center;
+  }
+
+  body.portal-body .portal-card{
+    width: min(980px, 100%);
+    display: grid;
+    justify-items: center;
+  }
+
+  body.portal-body .portal-logo{
+    width: min(760px, 70vw);
+    max-width: 760px;
+    max-height: 260px; /* <- das ist der entscheidende “Stopper” */
+    height: auto;
+    object-fit: contain;
+    margin: 0 0 10px 0;
+    display: block;
+  }
+
+  body.portal-body .portal-spacer{
+    height: clamp(28px, 5vh, 90px);
+  }
+
+  body.portal-body .portal-actions{
+    width: min(560px, 100%);
+  }
+}

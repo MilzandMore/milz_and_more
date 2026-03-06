@@ -1,74 +1,167 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Lebenscode Mandala</title>
-
-<link rel="stylesheet" href="app.css?v=1208">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Lebenscode Mandala</title>
+  <link rel="stylesheet" href="app.css?v=1209">
 </head>
 
 <body>
+  <header class="app-header">
 
-<header class="app-header">
+    <div class="brand">
+      <a href="index.html" class="brand-link">
+        <img class="brand-logo" src="assets/Logo_gold.png" alt="Milz & More Logo">
+      </a>
+    </div>
 
-<div class="brand">
-<a href="index.html" class="brand-link">
-<img class="brand-logo" src="assets/Logo_gold.png">
-</a>
-</div>
+    <div class="controls">
+      <div class="field">
+        <label>Modus</label>
+        <select id="mode">
+          <option value="geburtstag">Geburtstag</option>
+          <option value="text">Text / Affirmation</option>
+        </select>
+      </div>
 
-<div class="controls">
+      <div class="field">
+        <label>Eingabe</label>
+        <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT">
+      </div>
 
-<div class="field">
-<label>Modus</label>
-<select id="mode">
-<option value="geburtstag">Geburtstag</option>
-<option value="text">Text / Affirmation</option>
-</select>
-</div>
+      <div class="field">
+        <label>Richtung</label>
+        <select id="direction">
+          <option value="aussen">Außen</option>
+          <option value="innen">Innen</option>
+        </select>
+      </div>
 
-<div class="field">
-<label>Eingabe</label>
-<input id="input" type="text" value="15011987">
-</div>
+      <button id="download" class="primary" type="button">Download</button>
+    </div>
 
-<div class="field">
-<label>Richtung</label>
-<select id="direction">
-<option value="aussen">Außen</option>
-<option value="innen">Innen</option>
-</select>
-</div>
+    <div class="right">
+      <nav class="engine-nav">
+        <button class="engine-btn active" data-engine="quadrat" type="button">Quadrat</button>
+        <button class="engine-btn" data-engine="rund" type="button">Rund</button>
+        <button class="engine-btn" data-engine="wabe" type="button">Wabe</button>
+      </nav>
+    </div>
 
-<button id="download" class="primary">Download</button>
+  </header>
 
-</div>
+  <main class="app-main">
+    <section id="stage" class="stage paper">
+      <div id="loading" class="loading">Engine lädt…</div>
+      <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
+    </section>
+  </main>
 
-<div class="right">
+  <script>
+    const state = {
+      engine: "quadrat",
+      mode: "geburtstag",
+      input: "15011987",
+      direction: "aussen",
+      sector: 8,
+      sliders: Array(10).fill(85),
+      isAdmin: false,
+      paperLook: true
+    };
 
-<nav class="engine-nav">
-<button class="engine-btn active" data-engine="quadrat">Quadrat</button>
-<button class="engine-btn" data-engine="rund">Rund</button>
-<button class="engine-btn" data-engine="wabe">Wabe</button>
-</nav>
+    const params = new URLSearchParams(location.search);
+    if (params.get("access") === "milz_secret") state.isAdmin = true;
 
-</div>
+    const els = {
+      stage: document.getElementById("stage"),
+      frame: document.getElementById("engineFrame"),
+      loading: document.getElementById("loading"),
+      mode: document.getElementById("mode"),
+      input: document.getElementById("input"),
+      direction: document.getElementById("direction"),
+      download: document.getElementById("download")
+    };
 
-</header>
+    function showLoading() {
+      els.loading.style.display = "grid";
+      els.stage.classList.add("is-loading");
+    }
 
-<main class="app-main">
+    function hideLoading() {
+      els.loading.style.display = "none";
+      els.stage.classList.remove("is-loading");
+    }
 
-<section id="stage" class="stage paper">
+    function setActiveEngineButton(engine) {
+      document.querySelectorAll(".engine-btn").forEach(btn => {
+        if (!btn.dataset.engine) return;
+        btn.classList.toggle("active", btn.dataset.engine === engine);
+      });
+    }
 
-<div id="loading" class="loading">Engine lädt…</div>
+    function loadEngine(engine) {
+      state.engine = engine;
+      setActiveEngineButton(engine);
 
-<iframe id="engineFrame" class="engine-frame"></iframe>
+      showLoading();
 
-</section>
+      const fallbackTimer = setTimeout(() => hideLoading(), 2500);
 
-</main>
+      els.frame.onload = () => {
+        clearTimeout(fallbackTimer);
+        hideLoading();
+        pushStateToEngine();
+      };
 
+      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+    }
+
+    function pushStateToEngine() {
+      try {
+        els.frame.contentWindow.postMessage({ type: "SET_STATE", payload: state }, "*");
+      } catch (_) {}
+    }
+
+    function requestExport() {
+      try {
+        els.frame.contentWindow.postMessage({ type: "EXPORT", payload: state }, "*");
+      } catch (_) {}
+    }
+
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== "object") return;
+
+      if (msg.type === "READY") {
+        hideLoading();
+        pushStateToEngine();
+      }
+    });
+
+    document.querySelectorAll(".engine-btn").forEach(btn => {
+      if (!btn.dataset.engine) return;
+      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+    });
+
+    els.mode.addEventListener("change", () => {
+      state.mode = els.mode.value;
+      pushStateToEngine();
+    });
+
+    els.input.addEventListener("input", () => {
+      state.input = els.input.value;
+      pushStateToEngine();
+    });
+
+    els.direction.addEventListener("change", () => {
+      state.direction = els.direction.value;
+      pushStateToEngine();
+    });
+
+    els.download.addEventListener("click", requestExport);
+
+    loadEngine("quadrat");
+  </script>
 </body>
 </html>

@@ -1,348 +1,74 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Lebenscode Mandala</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Lebenscode Mandala</title>
 
-  <link rel="stylesheet" href="app.css?v=1203" />
+<link rel="stylesheet" href="app.css?v=1208">
+
 </head>
 
-<body class="tool-body">
-  <header class="tool-header">
-    <a class="tool-brand" href="index.html" aria-label="Zurück zur Übersicht">
-      <img class="tool-brand-logo" src="assets/Logo_gold.png" alt="Milz & More" />
-    </a>
-  </header>
+<body>
 
-  <main class="tool-layout">
-    <section class="tool-stage-wrap">
-      <section id="stage" class="stage paper tool-stage">
-        <div id="loading" class="loading">Engine lädt…</div>
-        <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
-      </section>
+<header class="app-header">
 
-      <div class="preview-row">
-        <button id="previewToggle" class="soft-btn active" type="button">Druckvorschau</button>
-        <div class="preview-note">
-          Druckvorschau – das Wasserzeichen wird beim Download entfernt.
-        </div>
-      </div>
-    </section>
+<div class="brand">
+<a href="index.html" class="brand-link">
+<img class="brand-logo" src="assets/Logo_gold.png">
+</a>
+</div>
 
-    <section class="tool-dock">
-      <div class="dock-row dock-row-1">
-        <div class="dock-field dock-form">
-          <label>Form</label>
-          <div class="form-switch">
-            <button class="form-btn active" data-engine="quadrat" type="button">Quadrat</button>
-            <button class="form-btn" data-engine="rund" type="button">Rund</button>
-            <button class="form-btn" data-engine="wabe" type="button">Wabe</button>
-          </div>
-        </div>
+<div class="controls">
 
-        <div class="dock-field">
-          <label>Modus</label>
-          <select id="mode">
-            <option value="geburtstag">Geburtstag</option>
-            <option value="text">Text / Affirmation</option>
-          </select>
-        </div>
+<div class="field">
+<label>Modus</label>
+<select id="mode">
+<option value="geburtstag">Geburtstag</option>
+<option value="text">Text / Affirmation</option>
+</select>
+</div>
 
-        <div class="dock-field dock-input">
-          <label>Eingabe</label>
-          <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT" />
-        </div>
+<div class="field">
+<label>Eingabe</label>
+<input id="input" type="text" value="15011987">
+</div>
 
-        <div class="dock-field dock-code">
-          <label>Code</label>
-          <input id="codeOutput" type="text" value="" readonly />
-        </div>
-      </div>
+<div class="field">
+<label>Richtung</label>
+<select id="direction">
+<option value="aussen">Außen</option>
+<option value="innen">Innen</option>
+</select>
+</div>
 
-      <div class="dock-row dock-row-2">
-        <div class="dock-field">
-          <label>Richtung</label>
-          <select id="direction">
-            <option value="aussen">Außen</option>
-            <option value="innen">Innen</option>
-          </select>
-        </div>
+<button id="download" class="primary">Download</button>
 
-        <div class="dock-field dock-field-hidden" id="sectorWrap">
-          <label>Sektor</label>
-          <select id="sector">
-            <option value="6">6</option>
-            <option value="8" selected>8</option>
-            <option value="10">10</option>
-            <option value="12">12</option>
-            <option value="13">13</option>
-          </select>
-        </div>
+</div>
 
-        <div class="dock-actions">
-          <button id="openSliders" class="soft-btn" type="button">Farben anpassen</button>
-          <button id="download" class="primary" type="button">Download</button>
-        </div>
-      </div>
-    </section>
-  </main>
+<div class="right">
 
-  <div id="sliderSheet" class="slider-sheet">
-    <div class="slider-sheet__backdrop" id="sliderBackdrop"></div>
-    <div class="slider-sheet__panel">
-      <div class="slider-sheet__header">
-        <div class="slider-sheet__title">Farbintensität</div>
-        <button id="closeSliders" class="engine-btn" type="button">Schließen</button>
-      </div>
-      <div class="slider-sheet__body">
-        <div id="slidersMobile" class="sliders"></div>
-        <div class="hint">Tipp: Slider regeln Sättigung/Helligkeit je Ziffer.</div>
-      </div>
-    </div>
-  </div>
+<nav class="engine-nav">
+<button class="engine-btn active" data-engine="quadrat">Quadrat</button>
+<button class="engine-btn" data-engine="rund">Rund</button>
+<button class="engine-btn" data-engine="wabe">Wabe</button>
+</nav>
 
-  <script>
-    const state = {
-      engine: "quadrat",
-      mode: "geburtstag",
-      input: "15011987",
-      direction: "aussen",
-      sector: 8,
-      sliders: Array(10).fill(85),
-      isAdmin: false,
-      paperLook: true
-    };
+</div>
 
-    const params = new URLSearchParams(location.search);
-    if (params.get("access") === "milz_secret") state.isAdmin = true;
+</header>
 
-    const els = {
-      stage: document.getElementById("stage"),
-      frame: document.getElementById("engineFrame"),
-      loading: document.getElementById("loading"),
-      mode: document.getElementById("mode"),
-      input: document.getElementById("input"),
-      direction: document.getElementById("direction"),
-      sectorWrap: document.getElementById("sectorWrap"),
-      sector: document.getElementById("sector"),
-      download: document.getElementById("download"),
-      slidersMobile: document.getElementById("slidersMobile"),
-      openSliders: document.getElementById("openSliders"),
-      closeSliders: document.getElementById("closeSliders"),
-      sliderSheet: document.getElementById("sliderSheet"),
-      sliderBackdrop: document.getElementById("sliderBackdrop"),
-      codeOutput: document.getElementById("codeOutput"),
-      previewToggle: document.getElementById("previewToggle")
-    };
+<main class="app-main">
 
-    const charMap = {
-      A:1,J:1,S:1,Ä:1, B:2,K:2,T:2,Ö:2, C:3,L:3,U:3,Ü:3, D:4,M:4,V:4,ß:4,
-      E:5,N:5,W:5, F:6,O:6,X:6, G:7,P:7,Y:7, H:8,Q:8,Z:8, I:9,R:9
-    };
+<section id="stage" class="stage paper">
 
-    function ex(a,b){
-      const s = (a || 0) + (b || 0);
-      return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
-    }
+<div id="loading" class="loading">Engine lädt…</div>
 
-    function codeFromDate(str){
-      let raw = String(str || "").replace(/\D/g, "").split("").map(Number);
-      while(raw.length < 8) raw.push(0);
-      return raw.slice(0, 8);
-    }
+<iframe id="engineFrame" class="engine-frame"></iframe>
 
-    function codeFromText(text){
-      let arr = String(text || "")
-        .toUpperCase()
-        .replace(/[^A-ZÄÖÜß]/g, "")
-        .split("")
-        .map(c => charMap[c])
-        .filter(Boolean);
+</section>
 
-      if (arr.length === 0) arr = [9];
+</main>
 
-      while(arr.length > 8){
-        const next = [];
-        for(let i = 0; i < arr.length - 1; i++) next.push(ex(arr[i], arr[i + 1]));
-        arr = next;
-      }
-
-      while(arr.length < 8) arr.push(9);
-      return arr.slice(0, 8);
-    }
-
-    function updateCodeOutput(){
-      const code = state.mode === "text"
-        ? codeFromText(state.input)
-        : codeFromDate(state.input);
-
-      els.codeOutput.value = code.join("");
-    }
-
-    function showLoading() {
-      els.loading.style.display = "grid";
-      els.stage.classList.add("is-loading");
-    }
-
-    function hideLoading() {
-      els.loading.style.display = "none";
-      els.stage.classList.remove("is-loading");
-    }
-
-    function buildSlidersInto(containerEl) {
-      containerEl.innerHTML = "";
-      for (let i = 1; i <= 9; i++) {
-        const row = document.createElement("div");
-        row.className = "slider-row";
-
-        const dot = document.createElement("div");
-        dot.className = "dot";
-        dot.id = containerEl.id + "_dot" + i;
-
-        const label = document.createElement("div");
-        label.className = "digit";
-        label.textContent = String(i);
-
-        const input = document.createElement("input");
-        input.type = "range";
-        input.min = "20";
-        input.max = "100";
-        input.value = String(state.sliders[i] ?? 85);
-
-        input.addEventListener("input", () => {
-          state.sliders[i] = Number(input.value);
-          pushStateToEngine();
-        });
-
-        row.appendChild(dot);
-        row.appendChild(label);
-        row.appendChild(input);
-        containerEl.appendChild(row);
-      }
-    }
-
-    function buildSliders() {
-      buildSlidersInto(els.slidersMobile);
-    }
-
-    function setActiveEngineButton(engine) {
-      document.querySelectorAll(".form-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.engine === engine);
-      });
-    }
-
-    function updateConditionalFields() {
-      els.sectorWrap.classList.toggle("dock-field-hidden", state.engine !== "rund");
-    }
-
-    function applyPaperLook() {
-      els.stage.classList.toggle("paper", !!state.paperLook);
-      els.stage.classList.toggle("dark", !state.paperLook);
-      els.previewToggle.classList.toggle("active", !!state.paperLook);
-      els.previewToggle.textContent = state.paperLook ? "Druckvorschau" : "Bildschirm";
-    }
-
-    function loadEngine(engine) {
-      state.engine = engine;
-      setActiveEngineButton(engine);
-      updateConditionalFields();
-
-      showLoading();
-
-      const fallbackTimer = setTimeout(() => hideLoading(), 2500);
-
-      els.frame.onload = () => {
-        clearTimeout(fallbackTimer);
-        hideLoading();
-        pushStateToEngine();
-      };
-
-      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
-    }
-
-    function pushStateToEngine() {
-      try {
-        els.frame.contentWindow.postMessage({ type: "SET_STATE", payload: state }, "*");
-      } catch (_) {}
-    }
-
-    function requestExport() {
-      try {
-        els.frame.contentWindow.postMessage({ type: "EXPORT", payload: state }, "*");
-      } catch (_) {}
-    }
-
-    function openSheet(){
-      els.sliderSheet.classList.add("open");
-      document.body.classList.add("no-scroll");
-    }
-
-    function closeSheet(){
-      els.sliderSheet.classList.remove("open");
-      document.body.classList.remove("no-scroll");
-    }
-
-    window.addEventListener("message", (ev) => {
-      const msg = ev.data;
-      if (!msg || typeof msg !== "object") return;
-
-      if (msg.type === "READY") {
-        hideLoading();
-        pushStateToEngine();
-      }
-
-      if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
-        for (let i = 1; i <= 9; i++) {
-          const dot = document.getElementById("slidersMobile_dot" + i);
-          if (dot && msg.colors[i - 1]) dot.style.background = msg.colors[i - 1];
-        }
-      }
-    });
-
-    document.querySelectorAll(".form-btn").forEach(btn => {
-      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
-    });
-
-    els.mode.addEventListener("change", () => {
-      state.mode = els.mode.value;
-      updateCodeOutput();
-      pushStateToEngine();
-    });
-
-    els.input.addEventListener("input", () => {
-      state.input = els.input.value;
-      updateCodeOutput();
-      pushStateToEngine();
-    });
-
-    els.direction.addEventListener("change", () => {
-      state.direction = els.direction.value;
-      pushStateToEngine();
-    });
-
-    els.sector.addEventListener("change", () => {
-      state.sector = Number(els.sector.value);
-      pushStateToEngine();
-    });
-
-    els.download.addEventListener("click", requestExport);
-
-    els.previewToggle.addEventListener("click", () => {
-      state.paperLook = !state.paperLook;
-      applyPaperLook();
-      pushStateToEngine();
-    });
-
-    els.openSliders.addEventListener("click", openSheet);
-    els.closeSliders.addEventListener("click", closeSheet);
-    els.sliderBackdrop.addEventListener("click", closeSheet);
-
-    buildSliders();
-    updateCodeOutput();
-    applyPaperLook();
-    updateConditionalFields();
-    loadEngine("quadrat");
-  </script>
 </body>
 </html>

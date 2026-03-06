@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Lebenscode Mandala</title>
 
-  <link rel="stylesheet" href="app.css?v=1203" />
+  <link rel="stylesheet" href="app.css?v=1206" />
 </head>
 
 <body class="tool-body">
@@ -15,14 +15,14 @@
     </a>
   </header>
 
-  <main class="tool-layout">
-    <section class="tool-stage-wrap">
+  <main class="tool-main">
+    <section class="tool-stage-area">
       <section id="stage" class="stage paper tool-stage">
         <div id="loading" class="loading">Engine lädt…</div>
         <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
       </section>
 
-      <div class="preview-row">
+      <div class="tool-stage-meta">
         <button id="previewToggle" class="soft-btn active" type="button">Druckvorschau</button>
         <div class="preview-note">
           Druckvorschau – das Wasserzeichen wird beim Download entfernt.
@@ -30,77 +30,79 @@
       </div>
     </section>
 
-    <section class="tool-dock">
-      <div class="dock-row dock-row-1">
-        <div class="dock-field dock-form">
-          <label>Form</label>
-          <div class="form-switch">
-            <button class="form-btn active" data-engine="quadrat" type="button">Quadrat</button>
-            <button class="form-btn" data-engine="rund" type="button">Rund</button>
-            <button class="form-btn" data-engine="wabe" type="button">Wabe</button>
+    <aside class="tool-panel">
+      <div class="panel-card">
+        <div class="panel-row">
+          <div class="panel-field">
+            <label>Form</label>
+            <div class="form-switch">
+              <button class="form-btn active" data-engine="quadrat" type="button">Quadrat</button>
+              <button class="form-btn" data-engine="rund" type="button">Rund</button>
+              <button class="form-btn" data-engine="wabe" type="button">Wabe</button>
+            </div>
           </div>
         </div>
 
-        <div class="dock-field">
-          <label>Modus</label>
-          <select id="mode">
-            <option value="geburtstag">Geburtstag</option>
-            <option value="text">Text / Affirmation</option>
-          </select>
+        <div class="panel-row panel-grid-2">
+          <div class="panel-field">
+            <label>Modus</label>
+            <select id="mode">
+              <option value="geburtstag">Geburtstag</option>
+              <option value="text">Text / Affirmation</option>
+            </select>
+          </div>
+
+          <div class="panel-field panel-field-hidden" id="sectorWrap">
+            <label>Sektor</label>
+            <select id="sector">
+              <option value="6">6</option>
+              <option value="8" selected>8</option>
+              <option value="10">10</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+            </select>
+          </div>
         </div>
 
-        <div class="dock-field dock-input">
-          <label>Eingabe</label>
-          <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT" />
+        <div class="panel-row">
+          <div class="panel-field">
+            <label>Eingabe</label>
+            <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT" />
+          </div>
         </div>
 
-        <div class="dock-field dock-code">
-          <label>Code</label>
-          <input id="codeOutput" type="text" value="" readonly />
-        </div>
-      </div>
+        <div class="panel-row panel-grid-2">
+          <div class="panel-field">
+            <label>Code</label>
+            <input id="codeOutput" type="text" value="" readonly />
+          </div>
 
-      <div class="dock-row dock-row-2">
-        <div class="dock-field">
-          <label>Richtung</label>
-          <select id="direction">
-            <option value="aussen">Außen</option>
-            <option value="innen">Innen</option>
-          </select>
-        </div>
-
-        <div class="dock-field dock-field-hidden" id="sectorWrap">
-          <label>Sektor</label>
-          <select id="sector">
-            <option value="6">6</option>
-            <option value="8" selected>8</option>
-            <option value="10">10</option>
-            <option value="12">12</option>
-            <option value="13">13</option>
-          </select>
+          <div class="panel-field">
+            <label>Richtung</label>
+            <select id="direction">
+              <option value="aussen">Außen</option>
+              <option value="innen">Innen</option>
+            </select>
+          </div>
         </div>
 
-        <div class="dock-actions">
-          <button id="openSliders" class="soft-btn" type="button">Farben anpassen</button>
+        <div class="panel-row panel-actions">
+          <button id="toggleColors" class="soft-btn" type="button">Farben anpassen</button>
           <button id="download" class="primary" type="button">Download</button>
         </div>
-      </div>
-    </section>
-  </main>
 
-  <div id="sliderSheet" class="slider-sheet">
-    <div class="slider-sheet__backdrop" id="sliderBackdrop"></div>
-    <div class="slider-sheet__panel">
-      <div class="slider-sheet__header">
-        <div class="slider-sheet__title">Farbintensität</div>
-        <button id="closeSliders" class="engine-btn" type="button">Schließen</button>
+        <div id="colorsPanel" class="colors-panel is-collapsed">
+          <div class="colors-panel__head">
+            <div class="colors-panel__title">Farbintensität</div>
+            <button id="closeColors" class="engine-btn" type="button">Schließen</button>
+          </div>
+
+          <div id="slidersInline" class="sliders"></div>
+          <div class="hint">Tipp: Slider regeln Sättigung/Helligkeit je Ziffer.</div>
+        </div>
       </div>
-      <div class="slider-sheet__body">
-        <div id="slidersMobile" class="sliders"></div>
-        <div class="hint">Tipp: Slider regeln Sättigung/Helligkeit je Ziffer.</div>
-      </div>
-    </div>
-  </div>
+    </aside>
+  </main>
 
   <script>
     const state = {
@@ -127,13 +129,12 @@
       sectorWrap: document.getElementById("sectorWrap"),
       sector: document.getElementById("sector"),
       download: document.getElementById("download"),
-      slidersMobile: document.getElementById("slidersMobile"),
-      openSliders: document.getElementById("openSliders"),
-      closeSliders: document.getElementById("closeSliders"),
-      sliderSheet: document.getElementById("sliderSheet"),
-      sliderBackdrop: document.getElementById("sliderBackdrop"),
       codeOutput: document.getElementById("codeOutput"),
-      previewToggle: document.getElementById("previewToggle")
+      previewToggle: document.getElementById("previewToggle"),
+      slidersInline: document.getElementById("slidersInline"),
+      colorsPanel: document.getElementById("colorsPanel"),
+      toggleColors: document.getElementById("toggleColors"),
+      closeColors: document.getElementById("closeColors")
     };
 
     const charMap = {
@@ -223,7 +224,7 @@
     }
 
     function buildSliders() {
-      buildSlidersInto(els.slidersMobile);
+      buildSlidersInto(els.slidersInline);
     }
 
     function setActiveEngineButton(engine) {
@@ -233,7 +234,7 @@
     }
 
     function updateConditionalFields() {
-      els.sectorWrap.classList.toggle("dock-field-hidden", state.engine !== "rund");
+      els.sectorWrap.classList.toggle("panel-field-hidden", state.engine !== "rund");
     }
 
     function applyPaperLook() {
@@ -273,14 +274,12 @@
       } catch (_) {}
     }
 
-    function openSheet(){
-      els.sliderSheet.classList.add("open");
-      document.body.classList.add("no-scroll");
+    function openColors() {
+      els.colorsPanel.classList.remove("is-collapsed");
     }
 
-    function closeSheet(){
-      els.sliderSheet.classList.remove("open");
-      document.body.classList.remove("no-scroll");
+    function closeColors() {
+      els.colorsPanel.classList.add("is-collapsed");
     }
 
     window.addEventListener("message", (ev) => {
@@ -294,7 +293,7 @@
 
       if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
         for (let i = 1; i <= 9; i++) {
-          const dot = document.getElementById("slidersMobile_dot" + i);
+          const dot = document.getElementById("slidersInline_dot" + i);
           if (dot && msg.colors[i - 1]) dot.style.background = msg.colors[i - 1];
         }
       }
@@ -334,9 +333,13 @@
       pushStateToEngine();
     });
 
-    els.openSliders.addEventListener("click", openSheet);
-    els.closeSliders.addEventListener("click", closeSheet);
-    els.sliderBackdrop.addEventListener("click", closeSheet);
+    els.toggleColors.addEventListener("click", () => {
+      const isClosed = els.colorsPanel.classList.contains("is-collapsed");
+      if (isClosed) openColors();
+      else closeColors();
+    });
+
+    els.closeColors.addEventListener("click", closeColors);
 
     buildSliders();
     updateCodeOutput();

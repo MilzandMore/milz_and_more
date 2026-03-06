@@ -5,89 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Lebenscode Mandala</title>
 
- <link rel="stylesheet" href="app.css?v=1200">
+  <link rel="stylesheet" href="app.css?v=1203" />
 </head>
 
-<body>
-  <header class="app-header">
-
-    <div class="brand">
-      <a href="index.html" class="brand-link">
-        <img class="brand-logo" src="assets/Logo_gold.png" alt="Milz & More Logo" />
-        <div class="brand-text">
-          <div class="brand-title">Lebenscode Mandala</div>
-        </div>
-      </a>
-    </div>
-
-    <div class="controls">
-      <div class="field">
-        <label>Modus</label>
-        <select id="mode">
-          <option value="geburtstag">Geburtstag</option>
-          <option value="text">Text / Affirmation</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Eingabe</label>
-        <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT" />
-      </div>
-
-      <div class="field">
-        <label>Richtung</label>
-        <select id="direction">
-          <option value="aussen">Außen</option>
-          <option value="innen">Innen</option>
-        </select>
-      </div>
-
-      <div class="field" id="sectorWrap" style="display:none;">
-        <label>Sektor</label>
-        <select id="sector">
-          <option value="6">6</option>
-          <option value="8" selected>8</option>
-          <option value="10">10</option>
-          <option value="12">12</option>
-          <option value="13">13</option>
-        </select>
-      </div>
-
-      <button id="download" class="primary" type="button">Download</button>
-
-      <!-- Mobile Button: öffnet Slider Panel als Bottom Sheet -->
-      <button id="openSliders" class="engine-btn mobile-only" type="button">Farben</button>
-    </div>
-
-    <div class="right">
-      <label class="toggle">
-        <input id="paperToggle" type="checkbox" checked />
-      </label>
-
-      <nav class="engine-nav">
-        <button class="engine-btn active" data-engine="quadrat" type="button">Quadrat</button>
-        <button class="engine-btn" data-engine="rund" type="button">Rund</button>
-        <button class="engine-btn" data-engine="wabe" type="button">Wabe</button>
-      </nav>
-    </div>
-
+<body class="tool-body">
+  <header class="tool-header">
+    <a class="tool-brand" href="index.html" aria-label="Zurück zur Übersicht">
+      <img class="tool-brand-logo" src="assets/Logo_gold.png" alt="Milz & More" />
+    </a>
   </header>
 
-  <main class="app-main">
-    <!-- Desktop Sidebar bleibt -->
-    <aside class="slider-panel desktop-only" id="sliderPanelDesktop">
-      <div class="slider-title">Farbintensität</div>
-      <div id="sliders" class="sliders"></div>
-      <div class="hint">Tipp: Slider regeln Sättigung/Helligkeit je Ziffer.</div>
-    </aside>
+  <main class="tool-layout">
+    <section class="tool-stage-wrap">
+      <section id="stage" class="stage paper tool-stage">
+        <div id="loading" class="loading">Engine lädt…</div>
+        <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
+      </section>
 
-    <section id="stage" class="stage paper">
-      <div id="loading" class="loading">Engine lädt…</div>
-      <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
+      <div class="preview-row">
+        <button id="previewToggle" class="soft-btn active" type="button">Druckvorschau</button>
+        <div class="preview-note">
+          Druckvorschau – das Wasserzeichen wird beim Download entfernt.
+        </div>
+      </div>
+    </section>
+
+    <section class="tool-dock">
+      <div class="dock-row dock-row-1">
+        <div class="dock-field dock-form">
+          <label>Form</label>
+          <div class="form-switch">
+            <button class="form-btn active" data-engine="quadrat" type="button">Quadrat</button>
+            <button class="form-btn" data-engine="rund" type="button">Rund</button>
+            <button class="form-btn" data-engine="wabe" type="button">Wabe</button>
+          </div>
+        </div>
+
+        <div class="dock-field">
+          <label>Modus</label>
+          <select id="mode">
+            <option value="geburtstag">Geburtstag</option>
+            <option value="text">Text / Affirmation</option>
+          </select>
+        </div>
+
+        <div class="dock-field dock-input">
+          <label>Eingabe</label>
+          <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT" />
+        </div>
+
+        <div class="dock-field dock-code">
+          <label>Code</label>
+          <input id="codeOutput" type="text" value="" readonly />
+        </div>
+      </div>
+
+      <div class="dock-row dock-row-2">
+        <div class="dock-field">
+          <label>Richtung</label>
+          <select id="direction">
+            <option value="aussen">Außen</option>
+            <option value="innen">Innen</option>
+          </select>
+        </div>
+
+        <div class="dock-field dock-field-hidden" id="sectorWrap">
+          <label>Sektor</label>
+          <select id="sector">
+            <option value="6">6</option>
+            <option value="8" selected>8</option>
+            <option value="10">10</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+          </select>
+        </div>
+
+        <div class="dock-actions">
+          <button id="openSliders" class="soft-btn" type="button">Farben anpassen</button>
+          <button id="download" class="primary" type="button">Download</button>
+        </div>
+      </div>
     </section>
   </main>
 
-  <!-- ✅ Mobile Bottom Sheet für Slider -->
   <div id="sliderSheet" class="slider-sheet">
     <div class="slider-sheet__backdrop" id="sliderBackdrop"></div>
     <div class="slider-sheet__panel">
@@ -127,19 +127,64 @@
       sectorWrap: document.getElementById("sectorWrap"),
       sector: document.getElementById("sector"),
       download: document.getElementById("download"),
-      sliders: document.getElementById("sliders"),
       slidersMobile: document.getElementById("slidersMobile"),
-      paperToggle: document.getElementById("paperToggle"),
       openSliders: document.getElementById("openSliders"),
       closeSliders: document.getElementById("closeSliders"),
       sliderSheet: document.getElementById("sliderSheet"),
-      sliderBackdrop: document.getElementById("sliderBackdrop")
+      sliderBackdrop: document.getElementById("sliderBackdrop"),
+      codeOutput: document.getElementById("codeOutput"),
+      previewToggle: document.getElementById("previewToggle")
     };
+
+    const charMap = {
+      A:1,J:1,S:1,Ä:1, B:2,K:2,T:2,Ö:2, C:3,L:3,U:3,Ü:3, D:4,M:4,V:4,ß:4,
+      E:5,N:5,W:5, F:6,O:6,X:6, G:7,P:7,Y:7, H:8,Q:8,Z:8, I:9,R:9
+    };
+
+    function ex(a,b){
+      const s = (a || 0) + (b || 0);
+      return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
+    }
+
+    function codeFromDate(str){
+      let raw = String(str || "").replace(/\D/g, "").split("").map(Number);
+      while(raw.length < 8) raw.push(0);
+      return raw.slice(0, 8);
+    }
+
+    function codeFromText(text){
+      let arr = String(text || "")
+        .toUpperCase()
+        .replace(/[^A-ZÄÖÜß]/g, "")
+        .split("")
+        .map(c => charMap[c])
+        .filter(Boolean);
+
+      if (arr.length === 0) arr = [9];
+
+      while(arr.length > 8){
+        const next = [];
+        for(let i = 0; i < arr.length - 1; i++) next.push(ex(arr[i], arr[i + 1]));
+        arr = next;
+      }
+
+      while(arr.length < 8) arr.push(9);
+      return arr.slice(0, 8);
+    }
+
+    function updateCodeOutput(){
+      const code = state.mode === "text"
+        ? codeFromText(state.input)
+        : codeFromDate(state.input);
+
+      els.codeOutput.value = code.join("");
+    }
 
     function showLoading() {
       els.loading.style.display = "grid";
       els.stage.classList.add("is-loading");
     }
+
     function hideLoading() {
       els.loading.style.display = "none";
       els.stage.classList.remove("is-loading");
@@ -164,6 +209,7 @@
         input.min = "20";
         input.max = "100";
         input.value = String(state.sliders[i] ?? 85);
+
         input.addEventListener("input", () => {
           state.sliders[i] = Number(input.value);
           pushStateToEngine();
@@ -177,24 +223,24 @@
     }
 
     function buildSliders() {
-      buildSlidersInto(els.sliders);
       buildSlidersInto(els.slidersMobile);
     }
 
     function setActiveEngineButton(engine) {
-      document.querySelectorAll(".engine-btn").forEach(btn => {
-        if (!btn.dataset.engine) return;
+      document.querySelectorAll(".form-btn").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.engine === engine);
       });
     }
 
     function updateConditionalFields() {
-      els.sectorWrap.style.display = (state.engine === "rund") ? "block" : "none";
+      els.sectorWrap.classList.toggle("dock-field-hidden", state.engine !== "rund");
     }
 
     function applyPaperLook() {
       els.stage.classList.toggle("paper", !!state.paperLook);
       els.stage.classList.toggle("dark", !state.paperLook);
+      els.previewToggle.classList.toggle("active", !!state.paperLook);
+      els.previewToggle.textContent = state.paperLook ? "Druckvorschau" : "Bildschirm";
     }
 
     function loadEngine(engine) {
@@ -216,17 +262,22 @@
     }
 
     function pushStateToEngine() {
-      try { els.frame.contentWindow.postMessage({ type: "SET_STATE", payload: state }, "*"); } catch (_) {}
+      try {
+        els.frame.contentWindow.postMessage({ type: "SET_STATE", payload: state }, "*");
+      } catch (_) {}
     }
 
     function requestExport() {
-      try { els.frame.contentWindow.postMessage({ type: "EXPORT", payload: state }, "*"); } catch (_) {}
+      try {
+        els.frame.contentWindow.postMessage({ type: "EXPORT", payload: state }, "*");
+      } catch (_) {}
     }
 
     function openSheet(){
       els.sliderSheet.classList.add("open");
       document.body.classList.add("no-scroll");
     }
+
     function closeSheet(){
       els.sliderSheet.classList.remove("open");
       document.body.classList.remove("no-scroll");
@@ -242,29 +293,43 @@
       }
 
       if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
-        // Desktop + Mobile Dots aktualisieren
         for (let i = 1; i <= 9; i++) {
-          const dot1 = document.getElementById("sliders_dot" + i);
-          const dot2 = document.getElementById("slidersMobile_dot" + i);
-          if (dot1 && msg.colors[i-1]) dot1.style.background = msg.colors[i-1];
-          if (dot2 && msg.colors[i-1]) dot2.style.background = msg.colors[i-1];
+          const dot = document.getElementById("slidersMobile_dot" + i);
+          if (dot && msg.colors[i - 1]) dot.style.background = msg.colors[i - 1];
         }
       }
     });
 
-    document.querySelectorAll(".engine-btn").forEach(btn => {
-      if (!btn.dataset.engine) return;
+    document.querySelectorAll(".form-btn").forEach(btn => {
       btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
     });
 
-    els.mode.addEventListener("change", () => { state.mode = els.mode.value; pushStateToEngine(); });
-    els.input.addEventListener("input",  () => { state.input = els.input.value; pushStateToEngine(); });
-    els.direction.addEventListener("change", () => { state.direction = els.direction.value; pushStateToEngine(); });
-    els.sector.addEventListener("change", () => { state.sector = Number(els.sector.value); pushStateToEngine(); });
+    els.mode.addEventListener("change", () => {
+      state.mode = els.mode.value;
+      updateCodeOutput();
+      pushStateToEngine();
+    });
+
+    els.input.addEventListener("input", () => {
+      state.input = els.input.value;
+      updateCodeOutput();
+      pushStateToEngine();
+    });
+
+    els.direction.addEventListener("change", () => {
+      state.direction = els.direction.value;
+      pushStateToEngine();
+    });
+
+    els.sector.addEventListener("change", () => {
+      state.sector = Number(els.sector.value);
+      pushStateToEngine();
+    });
+
     els.download.addEventListener("click", requestExport);
 
-    els.paperToggle.addEventListener("change", () => {
-      state.paperLook = els.paperToggle.checked;
+    els.previewToggle.addEventListener("click", () => {
+      state.paperLook = !state.paperLook;
       applyPaperLook();
       pushStateToEngine();
     });
@@ -274,9 +339,10 @@
     els.sliderBackdrop.addEventListener("click", closeSheet);
 
     buildSliders();
+    updateCodeOutput();
     applyPaperLook();
+    updateConditionalFields();
     loadEngine("quadrat");
   </script>
 </body>
 </html>
-

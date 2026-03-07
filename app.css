@@ -25,7 +25,6 @@
 *{ box-sizing:border-box; }
 
 html,body{
-  outline: 8px solid red !important;
   height:100%;
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;

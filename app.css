@@ -308,77 +308,190 @@ html,body{
 .stage.is-loading .engine-frame{ opacity: 0.92; }
 
 /* =========================
-   MOBILE (<= 900px) — App sauber
+   MOBILE (<= 900px) — APP FIX
    ========================= */
 @media (max-width: 900px){
 
   html, body{
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     height: auto;
     -webkit-overflow-scrolling: touch;
   }
 
   .app-header{
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
     height: auto;
-    padding: 10px 12px;
+    padding: 10px 12px 8px;
     gap: 10px;
     flex-wrap: wrap;
-    align-items: flex-end;
+    align-items: flex-start;
   }
 
   .brand{
+    width: 100%;
+    flex: 0 0 100%;
     min-width: 0;
-    flex: 1 1 auto;
+    margin-bottom: 2px;
+  }
+
+  .brand-link{
+    gap: 8px;
   }
 
   .brand-logo{
-    height: 46px;        /* ✅ mobil sichtbar */
+    height: 30px;
     width: auto;
   }
 
-  .brand-title{
+  .right{
+    order: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+
+  .toggle{
+    flex: 0 0 52px;
+    width: 52px;
+    height: 48px;
+    padding: 0;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+  }
+
+  .toggle input{
+    transform: scale(1.05);
+  }
+
+  .engine-nav{
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .engine-btn{
+    height: 46px;
+    padding: 0 10px;
+    border-radius: 16px;
     font-size: 14px;
   }
 
-  .right{
-    flex: 0 0 auto;
-    gap: 10px;
-  }
-
   .controls{
-    order: 3;
+    order: 2;
     width: 100%;
     min-width: 0;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
-    align-items: flex-end;
+    align-items: end;
   }
 
-  .field{ flex: 1 1 150px; min-width: 0; }
-  .primary{ flex: 1 1 150px; }
+  .field{
+    min-width: 0;
+    gap: 5px;
+  }
 
-  .mobile-only{ display: inline-flex; }
-  .desktop-only{ display: none !important; }
+  .field label{
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+
+  .field input,
+  .field select{
+    height: 46px;
+    padding: 0 12px;
+    border-radius: 16px;
+    font-size: 15px;
+  }
+
+  .primary{
+    height: 46px;
+    width: 100%;
+    padding: 0 14px;
+    border-radius: 16px;
+    font-size: 14px;
+  }
+
+  .mobile-only{
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .desktop-only{
+    display: none !important;
+  }
+
+  /* Reihenfolge */
+  .controls > .field:nth-of-type(1){ order: 1; } /* Modus */
+  .controls > .field:nth-of-type(2){ order: 2; } /* Eingabe */
+  .controls > .field:nth-of-type(3){ order: 3; } /* Richtung */
+  #sectorWrap{ order: 4; }
+  #download{ order: 5; }
+  #openSliders{ order: 6; }
 
   .app-main{
     position: relative;
     top: 0;
-    grid-template-columns: 1fr;
-    padding: 12px;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    display: block;
+    padding: 8px 12px 18px;
+  }
+
+  .slider-panel{
+    display: none !important;
   }
 
   .stage{
-    min-height: 64vh;
-    border-radius: 22px;
+    margin-top: 10px;
+    min-height: 56vh;
+    border-radius: 24px;
   }
 
   .engine-frame{
-    height: 64vh;
-    min-height: 420px;
+    height: 56vh;
+    min-height: 440px;
   }
 }
 
+/* Sehr kleine Geräte */
+@media (max-width: 560px){
+  .controls{
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .engine-btn,
+  .primary,
+  .field input,
+  .field select{
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .brand-logo{
+    height: 28px;
+  }
+
+  .stage{
+    min-height: 52vh;
+  }
+
+  .engine-frame{
+    height: 52vh;
+    min-height: 400px;
+  }
+}
 /* =========================
    Mobile Bottom Sheet (Farben)
    ========================= */

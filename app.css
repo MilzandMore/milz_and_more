@@ -671,4 +671,65 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
 .brand-sub{
   display:none;
 }
+/* =====================================
+   MOBILE UI SCALE FIX
+   ===================================== */
 
+@media (max-width: 900px){
+
+  /* Logo */
+  .brand-logo{
+    height:26px;
+  }
+
+  /* Formen Buttons */
+  .engine-btn{
+    height:36px;
+    padding:0 10px;
+    font-size:13px;
+    border-radius:12px;
+  }
+
+  /* Checkbox */
+  .toggle{
+    width:36px;
+    height:36px;
+  }
+
+  .toggle input{
+    transform:scale(.9);
+  }
+
+  /* Dropdown + Eingabe */
+  .field input,
+  .field select{
+    height:38px;
+    font-size:14px;
+    border-radius:12px;
+  }
+
+  /* Labels */
+  .field label{
+    font-size:10px;
+    letter-spacing:.05em;
+  }
+
+  /* Download Button */
+  .primary{
+    height:38px;
+    font-size:14px;
+    border-radius:12px;
+  }
+
+  /* Farben Button */
+  #openSliders{
+    height:38px;
+    font-size:14px;
+  }
+
+  /* Abstand unter UI */
+  .app-header{
+    padding-bottom:8px;
+  }
+
+}

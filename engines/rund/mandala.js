@@ -49,7 +49,7 @@ var colorSeed = 1;
 var isAdmin = false;
 
 function preload() {
-  logoImg = loadImage('logo.png');
+  logoImg = null;
 }
 
 function setup() {

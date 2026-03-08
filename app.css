@@ -41,7 +41,6 @@ html,body{
 /* Helpers */
 .mobile-only{ display:none; }
 .desktop-only{ display:block; }
-.no-scroll{ overflow:hidden !important; }
 
 /* =========================
    TOOL / APP (Lebenscode)

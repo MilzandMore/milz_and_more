@@ -832,3 +832,12 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     font-size: 8px;
   }
 }
+
+/* Desktop Code Feld */
+@media (min-width: 901px){
+
+  .field-code{
+    flex: 0 0 130px;
+  }
+
+}

@@ -70,95 +70,28 @@ window.addEventListener("message", (ev) => {
 });
 
 // --------- p5 ----------
-  if(msg.type==="EXPORT"){
-    if(msg.payload){ APP = msg.payload; isAdmin = !!APP.isAdmin; }
-    exportHighRes();
-  }
-});
-
 function preload() {
   const p = (APP && APP.exportLogo) ? APP.exportLogo : "../../assets/Logo_black.png";
   logoImg = loadImage(
     p,
     () => {},
-    () => { logoImg = loadImage("../../assets/Logo.png"); }
+    () => {
+      logoImg = loadImage(
+        "../../assets/Logo.png",
+        () => {},
+        () => { logoImg = null; }
+      );
+    }
   );
 }
 
-function setup(){
+function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
   noLoop();
   sendReady();
   redraw();
 }
-
-function draw(){
-  background(12);
-
-  const rawVal = String(APP.input || "").trim();
-  if(rawVal === "" || (APP.mode==="geburtstag" && rawVal.replace(/\D/g,"").length===0)) return;
-
-  const sector = buildSector();
-  const currentColors = getColorMatrix(colorSeed);
-
-  sendColors(currentColors);
-
-  push();
-  const isMobile = windowWidth < 600;
-  const centerY = isMobile ? height/2 - 10 : height/2 + 10;
-  const centerX = width/2;
-  translate(centerX, centerY);
-
-  const scaleFactor = (min(width, height) / 900) * (isMobile ? 0.85 : 0.95);
-  scale(scaleFactor);
-
-  const sc = int(APP.sector || 8);
-  const angle = TWO_PI / sc;
-  for(let i=0;i<sc;i++){
-    push();
-    rotate(i*angle);
-    drawSector(sector, currentColors);
-    pop();
-  }
-  pop();
-}
-
-/* =========================================================
-   0er-Felder immer weiß + Linien überall sichtbar
-   ========================================================= */
-function drawSector(m, colors, target){
-  const ctx = target || window;
-  const step = 20;
-  const sc = int(APP.sector || 8);
-  const angle = TWO_PI / sc;
-  const h = tan(angle/2) * step;
-
-  // Linien aktiv
-  ctx.stroke(0, 0, 0, 35);
-  ctx.strokeWeight(0.6);
-
-  for(let r=0;r<m.length;r++){
-    for(let c=0;c<=r;c++){
-      const v = m[r][c];
-      const x = r*step;
-      const y = (c - r/2) * h * 2;
-
-      if(v >= 1 && v <= 9){
-        const baseCol = color(colors[v-1]);
-        const sVal = (APP.sliders && APP.sliders[v]) ? APP.sliders[v] : 85;
-
-        ctx.fill(
-          hue(baseCol),
-          map(sVal, 20, 100, 15, saturation(baseCol)),
-          map(sVal, 20, 100, 98, brightness(baseCol))
-        );
-      } else {
-        // 0er immer weiß
-        ctx.fill(0, 0, 100);
-      }
-
-
 
 function draw() {
   background(12);
@@ -235,6 +168,7 @@ function drawSector(m, colors, target) {
   }
 }
 
+// --------- EXPORT ----------
 function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
@@ -290,6 +224,7 @@ function exportHighRes() {
 
   save(pg, "Milz&More_Rund.png");
 }
+
 // --------- RICHTIGE RUND-LOGIK ----------
 function buildSector() {
   var n = 16;

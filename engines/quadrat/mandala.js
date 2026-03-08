@@ -198,7 +198,7 @@ async function exportHighRes() {
     const yShift = -200;
 
     for (let x = -100; x < exportW + 400; x += 500) {
-      for (let y = -800; y < exportH + 400; y += 500) {
+      for (let y = -700; y < exportH + 400; y += 500) {
         pg.image(exportLogo, x, y + yShift, wWidth, wHeight);
       }
     }

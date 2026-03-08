@@ -731,3 +731,146 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
   }
 
 }
+
+/* =====================================
+   MOBILE FEINSCHLIFF FINAL
+   ===================================== */
+@media (max-width: 900px){
+
+  .app-header{
+    padding: 10px 12px 8px !important;
+    gap: 8px !important;
+  }
+
+  .brand{
+    width: 100% !important;
+    flex: 0 0 100% !important;
+    margin-bottom: 2px !important;
+  }
+
+  .brand-logo{
+    height: 30px !important;
+    width: auto !important;
+  }
+
+  .right{
+    width: 100% !important;
+    order: 1 !important;
+    gap: 8px !important;
+    align-items: center !important;
+  }
+
+  .toggle{
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    padding: 0 !important;
+    border-radius: 14px !important;
+  }
+
+  .toggle input{
+    transform: scale(0.9) !important;
+  }
+
+  .engine-nav{
+    flex: 1 1 auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .engine-btn{
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 10px !important;
+    font-size: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  .controls{
+    width: 100% !important;
+    order: 2 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    align-items: end !important;
+  }
+
+  .field{
+    min-width: 0 !important;
+    gap: 4px !important;
+  }
+
+  .field label{
+    font-size: 10px !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.1 !important;
+  }
+
+  .field input,
+  .field select{
+    height: 44px !important;
+    min-height: 44px !important;
+    font-size: 14px !important;
+    padding: 0 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .primary{
+    height: 44px !important;
+    min-height: 44px !important;
+    font-size: 14px !important;
+    padding: 0 14px !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+  }
+
+  #openSliders{
+    height: 44px !important;
+    min-height: 44px !important;
+    font-size: 14px !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+  }
+
+  .app-main{
+    padding: 8px 12px 18px !important;
+  }
+
+  .stage{
+    margin-top: 8px !important;
+    border-radius: 24px !important;
+  }
+}
+
+@media (max-width: 560px){
+
+  .brand-logo{
+    height: 34px !important;
+  }
+
+  .engine-btn{
+    height: 42px !important;
+    min-height: 42px !important;
+    font-size: 12px !important;
+  }
+
+  .toggle{
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+  }
+
+  .field input,
+  .field select,
+  .primary,
+  #openSliders{
+    height: 42px !important;
+    min-height: 42px !important;
+    font-size: 13px !important;
+  }
+
+  .field label{
+    font-size: 9px !important;
+  }
+}

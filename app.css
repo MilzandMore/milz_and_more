@@ -535,20 +535,20 @@ html,body{
     flex: initial;
   }
 
-  .field-code input{
-    width: 10ch;
-    min-width: 10ch;
-    max-width: 10ch;
-    font-size: 12px;
-    letter-spacing: 0.03em;
-    padding: 0 6px;
-  }
+ .field-code input{
+  width: 11ch;
+  min-width: 11ch;
+  max-width: 11ch;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  padding: 0 6px;
+}
 
-  #sectorWrap{
-    min-width: 72px;
-    max-width: 72px;
-    flex: initial;
-  }
+#sectorWrap{
+  min-width: 60px;
+  max-width: 60px;
+  flex: initial;
+}
 
   .primary{
     height: 36px;
@@ -638,16 +638,16 @@ html,body{
   }
 
   .field-code input{
-    width: 10ch;
-    min-width: 10ch;
-    max-width: 10ch;
-    font-size: 11px;
-  }
+  width: 11ch;
+  min-width: 11ch;
+  max-width: 11ch;
+  font-size: 11px;
+}
 
-  #sectorWrap{
-    min-width: 68px;
-    max-width: 68px;
-  }
+#sectorWrap{
+  min-width: 56px;
+  max-width: 56px;
+}
 
   .field label{
     font-size: 8px;

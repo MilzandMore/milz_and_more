@@ -356,25 +356,29 @@
         pushStateToEngine();
       }
 
-      if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
-        for (let i = 1; i <= 9; i++) {
-          const color = msg.colors[i - 1];
-          const dotDesktop = document.getElementById("sliders_dot" + i);
-          const dotMobile = document.getElementById("slidersMobile_dot" + i);
+     if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
+  for (let i = 1; i <= 9; i++) {
+    const color = msg.colors[i - 1];
+    const dotDesktop = document.getElementById("sliders_dot" + i);
+    const dotMobile = document.getElementById("slidersMobile_dot" + i);
 
-          if (dotDesktop && color) dotDesktop.style.background = color;
-          if (dotMobile && color) dotMobile.style.background = color;
+    if (dotDesktop && color) dotDesktop.style.background = color;
+    if (dotMobile && color) dotMobile.style.background = color;
 
-          const sliderInputs = document.querySelectorAll(`.slider-row input[type="range"][data-digit="${i}"]`);
-          sliderInputs.forEach(input => {
-            if (color) {
-              input.style.setProperty("--accent", color);
-            }
-            setSliderVisual(input);
-          });
-        }
+    const sliderRows = document.querySelectorAll(".slider-row");
+    sliderRows.forEach(row => {
+      const digitEl = row.querySelector(".digit");
+      const inputEl = row.querySelector('input[type="range"]');
+      const digit = Number(inputEl?.dataset?.digit || 0);
+
+      if (digit === i && color) {
+        if (digitEl) digitEl.style.color = color;
+        if (inputEl) inputEl.style.setProperty("--accent", color);
+        if (inputEl) setSliderVisual(inputEl);
       }
     });
+  }
+}
 
     document.querySelectorAll(".engine-btn").forEach(btn => {
       if (!btn.dataset.engine) return;

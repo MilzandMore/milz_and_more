@@ -123,32 +123,33 @@ html,body{
   color: rgba(238,243,251,0.45);
 }
 
-/* Code-Feld */
 .field-code{
-  flex: 0 0 128px;
-  min-width: 128px;
+  flex: 0 0 140px;
+  min-width: 140px;
+  max-width: 140px;
 }
 
 .field-code input{
-  width: 10ch;
-  min-width: 10ch;
-  max-width: 10ch;
+  width: 11ch;
+  min-width: 11ch;
+  max-width: 11ch;
   text-align: center;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   font-weight: 900;
-  padding: 0 8px;
+  padding: 0 6px;
 }
 
-/* Sektor kompakter */
 #sectorWrap{
-  min-width: 84px;
-  max-width: 84px;
-  flex: 0 0 84px;
+  min-width: 68px;
+  max-width: 68px;
+  flex: 0 0 68px;
 }
 
 #sector{
   width: 100%;
+  padding-left: 10px;
+  padding-right: 26px;
 }
 
 .primary{
@@ -271,7 +272,7 @@ html,body{
 
 .digit{
   font-weight: 950;
-  color: rgba(238,243,251,0.84);
+  color: var(--accent, #d8b45a);
   font-size: 12px;
 }
 
@@ -285,7 +286,7 @@ html,body{
 /* Slider Design */
 .slider-row input[type="range"]{
   --val: 85%;
-  --accent: #4cc9ff;
+  --accent: #d8b45a;
 
   -webkit-appearance: none;
   appearance: none;
@@ -297,8 +298,8 @@ html,body{
     90deg,
     var(--accent) 0%,
     var(--accent) var(--val),
-    rgba(255,255,255,0.25) var(--val),
-    rgba(255,255,255,0.25) 100%
+    rgba(255,255,255,0.20) var(--val),
+    rgba(255,255,255,0.20) 100%
   );
 }
 
@@ -308,8 +309,8 @@ html,body{
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid rgba(0,0,0,0.35);
+  background: var(--accent);
+  border: 2px solid rgba(7,9,14,0.85);
   box-shadow: 0 2px 10px rgba(0,0,0,0.35);
   cursor: pointer;
 }
@@ -318,8 +319,8 @@ html,body{
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #ffffff;
-  border: none;
+  background: var(--accent);
+  border: 2px solid rgba(7,9,14,0.85);
   box-shadow: 0 2px 10px rgba(0,0,0,0.35);
   cursor: pointer;
 }
@@ -327,9 +328,8 @@ html,body{
 .slider-row input[type="range"]::-moz-range-track{
   height: 6px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.20);
 }
-
 .stage{
   position:relative;
   border-radius: 18px;

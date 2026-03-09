@@ -102,8 +102,9 @@
   <script>
     const state = {
       engine: "quadrat",
-      mode: "geburtstag",
-      input: "15011987",
+      mode: "geburtstag",          // UI-Modus
+      input: "15011987",           // rohe Eingabe aus dem Feld
+      computedCode: "15011987",    // fertiger 8-stelliger Code für Engine/Export
       direction: "aussen",
       sector: 8,
       sliders: Array(10).fill(85),
@@ -163,6 +164,33 @@
       return arr.slice(0, 8);
     }
 
+    function getComputedCodeArray() {
+      return state.mode === "text"
+        ? codeFromText(state.input)
+        : codeFromDate(state.input);
+    }
+
+    function getComputedCodeString() {
+      return getComputedCodeArray().join("");
+    }
+
+    function syncComputedCode() {
+      state.computedCode = getComputedCodeString();
+      if (els.codeOutput) {
+        els.codeOutput.value = state.computedCode;
+      }
+    }
+
+    function getEnginePayloadState() {
+      syncComputedCode();
+
+      return {
+        ...state,
+        mode: "geburtstag",
+        input: state.computedCode
+      };
+    }
+
     const els = {
       stage: document.getElementById("stage"),
       frame: document.getElementById("engineFrame"),
@@ -184,11 +212,7 @@
     };
 
     function updateCodeOutput() {
-      const code = state.mode === "text"
-        ? codeFromText(state.input)
-        : codeFromDate(state.input);
-
-      els.codeOutput.value = code.join("");
+      syncComputedCode();
     }
 
     function showLoading() {
@@ -278,8 +302,10 @@
 
     function pushStateToEngine() {
       try {
+        const enginePayload = getEnginePayloadState();
+
         els.frame.contentWindow.postMessage(
-          { type: "SET_STATE", payload: state },
+          { type: "SET_STATE", payload: enginePayload },
           "*"
         );
       } catch (_) {}
@@ -287,8 +313,10 @@
 
     function requestExport() {
       try {
+        const enginePayload = getEnginePayloadState();
+
         els.frame.contentWindow.postMessage(
-          { type: "EXPORT", payload: state },
+          { type: "EXPORT", payload: enginePayload },
           "*"
         );
       } catch (_) {}

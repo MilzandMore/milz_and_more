@@ -678,82 +678,112 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
   display:none;
 }
 /* =====================================
-   MOBILE UI SCALE FIX
+   FINAL UI POLISH
    ===================================== */
 
-@media (max-width: 900px){
+/* Code-Feld allgemein kompakter */
+.field-code{
+  min-width: unset;
+}
 
-  /* Logo */
-  .brand-logo{
-    height:26px;
-  }
+.field-code input{
+  width: 8ch;
+  min-width: 8ch;
+  max-width: 8ch;
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.08em;
+  font-weight: 900;
+  padding: 0 8px;
+}
 
-  /* Formen Buttons */
-  .engine-btn{
-    height:36px;
-    padding:0 10px;
-    font-size:13px;
-    border-radius:12px;
-  }
+/* Desktop: Top-Bar etwas ruhiger */
+@media (min-width: 901px){
 
-  /* Checkbox */
-  .toggle{
-    width:36px;
-    height:36px;
-  }
-
-  .toggle input{
-    transform:scale(.9);
-  }
-
-  /* Dropdown + Eingabe */
-  .field input,
-  .field select{
-    height:38px;
-    font-size:14px;
-    border-radius:12px;
-  }
-
-  /* Labels */
-  .field label{
-    font-size:10px;
-    letter-spacing:.05em;
-  }
-
-  /* Download Button */
-  .primary{
-    height:38px;
-    font-size:14px;
-    border-radius:12px;
-  }
-
-  /* Farben Button */
-  #openSliders{
-    height:38px;
-    font-size:14px;
-  }
-
-  /* Abstand unter UI */
   .app-header{
-    padding-bottom:8px;
+    height: 84px;
+    padding: 10px 16px;
+    align-items: center;
   }
 
+  .app-main{
+    top: 84px;
+  }
+
+  .brand-logo{
+    height: 58px;
+  }
+
+  .controls{
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: nowrap;
+  }
+
+  .field{
+    min-width: 140px;
+  }
+
+  .field-code{
+    flex: 0 0 96px;
+    min-width: 96px;
+  }
+
+  .field input,
+  .field select,
+  .primary,
+  .engine-btn{
+    height: 38px;
+  }
 }
 
 /* =====================================
-   MOBILE FINAL – Logo größer, Buttons kleiner, Code-Feld
+   MOBILE FINAL
    ===================================== */
-
-.field-code input{
-  letter-spacing: 0.12em;
-  font-weight: 900;
-}
-
 @media (max-width: 900px){
 
+  html, body{
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-header{
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    padding: max(10px, env(safe-area-inset-top)) 12px 10px;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .brand{
+    width: 100%;
+    flex: 0 0 100%;
+    min-width: 0;
+    margin-bottom: 2px;
+  }
+
+  .brand-link{
+    gap: 8px;
+  }
+
   .brand-logo{
-    height: 42px;
+    height: 40px;
     width: auto;
+  }
+
+  .right{
+    order: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
   }
 
   .toggle{
@@ -763,10 +793,19 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     min-width: 36px;
     padding: 0;
     border-radius: 11px;
+    display: grid;
+    place-items: center;
   }
 
   .toggle input{
     transform: scale(0.9);
+  }
+
+  .engine-nav{
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
 
   .engine-btn{
@@ -775,6 +814,26 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     padding: 0 8px;
     border-radius: 11px;
     font-size: 11px;
+  }
+
+  .controls{
+    order: 2;
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: end;
+  }
+
+  .field{
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .field label{
+    font-size: 9px;
+    letter-spacing: 0.04em;
   }
 
   .field input,
@@ -786,9 +845,13 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     font-size: 12px;
   }
 
-  .field label{
-    font-size: 9px;
-    letter-spacing: 0.04em;
+  .field-code input{
+    width: 8ch;
+    min-width: 8ch;
+    max-width: 8ch;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    padding: 0 6px;
   }
 
   .primary{
@@ -807,12 +870,56 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     font-size: 12px;
     border-radius: 11px;
   }
+
+  .mobile-only{
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .desktop-only{
+    display: none !important;
+  }
+
+  /* Reihenfolge */
+  .controls > .field:nth-of-type(1){ order: 1; } /* Modus */
+  .controls > .field:nth-of-type(2){ order: 2; } /* Eingabe */
+  .controls > .field:nth-of-type(3){ order: 3; } /* Code */
+  #sectorWrap{ order: 4; }
+  #download{ order: 5; }
+  #openSliders{ order: 6; }
+
+  .app-main{
+    position: relative;
+    top: 0;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    display: block;
+    padding: 8px 12px 18px;
+  }
+
+  .slider-panel{
+    display: none !important;
+  }
+
+  .stage{
+    margin-top: 10px;
+    min-height: 56vh;
+    border-radius: 24px;
+  }
+
+  .engine-frame{
+    height: 56vh;
+    min-height: 440px;
+  }
 }
 
+/* Sehr kleine Geräte */
 @media (max-width: 560px){
 
   .brand-logo{
-    height: 44px;
+    height: 42px;
   }
 
   .engine-btn{
@@ -836,16 +943,23 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     font-size: 11px;
   }
 
+  .field-code input{
+    width: 8ch;
+    min-width: 8ch;
+    max-width: 8ch;
+    font-size: 11px;
+  }
+
   .field label{
     font-size: 8px;
   }
-}
 
-/* Desktop Code Feld */
-@media (min-width: 901px){
-
-  .field-code{
-    flex: 0 0 130px;
+  .stage{
+    min-height: 52vh;
   }
 
+  .engine-frame{
+    height: 52vh;
+    min-height: 400px;
+  }
 }

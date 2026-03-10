@@ -99,187 +99,338 @@
     </div>
   </div>
 
-  <script>
-    const state = {
-      engine: "quadrat",
-      mode: "geburtstag",
-      input: "15011987",
-      computedCode: "15011987",
-      direction: "aussen",
-      sector: 8,
-      sliders: Array(10).fill(85),
-      isAdmin: false,
-      paperLook: true
-    };
+ <script>
+  const state = {
+    engine: "quadrat",
+    mode: "geburtstag",
+    input: "15011987",
+    computedCode: "15011987",
+    direction: "aussen",
+    sector: 8,
+    sliders: Array(10).fill(85),
+    isAdmin: false,
+    paperLook: true
+  };
 
-    const params = new URLSearchParams(location.search);
-    if (params.get("access") === "milz_secret") state.isAdmin = true;
+  const params = new URLSearchParams(location.search);
+  if (params.get("access") === "milz_secret") state.isAdmin = true;
 
-    const charMap = {
-      A:1, J:1, S:1, Ä:1,
-      B:2, K:2, T:2, Ö:2,
-      C:3, L:3, U:3, Ü:3,
-      D:4, M:4, V:4, ß:4,
-      E:5, N:5, W:5,
-      F:6, O:6, X:6,
-      G:7, P:7, Y:7,
-      H:8, Q:8, Z:8,
-      I:9, R:9
-    };
+  const charMap = {
+    A:1, J:1, S:1, Ä:1,
+    B:2, K:2, T:2, Ö:2,
+    C:3, L:3, U:3, Ü:3,
+    D:4, M:4, V:4, ß:4,
+    E:5, N:5, W:5,
+    F:6, O:6, X:6,
+    G:7, P:7, Y:7,
+    H:8, Q:8, Z:8,
+    I:9, R:9
+  };
 
-    const els = {
-      stage: document.getElementById("stage"),
-      frame: document.getElementById("engineFrame"),
-      loading: document.getElementById("loading"),
-      mode: document.getElementById("mode"),
-      input: document.getElementById("input"),
-      direction: document.getElementById("direction"),
-      sectorWrap: document.getElementById("sectorWrap"),
-      sector: document.getElementById("sector"),
-      download: document.getElementById("download"),
-      sliders: document.getElementById("sliders"),
-      slidersMobile: document.getElementById("slidersMobile"),
-      paperToggle: document.getElementById("paperToggle"),
-      openSliders: document.getElementById("openSliders"),
-      closeSliders: document.getElementById("closeSliders"),
-      sliderSheet: document.getElementById("sliderSheet"),
-      sliderBackdrop: document.getElementById("sliderBackdrop"),
-      codeOutput: document.getElementById("codeOutput")
-    };
+  const els = {
+    stage: document.getElementById("stage"),
+    frame: document.getElementById("engineFrame"),
+    loading: document.getElementById("loading"),
+    mode: document.getElementById("mode"),
+    input: document.getElementById("input"),
+    direction: document.getElementById("direction"),
+    sectorWrap: document.getElementById("sectorWrap"),
+    sector: document.getElementById("sector"),
+    download: document.getElementById("download"),
+    sliders: document.getElementById("sliders"),
+    slidersMobile: document.getElementById("slidersMobile"),
+    paperToggle: document.getElementById("paperToggle"),
+    openSliders: document.getElementById("openSliders"),
+    closeSliders: document.getElementById("closeSliders"),
+    sliderSheet: document.getElementById("sliderSheet"),
+    sliderBackdrop: document.getElementById("sliderBackdrop"),
+    codeOutput: document.getElementById("codeOutput")
+  };
 
-    function ex(a, b) {
-      const s = (a || 0) + (b || 0);
-      return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
-    }
+  function ex(a, b) {
+    const s = (a || 0) + (b || 0);
+    return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
+  }
 
-    function codeFromDate(str) {
-      let raw = String(str || "").replace(/\D/g, "").split("").map(Number);
-      while (raw.length < 8) raw.push(0);
-      return raw.slice(0, 8);
-    }
+  function codeFromDate(str) {
+    let raw = String(str || "").replace(/\D/g, "").split("").map(Number);
+    while (raw.length < 8) raw.push(0);
+    return raw.slice(0, 8);
+  }
 
-    function codeFromText(text) {
-      let arr = String(text || "")
-        .toUpperCase()
-        .replace(/[^A-ZÄÖÜß]/g, "")
-        .split("")
-        .map(c => charMap[c])
-        .filter(Boolean);
+  function codeFromText(text) {
+    let arr = String(text || "")
+      .toUpperCase()
+      .replace(/[^A-ZÄÖÜß]/g, "")
+      .split("")
+      .map(c => charMap[c])
+      .filter(Boolean);
 
-      if (arr.length === 0) arr = [9];
+    if (arr.length === 0) arr = [9];
 
-      while (arr.length > 8) {
-        const next = [];
-        for (let i = 0; i < arr.length - 1; i++) {
-          next.push(ex(arr[i], arr[i + 1]));
-        }
-        arr = next;
+    while (arr.length > 8) {
+      const next = [];
+      for (let i = 0; i < arr.length - 1; i++) {
+        next.push(ex(arr[i], arr[i + 1]));
       }
-
-      while (arr.length < 8) {
-        const len = arr.length;
-        arr.push(ex(arr[len - 2], arr[len - 1]));
-      }
-
-      return arr.slice(0, 8);
+      arr = next;
     }
 
-    function getComputedCodeArray() {
-      return state.mode === "text"
-        ? codeFromText(state.input)
-        : codeFromDate(state.input);
+    while (arr.length < 8) {
+      const len = arr.length;
+      arr.push(ex(arr[len - 2], arr[len - 1]));
     }
 
-    function getComputedCodeString() {
-      return getComputedCodeArray().join("");
-    }
+    return arr.slice(0, 8);
+  }
 
-    function syncComputedCode() {
-      state.computedCode = getComputedCodeString();
+  function getComputedCodeArray() {
+    return state.mode === "text"
+      ? codeFromText(state.input)
+      : codeFromDate(state.input);
+  }
+
+  function getComputedCodeString() {
+    return getComputedCodeArray().join("");
+  }
+
+  function syncComputedCode() {
+    state.computedCode = getComputedCodeString();
+    if (els.codeOutput) {
       els.codeOutput.value = state.computedCode;
     }
+  }
 
-    function getEnginePayloadState() {
-      syncComputedCode();
+  function getEnginePayloadState() {
+    syncComputedCode();
 
-      return {
-        ...state,
-        mode: "geburtstag",
-        input: state.computedCode
-      };
-    }
+    return {
+      ...state,
+      mode: "geburtstag",
+      input: state.computedCode
+    };
+  }
 
-    function updateCodeOutput() {
-      syncComputedCode();
-    }
+  function updateCodeOutput() {
+    syncComputedCode();
+  }
 
-    function showLoading() {
-      els.loading.style.display = "grid";
-      els.stage.classList.add("is-loading");
-    }
+  function showLoading() {
+    els.loading.style.display = "grid";
+    els.stage.classList.add("is-loading");
+  }
 
-    function hideLoading() {
-      els.loading.style.display = "none";
-      els.stage.classList.remove("is-loading");
-    }
+  function hideLoading() {
+    els.loading.style.display = "none";
+    els.stage.classList.remove("is-loading");
+  }
 
-    function setSliderVisual(input) {
-      input.style.setProperty("--val", input.value + "%");
-    }
+  function setSliderVisual(input) {
+    input.style.setProperty("--val", input.value + "%");
+  }
 
-    function buildSlidersInto(containerEl) {
-      if (!containerEl) return;
-      containerEl.innerHTML = "";
+  function syncSameDigitSliders(digit, value, sourceInput = null) {
+    const sliders = document.querySelectorAll(
+      '.slider-row input[type="range"][data-digit="' + digit + '"]'
+    );
 
-      for (let i = 1; i <= 9; i++) {
-        const row = document.createElement("div");
-        row.className = "slider-row";
+    sliders.forEach(slider => {
+      if (slider !== sourceInput) {
+        slider.value = value;
+      }
+      setSliderVisual(slider);
+    });
+  }
 
-        const dot = document.createElement("div");
-        dot.className = "dot";
-        dot.id = containerEl.id + "_dot" + i;
+  function buildSlidersInto(containerEl) {
+    if (!containerEl) return;
+    containerEl.innerHTML = "";
 
-        const label = document.createElement("div");
-        label.className = "digit";
-        label.textContent = String(i);
+    for (let i = 1; i <= 9; i++) {
+      const row = document.createElement("div");
+      row.className = "slider-row";
 
-        const input = document.createElement("input");
-        input.type = "range";
-        input.min = "20";
-        input.max = "100";
-        input.value = String(state.sliders[i] ?? 85);
-        input.dataset.digit = String(i);
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      dot.id = containerEl.id + "_dot" + i;
 
+      const label = document.createElement("div");
+      label.className = "digit";
+      label.textContent = String(i);
+
+      const input = document.createElement("input");
+      input.type = "range";
+      input.min = "20";
+      input.max = "100";
+      input.value = String(state.sliders[i] ?? 85);
+      input.dataset.digit = String(i);
+
+      setSliderVisual(input);
+
+      input.addEventListener("input", () => {
+        state.sliders[i] = Number(input.value);
         setSliderVisual(input);
+        syncSameDigitSliders(i, input.value, input);
+        pushStateToEngine();
+      });
 
-        input.addEventListener("input", () => {
-          state.sliders[i] = Number(input.value);
-          setSliderVisual(input);
-          syncSameDigitSliders(i, input.value, input);
-          pushStateToEngine();
+      row.appendChild(dot);
+      row.appendChild(label);
+      row.appendChild(input);
+      containerEl.appendChild(row);
+    }
+  }
+
+  function buildSliders() {
+    buildSlidersInto(els.sliders);
+    buildSlidersInto(els.slidersMobile);
+  }
+
+  function setActiveEngineButton(engine) {
+    document.querySelectorAll(".engine-btn").forEach(btn => {
+      if (!btn.dataset.engine) return;
+      btn.classList.toggle("active", btn.dataset.engine === engine);
+    });
+  }
+
+  function updateConditionalFields() {
+    if (els.sectorWrap) {
+      els.sectorWrap.style.display = (state.engine === "rund") ? "flex" : "none";
+    }
+  }
+
+  function applyPaperLook() {
+    els.stage.classList.toggle("paper", !!state.paperLook);
+    els.stage.classList.toggle("dark", !state.paperLook);
+  }
+
+  function loadEngine(engine) {
+    state.engine = engine;
+    setActiveEngineButton(engine);
+    updateConditionalFields();
+
+    showLoading();
+
+    const fallbackTimer = setTimeout(() => hideLoading(), 2500);
+
+    els.frame.onload = () => {
+      clearTimeout(fallbackTimer);
+      hideLoading();
+      pushStateToEngine();
+    };
+
+    els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+  }
+
+  function pushStateToEngine() {
+    try {
+      const enginePayload = getEnginePayloadState();
+      els.frame.contentWindow.postMessage(
+        { type: "SET_STATE", payload: enginePayload },
+        "*"
+      );
+    } catch (_) {}
+  }
+
+  function requestExport() {
+    try {
+      const enginePayload = getEnginePayloadState();
+      els.frame.contentWindow.postMessage(
+        { type: "EXPORT", payload: enginePayload },
+        "*"
+      );
+    } catch (_) {}
+  }
+
+  function openSheet() {
+    els.sliderSheet.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeSheet() {
+    els.sliderSheet.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  window.addEventListener("message", (ev) => {
+    const msg = ev.data;
+    if (!msg || typeof msg !== "object") return;
+
+    if (msg.type === "READY") {
+      hideLoading();
+      pushStateToEngine();
+    }
+
+    if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
+      for (let i = 1; i <= 9; i++) {
+        const color = msg.colors[i - 1];
+        const dotDesktop = document.getElementById("sliders_dot" + i);
+        const dotMobile = document.getElementById("slidersMobile_dot" + i);
+
+        if (dotDesktop && color) dotDesktop.style.background = color;
+        if (dotMobile && color) dotMobile.style.background = color;
+
+        const sliderRows = document.querySelectorAll(".slider-row");
+        sliderRows.forEach(row => {
+          const digitEl = row.querySelector(".digit");
+          const inputEl = row.querySelector('input[type="range"]');
+          const digit = Number(inputEl?.dataset?.digit || 0);
+
+          if (digit === i && color) {
+            if (digitEl) digitEl.style.color = color;
+            if (inputEl) inputEl.style.setProperty("--accent", color);
+            if (inputEl) setSliderVisual(inputEl);
+          }
         });
-
-        row.appendChild(dot);
-        row.appendChild(label);
-        row.appendChild(input);
-        containerEl.appendChild(row);
       }
     }
+  });
 
-    function syncSameDigitSliders(digit, value, sourceInput = null) {
-      const sliders = document.querySelectorAll(`.slider-row input[type="range"][data-digit="${digit}"]`);
-      sliders.forEach(slider => {
-        if (slider !== sourceInput) {
-          slider.value = value;
-        }
-        setSliderVisual(slider);
-      });
-    }
+  document.querySelectorAll(".engine-btn").forEach(btn => {
+    if (!btn.dataset.engine) return;
+    btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+  });
 
-    function buildSliders() {
-      buildSlidersInto(els.sliders);
-      buildSlidersInto(els.slidersMobile);
-    }
+  els.mode.addEventListener("change", () => {
+    state.mode = els.mode.value;
+    updateCodeOutput();
+    pushStateToEngine();
+  });
+
+  els.input.addEventListener("input", () => {
+    state.input = els.input.value;
+    updateCodeOutput();
+    pushStateToEngine();
+  });
+
+  els.direction.addEventListener("change", () => {
+    state.direction = els.direction.value;
+    pushStateToEngine();
+  });
+
+  els.sector.addEventListener("change", () => {
+    state.sector = Number(els.sector.value);
+    pushStateToEngine();
+  });
+
+  els.download.addEventListener("click", requestExport);
+
+  els.paperToggle.addEventListener("change", () => {
+    state.paperLook = els.paperToggle.checked;
+    applyPaperLook();
+    pushStateToEngine();
+  });
+
+  els.openSliders.addEventListener("click", openSheet);
+  els.closeSliders.addEventListener("click", closeSheet);
+  els.sliderBackdrop.addEventListener("click", closeSheet);
+
+  buildSliders();
+  updateCodeOutput();
+  applyPaperLook();
+  updateConditionalFields();
+  loadEngine("quadrat");
+</script>
 
     function setActiveEngineButton(engine) {
       document.querySelectorAll(".engine-btn").forEach(btn => {

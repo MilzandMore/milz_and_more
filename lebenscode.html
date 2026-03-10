@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=final-3">
+  <link rel="stylesheet" href="app.css?v=final-pastell-1">
 </head>
 
 <body>
@@ -74,7 +74,7 @@
     <aside class="slider-panel desktop-only">
       <div class="slider-title">Farbintensität</div>
       <div id="sliders" class="sliders"></div>
-      <div class="hint">Tipp: Slider regeln Sättigung/Helligkeit je Ziffer.</div>
+      <div class="hint">Tipp: Regler steuern jede Farbe von sanftem Pastell bis leuchtend kräftig.</div>
     </aside>
 
     <section id="stage" class="stage paper">
@@ -92,7 +92,7 @@
       </div>
       <div class="slider-sheet__body">
         <div id="slidersMobile" class="sliders"></div>
-        <div class="hint">Tipp: Slider regeln Sättigung/Helligkeit je Ziffer.</div>
+        <div class="hint">Tipp: Regler steuern jede Farbe von sanftem Pastell bis leuchtend kräftig.</div>
       </div>
     </div>
   </div>
@@ -105,7 +105,8 @@
       computedCode: "15011987",
       direction: "aussen",
       sector: 8,
-      sliders: Array(10).fill(85),
+      sliders: Array(10).fill(85), // 1..9 genutzt
+      colors: [],
       paperLook: true
     };
 
@@ -120,6 +121,18 @@
       H:8, Q:8, Z:8,
       I:9, R:9
     };
+
+    const BASE_PALETTE = [
+      "#FF0000", // 1
+      "#00008B", // 2
+      "#00FF00", // 3
+      "#FFFF00", // 4
+      "#87CEEB", // 5
+      "#40E0D0", // 6
+      "#FFC0CB", // 7
+      "#FFA500", // 8
+      "#9400D3"  // 9
+    ];
 
     const els = {
       stage: document.getElementById("stage"),
@@ -189,23 +202,124 @@
       els.codeOutput.value = state.computedCode;
     }
 
-    function getEnginePayloadState() {
-      syncComputedCode();
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function hexToRgb(hex) {
+      const clean = hex.replace("#", "");
+      const full = clean.length === 3
+        ? clean.split("").map(ch => ch + ch).join("")
+        : clean;
+
+      const num = parseInt(full, 16);
+
       return {
-        ...state,
-        mode: "geburtstag",
-        input: state.computedCode
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
       };
     }
 
-    function showLoading() {
-      els.loading.style.display = "grid";
-      els.stage.classList.add("is-loading");
+    function rgbToHsl(r, g, b) {
+      r /= 255;
+      g /= 255;
+      b /= 255;
+
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const d = max - min;
+
+      let h = 0;
+      let s = 0;
+      const l = (max + min) / 2;
+
+      if (d !== 0) {
+        s = d / (1 - Math.abs(2 * l - 1));
+
+        switch (max) {
+          case r:
+            h = 60 * (((g - b) / d) % 6);
+            break;
+          case g:
+            h = 60 * ((b - r) / d + 2);
+            break;
+          case b:
+            h = 60 * ((r - g) / d + 4);
+            break;
+        }
+      }
+
+      if (h < 0) h += 360;
+
+      return {
+        h,
+        s: s * 100,
+        l: l * 100
+      };
     }
 
-    function hideLoading() {
-      els.loading.style.display = "none";
-      els.stage.classList.remove("is-loading");
+    function hslToHex(h, s, l) {
+      s /= 100;
+      l /= 100;
+
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = l - c / 2;
+
+      let r1 = 0, g1 = 0, b1 = 0;
+
+      if (h >= 0 && h < 60) {
+        r1 = c; g1 = x; b1 = 0;
+      } else if (h >= 60 && h < 120) {
+        r1 = x; g1 = c; b1 = 0;
+      } else if (h >= 120 && h < 180) {
+        r1 = 0; g1 = c; b1 = x;
+      } else if (h >= 180 && h < 240) {
+        r1 = 0; g1 = x; b1 = c;
+      } else if (h >= 240 && h < 300) {
+        r1 = x; g1 = 0; b1 = c;
+      } else {
+        r1 = c; g1 = 0; b1 = x;
+      }
+
+      const r = Math.round((r1 + m) * 255);
+      const g = Math.round((g1 + m) * 255);
+      const b = Math.round((b1 + m) * 255);
+
+      return "#" + [r, g, b]
+        .map(v => v.toString(16).padStart(2, "0"))
+        .join("")
+        .toUpperCase();
+    }
+
+    function rotatePaletteBySeed(seedDigit) {
+      const shift = clamp((seedDigit || 1) - 1, 0, 8);
+      return BASE_PALETTE.map((_, i) => BASE_PALETTE[(i + shift) % BASE_PALETTE.length]);
+    }
+
+    function pastelToVivid(hex, sliderValue) {
+      const { r, g, b } = hexToRgb(hex);
+      const base = rgbToHsl(r, g, b);
+
+      const t = (clamp(Number(sliderValue) || 85, 20, 100) - 20) / 80;
+
+      // niedrig = sanftes Pastell, hoch = kräftig
+      const saturation = 35 + t * 62; // 35 → 97
+      const lightness = 84 - t * 34;  // 84 → 50
+
+      return hslToHex(base.h, saturation, lightness);
+    }
+
+    function computeFinalColors() {
+      const seedDigit = Number(state.computedCode?.charAt(0) || 1);
+      const shiftedBase = rotatePaletteBySeed(seedDigit);
+
+      state.colors = shiftedBase.map((baseHex, index) => {
+        const digit = index + 1;
+        const sliderValue = state.sliders[digit] ?? 85;
+        return pastelToVivid(baseHex, sliderValue);
+      });
     }
 
     function setSliderVisual(input) {
@@ -218,11 +332,63 @@
       );
 
       sliders.forEach(slider => {
-        if (slider !== sourceInput) {
-          slider.value = value;
-        }
+        if (slider !== sourceInput) slider.value = value;
         setSliderVisual(slider);
       });
+    }
+
+    function applySliderColorsToUI() {
+      for (let i = 1; i <= 9; i++) {
+        const color = state.colors[i - 1] || "#D8B45A";
+
+        const dotDesktop = document.getElementById("sliders_dot" + i);
+        const dotMobile = document.getElementById("slidersMobile_dot" + i);
+
+        if (dotDesktop) dotDesktop.style.background = color;
+        if (dotMobile) dotMobile.style.background = color;
+
+        const digitEls = document.querySelectorAll(
+          '.slider-row .digit[data-digit="' + i + '"]'
+        );
+        digitEls.forEach(el => {
+          el.style.color = color;
+        });
+
+        const inputs = document.querySelectorAll(
+          '.slider-row input[type="range"][data-digit="' + i + '"]'
+        );
+        inputs.forEach(input => {
+          input.style.setProperty("--accent", color);
+          setSliderVisual(input);
+        });
+      }
+    }
+
+    function refreshComputedCodeAndColors() {
+      syncComputedCode();
+      computeFinalColors();
+      applySliderColorsToUI();
+    }
+
+    function getEnginePayloadState() {
+      refreshComputedCodeAndColors();
+
+      return {
+        ...state,
+        mode: "geburtstag",
+        input: state.computedCode,
+        colors: [...state.colors]
+      };
+    }
+
+    function showLoading() {
+      els.loading.style.display = "grid";
+      els.stage.classList.add("is-loading");
+    }
+
+    function hideLoading() {
+      els.loading.style.display = "none";
+      els.stage.classList.remove("is-loading");
     }
 
     function buildSlidersInto(containerEl) {
@@ -239,6 +405,7 @@
 
         const label = document.createElement("div");
         label.className = "digit";
+        label.dataset.digit = String(i);
         label.textContent = String(i);
 
         const input = document.createElement("input");
@@ -254,6 +421,7 @@
           state.sliders[i] = Number(input.value);
           setSliderVisual(input);
           syncSameDigitSliders(i, input.value, input);
+          refreshComputedCodeAndColors();
           pushStateToEngine();
         });
 
@@ -346,30 +514,6 @@
         hideLoading();
         pushStateToEngine();
       }
-
-      if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
-        for (let i = 1; i <= 9; i++) {
-          const color = msg.colors[i - 1];
-          const dotDesktop = document.getElementById("sliders_dot" + i);
-          const dotMobile = document.getElementById("slidersMobile_dot" + i);
-
-          if (dotDesktop && color) dotDesktop.style.background = color;
-          if (dotMobile && color) dotMobile.style.background = color;
-
-          const sliderRows = document.querySelectorAll(".slider-row");
-          sliderRows.forEach(row => {
-            const digitEl = row.querySelector(".digit");
-            const inputEl = row.querySelector('input[type="range"]');
-            const digit = Number(inputEl?.dataset?.digit || 0);
-
-            if (digit === i && color) {
-              if (digitEl) digitEl.style.color = color;
-              if (inputEl) inputEl.style.setProperty("--accent", color);
-              if (inputEl) setSliderVisual(inputEl);
-            }
-          });
-        }
-      }
     });
 
     document.querySelectorAll(".engine-btn").forEach(btn => {
@@ -379,13 +523,13 @@
 
     els.mode.addEventListener("change", () => {
       state.mode = els.mode.value;
-      syncComputedCode();
+      refreshComputedCodeAndColors();
       pushStateToEngine();
     });
 
     els.input.addEventListener("input", () => {
       state.input = els.input.value;
-      syncComputedCode();
+      refreshComputedCodeAndColors();
       pushStateToEngine();
     });
 
@@ -412,7 +556,7 @@
     els.sliderBackdrop.addEventListener("click", closeSheet);
 
     buildSliders();
-    syncComputedCode();
+    refreshComputedCodeAndColors();
     applyPaperLook();
     updateConditionalFields();
     loadEngine("quadrat");

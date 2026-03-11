@@ -1,6 +1,6 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED v=1002");
+console.log("QUADRAT mandala.js LOADED v=1003");
 
 var qMatrix = [];
 var logoImg = null;
@@ -21,6 +21,7 @@ var extState = {
   input: "15011987",
   direction: "aussen",        // aussen | innen
   sliders: Array(10).fill(85),
+  colors: [],                 // <-- neu: Farben vom Parent
   isAdmin: false,
   paperLook: true
 };
@@ -111,6 +112,27 @@ function draw() {
   pop();
 }
 
+/* ====== neue zentrale Farbquelle mit Fallback ====== */
+function getRenderPalette(startDigit) {
+  // Parent-Farben haben Vorrang
+  if (Array.isArray(extState.colors) && extState.colors.length === 9) {
+    return {
+      1: extState.colors[0],
+      2: extState.colors[1],
+      3: extState.colors[2],
+      4: extState.colors[3],
+      5: extState.colors[4],
+      6: extState.colors[5],
+      7: extState.colors[6],
+      8: extState.colors[7],
+      9: extState.colors[8]
+    };
+  }
+
+  // Fallback: alte Engine-Palette
+  return (colorMatrix[startDigit] || mapZ);
+}
+
 /* ====== Nuller IMMER weiß + Linien überall ====== */
 function drawQuadrat(startDigit, target, opts) {
   var ctx = target || window;
@@ -126,6 +148,8 @@ function drawQuadrat(startDigit, target, opts) {
     ctx.noStroke();
   }
 
+  const renderPalette = getRenderPalette(startDigit);
+
   for (var r = 0; r < 20; r++) {
     for (var c = 0; c < 20; c++) {
       var val = qMatrix[r][c];
@@ -134,7 +158,7 @@ function drawQuadrat(startDigit, target, opts) {
         // ✅ Nuller grundsätzlich weiß
         ctx.fill(0, 0, 100, 100);
       } else {
-        var hex = (colorMatrix[startDigit] && colorMatrix[startDigit][val]) ? colorMatrix[startDigit][val] : mapZ[val];
+        var hex = renderPalette[val] || mapZ[val];
         var col = color(hex);
         var sVal = getSlider(val);
 
@@ -276,6 +300,7 @@ function onMessageFromParent(ev) {
 
   if (msg.type === "SET_STATE" && msg.payload) {
     extState = Object.assign(extState, msg.payload);
+    if (!Array.isArray(extState.colors)) extState.colors = [];
     isAdmin = !!extState.isAdmin;
     redraw();
   }
@@ -283,6 +308,7 @@ function onMessageFromParent(ev) {
   if (msg.type === "EXPORT") {
     if (msg.payload) {
       extState = Object.assign(extState, msg.payload);
+      if (!Array.isArray(extState.colors)) extState.colors = [];
       isAdmin = !!extState.isAdmin;
     }
     exportHighRes();

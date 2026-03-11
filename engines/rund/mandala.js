@@ -6,6 +6,7 @@ let APP = {
   direction: "aussen",
   sector: 8,
   sliders: Array(10).fill(85),
+  colors: [],
   isAdmin: false
 };
 
@@ -55,14 +56,22 @@ window.addEventListener("message", (ev) => {
   if (!msg || typeof msg !== "object") return;
 
   if (msg.type === "SET_STATE" && msg.payload) {
-    APP = msg.payload;
+    APP = {
+      ...APP,
+      ...msg.payload,
+      colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : APP.colors
+    };
     isAdmin = !!APP.isAdmin;
     redraw();
   }
 
   if (msg.type === "EXPORT") {
     if (msg.payload) {
-      APP = msg.payload;
+      APP = {
+        ...APP,
+        ...msg.payload,
+        colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : APP.colors
+      };
       isAdmin = !!APP.isAdmin;
     }
     exportHighRes();
@@ -100,7 +109,7 @@ function draw() {
   if (rawVal === "" || (APP.mode === "geburtstag" && rawVal.replace(/\D/g, "").length === 0)) return;
 
   const sector = buildSector();
-  const currentColors = getColorMatrix(colorSeed);
+  const currentColors = getRenderColors(colorSeed);
 
   sendColors(currentColors);
 
@@ -147,7 +156,7 @@ function drawSector(m, colors, target) {
 
       if (v >= 1 && v <= 9) {
         const baseCol = color(colors[v - 1]);
-        const sVal = (APP.sliders && APP.sliders[v]) ? APP.sliders[v] : 85;
+        const sVal = (APP.sliders && typeof APP.sliders[v] === "number") ? APP.sliders[v] : 85;
 
         ctx.fill(
           hue(baseCol),
@@ -178,7 +187,7 @@ function exportHighRes() {
   pg.background(255);
 
   const sector = buildSector();
-  const currentColors = getColorMatrix(colorSeed);
+  const currentColors = getRenderColors(colorSeed);
   const sc = int(APP.sector || 8);
   const angle = TWO_PI / sc;
 
@@ -317,6 +326,13 @@ function getColorMatrix(seed) {
   var s = (seed === 0 || !seed) ? 1 : seed;
   var shift = (s - 1) % 9;
   return baseColors.slice(shift).concat(baseColors.slice(0, shift));
+}
+
+function getRenderColors(seed) {
+  if (Array.isArray(APP.colors) && APP.colors.length === 9) {
+    return APP.colors;
+  }
+  return getColorMatrix(seed);
 }
 
 // --------- RESIZE ----------

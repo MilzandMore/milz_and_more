@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=final-palette-3">
+  <link rel="stylesheet" href="app.css?v=final-palette-4">
 </head>
 
 <body>
@@ -105,7 +105,7 @@
       computedCode: "15011987",
       direction: "aussen",
       sector: 8,
-      sliders: Array(10).fill(85), // 1..9 genutzt
+      sliders: Array(10).fill(85),
       colors: [],
       paperLook: true
     };
@@ -122,17 +122,17 @@
       I:9, R:9
     };
 
-    /* Klar getrennte Farbfamilien:
-       1 Rot, 2 Blau, 3 Grün, 4 Gelb, 5 Hellblau,
-       6 Türkis, 7 Pink, 8 Orange, 9 Violett */
+    /* Premium-Rampen mit stärker getrennten Familien
+       6 = Türkis schöner/luxuriöser
+       7 = Pink kräftiger/eleganter */
     const PALETTE_RAMPS = [
       { soft: "#F3C6B8", vivid: "#DC2626" }, // 1 Rot
       { soft: "#C9D5FF", vivid: "#2563EB" }, // 2 Blau
       { soft: "#D6F0C8", vivid: "#16A34A" }, // 3 Grün
       { soft: "#F7EDAF", vivid: "#EAB308" }, // 4 Gelb
       { soft: "#CDEFFD", vivid: "#0EA5E9" }, // 5 Hellblau
-      { soft: "#C7F0EA", vivid: "#0F766E" }, // 6 Türkis
-      { soft: "#F6CCE3", vivid: "#DB2777" }, // 7 Pink
+      { soft: "#BFEDE7", vivid: "#0F9D94" }, // 6 Türkis: lagoon/seafoam -> rich teal
+      { soft: "#F7C1DD", vivid: "#C2185B" }, // 7 Pink: rose -> raspberry/fuchsia
       { soft: "#F6D3B1", vivid: "#F97316" }, // 8 Orange
       { soft: "#DDD0FA", vivid: "#7C3AED" }  // 9 Violett
     ];

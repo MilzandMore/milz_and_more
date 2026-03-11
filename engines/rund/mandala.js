@@ -159,10 +159,10 @@ function drawSector(m, colors, target) {
         const sVal = (APP.sliders && typeof APP.sliders[v] === "number") ? APP.sliders[v] : 85;
 
         ctx.fill(
-          hue(baseCol),
-          map(sVal, 20, 100, 15, saturation(baseCol)),
-          map(sVal, 20, 100, 98, brightness(baseCol))
-        );
+  hue(baseCol),
+  map(sVal, 20, 100, 35, saturation(baseCol)),
+  map(sVal, 20, 100, 100, brightness(baseCol))
+);
       } else {
         ctx.fill(0, 0, 100); // 0er weiß
       }

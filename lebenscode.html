@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=final-palette-5">
+  <link rel="stylesheet" href="app.css?v=final-palette-6">
 </head>
 
 <body>
@@ -122,15 +122,20 @@
       I:9, R:9
     };
 
-    /* Premium-Familien mit stärkerem Charakter */
+    /* Premium-Familien, jetzt mit klar neuem Pink/Türkis */
     const PALETTE_RAMPS = [
       { soft: "#F3C6B8", vivid: "#DC2626" }, // 1 Rot
       { soft: "#C9D5FF", vivid: "#2563EB" }, // 2 Blau
       { soft: "#D6F0C8", vivid: "#16A34A" }, // 3 Grün
       { soft: "#F7EDAF", vivid: "#EAB308" }, // 4 Gelb
       { soft: "#CDEFFD", vivid: "#0EA5E9" }, // 5 Hellblau
-      { soft: "#AEE8E2", vivid: "#00796B" }, // 6 Türkis: seafoam -> gem teal
-      { soft: "#F4B3D4", vivid: "#AD1457" }, // 7 Pink: blush -> jewel pink
+
+      /* 6 Türkis: weniger mintig, mehr Lagoon -> Deep Teal */
+      { soft: "#9FE3DD", vivid: "#006D77" }, // 6 Türkis
+
+      /* 7 Pink: weniger "rosa", mehr Powder Rose -> Rich Berry Magenta */
+      { soft: "#F1A9CF", vivid: "#9D174D" }, // 7 Pink
+
       { soft: "#F6D3B1", vivid: "#F97316" }, // 8 Orange
       { soft: "#DDD0FA", vivid: "#7C3AED" }  // 9 Violett
     ];
@@ -248,8 +253,8 @@
     function getRampColor(ramp, sliderValue) {
       const tLinear = (clamp(Number(sliderValue) || 85, 20, 100) - 20) / 80;
 
-      /* mehr Unterschied früh im Verlauf sichtbar */
-      const t = Math.pow(tLinear, 0.78);
+      /* Früh stärker sichtbar, aber nicht zu hart */
+      const t = Math.pow(tLinear, 0.72);
 
       return interpolateHex(ramp.soft, ramp.vivid, t);
     }

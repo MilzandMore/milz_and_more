@@ -5,6 +5,7 @@ let APP = {
   direction: "aussen",
   sector: 8,
   sliders: Array(10).fill(85),
+  colors: [],
   isAdmin: false
 };
 
@@ -30,19 +31,37 @@ var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 let logoImg;
 let isAdmin = false;
 
-function sendReady(){ if(window.parent) window.parent.postMessage({type:"READY"}, "*"); }
-function sendColors(colors){ if(window.parent) window.parent.postMessage({type:"COLORS", colors}, "*"); }
+function sendReady() {
+  if (window.parent) window.parent.postMessage({ type: "READY" }, "*");
+}
 
-window.addEventListener("message",(ev)=>{
+function sendColors(colors) {
+  if (window.parent) window.parent.postMessage({ type: "COLORS", colors }, "*");
+}
+
+window.addEventListener("message", (ev) => {
   const msg = ev.data;
-  if(!msg || typeof msg!=="object") return;
-  if(msg.type==="SET_STATE" && msg.payload){
-    APP = msg.payload;
+  if (!msg || typeof msg !== "object") return;
+
+  if (msg.type === "SET_STATE" && msg.payload) {
+    APP = {
+      ...APP,
+      ...msg.payload,
+      colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : APP.colors
+    };
     isAdmin = !!APP.isAdmin;
     redraw();
   }
-  if(msg.type==="EXPORT"){
-    if(msg.payload){ APP = msg.payload; isAdmin = !!APP.isAdmin; }
+
+  if (msg.type === "EXPORT") {
+    if (msg.payload) {
+      APP = {
+        ...APP,
+        ...msg.payload,
+        colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : APP.colors
+      };
+      isAdmin = !!APP.isAdmin;
+    }
     exportHighRes();
   }
 });
@@ -56,7 +75,7 @@ function preload() {
   );
 }
 
-function setup(){
+function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
   smooth(8);
@@ -65,37 +84,39 @@ function setup(){
   redraw();
 }
 
-function draw(){
+function draw() {
   background(12);
 
   const rawVal = String(APP.input || "").trim();
-  if(rawVal === "" || (APP.mode==="geburtstag" && rawVal.replace(/\D/g,"").length===0)) return;
+  if (rawVal === "" || (APP.mode === "geburtstag" && rawVal.replace(/\D/g, "").length === 0)) return;
 
-  let code = (APP.mode==="text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g,"").split('').map(Number);
-  while(code.length<8) code.push(0);
-  code = code.slice(0,8);
+  let code = (APP.mode === "text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
+  while (code.length < 8) code.push(0);
+  code = code.slice(0, 8);
 
-  if(code.every(v=>v===0)) return;
+  if (code.every(v => v === 0)) return;
 
   const cKey = code[0] || 1;
+  const renderColors = getRenderColors(cKey);
 
-  sendColors(colorMatrix[cKey]);
+  sendColors(renderColors);
 
   push();
   const isMobile = windowWidth < 600;
   const yOffset = isMobile ? -10 : 10;
-  translate(width/2, height/2 + yOffset);
+  translate(width / 2, height / 2 + yOffset);
 
   const scaleFactor = (min(width, height) / 520) * (isMobile ? 0.45 : 0.48);
   scale(scaleFactor);
 
-  renderWabeKorrekt(code, cKey);
+  renderWabeKorrekt(code, cKey, null, renderColors);
   pop();
 }
 
-function renderWabeKorrekt(code, cKey, target){
+function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
   const ctx = target || window;
   const sz = 16.2;
+  const renderColors = renderColorsOverride || getRenderColors(cKey);
 
   // Zwischenlinien (wie vorher)
   ctx.stroke(0, 0, 0, 35);
@@ -105,29 +126,33 @@ function renderWabeKorrekt(code, cKey, target){
     ? [...code, ...[...code].reverse()]
     : [...[...code].reverse(), ...code];
 
-  for(let s=0;s<6;s++){
+  for (let s = 0; s < 6; s++) {
     ctx.push();
     ctx.rotate(s * PI / 3);
 
-    const m = Array(17).fill().map(()=>Array(17).fill(0));
-    for(let i=0;i<16;i++) m[16][i] = path[i % path.length];
+    const m = Array(17).fill().map(() => Array(17).fill(0));
+    for (let i = 0; i < 16; i++) m[16][i] = path[i % path.length];
 
-    for(let r=15;r>=1;r--) for(let i=0;i<r;i++) m[r][i] = ex(m[r+1][i], m[r+1][i+1]);
+    for (let r = 15; r >= 1; r--) {
+      for (let i = 0; i < r; i++) {
+        m[r][i] = ex(m[r + 1][i], m[r + 1][i + 1]);
+      }
+    }
 
-    for(let r=1;r<=16;r++){
-      for(let i=0;i<r;i++){
+    for (let r = 1; r <= 16; r++) {
+      for (let i = 0; i < r; i++) {
         const val = m[r][i];
 
-        if(val>=1 && val<=9){
-          const col = color(colorMatrix[cKey][val-1]);
-          const sVal = (APP.sliders && APP.sliders[val]) ? APP.sliders[val] : 85;
+        if (val >= 1 && val <= 9) {
+          const col = color(renderColors[val - 1]);
+          const sVal = (APP.sliders && typeof APP.sliders[val] === "number") ? APP.sliders[val] : 85;
           ctx.fill(
             hue(col),
             map(sVal, 20, 100, 15, saturation(col)),
             map(sVal, 20, 100, 98, brightness(col))
           );
         } else {
-          // ✅ Nuller immer weiß (statt Hintergrund/Schwarz)
+          // ✅ Nuller immer weiß
           ctx.fill(0, 0, 100);
         }
 
@@ -135,7 +160,9 @@ function renderWabeKorrekt(code, cKey, target){
         const y = -(r - 1) * sz * 1.5;
 
         ctx.beginShape();
-        for(let a = PI/6; a < TWO_PI; a += PI/3) ctx.vertex(x + cos(a)*sz, y + sin(a)*sz);
+        for (let a = PI / 6; a < TWO_PI; a += PI / 3) {
+          ctx.vertex(x + cos(a) * sz, y + sin(a) * sz);
+        }
         ctx.endShape(CLOSE);
       }
     }
@@ -144,59 +171,80 @@ function renderWabeKorrekt(code, cKey, target){
   }
 }
 
-function exportHighRes(){
-  const exportW=2480, exportH=3508;
+function exportHighRes() {
+  const exportW = 2480, exportH = 3508;
   const pg = createGraphics(exportW, exportH);
   pg.colorMode(HSB, 360, 100, 100);
   pg.background(255);
 
-  const rawVal = String(APP.input||"").trim();
-  let code = (APP.mode==="text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g,"").split('').map(Number);
-  while(code.length<8) code.push(0);
-  code = code.slice(0,8);
+  const rawVal = String(APP.input || "").trim();
+  let code = (APP.mode === "text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
+  while (code.length < 8) code.push(0);
+  code = code.slice(0, 8);
 
   const cKey = code[0] || 1;
+  const renderColors = getRenderColors(cKey);
 
   pg.push();
-  pg.translate(exportW/2, exportH*0.40);
+  pg.translate(exportW / 2, exportH * 0.40);
   pg.scale(2.4);
-  renderWabeKorrekt(code, cKey, pg);
+  renderWabeKorrekt(code, cKey, pg, renderColors);
   pg.pop();
 
-  if(logoImg && !isAdmin){
-    pg.resetMatrix(); pg.tint(255, 0.45);
-    const wWidth=380, wHeight=(logoImg.height/logoImg.width)*wWidth;
-    for(let x=-100;x<exportW+400;x+=500){
-      for(let y=-400;y<exportH+400;y+=500) pg.image(logoImg, x, y, wWidth, wHeight);
+  if (logoImg && !isAdmin) {
+    pg.resetMatrix();
+    pg.tint(255, 0.45);
+    const wWidth = 380, wHeight = (logoImg.height / logoImg.width) * wWidth;
+    for (let x = -100; x < exportW + 400; x += 500) {
+      for (let y = -400; y < exportH + 400; y += 500) {
+        pg.image(logoImg, x, y, wWidth, wHeight);
+      }
     }
     pg.noTint();
   }
 
-  if(logoImg){
-    pg.resetMatrix(); pg.noTint();
-    const lW=500, lH=(logoImg.height/logoImg.width)*lW;
-    pg.image(logoImg, exportW-lW-100, exportH-lH-100, lW, lH);
+  if (logoImg) {
+    pg.resetMatrix();
+    pg.noTint();
+    const lW = 500, lH = (logoImg.height / logoImg.width) * lW;
+    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
 
   save(pg, 'Milz&More_Wabe.png');
 }
 
-function getCodeFromText(textStr){
-  const cleanText = String(textStr||"").toUpperCase().replace(/[^A-ZÄÖÜß]/g,"");
-  if(cleanText.length===0) return [0,0,0,0,0,0,0,0];
+function getCodeFromText(textStr) {
+  const cleanText = String(textStr || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
+  if (cleanText.length === 0) return [0, 0, 0, 0, 0, 0, 0, 0];
 
   let currentRow = cleanText.split("").map(c => charMap[c]).filter(n => n);
-  while(currentRow.length<8) currentRow.push(9);
+  while (currentRow.length < 8) currentRow.push(9);
 
-  while(currentRow.length>8){
-    const nextRow=[];
-    for(let i=0;i<currentRow.length-1;i++) nextRow.push(ex(currentRow[i], currentRow[i+1]));
-    currentRow=nextRow;
+  while (currentRow.length > 8) {
+    const nextRow = [];
+    for (let i = 0; i < currentRow.length - 1; i++) {
+      nextRow.push(ex(currentRow[i], currentRow[i + 1]));
+    }
+    currentRow = nextRow;
   }
   return currentRow;
 }
 
-function windowResized(){
+// --------- FARBEN ----------
+function getColorMatrix(seed) {
+  const s = (seed === 0 || !seed) ? 1 : seed;
+  return colorMatrix[s] || colorMatrix[1];
+}
+
+function getRenderColors(cKey) {
+  if (Array.isArray(APP.colors) && APP.colors.length === 9) {
+    return APP.colors;
+  }
+  return getColorMatrix(cKey);
+}
+
+// --------- RESIZE ----------
+function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   redraw();
 }

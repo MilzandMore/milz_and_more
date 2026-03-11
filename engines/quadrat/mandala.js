@@ -162,13 +162,11 @@ function drawQuadrat(startDigit, target, opts) {
         var col = color(hex);
         var sVal = getSlider(val);
 
-        ctx.fill(
-          hue(col),
-          map(sVal, 20, 100, 15, saturation(col)),
-          map(sVal, 20, 100, 98, brightness(col)),
-          100
-        );
-      }
+        fill(
+  hue(baseCol),
+  map(sVal, 20, 100, 35, saturation(baseCol)),
+  map(sVal, 20, 100, 100, brightness(baseCol))
+);
 
       // alle 4 Quadranten zeichnen (wie Original)
       ctx.rect(c * ts, -(r + 1) * ts, ts, ts);

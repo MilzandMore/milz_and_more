@@ -147,10 +147,10 @@ function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
           const col = color(renderColors[val - 1]);
           const sVal = (APP.sliders && typeof APP.sliders[val] === "number") ? APP.sliders[val] : 85;
           ctx.fill(
-            hue(col),
-            map(sVal, 20, 100, 15, saturation(col)),
-            map(sVal, 20, 100, 98, brightness(col))
-          );
+  hue(baseCol),
+  map(sVal, 20, 100, 35, saturation(baseCol)),
+  map(sVal, 20, 100, 100, brightness(baseCol))
+);
         } else {
           // ✅ Nuller immer weiß
           ctx.fill(0, 0, 100);

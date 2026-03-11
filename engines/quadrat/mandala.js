@@ -162,7 +162,7 @@ function drawQuadrat(startDigit, target, opts) {
         var col = color(hex);
         var sVal = getSlider(val);
 
-        fill(
+       fill(
   hue(baseCol),
   map(sVal, 20, 100, 35, saturation(baseCol)),
   map(sVal, 20, 100, 100, brightness(baseCol))

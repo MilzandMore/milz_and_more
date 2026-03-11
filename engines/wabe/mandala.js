@@ -118,7 +118,6 @@ function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
   const sz = 16.2;
   const renderColors = renderColorsOverride || getRenderColors(cKey);
 
-  // Zwischenlinien (wie vorher)
   ctx.stroke(0, 0, 0, 35);
   ctx.strokeWeight(0.6);
 
@@ -147,12 +146,11 @@ function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
           const col = color(renderColors[val - 1]);
           const sVal = (APP.sliders && typeof APP.sliders[val] === "number") ? APP.sliders[val] : 85;
           ctx.fill(
-  hue(baseCol),
-  map(sVal, 20, 100, 35, saturation(baseCol)),
-  map(sVal, 20, 100, 100, brightness(baseCol))
-);
+            hue(col),
+            map(sVal, 20, 100, 35, saturation(col)),
+            map(sVal, 20, 100, 100, brightness(col))
+          );
         } else {
-          // ✅ Nuller immer weiß
           ctx.fill(0, 0, 100);
         }
 
@@ -230,7 +228,6 @@ function getCodeFromText(textStr) {
   return currentRow;
 }
 
-// --------- FARBEN ----------
 function getColorMatrix(seed) {
   const s = (seed === 0 || !seed) ? 1 : seed;
   return colorMatrix[s] || colorMatrix[1];
@@ -243,7 +240,6 @@ function getRenderColors(cKey) {
   return getColorMatrix(cKey);
 }
 
-// --------- RESIZE ----------
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   redraw();

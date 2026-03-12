@@ -1,6 +1,6 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED v=1003");
+console.log("QUADRAT mandala.js LOADED v=1004");
 
 var qMatrix = [];
 var logoImg = null;
@@ -17,11 +17,11 @@ var EMBED = isEmbed();
 
 var extState = {
   engine: "quadrat",
-  mode: "geburtstag",         // geburtstag | text
+  mode: "geburtstag",
   input: "15011987",
-  direction: "aussen",        // aussen | innen
+  direction: "aussen",
   sliders: Array(10).fill(85),
-  colors: [],                 // <-- neu: Farben vom Parent
+  colors: [],
   isAdmin: false,
   paperLook: true
 };
@@ -64,7 +64,6 @@ function setup() {
   colorMode(HSB, 360, 100, 100, 100);
   pixelDensity(2);
 
-  // Logo (dunkel) laden
   loadImage("../../assets/Logo_black.png",
     img => logoImg = img,
     () => loadImage("/milz_and_more/assets/Logo_black.png",
@@ -114,7 +113,6 @@ function draw() {
 
 /* ====== neue zentrale Farbquelle mit Fallback ====== */
 function getRenderPalette(startDigit) {
-  // Parent-Farben haben Vorrang
   if (Array.isArray(extState.colors) && extState.colors.length === 9) {
     return {
       1: extState.colors[0],
@@ -129,7 +127,6 @@ function getRenderPalette(startDigit) {
     };
   }
 
-  // Fallback: alte Engine-Palette
   return (colorMatrix[startDigit] || mapZ);
 }
 
@@ -155,20 +152,20 @@ function drawQuadrat(startDigit, target, opts) {
       var val = qMatrix[r][c];
 
       if (val === 0) {
-        // ✅ Nuller grundsätzlich weiß
         ctx.fill(0, 0, 100, 100);
       } else {
         var hex = renderPalette[val] || mapZ[val];
         var col = color(hex);
         var sVal = getSlider(val);
 
-       fill(
-  hue(baseCol),
-  map(sVal, 20, 100, 35, saturation(baseCol)),
-  map(sVal, 20, 100, 100, brightness(baseCol))
-);
+        ctx.fill(
+          hue(col),
+          map(sVal, 20, 100, 35, saturation(col)),
+          map(sVal, 20, 100, 100, brightness(col)),
+          100
+        );
+      }
 
-      // alle 4 Quadranten zeichnen (wie Original)
       ctx.rect(c * ts, -(r + 1) * ts, ts, ts);
       ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts);
       ctx.rect(c * ts, r * ts, ts, ts);
@@ -181,7 +178,7 @@ function drawQuadrat(startDigit, target, opts) {
 async function exportHighRes() {
   const exportW = 2480, exportH = 3508;
   const pg = createGraphics(exportW, exportH);
-  pg.colorMode(HSB, 360, 100, 100);
+  pg.colorMode(HSB, 360, 100, 100, 100);
   pg.background(255);
 
   const baseCode = (getMode() === "geburtstag")
@@ -209,14 +206,12 @@ async function exportHighRes() {
 
   const exportLogo = await waitForLogo(5000);
 
-  // Wasserzeichen (höher starten + yShift)
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
     pg.tint(255, 0.45);
 
     const wWidth = 380;
     const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
-
     const yShift = -200;
 
     for (let x = -100; x < exportW + 400; x += 500) {
@@ -227,7 +222,6 @@ async function exportHighRes() {
     pg.noTint();
   }
 
-  // Signatur unten rechts
   if (exportLogo) {
     pg.resetMatrix();
     pg.noTint();
@@ -251,10 +245,15 @@ function getCodeFromDate(str) {
 function getCodeFromText(textStr) {
   var t = String(textStr || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
   if (t.length === 0) return [1, 1, 1, 1, 1, 1, 1, 1];
+
   var firstRow = [];
-  for (var char of t) { if (charMap[char]) firstRow.push(charMap[char]); }
+  for (var char of t) {
+    if (charMap[char]) firstRow.push(charMap[char]);
+  }
+
   var currentRow = firstRow;
   while (currentRow.length < 8) currentRow.push(9);
+
   while (currentRow.length > 8) {
     var nextRow = [];
     for (var i = 0; i < currentRow.length - 1; i++) {
@@ -262,10 +261,11 @@ function getCodeFromText(textStr) {
     }
     currentRow = nextRow;
   }
+
   return currentRow;
 }
 
-/* ====== ORIGINAL: vollständige Quadrat-Logik (deine Version) ====== */
+/* ====== ORIGINAL: vollständige Quadrat-Logik ====== */
 function calcQuadratMatrix(code) {
   qMatrix = Array(20).fill().map(() => Array(20).fill(0));
   var d = [code[0], code[1]], m = [code[2], code[3]], j1 = [code[4], code[5]], j2 = [code[6], code[7]];
@@ -279,9 +279,16 @@ function calcQuadratMatrix(code) {
   }
 
   for (var i = 0; i < 8; i += 2) set2(i, i, d[0], d[1]);
-  for (var i = 0; i < 6; i += 2) { set2(i, i + 2, m[0], m[1]); set2(i + 2, i, m[0], m[1]); }
-  for (var i = 0; i < 4; i += 2) { set2(i, i + 4, j1[0], j1[1]); set2(i + 4, i, j1[0], j1[1]); }
-  set2(0, 6, j2[0], j2[1]); set2(6, 0, j2[0], j2[1]);
+  for (var i = 0; i < 6; i += 2) {
+    set2(i, i + 2, m[0], m[1]);
+    set2(i + 2, i, m[0], m[1]);
+  }
+  for (var i = 0; i < 4; i += 2) {
+    set2(i, i + 4, j1[0], j1[1]);
+    set2(i + 4, i, j1[0], j1[1]);
+  }
+  set2(0, 6, j2[0], j2[1]);
+  set2(6, 0, j2[0], j2[1]);
 
   for (var r = 0; r < 8; r++) {
     for (var c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c - 2], qMatrix[r][c - 1]);
@@ -314,9 +321,18 @@ function onMessageFromParent(ev) {
 }
 
 /* --------- state helpers --------- */
-function getMode() { return EMBED ? (extState.mode || "geburtstag") : "geburtstag"; }
-function getInput() { return EMBED ? (extState.input ?? "15011987") : "15011987"; }
-function getDirection() { return EMBED ? (extState.direction || "aussen") : "aussen"; }
+function getMode() {
+  return EMBED ? (extState.mode || "geburtstag") : "geburtstag";
+}
+
+function getInput() {
+  return EMBED ? (extState.input ?? "15011987") : "15011987";
+}
+
+function getDirection() {
+  return EMBED ? (extState.direction || "aussen") : "aussen";
+}
+
 function getSlider(val) {
   if (!EMBED) return 85;
   const arr = extState.sliders || [];

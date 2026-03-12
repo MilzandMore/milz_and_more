@@ -584,11 +584,25 @@ body{
   }
 
   #sectorWrap{
-    min-width:56px;
-    max-width:56px;
+    min-width:68px;
+    max-width:68px;
     flex:initial;
+    
   }
+#sector{
+  width:100%;
+  padding-left:10px;
+  padding-right:26px;
 
+  color:#ffffff;
+  background:rgba(20,20,25,0.9);
+
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:10px;
+
+  -webkit-appearance:none;
+  appearance:none;
+}
   .primary{
     height:36px;
     min-height:36px;

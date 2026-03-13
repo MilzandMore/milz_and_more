@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=final-palette-9">
+  <link rel="stylesheet" href="app.css?v=final-preview-1">
 </head>
 
 <body>
@@ -53,8 +53,14 @@
         </select>
       </div>
 
-      <button id="download" class="primary" type="button">Download</button>
+      <button id="previewPrint" class="engine-btn" type="button">Druckvorschau</button>
+      <button id="download" class="primary" type="button">PNG Download</button>
       <button id="openSliders" class="engine-btn mobile-only" type="button">Farben</button>
+    </div>
+
+    <div id="previewHint" class="preview-hint" aria-live="polite">
+      Die Vorschau enthält Wasserzeichen.<br>
+      Der PNG-Download ist ohne Wasserzeichen.
     </div>
 
     <div class="right">
@@ -122,18 +128,16 @@
       I:9, R:9
     };
 
-    /* unten besser unterscheidbare Pastells,
-       oben wieder klare leuchtende Endfarben */
     const PALETTE_RAMPS = [
-      { soft: "#F4C7BD", vivid: "#FF0000" }, // 1 Rot
-      { soft: "#C9D6FF", vivid: "#00008B" }, // 2 Blau
-      { soft: "#D8F3C7", vivid: "#00FF00" }, // 3 Grün
-      { soft: "#FFF1A6", vivid: "#FFFF00" }, // 4 Gelb
-      { soft: "#D3F0FF", vivid: "#87CEEB" }, // 5 Hellblau
-      { soft: "#9FE3E0", vivid: "#40E0D0" }, // 6 Türkis
-      { soft: "#F4B6D9", vivid: "#FF00A8" }, // 7 Pink
-      { soft: "#F8D4B4", vivid: "#FFA500" }, // 8 Orange
-      { soft: "#DDD0FA", vivid: "#9400D3" }  // 9 Violett
+      { soft: "#F4C7BD", vivid: "#FF0000" },
+      { soft: "#C9D6FF", vivid: "#00008B" },
+      { soft: "#D8F3C7", vivid: "#00FF00" },
+      { soft: "#FFF1A6", vivid: "#FFFF00" },
+      { soft: "#D3F0FF", vivid: "#87CEEB" },
+      { soft: "#9FE3E0", vivid: "#40E0D0" },
+      { soft: "#F4B6D9", vivid: "#FF00A8" },
+      { soft: "#F8D4B4", vivid: "#FFA500" },
+      { soft: "#DDD0FA", vivid: "#9400D3" }
     ];
 
     const els = {
@@ -146,6 +150,8 @@
       sectorWrap: document.getElementById("sectorWrap"),
       sector: document.getElementById("sector"),
       download: document.getElementById("download"),
+      previewPrint: document.getElementById("previewPrint"),
+      previewHint: document.getElementById("previewHint"),
       sliders: document.getElementById("sliders"),
       slidersMobile: document.getElementById("slidersMobile"),
       paperToggle: document.getElementById("paperToggle"),
@@ -248,10 +254,7 @@
 
     function getRampColor(ramp, sliderValue) {
       const tLinear = (clamp(Number(sliderValue) || 85, 20, 100) - 20) / 80;
-
-      /* oben schneller wieder bei voller Kraft */
       const t = Math.pow(tLinear, 0.86);
-
       return interpolateHex(ramp.soft, ramp.vivid, t);
     }
 
@@ -487,7 +490,13 @@
       pushStateToEngine();
     });
 
-    els.download.addEventListener("click", requestExport);
+    els.download.addEventListener("click", () => {
+      requestExport();
+    });
+
+    els.previewPrint.addEventListener("click", () => {
+      els.previewHint.classList.toggle("show");
+    });
 
     els.paperToggle.addEventListener("change", () => {
       state.paperLook = els.paperToggle.checked;

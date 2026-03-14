@@ -63,6 +63,7 @@ window.addEventListener("message", (ev) => {
     };
     isAdmin = !!APP.isAdmin;
     redraw();
+    return;
   }
 
   if (msg.type === "EXPORT") {
@@ -75,6 +76,7 @@ window.addEventListener("message", (ev) => {
       isAdmin = !!APP.isAdmin;
     }
     exportHighRes();
+    return;
   }
 });
 
@@ -159,10 +161,10 @@ function drawSector(m, colors, target) {
         const sVal = (APP.sliders && typeof APP.sliders[v] === "number") ? APP.sliders[v] : 85;
 
         ctx.fill(
-  hue(baseCol),
-  map(sVal, 20, 100, 35, saturation(baseCol)),
-  map(sVal, 20, 100, 100, brightness(baseCol))
-);
+          hue(baseCol),
+          map(sVal, 20, 100, 35, saturation(baseCol)),
+          map(sVal, 20, 100, 100, brightness(baseCol))
+        );
       } else {
         ctx.fill(0, 0, 100); // 0er weiß
       }
@@ -231,7 +233,14 @@ function exportHighRes() {
     pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
 
-  save(pg, "Milz&More_Rund.png");
+  const dataUrl = pg.canvas.toDataURL("image/png");
+
+  try {
+    window.parent.postMessage({
+      type: "EXPORT_RESULT",
+      dataUrl: dataUrl
+    }, "*");
+  } catch (_) {}
 }
 
 // --------- RICHTIGE RUND-LOGIK ----------

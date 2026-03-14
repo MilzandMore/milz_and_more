@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=preview-fix-7">
+  <link rel="stylesheet" href="app.css?v=preview-fix-8">
 </head>
 
 <body>
@@ -89,7 +89,6 @@
 
       <div id="printPreview" class="print-preview" hidden>
         <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
-
         <div class="print-preview__panel">
           <button id="closePrintPreview" class="print-preview__close" type="button" aria-label="Schließen">×</button>
           <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
@@ -351,12 +350,10 @@
 
     function showLoading() {
       els.loading.style.display = "grid";
-      els.stage.classList.add("is-loading");
     }
 
     function hideLoading() {
       els.loading.style.display = "none";
-      els.stage.classList.remove("is-loading");
     }
 
     function showPreviewInfo() {
@@ -369,16 +366,14 @@
     }
 
     function openPrintPreview(dataUrl) {
-      if (!els.printPreview || !els.printPreviewImage) return;
       els.printPreviewImage.src = dataUrl;
       els.printPreview.hidden = false;
       document.body.style.overflow = "hidden";
     }
 
     function closePrintPreview() {
-      if (!els.printPreview) return;
       els.printPreview.hidden = true;
-      if (els.printPreviewImage) els.printPreviewImage.src = "";
+      els.printPreviewImage.src = "";
       document.body.style.overflow = "";
     }
 
@@ -449,13 +444,11 @@
     function pushStateToEngine() {
       if (!els.frame.contentWindow) return;
 
-      try {
-        const enginePayload = getEnginePayloadState();
-        els.frame.contentWindow.postMessage(
-          { type: "SET_STATE", payload: enginePayload },
-          "*"
-        );
-      } catch (_) {}
+      const enginePayload = getEnginePayloadState();
+      els.frame.contentWindow.postMessage(
+        { type: "SET_STATE", payload: enginePayload },
+        "*"
+      );
     }
 
     function requestExport() {
@@ -463,15 +456,11 @@
 
       showLoading();
 
-      try {
-        const enginePayload = getEnginePayloadState();
-        els.frame.contentWindow.postMessage(
-          { type: "EXPORT", payload: enginePayload },
-          "*"
-        );
-      } catch (_) {
-        hideLoading();
-      }
+      const enginePayload = getEnginePayloadState();
+      els.frame.contentWindow.postMessage(
+        { type: "EXPORT", payload: enginePayload },
+        "*"
+      );
     }
 
     function handlePngDownload() {
@@ -488,10 +477,7 @@
       updateConditionalFields();
       showLoading();
 
-      const fallbackTimer = setTimeout(() => hideLoading(), 2500);
-
       els.frame.onload = () => {
-        clearTimeout(fallbackTimer);
         hideLoading();
         pushStateToEngine();
       };
@@ -577,7 +563,6 @@
     els.openSliders.addEventListener("click", openSheet);
     els.closeSliders.addEventListener("click", closeSheet);
     els.sliderBackdrop.addEventListener("click", closeSheet);
-
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 

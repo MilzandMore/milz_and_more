@@ -983,6 +983,33 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
   </button>
 </div>
 @media (max-width:900px){
+  .print-preview__buy{
+  position:absolute;
+  top:12px;
+  right:60px;
+
+  height:40px;
+  padding:0 18px;
+
+  border:none;
+  border-radius:12px;
+
+  background:#D8B45A;
+  color:#0b0f14;
+
+  font-weight:800;
+  font-size:13px;
+
+  cursor:pointer;
+
+  box-shadow:0 6px 18px rgba(0,0,0,.35);
+  transition:all .15s ease;
+}
+
+.print-preview__buy:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 22px rgba(0,0,0,.45);
+}
   .print-preview__panel{
     width:min(94%, 980px);
     padding:14px;

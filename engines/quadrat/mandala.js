@@ -1,6 +1,6 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED v=1006");
+console.log("QUADRAT mandala.js LOADED v=1007");
 
 var qMatrix = [];
 var logoImg = null;
@@ -171,7 +171,6 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-/* ====== EXPORT ====== */
 async function exportHighRes() {
   const exportW = 2480, exportH = 3508;
 
@@ -206,7 +205,7 @@ async function exportHighRes() {
 
   if (exportLogo && !isAdmin) {
     pg.resetMatrix();
-    pg.tint(255, 0.45);
+    pg.tint(255, 45);
 
     const wWidth = 380;
     const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
@@ -239,7 +238,6 @@ async function exportHighRes() {
   } catch (_) {}
 }
 
-/* --------- code gen --------- */
 function getCodeFromDate(str) {
   var val = String(str || "").replace(/[^0-9]/g, "");
   var res = val.split('').map(Number);
@@ -270,7 +268,6 @@ function getCodeFromText(textStr) {
   return currentRow;
 }
 
-/* ====== vollständige Quadrat-Logik ====== */
 function calcQuadratMatrix(code) {
   qMatrix = Array(20).fill().map(() => Array(20).fill(0));
   var d = [code[0], code[1]], m = [code[2], code[3]], j1 = [code[4], code[5]], j2 = [code[6], code[7]];
@@ -303,7 +300,6 @@ function calcQuadratMatrix(code) {
   }
 }
 
-/* --------- messaging --------- */
 function onMessageFromParent(ev) {
   const msg = ev.data;
   if (!msg || typeof msg !== "object") return;
@@ -327,7 +323,6 @@ function onMessageFromParent(ev) {
   }
 }
 
-/* --------- state helpers --------- */
 function getMode() {
   return EMBED ? (extState.mode || "geburtstag") : "geburtstag";
 }

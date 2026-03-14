@@ -972,35 +972,16 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
   margin-top:4px;
 }
 
-.print-preview__caption{
-  text-align:left;
-  font-size:13px;
-  line-height:1.45;
-  color:rgba(255,255,255,.92);
-  flex:1 1 auto;
-}
+<div class="print-preview__caption">
+  <div class="print-preview__text">
+    Diese Druckvorschau enthält Wasserzeichen.<br>
+    Der PNG Download ist ohne Wasserzeichen.
+  </div>
 
-.print-preview__buy{
-  flex:0 0 auto;
-  min-height:46px;
-  padding:0 20px;
-  border:none;
-  border-radius:14px;
-  background:#ffffff;
-  color:#0b0f14;
-  font-weight:950;
-  font-size:14px;
-  cursor:pointer;
-  box-shadow:0 12px 28px rgba(0,0,0,.22);
-  white-space:nowrap;
-  transition:transform .15s ease, opacity .15s ease;
-}
-
-.print-preview__buy:hover{
-  opacity:.94;
-  transform:translateY(-1px);
-}
-
+  <button id="buyPreviewPng" class="print-preview__buy" type="button">
+    PNG ohne Wasserzeichen kaufen
+  </button>
+</div>
 @media (max-width:900px){
   .print-preview__panel{
     width:min(94%, 980px);

@@ -429,7 +429,6 @@ body{
   color:rgba(238,243,251,.92);
 }
 
-/* Hinweis in der Vorschau */
 .preview-info{
   position:absolute;
   left:50%;
@@ -453,6 +452,101 @@ body{
 
 .preview-info.show{
   opacity:1;
+}
+
+/* =========================
+   PRINT PREVIEW
+   ========================= */
+
+.print-preview[hidden]{
+  display:none !important;
+}
+
+.print-preview{
+  position:absolute;
+  inset:0;
+  z-index:40;
+  display:grid;
+  place-items:center;
+}
+
+.print-preview__backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.58);
+  backdrop-filter:blur(8px);
+}
+
+.print-preview__panel{
+  position:relative;
+  z-index:1;
+  width:min(92%, 980px);
+  max-height:90%;
+  padding:18px;
+  border-radius:20px;
+  background:rgba(16,20,28,.96);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 24px 80px rgba(0,0,0,.55);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  align-items:center;
+}
+
+.print-preview__close{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:40px;
+  height:40px;
+  border:none;
+  border-radius:999px;
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  font-size:24px;
+  line-height:1;
+  cursor:pointer;
+}
+
+.print-preview__buy{
+  position:absolute;
+  top:12px;
+  right:64px;
+  height:38px;
+  padding:0 14px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.18);
+  background:#ffffff;
+  color:#0b0f14;
+  font-weight:950;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.22);
+  transition:transform .15s ease, opacity .15s ease;
+}
+
+.print-preview__buy:hover{
+  opacity:.93;
+  transform:translateY(-1px);
+}
+
+.print-preview__image{
+  display:block;
+  max-width:100%;
+  max-height:70vh;
+  border-radius:14px;
+  background:#ffffff;
+  object-fit:contain;
+  box-shadow:0 10px 32px rgba(0,0,0,.22);
+}
+
+.print-preview__caption{
+  width:100%;
+  text-align:left;
+  font-size:13px;
+  line-height:1.45;
+  color:rgba(255,255,255,.92);
+  margin-top:4px;
 }
 
 /* =========================
@@ -682,8 +776,7 @@ body{
   .controls > .field:nth-of-type(4){ order:4; }
   #sectorWrap{ order:5; }
   #download{ order:6; }
-  #pngDownload{ order:7; }
-  #openSliders{ order:8; }
+  #openSliders{ order:7; }
 
   .app-main{
     position:relative;
@@ -715,6 +808,36 @@ body{
     font-size:11px;
     padding:8px 12px;
     max-width:calc(100% - 24px);
+  }
+
+  .print-preview__panel{
+    width:min(94%, 980px);
+    padding:14px;
+    border-radius:16px;
+  }
+
+  .print-preview__image{
+    max-height:62vh;
+  }
+
+  .print-preview__caption{
+    text-align:center;
+    font-size:12px;
+    margin-top:8px;
+  }
+
+  .print-preview__buy{
+    position:static;
+    width:100%;
+    margin-top:8px;
+    min-height:42px;
+    font-size:13px;
+  }
+
+  .print-preview__close{
+    width:36px;
+    height:36px;
+    font-size:22px;
   }
 }
 
@@ -901,132 +1024,4 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     max-width:760px;
     max-height:260px;
   }
-}
-
-.print-preview[hidden]{
-  display:none !important;
-}
-
-.print-preview{
-  position:absolute;
-  inset:0;
-  z-index:40;
-  display:grid;
-  place-items:center;
-}
-
-.print-preview__backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.58);
-  backdrop-filter:blur(8px);
-}
-
-.print-preview__panel{
-  position:relative;
-  z-index:1;
-  width:min(92%, 980px);
-  max-height:90%;
-  padding:18px;
-  border-radius:20px;
-  background:rgba(16,20,28,.96);
-  border:1px solid rgba(255,255,255,.14);
-  box-shadow:0 24px 80px rgba(0,0,0,.55);
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  align-items:center;
-}
-
-.print-preview__close{
-  position:absolute;
-  top:12px;
-  right:12px;
-  width:40px;
-  height:40px;
-  border:none;
-  border-radius:999px;
-  background:rgba(255,255,255,.10);
-  color:#fff;
-  font-size:24px;
-  line-height:1;
-  cursor:pointer;
-}
-
-.print-preview__buy{
-  position:absolute;
-  top:12px;
-  right:64px;
-
-  height:38px;
-  padding:0 14px;
-
-  border-radius:12px;
-  border:1px solid rgba(0,0,0,.18);
-
-  background:#ffffff;
-  color:#0b0f14;
-
-  font-weight:950;
-  font-size:14px;
-  cursor:pointer;
-
-  box-shadow:0 10px 24px rgba(0,0,0,.22);
-  transition:transform .15s ease, opacity .15s ease;
-}
-
-.print-preview__buy:hover{
-  opacity:.93;
-  transform:translateY(-1px);
-}
-
-.print-preview__image{
-  display:block;
-  max-width:100%;
-  max-height:70vh;
-  border-radius:14px;
-  background:#ffffff;
-  object-fit:contain;
-  box-shadow:0 10px 32px rgba(0,0,0,.22);
-}
-
-.print-preview__caption{
-  width:100%;
-  text-align:left;
-  font-size:13px;
-  line-height:1.45;
-  color:rgba(255,255,255,.92);
-  margin-top:4px;
-}
-
-@media (max-width:900px){
-  .print-preview__panel{
-    width:min(94%, 980px);
-    padding:14px;
-    border-radius:16px;
-  }
-
-  .print-preview__image{
-    max-height:62vh;
-  }
-
-  .print-preview__caption{
-    text-align:center;
-    font-size:12px;
-    margin-top:8px;
-  }
-
-  .print-preview__buy{
-    position:static;
-    width:100%;
-    margin-top:8px;
-    min-height:42px;
-    font-size:13px;
-  }
-
-  .print-preview__close{
-    width:36px;
-    height:36px;
-    font-size:22px;
-  }
-}
+}  bitte den gedamten css, da ist was schief gegangen

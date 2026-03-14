@@ -991,3 +991,28 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     font-size:22px;
   }
 }
+
+.print-preview__buy{
+  min-height:44px;
+  padding:0 18px;
+  border:none;
+  border-radius:14px;
+  background:#ffffff;
+  color:#0b0f14;
+  font-weight:950;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 12px 28px rgba(0,0,0,.22);
+}
+
+.print-preview__buy:hover{
+  opacity:.94;
+}
+
+@media (max-width:900px){
+  .print-preview__buy{
+    width:100%;
+    min-height:42px;
+    font-size:13px;
+  }
+}

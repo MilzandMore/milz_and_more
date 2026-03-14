@@ -1,6 +1,6 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED v=1004");
+console.log("QUADRAT mandala.js LOADED v=1005");
 
 var qMatrix = [];
 var logoImg = null;
@@ -56,7 +56,6 @@ function ex(a, b) {
   return (s === 0) ? 0 : (s % 9 === 0 ? 9 : s % 9);
 }
 
-/* ====== WICHTIG: kein blockierendes preload ====== */
 function preload() {}
 
 function setup() {
@@ -111,7 +110,6 @@ function draw() {
   pop();
 }
 
-/* ====== neue zentrale Farbquelle mit Fallback ====== */
 function getRenderPalette(startDigit) {
   if (Array.isArray(extState.colors) && extState.colors.length === 9) {
     return {
@@ -130,7 +128,6 @@ function getRenderPalette(startDigit) {
   return (colorMatrix[startDigit] || mapZ);
 }
 
-/* ====== Nuller IMMER weiß + Linien überall ====== */
 function drawQuadrat(startDigit, target, opts) {
   var ctx = target || window;
   var ts = 16;
@@ -174,9 +171,11 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-/* ====== Export nur noch als Vorschau an Parent senden ====== */
+/* ====== EXPORT ====== */
 async function exportHighRes() {
+
   const exportW = 2480, exportH = 3508;
+
   const pg = createGraphics(exportW, exportH);
   pg.colorMode(HSB, 360, 100, 100, 100);
   pg.background(255);
@@ -231,6 +230,8 @@ async function exportHighRes() {
     pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
 
+  /* ===== WICHTIG: kein Download mehr ===== */
+
   const dataUrl = pg.canvas.toDataURL("image/png");
 
   try {
@@ -241,71 +242,6 @@ async function exportHighRes() {
   } catch (_) {}
 }
 
-/* --------- code gen --------- */
-function getCodeFromDate(str) {
-  var val = String(str || "").replace(/[^0-9]/g, "");
-  var res = val.split('').map(Number);
-  while (res.length < 8) res.push(0);
-  return res.slice(0, 8);
-}
-
-function getCodeFromText(textStr) {
-  var t = String(textStr || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
-  if (t.length === 0) return [1, 1, 1, 1, 1, 1, 1, 1];
-
-  var firstRow = [];
-  for (var char of t) {
-    if (charMap[char]) firstRow.push(charMap[char]);
-  }
-
-  var currentRow = firstRow;
-  while (currentRow.length < 8) currentRow.push(9);
-
-  while (currentRow.length > 8) {
-    var nextRow = [];
-    for (var i = 0; i < currentRow.length - 1; i++) {
-      nextRow.push(ex(currentRow[i], currentRow[i + 1]));
-    }
-    currentRow = nextRow;
-  }
-
-  return currentRow;
-}
-
-/* ====== ORIGINAL: vollständige Quadrat-Logik ====== */
-function calcQuadratMatrix(code) {
-  qMatrix = Array(20).fill().map(() => Array(20).fill(0));
-  var d = [code[0], code[1]], m = [code[2], code[3]], j1 = [code[4], code[5]], j2 = [code[6], code[7]];
-
-  function set2(r, c, v1, v2) {
-    if (r >= 20 || c >= 20) return;
-    qMatrix[r][c] = v1;
-    if (c + 1 < 20) qMatrix[r][c + 1] = v2;
-    if (r + 1 < 20) qMatrix[r + 1][c] = v2;
-    if (r + 1 < 20 && c + 1 < 20) qMatrix[r + 1][c + 1] = v1;
-  }
-
-  for (var i = 0; i < 8; i += 2) set2(i, i, d[0], d[1]);
-  for (var i = 0; i < 6; i += 2) {
-    set2(i, i + 2, m[0], m[1]);
-    set2(i + 2, i, m[0], m[1]);
-  }
-  for (var i = 0; i < 4; i += 2) {
-    set2(i, i + 4, j1[0], j1[1]);
-    set2(i + 4, i, j1[0], j1[1]);
-  }
-  set2(0, 6, j2[0], j2[1]);
-  set2(6, 0, j2[0], j2[1]);
-
-  for (var r = 0; r < 8; r++) {
-    for (var c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c - 2], qMatrix[r][c - 1]);
-  }
-  for (var c = 0; c < 20; c++) {
-    for (var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r - 2][c], qMatrix[r - 1][c]);
-  }
-}
-
-/* --------- messaging --------- */
 function onMessageFromParent(ev) {
   const msg = ev.data;
   if (!msg || typeof msg !== "object") return;
@@ -323,11 +259,11 @@ function onMessageFromParent(ev) {
       if (!Array.isArray(extState.colors)) extState.colors = [];
       isAdmin = !!extState.isAdmin;
     }
+
     exportHighRes();
   }
 }
 
-/* --------- state helpers --------- */
 function getMode() {
   return EMBED ? (extState.mode || "geburtstag") : "geburtstag";
 }

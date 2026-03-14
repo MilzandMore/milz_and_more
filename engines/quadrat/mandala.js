@@ -174,7 +174,7 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-/* ====== Export (wie Wabe/Rund) + Watermark höher ====== */
+/* ====== Export nur noch als Vorschau an Parent senden ====== */
 async function exportHighRes() {
   const exportW = 2480, exportH = 3508;
   const pg = createGraphics(exportW, exportH);
@@ -231,7 +231,14 @@ async function exportHighRes() {
     pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
 
-  save(pg, 'Milz&More_Quadrat.png');
+  const dataUrl = pg.canvas.toDataURL("image/png");
+
+  try {
+    window.parent.postMessage({
+      type: "EXPORT_RESULT",
+      dataUrl: dataUrl
+    }, "*");
+  } catch (_) {}
 }
 
 /* --------- code gen --------- */

@@ -51,6 +51,7 @@ window.addEventListener("message", (ev) => {
     };
     isAdmin = !!APP.isAdmin;
     redraw();
+    return;
   }
 
   if (msg.type === "EXPORT") {
@@ -63,6 +64,7 @@ window.addEventListener("message", (ev) => {
       isAdmin = !!APP.isAdmin;
     }
     exportHighRes();
+    return;
   }
 });
 
@@ -208,7 +210,14 @@ function exportHighRes() {
     pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
 
-  save(pg, 'Milz&More_Wabe.png');
+  const dataUrl = pg.canvas.toDataURL("image/png");
+
+  try {
+    window.parent.postMessage({
+      type: "EXPORT_RESULT",
+      dataUrl: dataUrl
+    }, "*");
+  } catch (_) {}
 }
 
 function getCodeFromText(textStr) {

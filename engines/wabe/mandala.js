@@ -193,7 +193,7 @@ function exportHighRes() {
 
   if (logoImg && !isAdmin) {
     pg.resetMatrix();
-    pg.tint(255, 0.45);
+    pg.tint(255, 45);
     const wWidth = 380, wHeight = (logoImg.height / logoImg.width) * wWidth;
     for (let x = -100; x < exportW + 400; x += 500) {
       for (let y = -400; y < exportH + 400; y += 500) {

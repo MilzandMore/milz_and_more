@@ -166,7 +166,7 @@ function drawSector(m, colors, target) {
           map(sVal, 20, 100, 100, brightness(baseCol))
         );
       } else {
-        ctx.fill(0, 0, 100); // 0er weiß
+        ctx.fill(0, 0, 100);
       }
 
       ctx.beginShape();
@@ -193,7 +193,6 @@ function exportHighRes() {
   const sc = int(APP.sector || 8);
   const angle = TWO_PI / sc;
 
-  // Mandala auf Druckseite
   pg.push();
   pg.translate(exportW / 2, exportH * 0.40);
   pg.scale(3.2);
@@ -206,10 +205,9 @@ function exportHighRes() {
   }
   pg.pop();
 
-  // Wasserzeichen nur ohne Premium/Admin
   if (logoImg && !isAdmin) {
     pg.resetMatrix();
-    pg.tint(255, 0.45);
+    pg.tint(255, 45);
 
     const wWidth = 380;
     const wHeight = (logoImg.height / logoImg.width) * wWidth;
@@ -223,7 +221,6 @@ function exportHighRes() {
     pg.noTint();
   }
 
-  // Logo unten rechts
   if (logoImg) {
     pg.resetMatrix();
     pg.noTint();

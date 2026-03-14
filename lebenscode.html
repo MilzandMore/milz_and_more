@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=preview-fix-8">
+  <link rel="stylesheet" href="app.css?v=preview-buy-1">
 </head>
 
 <body>
@@ -54,15 +54,10 @@
       </div>
 
       <button id="download" class="primary" type="button">Druckvorschau</button>
-      <button id="pngDownload" class="engine-btn" type="button">PNG Download</button>
       <button id="openSliders" class="engine-btn mobile-only" type="button">Farben</button>
     </div>
 
     <div class="right">
-      <label class="toggle" aria-label="Papieroptik">
-        <input id="paperToggle" type="checkbox" checked>
-      </label>
-
       <nav class="engine-nav" aria-label="Form auswählen">
         <button class="engine-btn active" data-engine="quadrat" type="button">Quadrat</button>
         <button class="engine-btn" data-engine="rund" type="button">Rund</button>
@@ -89,13 +84,20 @@
 
       <div id="printPreview" class="print-preview" hidden>
         <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
+
         <div class="print-preview__panel">
           <button id="closePrintPreview" class="print-preview__close" type="button" aria-label="Schließen">×</button>
+
           <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
+
           <div class="print-preview__caption">
             Diese Druckvorschau enthält Wasserzeichen.<br>
             Der PNG Download ist ohne Wasserzeichen.
           </div>
+
+          <button id="buyPreviewPng" class="print-preview__buy" type="button">
+            PNG ohne Wasserzeichen kaufen
+          </button>
         </div>
       </div>
     </section>
@@ -164,11 +166,9 @@
       sectorWrap: document.getElementById("sectorWrap"),
       sector: document.getElementById("sector"),
       download: document.getElementById("download"),
-      pngDownload: document.getElementById("pngDownload"),
       previewInfo: document.getElementById("previewInfo"),
       sliders: document.getElementById("sliders"),
       slidersMobile: document.getElementById("slidersMobile"),
-      paperToggle: document.getElementById("paperToggle"),
       openSliders: document.getElementById("openSliders"),
       closeSliders: document.getElementById("closeSliders"),
       sliderSheet: document.getElementById("sliderSheet"),
@@ -177,7 +177,8 @@
       printPreview: document.getElementById("printPreview"),
       printPreviewBackdrop: document.getElementById("printPreviewBackdrop"),
       printPreviewImage: document.getElementById("printPreviewImage"),
-      closePrintPreview: document.getElementById("closePrintPreview")
+      closePrintPreview: document.getElementById("closePrintPreview"),
+      buyPreviewPng: document.getElementById("buyPreviewPng")
     };
 
     function ex(a, b) {
@@ -362,7 +363,7 @@
       clearTimeout(showPreviewInfo._timer);
       showPreviewInfo._timer = setTimeout(() => {
         els.previewInfo.classList.remove("show");
-      }, 2200);
+      }, 1800);
     }
 
     function openPrintPreview(dataUrl) {
@@ -375,6 +376,14 @@
       els.printPreview.hidden = true;
       els.printPreviewImage.src = "";
       document.body.style.overflow = "";
+    }
+
+    function handlePaidDownload() {
+      if (!PAYMENT_URL || PAYMENT_URL === "#") {
+        alert("Der Zahlungslink wird noch hinterlegt.");
+        return;
+      }
+      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
     }
 
     function buildSlidersInto(containerEl) {
@@ -436,11 +445,6 @@
       }
     }
 
-    function applyPaperLook() {
-      els.stage.classList.toggle("paper", !!state.paperLook);
-      els.stage.classList.toggle("dark", !state.paperLook);
-    }
-
     function pushStateToEngine() {
       if (!els.frame.contentWindow) return;
 
@@ -461,14 +465,6 @@
         { type: "EXPORT", payload: enginePayload },
         "*"
       );
-    }
-
-    function handlePngDownload() {
-      if (!PAYMENT_URL || PAYMENT_URL === "#") {
-        alert("Der Zahlungslink wird noch hinterlegt.");
-        return;
-      }
-      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
     }
 
     function loadEngine(engine) {
@@ -550,25 +546,15 @@
       requestExport();
     });
 
-    els.pngDownload.addEventListener("click", () => {
-      handlePngDownload();
-    });
-
-    els.paperToggle.addEventListener("change", () => {
-      state.paperLook = els.paperToggle.checked;
-      applyPaperLook();
-      pushStateToEngine();
-    });
-
     els.openSliders.addEventListener("click", openSheet);
     els.closeSliders.addEventListener("click", closeSheet);
     els.sliderBackdrop.addEventListener("click", closeSheet);
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
+    els.buyPreviewPng.addEventListener("click", handlePaidDownload);
 
     buildSliders();
     refreshComputedCodeAndColors();
-    applyPaperLook();
     updateConditionalFields();
     loadEngine("quadrat");
   </script>

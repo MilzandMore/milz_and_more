@@ -1009,7 +1009,19 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     min-height:44px;
     font-size:13px;
   }
+@media (max-width:900px){
 
+  .print-preview__caption{
+    flex-direction:column;
+    align-items:stretch;
+    gap:12px;
+    text-align:center;
+  }
+
+  .print-preview__buy{
+    width:100%;
+  }
+}
   .print-preview__close{
     width:36px;
     height:36px;

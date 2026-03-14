@@ -200,23 +200,6 @@ body{
 }
 
 /* =========================
-   PREVIEW HINT
-   ========================= */
-
-.preview-hint{
-  display:none;
-  width:100%;
-  margin-top:8px;
-  font-size:12px;
-  line-height:1.4;
-  color:var(--muted);
-}
-
-.preview-hint.show{
-  display:block;
-}
-
-/* =========================
    RIGHT SIDE / ENGINE BUTTONS
    ========================= */
 
@@ -439,6 +422,31 @@ body{
   color:rgba(238,243,251,.92);
 }
 
+/* Hinweis in der Vorschau */
+.preview-info{
+  position:absolute;
+  left:50%;
+  bottom:20px;
+  transform:translateX(-50%);
+  padding:10px 16px;
+  border-radius:12px;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(8px);
+  font-size:12px;
+  line-height:1.4;
+  text-align:center;
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.15);
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .2s ease;
+  z-index:25;
+}
+
+.preview-info.show{
+  opacity:1;
+}
+
 /* =========================
    MOBILE BOTTOM SHEET
    ========================= */
@@ -659,15 +667,9 @@ body{
   .controls > .field:nth-of-type(3){ order:3; }
   .controls > .field:nth-of-type(4){ order:4; }
   #sectorWrap{ order:5; }
-  #previewPrint{ order:6; }
-  #download{ order:7; }
+  #download{ order:6; }
+  #pngDownload{ order:7; }
   #openSliders{ order:8; }
-
-  .preview-hint{
-    order:9;
-    font-size:11px;
-    margin-top:2px;
-  }
 
   .app-main{
     position:relative;
@@ -692,6 +694,13 @@ body{
   .engine-frame{
     height:56vh;
     min-height:440px;
+  }
+
+  .preview-info{
+    bottom:14px;
+    font-size:11px;
+    padding:8px 12px;
+    max-width:calc(100% - 24px);
   }
 }
 

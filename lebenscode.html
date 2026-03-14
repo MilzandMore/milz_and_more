@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=final-preview-3">
+  <link rel="stylesheet" href="app.css?v=preview-fix-7">
 </head>
 
 <body>
@@ -86,6 +86,19 @@
         Diese Druckvorschau enthält Wasserzeichen.<br>
         Der PNG Download ist ohne Wasserzeichen.
       </div>
+
+      <div id="printPreview" class="print-preview" hidden>
+        <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
+
+        <div class="print-preview__panel">
+          <button id="closePrintPreview" class="print-preview__close" type="button" aria-label="Schließen">×</button>
+          <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
+          <div class="print-preview__caption">
+            Diese Druckvorschau enthält Wasserzeichen.<br>
+            Der PNG Download ist ohne Wasserzeichen.
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -105,7 +118,6 @@
 
   <script>
     const PAYMENT_URL = "#";
-    // Später echten Zahlungslink einsetzen
 
     const state = {
       engine: "quadrat",
@@ -162,7 +174,11 @@
       closeSliders: document.getElementById("closeSliders"),
       sliderSheet: document.getElementById("sliderSheet"),
       sliderBackdrop: document.getElementById("sliderBackdrop"),
-      codeOutput: document.getElementById("codeOutput")
+      codeOutput: document.getElementById("codeOutput"),
+      printPreview: document.getElementById("printPreview"),
+      printPreviewBackdrop: document.getElementById("printPreviewBackdrop"),
+      printPreviewImage: document.getElementById("printPreviewImage"),
+      closePrintPreview: document.getElementById("closePrintPreview")
     };
 
     function ex(a, b) {
@@ -349,7 +365,21 @@
       clearTimeout(showPreviewInfo._timer);
       showPreviewInfo._timer = setTimeout(() => {
         els.previewInfo.classList.remove("show");
-      }, 2600);
+      }, 2200);
+    }
+
+    function openPrintPreview(dataUrl) {
+      if (!els.printPreview || !els.printPreviewImage) return;
+      els.printPreviewImage.src = dataUrl;
+      els.printPreview.hidden = false;
+      document.body.style.overflow = "hidden";
+    }
+
+    function closePrintPreview() {
+      if (!els.printPreview) return;
+      els.printPreview.hidden = true;
+      if (els.printPreviewImage) els.printPreviewImage.src = "";
+      document.body.style.overflow = "";
     }
 
     function buildSlidersInto(containerEl) {
@@ -431,13 +461,17 @@
     function requestExport() {
       if (!els.frame.contentWindow) return;
 
+      showLoading();
+
       try {
         const enginePayload = getEnginePayloadState();
         els.frame.contentWindow.postMessage(
           { type: "EXPORT", payload: enginePayload },
           "*"
         );
-      } catch (_) {}
+      } catch (_) {
+        hideLoading();
+      }
     }
 
     function handlePngDownload() {
@@ -482,6 +516,19 @@
       if (msg.type === "READY") {
         hideLoading();
         pushStateToEngine();
+        return;
+      }
+
+      if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
+        state.colors = [...msg.colors];
+        applySliderColorsToUI();
+        return;
+      }
+
+      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+        hideLoading();
+        openPrintPreview(msg.dataUrl);
+        return;
       }
     });
 
@@ -530,6 +577,9 @@
     els.openSliders.addEventListener("click", openSheet);
     els.closeSliders.addEventListener("click", closeSheet);
     els.sliderBackdrop.addEventListener("click", closeSheet);
+
+    els.closePrintPreview.addEventListener("click", closePrintPreview);
+    els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
     buildSliders();
     refreshComputedCodeAndColors();

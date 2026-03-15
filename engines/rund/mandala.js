@@ -9,6 +9,16 @@ let APP = {
   colors: [],
   isAdmin: false
 };
+// ---- Canvas Export Protection ----
+const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
+
+HTMLCanvasElement.prototype.toDataURL = function () {
+  if (!window.isAdmin) {
+    console.warn("Canvas export blocked");
+    return "";
+  }
+  return originalToDataURL.apply(this, arguments);
+};
 
 // --------- KONSTANTEN ----------
 var baseColors = [

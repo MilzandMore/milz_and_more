@@ -77,18 +77,24 @@ function preload() {
     () => { logoImg = loadImage("../../assets/Logo.png"); }
   );
 
-  crownImg = loadImage(
-    "../../assets/krone.png",
-    () => {},
-    () => {
-      crownImg = loadImage(
-        "/milz_and_more/assets/krone.png",
-        () => {},
-        () => { crownImg = null; }
-      );
-    }
-  );
-}
+  loadImage("../../assets/krone.png",
+  img => {
+    crownImg = img;
+    console.log("Krone geladen");
+  },
+  err => {
+    console.error("Krone NICHT geladen", err);
+    loadImage("/milz_and_more/assets/krone.png",
+      img => {
+        crownImg = img;
+        console.log("Krone geladen über Fallback");
+      },
+      err2 => {
+        console.error("Krone auch im Fallback nicht geladen", err2);
+      }
+    );
+  }
+);
 
 function setup() {
   createCanvas(windowWidth, windowHeight);

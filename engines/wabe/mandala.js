@@ -29,6 +29,7 @@ var charMap = {
 var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
 let logoImg;
+let crownImg = null;
 let isAdmin = false;
 
 function sendReady() {
@@ -74,6 +75,18 @@ function preload() {
     p,
     () => {},
     () => { logoImg = loadImage("../../assets/Logo.png"); }
+  );
+
+  crownImg = loadImage(
+    "../../assets/krone.png",
+    () => {},
+    () => {
+      crownImg = loadImage(
+        "/milz_and_more/assets/krone.png",
+        () => {},
+        () => { crownImg = null; }
+      );
+    }
   );
 }
 
@@ -181,22 +194,19 @@ function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
 }
 
 function drawLiveWatermark() {
+  if (!crownImg) return;
+
   push();
   resetMatrix();
-  noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(width < 700 ? 16 : 20);
+  imageMode(CENTER);
 
   drawingContext.save();
-  drawingContext.globalAlpha = 0.10;
+  drawingContext.globalAlpha = 0.18;
 
-  fill(0, 0, 100);
+  const crownW = min(width, height) * 0.28;
+  const crownH = (crownImg.height / crownImg.width) * crownW;
 
-  for (let x = 90; x < width; x += 220) {
-    for (let y = 70; y < height; y += 170) {
-      text("Milz & More", x, y);
-    }
-  }
+  image(crownImg, width / 2, height / 2, crownW, crownH);
 
   drawingContext.restore();
   pop();

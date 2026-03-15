@@ -355,7 +355,27 @@ function getSlider(val) {
   const v = arr[val];
   return (typeof v === "number") ? v : 85;
 }
+function drawLiveWatermark() {
+  push();
+  resetMatrix();
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(width < 700 ? 16 : 20);
 
+  drawingContext.save();
+  drawingContext.globalAlpha = 0.10;
+
+  fill(0, 0, 100);
+
+  for (let x = 90; x < width; x += 220) {
+    for (let y = 70; y < height; y += 170) {
+      text("Milz & More", x, y);
+    }
+  }
+
+  drawingContext.restore();
+  pop();
+}
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   if (EMBED) redraw();

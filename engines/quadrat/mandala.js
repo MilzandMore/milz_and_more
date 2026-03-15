@@ -1,7 +1,16 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
 console.log("QUADRAT mandala.js LOADED v=1007");
+// ---- Canvas Export Protection ----
+const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
 
+HTMLCanvasElement.prototype.toDataURL = function () {
+  if (!window.isAdmin) {
+    console.warn("Canvas export blocked");
+    return "";
+  }
+  return originalToDataURL.apply(this, arguments);
+};
 var qMatrix = [];
 var logoImg = null;
 var isAdmin = false;

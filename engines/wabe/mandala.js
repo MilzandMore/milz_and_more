@@ -8,16 +8,7 @@ let APP = {
   colors: [],
   isAdmin: false
 };
-// ---- Canvas Export Protection ----
-const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
 
-HTMLCanvasElement.prototype.toDataURL = function () {
-  if (!window.isAdmin) {
-    console.warn("Canvas export blocked");
-    return "";
-  }
-  return originalToDataURL.apply(this, arguments);
-};
 var colorMatrix = {
   1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
   2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
@@ -88,11 +79,13 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
   const c = document.querySelector("canvas");
-if (c) {
-  c.addEventListener("contextmenu", (e) => e.preventDefault());
-  c.addEventListener("dragstart", (e) => e.preventDefault());
-}
+  if (c) {
+    c.addEventListener("contextmenu", (e) => e.preventDefault());
+    c.addEventListener("dragstart", (e) => e.preventDefault());
+  }
+
   colorMode(HSB, 360, 100, 100);
   smooth(8);
   noLoop();
@@ -127,6 +120,8 @@ function draw() {
 
   renderWabeKorrekt(code, cKey, null, renderColors);
   pop();
+
+  drawLiveWatermark();
 }
 
 function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
@@ -185,6 +180,28 @@ function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
   }
 }
 
+function drawLiveWatermark() {
+  push();
+  resetMatrix();
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(width < 700 ? 16 : 20);
+
+  drawingContext.save();
+  drawingContext.globalAlpha = 0.10;
+
+  fill(0, 0, 100);
+
+  for (let x = 90; x < width; x += 220) {
+    for (let y = 70; y < height; y += 170) {
+      text("Milz & More", x, y);
+    }
+  }
+
+  drawingContext.restore();
+  pop();
+}
+
 function exportHighRes() {
   const exportW = 2480, exportH = 3508;
   const pg = createGraphics(exportW, exportH);
@@ -208,7 +225,10 @@ function exportHighRes() {
   if (logoImg && !isAdmin) {
     pg.resetMatrix();
     pg.tint(255, 45);
-    const wWidth = 380, wHeight = (logoImg.height / logoImg.width) * wWidth;
+
+    const wWidth = 380;
+    const wHeight = (logoImg.height / logoImg.width) * wWidth;
+
     for (let x = -100; x < exportW + 400; x += 500) {
       for (let y = -400; y < exportH + 400; y += 500) {
         pg.image(logoImg, x, y, wWidth, wHeight);
@@ -220,7 +240,9 @@ function exportHighRes() {
   if (logoImg) {
     pg.resetMatrix();
     pg.noTint();
-    const lW = 500, lH = (logoImg.height / logoImg.width) * lW;
+
+    const lW = 500;
+    const lH = (logoImg.height / logoImg.width) * lW;
     pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
   }
 
@@ -262,27 +284,7 @@ function getRenderColors(cKey) {
   }
   return getColorMatrix(cKey);
 }
-function drawLiveWatermark() {
-  push();
-  resetMatrix();
-  noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(width < 700 ? 16 : 20);
 
-  drawingContext.save();
-  drawingContext.globalAlpha = 0.10;
-
-  fill(0, 0, 100);
-
-  for (let x = 90; x < width; x += 220) {
-    for (let y = 70; y < height; y += 170) {
-      text("Milz & More", x, y);
-    }
-  }
-
-  drawingContext.restore();
-  pop();
-}
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   redraw();

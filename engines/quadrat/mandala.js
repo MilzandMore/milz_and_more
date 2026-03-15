@@ -360,6 +360,3 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   if (EMBED) redraw();
 }
-document.addEventListener("contextmenu", function(e) {
-  e.preventDefault();
-});

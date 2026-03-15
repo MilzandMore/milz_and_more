@@ -9,16 +9,6 @@ let APP = {
   colors: [],
   isAdmin: false
 };
-// ---- Canvas Export Protection ----
-const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
-
-HTMLCanvasElement.prototype.toDataURL = function () {
-  if (!window.isAdmin) {
-    console.warn("Canvas export blocked");
-    return "";
-  }
-  return originalToDataURL.apply(this, arguments);
-};
 
 // --------- KONSTANTEN ----------
 var baseColors = [
@@ -49,6 +39,7 @@ var ex = (a, b) => (a + b) % 9 === 0 ? 9 : (a + b) % 9;
 
 // --------- VARIABLEN ----------
 let logoImg = null;
+let crownImg = null;
 let colorSeed = 1;
 let isAdmin = false;
 
@@ -104,15 +95,29 @@ function preload() {
       );
     }
   );
+
+  crownImg = loadImage(
+    "../../assets/krone.png",
+    () => {},
+    () => {
+      crownImg = loadImage(
+        "/milz_and_more/assets/krone.png",
+        () => {},
+        () => { crownImg = null; }
+      );
+    }
+  );
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
   const c = document.querySelector("canvas");
-if (c) {
-  c.addEventListener("contextmenu", (e) => e.preventDefault());
-  c.addEventListener("dragstart", (e) => e.preventDefault());
-}
+  if (c) {
+    c.addEventListener("contextmenu", (e) => e.preventDefault());
+    c.addEventListener("dragstart", (e) => e.preventDefault());
+  }
+
   colorMode(HSB, 360, 100, 100);
   noLoop();
   sendReady();
@@ -152,6 +157,8 @@ function draw() {
   }
 
   pop();
+
+  drawLiveWatermark();
 }
 
 // --------- ZEICHNEN ----------
@@ -192,6 +199,25 @@ function drawSector(m, colors, target) {
       ctx.endShape(CLOSE);
     }
   }
+}
+
+function drawLiveWatermark() {
+  if (!crownImg) return;
+
+  push();
+  resetMatrix();
+  imageMode(CENTER);
+
+  drawingContext.save();
+  drawingContext.globalAlpha = 0.18;
+
+  const crownW = min(width, height) * 0.28;
+  const crownH = (crownImg.height / crownImg.width) * crownW;
+
+  image(crownImg, width / 2, height / 2, crownW, crownH);
+
+  drawingContext.restore();
+  pop();
 }
 
 // --------- EXPORT ----------
@@ -355,27 +381,7 @@ function getRenderColors(seed) {
   }
   return getColorMatrix(seed);
 }
-function drawLiveWatermark() {
-  push();
-  resetMatrix();
-  noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(width < 700 ? 16 : 20);
 
-  drawingContext.save();
-  drawingContext.globalAlpha = 0.10;
-
-  fill(0, 0, 100);
-
-  for (let x = 90; x < width; x += 220) {
-    for (let y = 70; y < height; y += 170) {
-      text("Milz & More", x, y);
-    }
-  }
-
-  drawingContext.restore();
-  pop();
-}
 // --------- RESIZE ----------
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);

@@ -1,16 +1,7 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED v=1007");
-// ---- Canvas Export Protection ----
-const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
+console.log("QUADRAT mandala.js LOADED v=1008");
 
-HTMLCanvasElement.prototype.toDataURL = function () {
-  if (!window.isAdmin) {
-    console.warn("Canvas export blocked");
-    return "";
-  }
-  return originalToDataURL.apply(this, arguments);
-};
 var qMatrix = [];
 var logoImg = null;
 var isAdmin = false;
@@ -69,11 +60,13 @@ function preload() {}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
   const c = document.querySelector("canvas");
-if (c) {
-  c.addEventListener("contextmenu", (e) => e.preventDefault());
-  c.addEventListener("dragstart", (e) => e.preventDefault());
-}
+  if (c) {
+    c.addEventListener("contextmenu", (e) => e.preventDefault());
+    c.addEventListener("dragstart", (e) => e.preventDefault());
+  }
+
   colorMode(HSB, 360, 100, 100, 100);
   pixelDensity(2);
 
@@ -122,6 +115,8 @@ function draw() {
   calcQuadratMatrix(drawCode);
   drawQuadrat(startDigit, null, { stroke: true });
   pop();
+
+  drawLiveWatermark();
 }
 
 function getRenderPalette(startDigit) {
@@ -183,6 +178,27 @@ function drawQuadrat(startDigit, target, opts) {
       ctx.rect(-(c + 1) * ts, r * ts, ts, ts);
     }
   }
+}
+
+function drawLiveWatermark() {
+  push();
+  resetMatrix();
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(width < 700 ? 16 : 20);
+
+  drawingContext.save();
+  drawingContext.globalAlpha = 0.10;
+  fill(0, 0, 100);
+
+  for (let x = 90; x < width; x += 220) {
+    for (let y = 70; y < height; y += 170) {
+      text("Milz & More", x, y);
+    }
+  }
+
+  drawingContext.restore();
+  pop();
 }
 
 async function exportHighRes() {
@@ -355,27 +371,7 @@ function getSlider(val) {
   const v = arr[val];
   return (typeof v === "number") ? v : 85;
 }
-function drawLiveWatermark() {
-  push();
-  resetMatrix();
-  noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(width < 700 ? 16 : 20);
 
-  drawingContext.save();
-  drawingContext.globalAlpha = 0.10;
-
-  fill(0, 0, 100);
-
-  for (let x = 90; x < width; x += 220) {
-    for (let y = 70; y < height; y += 170) {
-      text("Milz & More", x, y);
-    }
-  }
-
-  drawingContext.restore();
-  pop();
-}
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   if (EMBED) redraw();

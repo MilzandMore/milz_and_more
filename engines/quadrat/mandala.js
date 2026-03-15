@@ -189,7 +189,7 @@ async function exportHighRes() {
 
   const ts = 16;
   const gridSize = 40 * ts;
-  const targetSizePx = exportW / PHI;
+  const targetSizePx = exportW / 1.33;
   const scale = targetSizePx / gridSize;
 
   const centerX = exportW / 2;

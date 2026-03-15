@@ -1,9 +1,10 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED v=1008");
+console.log("QUADRAT mandala.js LOADED v=1009");
 
 var qMatrix = [];
 var logoImg = null;
+var crownImg = null;
 var isAdmin = false;
 
 const PHI = 1.61803398875;
@@ -72,9 +73,12 @@ function setup() {
 
   loadImage("../../assets/Logo_black.png",
     img => logoImg = img,
-    () => loadImage("/milz_and_more/assets/Logo_black.png",
-      img => logoImg = img
-    )
+    () => loadImage("/milz_and_more/assets/Logo_black.png", img => logoImg = img)
+  );
+
+  loadImage("../../assets/krone.png",
+    img => crownImg = img,
+    () => loadImage("/milz_and_more/assets/krone.png", img => crownImg = img)
   );
 
   if (EMBED) {
@@ -181,21 +185,19 @@ function drawQuadrat(startDigit, target, opts) {
 }
 
 function drawLiveWatermark() {
+  if (!crownImg) return;
+
   push();
   resetMatrix();
-  noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(width < 700 ? 16 : 20);
+  imageMode(CENTER);
 
   drawingContext.save();
-  drawingContext.globalAlpha = 0.10;
-  fill(0, 0, 100);
+  drawingContext.globalAlpha = 0.18;
 
-  for (let x = 90; x < width; x += 220) {
-    for (let y = 70; y < height; y += 170) {
-      text("Milz & More", x, y);
-    }
-  }
+  const crownW = min(width, height) * 0.28;
+  const crownH = (crownImg.height / crownImg.width) * crownW;
+
+  image(crownImg, width / 2, height / 2, crownW, crownH);
 
   drawingContext.restore();
   pop();

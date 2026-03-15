@@ -88,6 +88,11 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  const c = document.querySelector("canvas");
+if (c) {
+  c.addEventListener("contextmenu", (e) => e.preventDefault());
+  c.addEventListener("dragstart", (e) => e.preventDefault());
+}
   colorMode(HSB, 360, 100, 100);
   smooth(8);
   noLoop();

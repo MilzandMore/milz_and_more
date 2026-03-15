@@ -361,3 +361,7 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   redraw();
 }
+
+document.addEventListener("contextmenu", function(e) {
+  e.preventDefault();
+});

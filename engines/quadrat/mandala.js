@@ -77,10 +77,23 @@ function setup() {
   );
 
   loadImage("../../assets/krone.png",
-    img => crownImg = img,
-    () => loadImage("/milz_and_more/assets/krone.png", img => crownImg = img)
-  );
-
+  img => {
+    crownImg = img;
+    console.log("Krone geladen");
+  },
+  err => {
+    console.error("Krone NICHT geladen", err);
+    loadImage("/milz_and_more/assets/krone.png",
+      img => {
+        crownImg = img;
+        console.log("Krone geladen über Fallback");
+      },
+      err2 => {
+        console.error("Krone auch im Fallback nicht geladen", err2);
+      }
+    );
+  }
+);
   if (EMBED) {
     noLoop();
     window.addEventListener("message", onMessageFromParent);

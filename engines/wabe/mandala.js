@@ -8,7 +8,16 @@ let APP = {
   colors: [],
   isAdmin: false
 };
+// ---- Canvas Export Protection ----
+const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
 
+HTMLCanvasElement.prototype.toDataURL = function () {
+  if (!window.isAdmin) {
+    console.warn("Canvas export blocked");
+    return "";
+  }
+  return originalToDataURL.apply(this, arguments);
+};
 var colorMatrix = {
   1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
   2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],

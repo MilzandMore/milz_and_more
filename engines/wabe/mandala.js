@@ -9,6 +9,8 @@ let APP = {
   isAdmin: false
 };
 
+console.log("WABE mandala.js LOADED v=1011");
+
 var colorMatrix = {
   1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
   2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
@@ -71,30 +73,22 @@ window.addEventListener("message", (ev) => {
 
 function preload() {
   const p = (APP && APP.exportLogo) ? APP.exportLogo : "../../assets/Logo_black.png";
+
   logoImg = loadImage(
     p,
     () => {},
     () => { logoImg = loadImage("../../assets/Logo.png"); }
   );
 
-  loadImage("../../assets/krone.png",
-  img => {
-    crownImg = img;
-    console.log("Krone geladen");
-  },
-  err => {
-    console.error("Krone NICHT geladen", err);
-    loadImage("/milz_and_more/assets/krone.png",
-      img => {
-        crownImg = img;
-        console.log("Krone geladen über Fallback");
-      },
-      err2 => {
-        console.error("Krone auch im Fallback nicht geladen", err2);
-      }
-    );
-  }
-);
+  crownImg = loadImage(
+    "../../assets/krone.png",
+    () => { console.log("WABE: Krone geladen"); },
+    err => {
+      console.error("WABE: Krone NICHT geladen", err);
+      crownImg = null;
+    }
+  );
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -207,9 +201,9 @@ function drawLiveWatermark() {
   imageMode(CENTER);
 
   drawingContext.save();
-  drawingContext.globalAlpha = 0.18;
+  drawingContext.globalAlpha = 0.32;
 
-  const crownW = min(width, height) * 0.28;
+  const crownW = min(width, height) * 0.42;
   const crownH = (crownImg.height / crownImg.width) * crownW;
 
   image(crownImg, width / 2, height / 2, crownW, crownH);

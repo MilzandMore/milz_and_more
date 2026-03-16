@@ -4,7 +4,7 @@ console.log("QUADRAT mandala.js LOADED v=1009");
 
 var qMatrix = [];
 var logoImg = null;
-var crownImg = null;
+let liveWatermarkImg = null;
 var isAdmin = false;
 
 const PHI = 1.61803398875;
@@ -76,20 +76,22 @@ function setup() {
     () => loadImage("/milz_and_more/assets/Logo_black.png", img => logoImg = img)
   );
 
-  loadImage("../../assets/krone.png",
+  loadImage(
+  "../../assets/Logo_gold.png",
   img => {
-    crownImg = img;
-    console.log("Krone geladen");
+    liveWatermarkImg = img;
+    console.log("Live-Wasserzeichen geladen");
   },
   err => {
-    console.error("Krone NICHT geladen", err);
-    loadImage("/milz_and_more/assets/krone.png",
+    console.error("Live-Wasserzeichen NICHT geladen", err);
+    loadImage(
+      "/milz_and_more/assets/Logo_gold.png",
       img => {
-        crownImg = img;
-        console.log("Krone geladen über Fallback");
+        liveWatermarkImg = img;
+        console.log("Live-Wasserzeichen über Fallback geladen");
       },
       err2 => {
-        console.error("Krone auch im Fallback nicht geladen", err2);
+        console.error("Live-Wasserzeichen auch im Fallback nicht geladen", err2);
       }
     );
   }
@@ -198,7 +200,7 @@ function drawQuadrat(startDigit, target, opts) {
 }
 
 function drawLiveWatermark() {
-  if (!crownImg) return;
+  if (!liveWatermarkImg) return;
 
   push();
   resetMatrix();
@@ -207,15 +209,14 @@ function drawLiveWatermark() {
   drawingContext.save();
   drawingContext.globalAlpha = 0.38;
 
-  const crownW = min(width, height) * 0.46;
-  const crownH = (crownImg.height / crownImg.width) * crownW;
+  const logoW = min(width, height) * 0.62;
+  const logoH = (liveWatermarkImg.height / liveWatermarkImg.width) * logoW;
 
-  image(crownImg, width / 2, height / 2, crownW, crownH);
+  image(liveWatermarkImg, width / 2, height / 2, logoW, logoH);
 
   drawingContext.restore();
   pop();
 }
-
 async function exportHighRes() {
   const exportW = 2480, exportH = 3508;
 

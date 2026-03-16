@@ -205,9 +205,9 @@ function drawLiveWatermark() {
   imageMode(CENTER);
 
   drawingContext.save();
-  drawingContext.globalAlpha = 0.32;
+  drawingContext.globalAlpha = 0.38;
 
-  const crownW = min(width, height) * 0.42;
+  const crownW = min(width, height) * 0.46;
   const crownH = (crownImg.height / crownImg.width) * crownW;
 
   image(crownImg, width / 2, height / 2, crownW, crownH);

@@ -5,6 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Lebenscode Mandala</title>
   <link rel="stylesheet" href="app.css?v=preview-buy-top-3">
+
+  <style>
+    /* Wasserzeichen stabil über dem Iframe */
+    .engine-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .engine-frame {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      background: transparent;
+    }
+
+    .viewer-watermark {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .viewer-watermark img {
+      width: min(68%, 520px);
+      max-width: 70vw;
+      height: auto;
+      opacity: 0.28;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+
+    /* Damit Ladeanzeige und Print-Preview weiter über allem liegen */
+    #loading {
+      position: relative;
+      z-index: 5;
+    }
+
+    #previewInfo {
+      position: relative;
+      z-index: 6;
+    }
+
+    #printPreview {
+      position: relative;
+      z-index: 20;
+    }
+  </style>
 </head>
 
 <body>
@@ -75,7 +132,14 @@
 
     <section id="stage" class="stage paper">
       <div id="loading" class="loading">Engine lädt…</div>
-      <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
+
+      <div class="engine-wrap">
+        <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
+
+        <div class="viewer-watermark" aria-hidden="true">
+          <img src="assets/Logo_gold.png" alt="">
+        </div>
+      </div>
 
       <div id="previewInfo" class="preview-info" aria-live="polite">
         Diese Druckvorschau enthält Wasserzeichen.<br>

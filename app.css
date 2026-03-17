@@ -401,7 +401,27 @@ body{
   display:block;
   background:transparent;
 }
+.viewer-watermark{
+  position:absolute;
+  inset:0;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
 
+.viewer-watermark img{
+  width:min(62%, 560px);
+  max-width:70vw;
+  height:auto;
+  opacity:0.26;
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:none;
+}
 .loading{
   position:absolute;
   inset:0;

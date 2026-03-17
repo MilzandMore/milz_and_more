@@ -9,7 +9,7 @@ let APP = {
   isAdmin: false
 };
 
-console.log("WABE mandala.js LOADED v=1011");
+console.log("WABE mandala.js LOADED v=1012");
 
 var colorMatrix = {
   1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
@@ -30,8 +30,7 @@ var charMap = {
 
 var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
-let logoImg;
-let crownImg = null;
+let logoImg = null;
 let isAdmin = false;
 
 function sendReady() {
@@ -77,15 +76,12 @@ function preload() {
   logoImg = loadImage(
     p,
     () => {},
-    () => { logoImg = loadImage("../../assets/Logo.png"); }
-  );
-
-  crownImg = loadImage(
-    "../../assets/krone.png",
-    () => { console.log("WABE: Krone geladen"); },
-    err => {
-      console.error("WABE: Krone NICHT geladen", err);
-      crownImg = null;
+    () => {
+      logoImg = loadImage(
+        "../../assets/Logo.png",
+        () => {},
+        () => { logoImg = null; }
+      );
     }
   );
 }
@@ -112,7 +108,10 @@ function draw() {
   const rawVal = String(APP.input || "").trim();
   if (rawVal === "" || (APP.mode === "geburtstag" && rawVal.replace(/\D/g, "").length === 0)) return;
 
-  let code = (APP.mode === "text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
+  let code = (APP.mode === "text")
+    ? getCodeFromText(rawVal)
+    : rawVal.replace(/\D/g, "").split("").map(Number);
+
   while (code.length < 8) code.push(0);
   code = code.slice(0, 8);
 
@@ -133,8 +132,6 @@ function draw() {
 
   renderWabeKorrekt(code, cKey, null, renderColors);
   pop();
-
-  drawLiveWatermark();
 }
 
 function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
@@ -193,33 +190,55 @@ function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
   }
 }
 
-function drawLiveWatermark() {
-  if (!crownImg) return;
+function drawExportWatermark(g) {
+  if (!g || isAdmin) return;
 
-  push();
-  resetMatrix();
-  imageMode(CENTER);
+  const rows = 6;
+  const cols = 5;
+  const tileW = g.width / cols;
+  const tileH = g.height / rows;
 
-  drawingContext.save();
-  drawingContext.globalAlpha = 0.32;
+  g.push();
+  g.resetMatrix();
+  g.blendMode(g.BLEND);
+  g.noStroke();
 
-  const crownW = min(width, height) * 0.42;
-  const crownH = (crownImg.height / crownImg.width) * crownW;
+  /* etwas heller */
+  g.fill(80, 60, 30, 78);
 
-  image(crownImg, width / 2, height / 2, crownW, crownH);
+  g.textAlign(g.CENTER, g.CENTER);
+  g.textStyle(g.BOLD);
+  g.textSize(Math.round(Math.min(g.width, g.height) * 0.028));
 
-  drawingContext.restore();
-  pop();
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const x = col * tileW + tileW / 2;
+      const y = row * tileH + tileH / 2;
+
+      g.push();
+      g.translate(x, y);
+      g.rotate(-0.32);
+      g.text("Milz & More", 0, 0);
+      g.pop();
+    }
+  }
+
+  g.pop();
 }
 
 function exportHighRes() {
-  const exportW = 2480, exportH = 3508;
+  const exportW = 2480;
+  const exportH = 3508;
   const pg = createGraphics(exportW, exportH);
+
   pg.colorMode(HSB, 360, 100, 100);
   pg.background(255);
 
   const rawVal = String(APP.input || "").trim();
-  let code = (APP.mode === "text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split('').map(Number);
+  let code = (APP.mode === "text")
+    ? getCodeFromText(rawVal)
+    : rawVal.replace(/\D/g, "").split("").map(Number);
+
   while (code.length < 8) code.push(0);
   code = code.slice(0, 8);
 
@@ -232,28 +251,20 @@ function exportHighRes() {
   renderWabeKorrekt(code, cKey, pg, renderColors);
   pg.pop();
 
-  if (logoImg && !isAdmin) {
-    pg.resetMatrix();
-    pg.tint(255, 45);
+  /* einheitliches Wasserzeichen */
+  drawExportWatermark(pg);
 
-    const wWidth = 380;
-    const wHeight = (logoImg.height / logoImg.width) * wWidth;
-
-    for (let x = -100; x < exportW + 400; x += 500) {
-      for (let y = -400; y < exportH + 400; y += 500) {
-        pg.image(logoImg, x, y, wWidth, wHeight);
-      }
-    }
-    pg.noTint();
-  }
-
+  /* optionales Logo unten rechts */
   if (logoImg) {
+    pg.push();
     pg.resetMatrix();
     pg.noTint();
 
     const lW = 500;
     const lH = (logoImg.height / logoImg.width) * lW;
     pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+
+    pg.pop();
   }
 
   const dataUrl = pg.canvas.toDataURL("image/png");

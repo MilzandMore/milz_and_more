@@ -190,39 +190,29 @@ function drawSector(m, colors, target) {
 }
 
 // --------- EXPORT-WASSERZEICHEN ----------
-function drawExportWatermark(g) {
-  if (!g || isAdmin) return;
-
-  const rows = 6;
-  const cols = 5;
-  const tileW = g.width / cols;
-  const tileH = g.height / rows;
+function drawExportWatermark(g, wmImg) {
+  if (!g || !wmImg || isAdmin) return;
 
   g.push();
   g.resetMatrix();
-  g.blendMode(g.BLEND);
-  g.noStroke();
 
-  // heller als vorher
-  g.fill(80, 60, 30, 78);
+  const ctx = g.drawingContext;
+  if (ctx) ctx.save();
 
-  g.textAlign(g.CENTER, g.CENTER);
-  g.textStyle(g.BOLD);
-  g.textSize(Math.round(Math.min(g.width, g.height) * 0.028));
+  // heller / unauffälliger als vorher
+  if (ctx) ctx.globalAlpha = 0.16;
 
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const x = col * tileW + tileW / 2;
-      const y = row * tileH + tileH / 2;
+  const wWidth = 380;
+  const wHeight = (wmImg.height / wmImg.width) * wWidth;
+  const yShift = -200;
 
-      g.push();
-      g.translate(x, y);
-      g.rotate(-0.32);
-      g.text("Milz & More", 0, 0);
-      g.pop();
+  for (let x = -100; x < g.width + 400; x += 500) {
+    for (let y = -700; y < g.height + 400; y += 500) {
+      g.image(wmImg, x, y + yShift, wWidth, wHeight);
     }
   }
 
+  if (ctx) ctx.restore();
   g.pop();
 }
 

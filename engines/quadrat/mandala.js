@@ -1,6 +1,6 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED v=1012");
+console.log("QUADRAT mandala.js LOADED v=1013");
 
 var qMatrix = [];
 var logoImg = null;
@@ -196,7 +196,6 @@ function drawExportWatermark(g, wmImg) {
   const ctx = g.drawingContext;
   if (ctx) ctx.save();
 
-  // heller / unauffälliger als vorher
   if (ctx) ctx.globalAlpha = 0.16;
 
   const wWidth = 380;
@@ -244,12 +243,10 @@ async function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  /* einheitliches Wasserzeichen */
-  drawExportWatermark(pg);
-
   const exportLogo = await waitForLogo(5000);
 
-  /* optionales Logo unten rechts */
+  drawExportWatermark(pg, exportLogo);
+
   if (exportLogo) {
     pg.push();
     pg.resetMatrix();

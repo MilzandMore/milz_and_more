@@ -414,10 +414,10 @@ body{
 }
 
 .viewer-watermark img{
-  width:min(62%, 560px);
+  width:min(70%, 640px);
   max-width:70vw;
   height:auto;
-  opacity:0.26;
+  opacity:0.38;
   user-select:none;
   -webkit-user-drag:none;
   pointer-events:none;

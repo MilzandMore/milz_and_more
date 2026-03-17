@@ -1,10 +1,9 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED v=1009");
+console.log("QUADRAT mandala.js LOADED v=1012");
 
 var qMatrix = [];
 var logoImg = null;
-let liveWatermarkImg = null;
 var isAdmin = false;
 
 const PHI = 1.61803398875;
@@ -71,31 +70,22 @@ function setup() {
   colorMode(HSB, 360, 100, 100, 100);
   pixelDensity(2);
 
-  loadImage("../../assets/Logo_black.png",
-    img => logoImg = img,
-    () => loadImage("/milz_and_more/assets/Logo_black.png", img => logoImg = img)
+  loadImage(
+    "../../assets/Logo_black.png",
+    img => { logoImg = img; },
+    () => loadImage(
+      "/milz_and_more/assets/Logo_black.png",
+      img => { logoImg = img; },
+      () => {
+        loadImage(
+          "../../assets/Logo.png",
+          img => { logoImg = img; },
+          () => { logoImg = null; }
+        );
+      }
+    )
   );
 
-  loadImage(
-  "../../assets/Logo_gold.png",
-  img => {
-    liveWatermarkImg = img;
-    console.log("Live-Wasserzeichen geladen");
-  },
-  err => {
-    console.error("Live-Wasserzeichen NICHT geladen", err);
-    loadImage(
-      "/milz_and_more/assets/Logo_gold.png",
-      img => {
-        liveWatermarkImg = img;
-        console.log("Live-Wasserzeichen über Fallback geladen");
-      },
-      err2 => {
-        console.error("Live-Wasserzeichen auch im Fallback nicht geladen", err2);
-      }
-    );
-  }
-);
   if (EMBED) {
     noLoop();
     window.addEventListener("message", onMessageFromParent);
@@ -134,8 +124,6 @@ function draw() {
   calcQuadratMatrix(drawCode);
   drawQuadrat(startDigit, null, { stroke: true });
   pop();
-
-  drawLiveWatermark();
 }
 
 function getRenderPalette(startDigit) {
@@ -199,26 +187,45 @@ function drawQuadrat(startDigit, target, opts) {
   }
 }
 
-function drawLiveWatermark() {
-  if (!liveWatermarkImg) return;
+function drawExportWatermark(g) {
+  if (!g || isAdmin) return;
 
-  push();
-  resetMatrix();
-  imageMode(CENTER);
+  const rows = 6;
+  const cols = 5;
+  const tileW = g.width / cols;
+  const tileH = g.height / rows;
 
-  drawingContext.save();
-  drawingContext.globalAlpha = 0.38;
+  g.push();
+  g.resetMatrix();
+  g.blendMode(g.BLEND);
+  g.noStroke();
 
-  const logoW = min(width, height) * 0.62;
-  const logoH = (liveWatermarkImg.height / liveWatermarkImg.width) * logoW;
+  /* etwas heller */
+  g.fill(80, 60, 30, 78);
 
-  image(liveWatermarkImg, width / 2, height / 2, logoW, logoH);
+  g.textAlign(g.CENTER, g.CENTER);
+  g.textStyle(g.BOLD);
+  g.textSize(Math.round(Math.min(g.width, g.height) * 0.028));
 
-  drawingContext.restore();
-  pop();
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const x = col * tileW + tileW / 2;
+      const y = row * tileH + tileH / 2;
+
+      g.push();
+      g.translate(x, y);
+      g.rotate(-0.32);
+      g.text("Milz & More", 0, 0);
+      g.pop();
+    }
+  }
+
+  g.pop();
 }
+
 async function exportHighRes() {
-  const exportW = 2480, exportH = 3508;
+  const exportW = 2480;
+  const exportH = 3508;
 
   const pg = createGraphics(exportW, exportH);
   pg.colorMode(HSB, 360, 100, 100, 100);
@@ -247,31 +254,22 @@ async function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
+  /* einheitliches Wasserzeichen */
+  drawExportWatermark(pg);
+
   const exportLogo = await waitForLogo(5000);
 
-  if (exportLogo && !isAdmin) {
-    pg.resetMatrix();
-    pg.tint(255, 45);
-
-    const wWidth = 380;
-    const wHeight = (exportLogo.height / exportLogo.width) * wWidth;
-    const yShift = -200;
-
-    for (let x = -100; x < exportW + 400; x += 500) {
-      for (let y = -700; y < exportH + 400; y += 500) {
-        pg.image(exportLogo, x, y + yShift, wWidth, wHeight);
-      }
-    }
-    pg.noTint();
-  }
-
+  /* optionales Logo unten rechts */
   if (exportLogo) {
+    pg.push();
     pg.resetMatrix();
     pg.noTint();
 
     const lW = 500;
     const lH = (exportLogo.height / exportLogo.width) * lW;
     pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
+
+    pg.pop();
   }
 
   const dataUrl = pg.canvas.toDataURL("image/png");

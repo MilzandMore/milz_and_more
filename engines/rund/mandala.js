@@ -10,7 +10,7 @@ let APP = {
   isAdmin: false
 };
 
-console.log("RUND mandala.js LOADED v=1011");
+console.log("RUND mandala.js LOADED v=1012");
 
 // --------- KONSTANTEN ----------
 var baseColors = [
@@ -41,7 +41,6 @@ var ex = (a, b) => (a + b) % 9 === 0 ? 9 : (a + b) % 9;
 
 // --------- VARIABLEN ----------
 let logoImg = null;
-let crownImg = null;
 let colorSeed = 1;
 let isAdmin = false;
 
@@ -98,15 +97,6 @@ function preload() {
       );
     }
   );
-
-  crownImg = loadImage(
-    "../../assets/krone.png",
-    () => { console.log("RUND: Krone geladen"); },
-    err => {
-      console.error("RUND: Krone NICHT geladen", err);
-      crownImg = null;
-    }
-  );
 }
 
 function setup() {
@@ -157,8 +147,6 @@ function draw() {
   }
 
   pop();
-
-  drawLiveWatermark();
 }
 
 // --------- ZEICHNEN ----------
@@ -201,23 +189,41 @@ function drawSector(m, colors, target) {
   }
 }
 
-function drawLiveWatermark() {
-  if (!crownImg) return;
+// --------- EXPORT-WASSERZEICHEN ----------
+function drawExportWatermark(g) {
+  if (!g || isAdmin) return;
 
-  push();
-  resetMatrix();
-  imageMode(CENTER);
+  const rows = 6;
+  const cols = 5;
+  const tileW = g.width / cols;
+  const tileH = g.height / rows;
 
-  drawingContext.save();
-  drawingContext.globalAlpha = 0.20;
+  g.push();
+  g.resetMatrix();
+  g.blendMode(g.BLEND);
+  g.noStroke();
 
-  const crownW = min(width, height) * 0.30;
-  const crownH = (crownImg.height / crownImg.width) * crownW;
+  // heller als vorher
+  g.fill(80, 60, 30, 78);
 
-  image(crownImg, width / 2, height / 2, crownW, crownH);
+  g.textAlign(g.CENTER, g.CENTER);
+  g.textStyle(g.BOLD);
+  g.textSize(Math.round(Math.min(g.width, g.height) * 0.028));
 
-  drawingContext.restore();
-  pop();
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const x = col * tileW + tileW / 2;
+      const y = row * tileH + tileH / 2;
+
+      g.push();
+      g.translate(x, y);
+      g.rotate(-0.32);
+      g.text("Milz & More", 0, 0);
+      g.pop();
+    }
+  }
+
+  g.pop();
 }
 
 // --------- EXPORT ----------
@@ -246,29 +252,20 @@ function exportHighRes() {
   }
   pg.pop();
 
-  if (logoImg && !isAdmin) {
-    pg.resetMatrix();
-    pg.tint(255, 45);
+  // einheitliches Wasserzeichen IMMER als letzter Zeichen-Schritt vor dem Logo
+  drawExportWatermark(pg);
 
-    const wWidth = 380;
-    const wHeight = (logoImg.height / logoImg.width) * wWidth;
-
-    for (let x = -100; x < exportW + 400; x += 500) {
-      for (let y = -400; y < exportH + 400; y += 500) {
-        pg.image(logoImg, x, y, wWidth, wHeight);
-      }
-    }
-
-    pg.noTint();
-  }
-
+  // optionales Logo unten rechts
   if (logoImg) {
+    pg.push();
     pg.resetMatrix();
     pg.noTint();
 
     const lW = 500;
     const lH = (logoImg.height / logoImg.width) * lW;
     pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+
+    pg.pop();
   }
 
   const dataUrl = pg.canvas.toDataURL("image/png");

@@ -9,7 +9,7 @@ let APP = {
   isAdmin: false
 };
 
-console.log("WABE mandala.js LOADED v=1013");
+console.log("WABE mandala.js LOADED v=1014");
 
 var colorMatrix = {
   1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],

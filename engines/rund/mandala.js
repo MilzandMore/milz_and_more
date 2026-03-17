@@ -10,7 +10,7 @@ let APP = {
   isAdmin: false
 };
 
-console.log("RUND mandala.js LOADED v=1012");
+console.log("RUND mandala.js LOADED v=1013");
 
 // --------- KONSTANTEN ----------
 var baseColors = [
@@ -199,7 +199,6 @@ function drawExportWatermark(g, wmImg) {
   const ctx = g.drawingContext;
   if (ctx) ctx.save();
 
-  // heller / unauffälliger als vorher
   if (ctx) ctx.globalAlpha = 0.16;
 
   const wWidth = 380;
@@ -216,8 +215,20 @@ function drawExportWatermark(g, wmImg) {
   g.pop();
 }
 
+function waitForLogo(maxMs = 5000) {
+  return new Promise(resolve => {
+    const start = Date.now();
+    const tick = () => {
+      if (logoImg) return resolve(logoImg);
+      if (Date.now() - start > maxMs) return resolve(null);
+      setTimeout(tick, 50);
+    };
+    tick();
+  });
+}
+
 // --------- EXPORT ----------
-function exportHighRes() {
+async function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
   const pg = createGraphics(exportW, exportH);
@@ -242,18 +253,18 @@ function exportHighRes() {
   }
   pg.pop();
 
-  // einheitliches Wasserzeichen IMMER als letzter Zeichen-Schritt vor dem Logo
-  drawExportWatermark(pg);
+  const exportLogo = await waitForLogo(5000);
 
-  // optionales Logo unten rechts
-  if (logoImg) {
+  drawExportWatermark(pg, exportLogo);
+
+  if (exportLogo) {
     pg.push();
     pg.resetMatrix();
     pg.noTint();
 
     const lW = 500;
-    const lH = (logoImg.height / logoImg.width) * lW;
-    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+    const lH = (exportLogo.height / exportLogo.width) * lW;
+    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
 
     pg.pop();
   }

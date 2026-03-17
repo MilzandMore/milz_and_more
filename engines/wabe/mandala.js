@@ -199,7 +199,7 @@ function drawExportWatermark(g, wmImg) {
   const ctx = g.drawingContext;
   if (ctx) ctx.save();
 
-  if (ctx) ctx.globalAlpha = 0.45;
+  if (ctx) ctx.globalAlpha = 1;
 
   const wWidth = 380;
   const wHeight = (wmImg.height / wmImg.width) * wWidth;

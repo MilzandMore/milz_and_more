@@ -9,7 +9,7 @@ let APP = {
   isAdmin: false
 };
 
-console.log("WABE mandala.js LOADED v=1012");
+console.log("WABE mandala.js LOADED v=1013");
 
 var colorMatrix = {
   1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
@@ -199,7 +199,6 @@ function drawExportWatermark(g, wmImg) {
   const ctx = g.drawingContext;
   if (ctx) ctx.save();
 
-  // heller / unauffälliger als vorher
   if (ctx) ctx.globalAlpha = 0.16;
 
   const wWidth = 380;
@@ -216,7 +215,19 @@ function drawExportWatermark(g, wmImg) {
   g.pop();
 }
 
-function exportHighRes() {
+function waitForLogo(maxMs = 5000) {
+  return new Promise(resolve => {
+    const start = Date.now();
+    const tick = () => {
+      if (logoImg) return resolve(logoImg);
+      if (Date.now() - start > maxMs) return resolve(null);
+      setTimeout(tick, 50);
+    };
+    tick();
+  });
+}
+
+async function exportHighRes() {
   const exportW = 2480;
   const exportH = 3508;
   const pg = createGraphics(exportW, exportH);
@@ -241,18 +252,18 @@ function exportHighRes() {
   renderWabeKorrekt(code, cKey, pg, renderColors);
   pg.pop();
 
-  /* einheitliches Wasserzeichen */
-  drawExportWatermark(pg);
+  const exportLogo = await waitForLogo(5000);
 
-  /* optionales Logo unten rechts */
-  if (logoImg) {
+  drawExportWatermark(pg, exportLogo);
+
+  if (exportLogo) {
     pg.push();
     pg.resetMatrix();
     pg.noTint();
 
     const lW = 500;
-    const lH = (logoImg.height / logoImg.width) * lW;
-    pg.image(logoImg, exportW - lW - 100, exportH - lH - 100, lW, lH);
+    const lH = (exportLogo.height / exportLogo.width) * lW;
+    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
 
     pg.pop();
   }

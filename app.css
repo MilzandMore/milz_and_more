@@ -413,26 +413,28 @@ body{
   -webkit-user-select:none;
 }
 
+.viewer-watermark{
+  position:absolute;
+  inset:0;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+
 .viewer-watermark img{
-  width:min(70%, 640px);
-  max-width:70vw;
+  width:min(78%, 760px);
+  max-width:88vw;
   height:auto;
-  opacity:0.38;
+  opacity:0.42;
+
+  /* DAS ist der wichtige Teil */
+  transform:translate(6%, -8%) rotate(-18deg);
+
   user-select:none;
   -webkit-user-drag:none;
   pointer-events:none;
-}
-.loading{
-  position:absolute;
-  inset:0;
-  display:grid;
-  place-items:center;
-  font-weight:900;
-  letter-spacing:.3px;
-  backdrop-filter:blur(8px);
-  background:rgba(0,0,0,.25);
-  z-index:20;
-  color:rgba(238,243,251,.92);
 }
 
 /* Hinweis in der Vorschau */

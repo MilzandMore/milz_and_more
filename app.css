@@ -875,7 +875,7 @@ body{
     min-height:440px;
   }
 
-  /* Mobile: gleiches Wasserzeichen-Verhalten wie Desktop */
+  /* Mobil exakt wie Desktop */
   .viewer-watermark img{
     width:min(82%, 820px);
     max-width:92vw;
@@ -914,6 +914,9 @@ body{
 
   .print-preview__image{
     max-height:62vh;
+    width:auto;
+    height:auto;
+    object-fit:contain;
   }
 
   .print-preview__caption{

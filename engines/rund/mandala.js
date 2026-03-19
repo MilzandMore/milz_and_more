@@ -242,17 +242,20 @@ async function exportHighRes() {
   const angle = TWO_PI / sc;
 
   pg.push();
-  pg.translate(exportW / 2, exportH * 0.40);
-  pg.scale(3.2);
+pg.translate(exportW / 2, exportH * 0.40);
 
-  for (let i = 0; i < sc; i++) {
-    pg.push();
-    pg.rotate(i * angle);
-    drawSector(sector, currentColors, pg);
-    pg.pop();
-  }
+const exportScale =
+  APP.engine === "rund" ? 3.0 : 3.2;
+
+pg.scale(exportScale);
+
+for (let i = 0; i < sc; i++) {
+  pg.push();
+  pg.rotate(i * angle);
+  drawSector(sector, currentColors, pg);
   pg.pop();
-
+}
+pg.pop();
   const exportLogo = await waitForLogo(5000);
 
   drawExportWatermark(pg, exportLogo);

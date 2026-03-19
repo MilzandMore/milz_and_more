@@ -201,7 +201,7 @@ body{ position:relative; }
     height:auto;
   }
 
-  .app-main{
+  .app-main
     display:block;
     padding:8px 12px;
   }

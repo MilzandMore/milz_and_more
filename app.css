@@ -4,7 +4,7 @@
   --bgA:#07090e;
   --bgB:#0b0f14;
 
-  --text:#eef3fb;
+  --text:#eef3
   --muted:rgba(238,243,251,0.72);
 
   --activeBg:#ffffff;
@@ -433,17 +433,17 @@ body{
 
 /* Quadrat */
 .engine-wrap.wm-quadrat .viewer-watermark img{
-  transform:translate(12%, -13%) rotate(-18deg);
+  transform:translate(7%, -10%) rotate(-18deg);
 }
 
 /* Rund */
 .engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(8%, -11%) rotate(-18deg);
+  transform:translate(7%, -10%) rotate(-18deg);
 }
 
 /* Wabe */
 .engine-wrap.wm-wabe .viewer-watermark img{
-  transform:translate(11%, -12%) rotate(-18deg);
+  transform:translate(7%, -10%) rotate(-18deg);
 }
 
 /* Hinweis in der Vorschau */

@@ -1,8 +1,12 @@
-/* Datei: app.css — FINAL mit goldener UI, stabiler Druckvorschau + Portal bleibt intakt */
+/* Datei: app.css — FINAL mit goldener UI, Desktop + Mobile angepasst,
+   neue Schrift, stabile Druckvorschau + Portal bleibt intakt */
 
 :root{
   --bgA:#07090e;
   --bgB:#0b0f14;
+
+  --font-ui:'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --font-brand:'Cinzel', Georgia, serif;
 
   --text:#f2e7c8;
   --muted:rgba(242,231,200,0.72);
@@ -36,14 +40,7 @@ html,
 body{
   height:100%;
   margin:0;
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    Segoe UI,
-    Roboto,
-    Arial,
-    sans-serif;
+  font-family:var(--font-ui);
   color:var(--text);
   overflow:hidden;
   background:
@@ -134,7 +131,8 @@ body{
   text-transform:uppercase;
   letter-spacing:.08em;
   color:var(--gold-light);
-  font-weight:900;
+  font-weight:700;
+  font-family:var(--font-brand);
 }
 
 .field input,
@@ -150,6 +148,7 @@ body{
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.04),
     0 6px 18px rgba(0,0,0,.16);
+  font-family:var(--font-ui);
 }
 
 .field input:focus,
@@ -224,7 +223,9 @@ body{
   border:1px solid rgba(255,220,140,.24);
   background:linear-gradient(180deg, #ecd187, #c69739);
   color:#181208;
-  font-weight:950;
+  font-weight:700;
+  font-family:var(--font-brand);
+  letter-spacing:.05em;
   cursor:pointer;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.18),
@@ -260,7 +261,9 @@ body{
   border:1px solid var(--input-border);
   background:linear-gradient(180deg, rgba(22,26,36,.96), rgba(11,15,24,.96));
   color:var(--gold-light);
-  font-weight:900;
+  font-weight:700;
+  font-family:var(--font-brand);
+  letter-spacing:.05em;
   cursor:pointer;
   transition:transform .15s ease, background .15s ease, border-color .15s ease, color .15s ease;
   box-shadow:0 10px 24px rgba(0,0,0,.18);
@@ -314,9 +317,11 @@ body{
 }
 
 .slider-title{
-  font-weight:950;
+  font-weight:700;
   margin-bottom:10px;
   color:var(--gold-light);
+  font-family:var(--font-brand);
+  letter-spacing:.05em;
 }
 
 .sliders{
@@ -441,6 +446,7 @@ body{
 
 /* =========================
    VIEWER WATERMARK
+   Desktop + Mobile bewusst gleich
    ========================= */
 
 .viewer-watermark{
@@ -470,17 +476,15 @@ body{
   mix-blend-mode:normal !important;
 }
 
-/* Quadrat */
+/* Desktop */
 .engine-wrap.wm-quadrat .viewer-watermark img{
   transform:translate(3%, -6%) rotate(-18deg);
 }
 
-/* Rund */
 .engine-wrap.wm-rund .viewer-watermark img{
   transform:translate(3%, -6%) rotate(-18deg);
 }
 
-/* Wabe */
 .engine-wrap.wm-wabe .viewer-watermark img{
   transform:translate(3%, -6%) rotate(-18deg);
 }
@@ -578,8 +582,10 @@ body{
   border:1px solid rgba(255,220,140,.24);
   background:linear-gradient(180deg, #ecd187, #c69739);
   color:#181208;
-  font-weight:950;
+  font-weight:700;
   font-size:14px;
+  font-family:var(--font-brand);
+  letter-spacing:.05em;
   cursor:pointer;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.18),
@@ -666,8 +672,10 @@ body{
 }
 
 .slider-sheet__title{
-  font-weight:950;
+  font-weight:700;
   color:var(--gold-light);
+  font-family:var(--font-brand);
+  letter-spacing:.05em;
 }
 
 /* =========================
@@ -817,6 +825,11 @@ body{
     width:100%;
     font-size:12px;
     border-radius:11px;
+    border:1px solid rgba(255,220,140,.24);
+    background:linear-gradient(180deg, rgba(22,26,36,.96), rgba(11,15,24,.96));
+    color:var(--gold-light);
+    font-family:var(--font-brand);
+    letter-spacing:.04em;
   }
 
   .mobile-only{
@@ -862,22 +875,23 @@ body{
     min-height:440px;
   }
 
+  /* Mobile: gleiches Wasserzeichen-Verhalten wie Desktop */
   .viewer-watermark img{
-    width:min(92%, 700px);
-    max-width:96vw;
-    opacity:0.42;
+    width:min(82%, 820px);
+    max-width:92vw;
+    opacity:0.46;
   }
 
   .engine-wrap.wm-quadrat .viewer-watermark img{
-    transform:translate(2%, -6%) rotate(-16deg);
+    transform:translate(3%, -6%) rotate(-18deg);
   }
 
   .engine-wrap.wm-rund .viewer-watermark img{
-    transform:translate(2%, -6%) rotate(-16deg);
+    transform:translate(3%, -6%) rotate(-18deg);
   }
 
   .engine-wrap.wm-wabe .viewer-watermark img{
-    transform:translate(2%, -6%) rotate(-16deg);
+    transform:translate(3%, -6%) rotate(-18deg);
   }
 
   .preview-info{
@@ -1012,7 +1026,8 @@ body.portal-body .portal-logo{
 }
 
 body.portal-body .portal-tagline{
-  font-weight:900;
+  font-family:var(--font-brand);
+  font-weight:700;
   letter-spacing:.22em;
   font-size:12px;
   color:rgba(255,225,160,.92);
@@ -1039,7 +1054,9 @@ body.portal-body .portal-pill{
   height:46px;
   padding:0 16px;
   border-radius:16px;
-  font-weight:900;
+  font-weight:700;
+  font-family:var(--font-brand);
+  letter-spacing:.04em;
   font-size:14px;
   border:1px solid rgba(255,210,120,.55);
   background:
@@ -1062,6 +1079,7 @@ body.portal-body .portal-pill__hint{
   font-size:11px;
   font-weight:800;
   color:rgba(255,225,160,.78);
+  font-family:var(--font-ui);
 }
 
 body.portal-body .portal-pill--disabled{

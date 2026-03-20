@@ -140,8 +140,7 @@ body{
   height:38px;
   border-radius:12px;
   border:1px solid var(--input-border);
-  background:
-    linear-gradient(180deg, rgba(25,29,40,.92), rgba(14,18,28,.96));
+  background:linear-gradient(180deg, rgba(25,29,40,.92), rgba(14,18,28,.96));
   color:var(--gold-soft);
   padding:0 12px;
   outline:none;
@@ -446,7 +445,6 @@ body{
 
 /* =========================
    VIEWER WATERMARK
-   Desktop + Mobile bewusst gleich
    ========================= */
 
 .viewer-watermark{
@@ -476,7 +474,6 @@ body{
   mix-blend-mode:normal !important;
 }
 
-/* Desktop */
 .engine-wrap.wm-quadrat .viewer-watermark img{
   transform:translate(3%, -6%) rotate(-18deg);
 }
@@ -875,7 +872,6 @@ body{
     min-height:440px;
   }
 
-  /* Mobil exakt wie Desktop */
   .viewer-watermark img{
     width:min(82%, 820px);
     max-width:92vw;
@@ -902,18 +898,22 @@ body{
   }
 
   .print-preview{
-    padding:12px;
+    padding:10px;
   }
 
   .print-preview__panel{
     width:min(96vw, 980px);
     max-height:94vh;
-    padding:14px;
+    padding:12px;
     border-radius:16px;
   }
 
+  .print-preview__image-wrap{
+    padding-top:20px;
+  }
+
   .print-preview__image{
-    max-height:62vh;
+    max-height:60vh;
     width:auto;
     height:auto;
     object-fit:contain;
@@ -990,6 +990,10 @@ body{
   .engine-frame{
     height:52vh;
     min-height:400px;
+  }
+
+  .print-preview__image{
+    max-height:56vh;
   }
 }
 

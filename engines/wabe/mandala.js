@@ -9,7 +9,7 @@ let APP = {
   isAdmin: false
 };
 
-console.log("WABE mandala.js LOADED v=1014");
+console.log("WABE mandala.js LOADED v=1015");
 
 var colorMatrix = {
   1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
@@ -32,6 +32,10 @@ var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
 let logoImg = null;
 let isAdmin = false;
+
+let exportKind = "preview";
+let lastPreviewKey = "";
+let lastPreviewDataUrl = "";
 
 function sendReady() {
   if (window.parent) window.parent.postMessage({ type: "READY" }, "*");
@@ -64,8 +68,12 @@ window.addEventListener("message", (ev) => {
         colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : APP.colors
       };
       isAdmin = !!APP.isAdmin;
+      exportKind = msg.payload.exportKind === "final" ? "final" : "preview";
+    } else {
+      exportKind = "preview";
     }
-    exportHighRes();
+
+    exportHighRes(exportKind);
     return;
   }
 });
@@ -198,7 +206,6 @@ function drawExportWatermark(g, wmImg) {
 
   const ctx = g.drawingContext;
   if (ctx) ctx.save();
-
   if (ctx) ctx.globalAlpha = 0.45;
 
   const wWidth = 380;
@@ -210,6 +217,27 @@ function drawExportWatermark(g, wmImg) {
       g.image(wmImg, x, y + yShift, wWidth, wHeight);
     }
   }
+
+  if (ctx) ctx.restore();
+  g.pop();
+}
+
+function drawPreviewWatermark(g, wmImg) {
+  if (!g || !wmImg || isAdmin) return;
+
+  g.push();
+  g.resetMatrix();
+
+  const ctx = g.drawingContext;
+  if (ctx) ctx.save();
+  if (ctx) ctx.globalAlpha = 0.32;
+
+  const wWidth = g.width * 0.52;
+  const wHeight = (wmImg.height / wmImg.width) * wWidth;
+
+  g.translate(g.width / 2, g.height / 2);
+  g.rotate(radians(-18));
+  g.image(wmImg, -wWidth / 2, -wHeight / 2, wWidth, wHeight);
 
   if (ctx) ctx.restore();
   g.pop();
@@ -227,9 +255,72 @@ function waitForLogo(maxMs = 5000) {
   });
 }
 
-async function exportHighRes() {
-  const exportW = 2480;
-  const exportH = 3508;
+function getExportSettings(kind = "preview") {
+  const isMobileViewport = windowWidth < 900;
+
+  if (kind === "final") {
+    return {
+      width: 2480,
+      height: 3508,
+      logoWaitMs: 5000,
+      useCache: false
+    };
+  }
+
+  if (isMobileViewport) {
+    return {
+      width: 1240,
+      height: 1754,
+      logoWaitMs: 350,
+      useCache: true
+    };
+  }
+
+  return {
+    width: 1800,
+    height: 2545,
+    logoWaitMs: 800,
+    useCache: true
+  };
+}
+
+function getExportScale(kind, exportW) {
+  const baseFinalScale = 2.4;
+  return baseFinalScale * (exportW / 2480);
+}
+
+function buildPreviewCacheKey(kind, settings) {
+  return JSON.stringify({
+    kind,
+    engine: APP.engine,
+    mode: APP.mode,
+    input: APP.input,
+    direction: APP.direction,
+    sector: APP.sector,
+    sliders: APP.sliders,
+    colors: APP.colors,
+    isAdmin: APP.isAdmin,
+    w: settings.width,
+    h: settings.height
+  });
+}
+
+async function exportHighRes(kind = "preview") {
+  const settings = getExportSettings(kind);
+  const exportW = settings.width;
+  const exportH = settings.height;
+
+  const cacheKey = buildPreviewCacheKey(kind, settings);
+  if (settings.useCache && cacheKey === lastPreviewKey && lastPreviewDataUrl) {
+    try {
+      window.parent.postMessage({
+        type: "EXPORT_RESULT",
+        dataUrl: lastPreviewDataUrl
+      }, "*");
+    } catch (_) {}
+    return;
+  }
+
   const pg = createGraphics(exportW, exportH);
 
   pg.colorMode(HSB, 360, 100, 100);
@@ -248,27 +339,40 @@ async function exportHighRes() {
 
   pg.push();
   pg.translate(exportW / 2, exportH * 0.40);
-  pg.scale(2.4);
+
+  const exportScale = getExportScale(kind, exportW);
+  pg.scale(exportScale);
+
   renderWabeKorrekt(code, cKey, pg, renderColors);
   pg.pop();
 
-  const exportLogo = await waitForLogo(5000);
+  const exportLogo = await waitForLogo(settings.logoWaitMs);
 
-  drawExportWatermark(pg, exportLogo);
+  if (kind === "final") {
+    drawExportWatermark(pg, exportLogo);
+  } else {
+    drawPreviewWatermark(pg, exportLogo);
+  }
 
   if (exportLogo) {
     pg.push();
     pg.resetMatrix();
     pg.noTint();
 
-    const lW = 500;
+    const lW = kind === "final" ? 500 : Math.round(exportW * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
-    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
+    const margin = kind === "final" ? 100 : Math.round(exportW * 0.04);
 
+    pg.image(exportLogo, exportW - lW - margin, exportH - lH - margin, lW, lH);
     pg.pop();
   }
 
   const dataUrl = pg.canvas.toDataURL("image/png");
+
+  if (settings.useCache) {
+    lastPreviewKey = cacheKey;
+    lastPreviewDataUrl = dataUrl;
+  }
 
   try {
     window.parent.postMessage({

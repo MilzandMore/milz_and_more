@@ -208,10 +208,11 @@ function drawPreviewWatermark(g, wmImg) {
   if (ctx) ctx.save();
   if (ctx) ctx.globalAlpha = 0.32;
 
-  /* exakt an Wabe angeglichen */
+  /* gleiche Größenwirkung wie bei Wabe */
   const wWidth = Math.round(g.width * 0.21);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
 
+  /* gleiche Verteilung wie bei Wabe */
   const startX = -20;
   const startY = -180;
   const endX = g.width + 120;
@@ -230,34 +231,6 @@ function drawPreviewWatermark(g, wmImg) {
   g.pop();
 }
 
-function drawPreviewWatermark(g, wmImg) {
-  if (!g || !wmImg || isAdmin) return;
-
-  g.push();
-  g.resetMatrix();
-
-  const ctx = g.drawingContext;
-  if (ctx) ctx.save();
-  if (ctx) ctx.globalAlpha = 0.34;
-
-  const isMobilePreview = g.width <= 1240;
-
-  const wWidth = isMobilePreview ? 300 : 340;
-  const wHeight = (wmImg.height / wmImg.width) * wWidth;
-
-  const stepX = isMobilePreview ? 390 : 430;
-  const stepY = isMobilePreview ? 390 : 430;
-  const yShift = isMobilePreview ? -150 : -180;
-
-  for (let x = -120; x < g.width + 320; x += stepX) {
-    for (let y = -520; y < g.height + 320; y += stepY) {
-      g.image(wmImg, x, y + yShift, wWidth, wHeight);
-    }
-  }
-
-  if (ctx) ctx.restore();
-  g.pop();
-}
 function waitForLogo(maxMs = 5000) {
   return new Promise(resolve => {
     const start = Date.now();

@@ -1,6 +1,6 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED v=1013");
+console.log("QUADRAT mandala.js LOADED v=1014");
 
 var qMatrix = [];
 var logoImg = null;
@@ -25,6 +25,10 @@ var extState = {
   isAdmin: false,
   paperLook: true
 };
+
+let exportKind = "preview";
+let lastPreviewKey = "";
+let lastPreviewDataUrl = "";
 
 const mapZ = {
   1: "#FFD670", 2: "#DEAAFF", 3: "#FF686B",
@@ -104,6 +108,78 @@ function waitForLogo(maxMs = 5000) {
     };
     tick();
   });
+}
+
+function getExportSettings(kind = "preview") {
+  const isMobileViewport = windowWidth < 900;
+
+  if (kind === "final") {
+    return {
+      width: 2480,
+      height: 3508,
+      logoWaitMs: 5000,
+      useCache: false
+    };
+  }
+
+  if (isMobileViewport) {
+    return {
+      width: 1240,
+      height: 1754,
+      logoWaitMs: 350,
+      useCache: true
+    };
+  }
+
+  return {
+    width: 1800,
+    height: 2545,
+    logoWaitMs: 800,
+    useCache: true
+  };
+}
+
+function buildPreviewCacheKey(kind, settings) {
+  return JSON.stringify({
+    kind,
+    engine: extState.engine,
+    mode: extState.mode,
+    input: extState.input,
+    direction: extState.direction,
+    sliders: extState.sliders,
+    colors: extState.colors,
+    isAdmin: extState.isAdmin,
+    w: settings.width,
+    h: settings.height
+  });
+}
+
+function getQuadratScale(exportW) {
+  const ts = 16;
+  const gridSize = 40 * ts;
+  const targetSizePx = exportW / 1.33;
+  return targetSizePx / gridSize;
+}
+
+function drawPreviewWatermark(g, wmImg) {
+  if (!g || !wmImg || isAdmin) return;
+
+  g.push();
+  g.resetMatrix();
+
+  const ctx = g.drawingContext;
+  if (ctx) ctx.save();
+  if (ctx) ctx.globalAlpha = 0.32;
+
+  const wWidth = g.width * 0.52;
+  const wHeight = (wmImg.height / wmImg.width) * wWidth;
+
+  g.translate(g.width / 2, g.height / 2);
+  g.rotate(radians(-18));
+  g.image(wmImg, -wWidth / 2, -wHeight / 2, wWidth, wHeight);
+
+  if (ctx) ctx.restore();
+  g.pop();
 }
 
 function draw() {
@@ -195,7 +271,6 @@ function drawExportWatermark(g, wmImg) {
 
   const ctx = g.drawingContext;
   if (ctx) ctx.save();
-
   if (ctx) ctx.globalAlpha = 0.45;
 
   const wWidth = 380;
@@ -212,9 +287,21 @@ function drawExportWatermark(g, wmImg) {
   g.pop();
 }
 
-async function exportHighRes() {
-  const exportW = 2480;
-  const exportH = 3508;
+async function exportHighRes(kind = "preview") {
+  const settings = getExportSettings(kind);
+  const exportW = settings.width;
+  const exportH = settings.height;
+
+  const cacheKey = buildPreviewCacheKey(kind, settings);
+  if (settings.useCache && cacheKey === lastPreviewKey && lastPreviewDataUrl) {
+    try {
+      window.parent.postMessage({
+        type: "EXPORT_RESULT",
+        dataUrl: lastPreviewDataUrl
+      }, "*");
+    } catch (_) {}
+    return;
+  }
 
   const pg = createGraphics(exportW, exportH);
   pg.colorMode(HSB, 360, 100, 100, 100);
@@ -229,13 +316,9 @@ async function exportHighRes() {
 
   calcQuadratMatrix(drawCode);
 
-  const ts = 16;
-  const gridSize = 40 * ts;
-  const targetSizePx = exportW / 1.33;
-  const scale = targetSizePx / gridSize;
-
   const centerX = exportW / 2;
   const centerY = exportH * (1 / (PHI * PHI));
+  const scale = getQuadratScale(exportW);
 
   pg.push();
   pg.translate(centerX, centerY);
@@ -243,23 +326,33 @@ async function exportHighRes() {
   drawQuadrat(startDigit, pg, { stroke: true });
   pg.pop();
 
-  const exportLogo = await waitForLogo(5000);
+  const exportLogo = await waitForLogo(settings.logoWaitMs);
 
-  drawExportWatermark(pg, exportLogo);
+  if (kind === "final") {
+    drawExportWatermark(pg, exportLogo);
+  } else {
+    drawPreviewWatermark(pg, exportLogo);
+  }
 
   if (exportLogo) {
     pg.push();
     pg.resetMatrix();
     pg.noTint();
 
-    const lW = 500;
+    const lW = kind === "final" ? 500 : Math.round(exportW * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
-    pg.image(exportLogo, exportW - lW - 100, exportH - lH - 100, lW, lH);
+    const margin = kind === "final" ? 100 : Math.round(exportW * 0.04);
 
+    pg.image(exportLogo, exportW - lW - margin, exportH - lH - margin, lW, lH);
     pg.pop();
   }
 
   const dataUrl = pg.canvas.toDataURL("image/png");
+
+  if (settings.useCache) {
+    lastPreviewKey = cacheKey;
+    lastPreviewDataUrl = dataUrl;
+  }
 
   try {
     window.parent.postMessage({
@@ -348,8 +441,12 @@ function onMessageFromParent(ev) {
       extState = Object.assign(extState, msg.payload);
       if (!Array.isArray(extState.colors)) extState.colors = [];
       isAdmin = !!extState.isAdmin;
+      exportKind = msg.payload.exportKind === "final" ? "final" : "preview";
+    } else {
+      exportKind = "preview";
     }
-    exportHighRes();
+
+    exportHighRes(exportKind);
     return;
   }
 }

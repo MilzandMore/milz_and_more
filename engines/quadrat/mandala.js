@@ -171,17 +171,18 @@ function drawPreviewWatermark(g, wmImg) {
   if (ctx) ctx.save();
   if (ctx) ctx.globalAlpha = 0.32;
 
-  /* exakt an Wabe angeglichen */
+  /* gleiche Größenwirkung wie Wabe */
   const wWidth = Math.round(g.width * 0.21);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
 
-  const startX = -20;
-  const startY = -180;
-  const endX = g.width + 120;
-  const endY = g.height + 120;
-  const stepX = 330;
-  const stepY = 330;
-  const yShift = -95;
+  /* Quadrat braucht etwas engere Verteilung und minimal tiefer */
+  const startX = -40;
+  const startY = -140;
+  const endX = g.width + 140;
+  const endY = g.height + 140;
+  const stepX = 300;
+  const stepY = 300;
+  const yShift = -75;
 
   for (let x = startX; x < endX; x += stepX) {
     for (let y = startY; y < endY; y += stepY) {

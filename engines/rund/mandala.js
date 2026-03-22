@@ -198,7 +198,7 @@ function drawSector(m, colors, target) {
 }
 
 // --------- EXPORT-WASSERZEICHEN ----------
-function drawExportWatermark(g, wmImg) {
+function drawPreviewWatermark(g, wmImg) {
   if (!g || !wmImg || isAdmin) return;
 
   g.push();

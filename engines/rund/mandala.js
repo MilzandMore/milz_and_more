@@ -206,26 +206,22 @@ function drawPreviewWatermark(g, wmImg) {
 
   const ctx = g.drawingContext;
   if (ctx) ctx.save();
-
-  /* minimal dunkler */
   if (ctx) ctx.globalAlpha = 0.32;
 
-  const ratio = g.width / 2480;
-
-  /* etwas größer als Logo unten rechts */
+  /* exakt an Wabe angeglichen */
   const wWidth = Math.round(g.width * 0.21);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
 
-  const yShift = -120 * ratio;
+  const startX = -20;
+  const startY = -180;
+  const endX = g.width + 120;
+  const endY = g.height + 120;
+  const stepX = 330;
+  const stepY = 330;
+  const yShift = -95;
 
-  const startX = -40 * ratio;
-  const startY = -260 * ratio;
-  const endX = g.width + 120 * ratio;
-  const endY = g.height + 120 * ratio;
-  const step = 360 * ratio;
-
-  for (let x = startX; x < endX; x += step) {
-    for (let y = startY; y < endY; y += step) {
+  for (let x = startX; x < endX; x += stepX) {
+    for (let y = startY; y < endY; y += stepY) {
       g.image(wmImg, x, y + yShift, wWidth, wHeight);
     }
   }

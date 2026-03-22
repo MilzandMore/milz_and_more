@@ -169,19 +169,14 @@ function drawPreviewWatermark(g, wmImg) {
 
   const ctx = g.drawingContext;
   if (ctx) ctx.save();
-  if (ctx) ctx.globalAlpha = 0.34;
+  if (ctx) ctx.globalAlpha = 0.45;
 
-  const isMobilePreview = g.width <= 1240;
-
-  const wWidth = isMobilePreview ? 300 : 340;
+  const wWidth = 380;
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
+  const yShift = -200;
 
-  const stepX = isMobilePreview ? 390 : 430;
-  const stepY = isMobilePreview ? 390 : 430;
-  const yShift = isMobilePreview ? -150 : -180;
-
-  for (let x = -120; x < g.width + 320; x += stepX) {
-    for (let y = -520; y < g.height + 320; y += stepY) {
+  for (let x = -100; x < g.width + 400; x += 500) {
+    for (let y = -700; y < g.height + 400; y += 500) {
       g.image(wmImg, x, y + yShift, wWidth, wHeight);
     }
   }
@@ -189,7 +184,6 @@ function drawPreviewWatermark(g, wmImg) {
   if (ctx) ctx.restore();
   g.pop();
 }
-
 function draw() {
   background(12);
 

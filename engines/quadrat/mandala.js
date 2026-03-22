@@ -169,12 +169,14 @@ function drawPreviewWatermark(g, wmImg) {
 
   const ctx = g.drawingContext;
   if (ctx) ctx.save();
-  if (ctx) ctx.globalAlpha = 0.25;
+
+  /* minimal dunkler */
+  if (ctx) ctx.globalAlpha = 0.32;
 
   const ratio = g.width / 2480;
 
-  /* gleiche Größenwirkung wie Logo unten rechts */
-  const wWidth = Math.round(g.width * 0.18);
+  /* etwas größer als Logo unten rechts */
+  const wWidth = Math.round(g.width * 0.21);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
 
   const yShift = -120 * ratio;

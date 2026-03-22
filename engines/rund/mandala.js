@@ -208,12 +208,21 @@ function drawPreviewWatermark(g, wmImg) {
   if (ctx) ctx.save();
   if (ctx) ctx.globalAlpha = 0.45;
 
-  const wWidth = 380;
-  const wHeight = (wmImg.height / wmImg.width) * wWidth;
-  const yShift = -200;
+  /* exakt alte Optik, nur proportional zur kleineren Vorschau */
+  const ratio = g.width / 2480;
 
-  for (let x = -100; x < g.width + 400; x += 500) {
-    for (let y = -700; y < g.height + 400; y += 500) {
+  const wWidth = 380 * ratio;
+  const wHeight = (wmImg.height / wmImg.width) * wWidth;
+  const yShift = -200 * ratio;
+
+  const startX = -100 * ratio;
+  const startY = -700 * ratio;
+  const endX = g.width + 400 * ratio;
+  const endY = g.height + 400 * ratio;
+  const step = 500 * ratio;
+
+  for (let x = startX; x < endX; x += step) {
+    for (let y = startY; y < endY; y += step) {
       g.image(wmImg, x, y + yShift, wWidth, wHeight);
     }
   }

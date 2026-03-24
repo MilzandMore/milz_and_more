@@ -3,8 +3,8 @@
   "short_name": "Lebenscode",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#0b0f14",
+  "theme_color": "#c9a14a",
   "icons": [
     {
       "src": "assets/icon-192.png",

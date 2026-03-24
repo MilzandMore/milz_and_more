@@ -843,9 +843,20 @@ body{
 .controls > .field:nth-of-type(2){ order:2; }
 .controls > .field:nth-of-type(3){ order:3; }
 .controls > .field:nth-of-type(4){ order:4; }
-#sectorWrap{ order:5 !important; }
-#openSliders{ order:6 !important; }
-#download{ order:7 !important; }
+
+#sectorWrap{
+  order:5 !important;
+}
+
+.controls > .field:has(#openSliders),
+#openSliders{
+  order:6 !important;
+}
+
+.controls > .field:has(#download),
+#download{
+  order:7 !important;
+}
 
   .app-main{
     position:relative;

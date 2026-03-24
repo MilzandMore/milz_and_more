@@ -23,7 +23,14 @@
 
   <link rel="stylesheet" href="app.css" />
 </head>
-<body class="portal-body">
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js")
+      .then(() => console.log("Service Worker registriert"))
+      .catch((err) => console.log("SW Fehler:", err));
+  }
+</script>
+  <body class="portal-body">
   <main class="portal">
     <div class="portal-card">
 

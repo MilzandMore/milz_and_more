@@ -839,13 +839,13 @@ body{
     display:none !important;
   }
 
- .controls > .field:nth-of-type(1){ order:1; }
+.controls > .field:nth-of-type(1){ order:1; }
 .controls > .field:nth-of-type(2){ order:2; }
 .controls > .field:nth-of-type(3){ order:3; }
 .controls > .field:nth-of-type(4){ order:4; }
-#sectorWrap{ order:5; }
-#openSliders{ order:6; }
-#download{ order:7; }
+#sectorWrap{ order:5 !important; }
+#openSliders{ order:6 !important; }
+#download{ order:7 !important; }
 
   .app-main{
     position:relative;

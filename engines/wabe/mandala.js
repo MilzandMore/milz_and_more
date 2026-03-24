@@ -232,23 +232,22 @@ function drawPreviewWatermark(g, wmImg) {
   if (ctx) ctx.save();
   if (ctx) ctx.globalAlpha = 0.32;
 
-  /* Größe so lassen, wie sie dir optisch gefällt */
-  const wWidth = Math.round(g.width * 0.21);
+  /* Größe exakt wie Wabe */
+  const wWidth = Math.round(g.width * 0.18);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
 
-  /* Position/Abstände NICHT nochmal kleinrechnen,
-     sonst überlappen die Logos auf Mobile */
-  const startX = -20;
-  const startY = -180;
-  const endX = g.width + 120;
-  const endY = g.height + 120;
-  const stepX = 330;
-  const stepY = 330;
-  const yShift = -95;
+  /* saubere Abstände */
+  const stepX = wWidth * 1.8;
+  const stepY = wHeight * 2.2;
+
+  const startX = -wWidth * 0.4;
+  const startY = -wHeight * 0.6;
+  const endX = g.width + wWidth;
+  const endY = g.height + wHeight;
 
   for (let x = startX; x < endX; x += stepX) {
     for (let y = startY; y < endY; y += stepY) {
-      g.image(wmImg, x, y + yShift, wWidth, wHeight);
+      g.image(wmImg, x, y, wWidth, wHeight);
     }
   }
 

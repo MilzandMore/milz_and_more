@@ -1,6 +1,6 @@
 {
-  "name": "Lebenscode App",
-  "short_name": "Lebenscode",
+  "name": "Milz & More",
+  "short_name": "Milz & More",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b0f14",

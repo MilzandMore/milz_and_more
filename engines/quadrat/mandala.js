@@ -160,7 +160,6 @@ function getQuadratScale(exportW) {
   const targetSizePx = exportW / 1.33;
   return targetSizePx / gridSize;
 }
-
 function drawPreviewWatermark(g, wmImg) {
   if (!g || !wmImg || isAdmin) return;
 
@@ -171,23 +170,22 @@ function drawPreviewWatermark(g, wmImg) {
   if (ctx) ctx.save();
   if (ctx) ctx.globalAlpha = 0.32;
 
-  /* Logo-Größe */
-  const wWidth = Math.round(g.width * 0.19);
+  /* Größe exakt wie Wabe */
+  const wWidth = Math.round(g.width * 0.18);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
 
-  /* mehr Abstand, damit nichts überlappt */
-  const stepX = Math.round(wWidth * 1.7);
-  const stepY = Math.round(wHeight * 2.2);
+  /* saubere Abstände */
+  const stepX = wWidth * 1.8;
+  const stepY = wHeight * 2.2;
 
-  const startX = -40;
-  const startY = -120;
-  const endX = g.width + 140;
-  const endY = g.height + 140;
-  const yShift = -55;
+  const startX = -wWidth * 0.4;
+  const startY = -wHeight * 0.6;
+  const endX = g.width + wWidth;
+  const endY = g.height + wHeight;
 
   for (let x = startX; x < endX; x += stepX) {
     for (let y = startY; y < endY; y += stepY) {
-      g.image(wmImg, x, y + yShift, wWidth, wHeight);
+      g.image(wmImg, x, y, wWidth, wHeight);
     }
   }
 

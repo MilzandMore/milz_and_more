@@ -1136,3 +1136,52 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     max-height:260px;
   }
 }
+/* ===== Mobile Button-Reihenfolge ===== */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.controls .field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-preview,
+.field-colors {
+  justify-content: flex-end;
+}
+
+.field-preview button,
+.field-colors button {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .field-mode { order: 1; }
+  .field-input { order: 2; }
+  .field-code { order: 3; }
+  .field-direction { order: 4; }
+  .field-sector { order: 5; }
+  .field-colors { order: 6; }
+  .field-preview { order: 7; }
+
+  .field-preview,
+  .field-colors,
+  .controls .field {
+    width: 100%;
+  }
+
+  #openSliders,
+  #download {
+    width: 100%;
+  }
+}

@@ -18,7 +18,7 @@
   <meta name="apple-mobile-web-app-title" content="Lebenscode">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=clean-preview-5">
+  <link rel="stylesheet" href="app.css?v=clean-preview-6">
 </head>
 
 <body>
@@ -30,7 +30,7 @@
     </div>
 
     <div class="controls">
-      <div class="field field-mode">
+      <div class="field">
         <label for="mode">Modus</label>
         <select id="mode">
           <option value="geburtstag">Geburtstag</option>
@@ -38,7 +38,7 @@
         </select>
       </div>
 
-      <div class="field field-input">
+      <div class="field">
         <label for="input">Eingabe</label>
         <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT">
       </div>
@@ -48,7 +48,7 @@
         <input id="codeOutput" type="text" value="" readonly>
       </div>
 
-      <div class="field field-direction">
+      <div class="field">
         <label for="direction">Richtung</label>
         <select id="direction">
           <option value="aussen">Außen</option>
@@ -56,7 +56,7 @@
         </select>
       </div>
 
-      <div class="field field-sector" id="sectorWrap">
+      <div class="field" id="sectorWrap">
         <label for="sector">Sektor</label>
         <select id="sector">
           <option value="6">6</option>
@@ -67,13 +67,8 @@
         </select>
       </div>
 
-      <div class="field field-colors mobile-only">
-        <button id="openSliders" class="engine-btn" type="button">Farben</button>
-      </div>
-
-      <div class="field field-preview">
-        <button id="download" class="primary" type="button">Druckvorschau</button>
-      </div>
+      <button id="download" class="primary" type="button">Druckvorschau</button>
+      <button id="openSliders" class="engine-btn mobile-only" type="button">Farben</button>
     </div>
 
     <div class="right">

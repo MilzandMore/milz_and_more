@@ -171,18 +171,19 @@ function drawPreviewWatermark(g, wmImg) {
   if (ctx) ctx.save();
   if (ctx) ctx.globalAlpha = 0.32;
 
-  /* gleiche Größenwirkung wie Wabe */
-  const wWidth = Math.round(g.width * 0.21);
+  /* Logo-Größe */
+  const wWidth = Math.round(g.width * 0.19);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
 
-  /* Quadrat braucht etwas engere Verteilung und minimal tiefer */
+  /* mehr Abstand, damit nichts überlappt */
+  const stepX = Math.round(wWidth * 1.7);
+  const stepY = Math.round(wHeight * 2.2);
+
   const startX = -40;
-  const startY = -140;
+  const startY = -120;
   const endX = g.width + 140;
   const endY = g.height + 140;
-  const stepX = 300;
-  const stepY = 300;
-  const yShift = -75;
+  const yShift = -55;
 
   for (let x = startX; x < endX; x += stepX) {
     for (let y = startY; y < endY; y += stepY) {

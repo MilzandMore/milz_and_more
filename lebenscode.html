@@ -4,8 +4,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
   <title>Lebenscode Mandala</title>
-  <link rel="stylesheet" href="app.css?v=clean-preview-4">
+  <meta name="description" content="Lebenscode Mandala">
+  <meta name="theme-color" content="#ffffff">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Lebenscode">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <link rel="stylesheet" href="app.css?v=clean-preview-5">
 </head>
 
 <body>
@@ -17,7 +30,7 @@
     </div>
 
     <div class="controls">
-      <div class="field">
+      <div class="field field-mode">
         <label for="mode">Modus</label>
         <select id="mode">
           <option value="geburtstag">Geburtstag</option>
@@ -25,7 +38,7 @@
         </select>
       </div>
 
-      <div class="field">
+      <div class="field field-input">
         <label for="input">Eingabe</label>
         <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT">
       </div>
@@ -35,7 +48,7 @@
         <input id="codeOutput" type="text" value="" readonly>
       </div>
 
-      <div class="field">
+      <div class="field field-direction">
         <label for="direction">Richtung</label>
         <select id="direction">
           <option value="aussen">Außen</option>
@@ -43,7 +56,7 @@
         </select>
       </div>
 
-      <div class="field" id="sectorWrap">
+      <div class="field field-sector" id="sectorWrap">
         <label for="sector">Sektor</label>
         <select id="sector">
           <option value="6">6</option>
@@ -54,8 +67,13 @@
         </select>
       </div>
 
-      <button id="download" class="primary" type="button">Druckvorschau</button>
-      <button id="openSliders" class="engine-btn mobile-only" type="button">Farben</button>
+      <div class="field field-colors mobile-only">
+        <button id="openSliders" class="engine-btn" type="button">Farben</button>
+      </div>
+
+      <div class="field field-preview">
+        <button id="download" class="primary" type="button">Druckvorschau</button>
+      </div>
     </div>
 
     <div class="right">

@@ -880,26 +880,25 @@ body{
     min-height:440px;
   }
 
- .viewer-watermark img{
-  width:min(82%, 820px);
-  max-width:92vw;
-  opacity:0.7.5;
-}
+  .viewer-watermark img{
+    width:min(82%, 820px);
+    max-width:92vw;
+    height:auto;
+    opacity:0.46;
+  }
 
-/* Quadrat bleibt */
-.engine-wrap.wm-quadrat .viewer-watermark img{
-  transform:translate(0%, -22%) rotate(-18deg);
-}
+  .engine-wrap.wm-quadrat .viewer-watermark img{
+    transform:translate(3%, -6%) rotate(-18deg);
+  }
 
-/* Rund etwas höher */
-.engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(0%, -20%) rotate(-18deg);
-}
+  .engine-wrap.wm-rund .viewer-watermark img{
+    transform:translate(3%, -6%) rotate(-18deg);
+  }
 
-/* Wabe am höchsten */
-.engine-wrap.wm-wabe .viewer-watermark img{
-  transform:translate(0%, -20%) rotate(-18deg);
-}
+  .engine-wrap.wm-wabe .viewer-watermark img{
+    transform:translate(3%, -6%) rotate(-18deg);
+  }
+
   .preview-info{
     bottom:14px;
     font-size:11px;

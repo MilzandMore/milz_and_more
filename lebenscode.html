@@ -118,11 +118,11 @@
         <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
       </div>
 
-      <div class="print-preview__caption">
-        Dies ist eine Vorschau deines Mandalas.<br>
-        Der Download ist ohne Wasserzeichen verfügbar.<br><br>
-        <strong>Einführungspreis: 11,-€</strong>
-      </div>
+      <div id="printPreviewCaption" class="print-preview__caption">
+  Dies ist eine Vorschau deines Mandalas.<br>
+  Der Download ist ohne Wasserzeichen verfügbar.<br><br>
+  <strong>Einführungspreis: 11 €</strong>
+</div>
     </div>
   </div>
 
@@ -142,7 +142,8 @@
 
   <script>
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
-
+const IS_ADMIN = new URLSearchParams(window.location.search).get("admin") === "1";
+    
     const state = {
       engine: "quadrat",
       mode: "geburtstag",
@@ -201,6 +202,7 @@
       printPreview: document.getElementById("printPreview"),
       printPreviewBackdrop: document.getElementById("printPreviewBackdrop"),
       printPreviewImage: document.getElementById("printPreviewImage"),
+      printPreviewCaption: document.getElementById("printPreviewCaption"),
       closePrintPreview: document.getElementById("closePrintPreview"),
       buyPreviewPng: document.getElementById("buyPreviewPng")
     };
@@ -390,11 +392,11 @@
       }, 1800);
     }
 
-    function openPrintPreview(dataUrl) {
-      els.printPreviewImage.src = dataUrl;
-      els.printPreview.hidden = false;
-      document.body.style.overflow = "hidden";
-    }
+    <div id="printPreviewCaption" class="print-preview__caption">
+  Dies ist eine Vorschau deines Mandalas.<br>
+  Der Download ist ohne Wasserzeichen verfügbar.<br><br>
+  <strong>Einführungspreis: 11 €</strong>
+</div>
 
     function closePrintPreview() {
       els.printPreview.hidden = true;

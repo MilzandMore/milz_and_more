@@ -10,7 +10,6 @@
   <meta name="theme-color" content="#c9a14a">
 
   <link rel="manifest" href="manifest.json">
-
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 
@@ -18,7 +17,7 @@
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=clean-preview-7">
+  <link rel="stylesheet" href="app.css?v=clean-preview-8">
 </head>
 
 <body>
@@ -408,7 +407,7 @@
         alert("Der Zahlungslink wird noch hinterlegt.");
         return;
       }
-      window.location.href = PAYMENT_URL;
+      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
     }
 
     function buildSlidersInto(containerEl) {

@@ -887,15 +887,15 @@ body{
   }
 
   .engine-wrap.wm-quadrat .viewer-watermark img{
-    transform:translate(3%, -6%) rotate(-18deg);
+    transform:translate(0%, -22%) rotate(-18deg);
   }
 
   .engine-wrap.wm-rund .viewer-watermark img{
-    transform:translate(3%, -6%) rotate(-18deg);
+    transform:translate(0%, -22%) rotate(-18deg);
   }
 
   .engine-wrap.wm-wabe .viewer-watermark img{
-    transform:translate(3%, -6%) rotate(-18deg);
+    transform:translate(0%, -22%) rotate(-18deg);
   }
 
   .preview-info{

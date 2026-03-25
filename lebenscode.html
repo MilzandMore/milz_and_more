@@ -18,7 +18,7 @@
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=clean-preview-6">
+  <link rel="stylesheet" href="app.css?v=clean-preview-7">
 </head>
 
 <body>
@@ -100,7 +100,7 @@
 
       <div id="previewInfo" class="preview-info" aria-live="polite">
         Diese Druckvorschau enthält Wasserzeichen.<br>
-        Der PNG Download ist ohne Wasserzeichen.
+        Der Download ist ohne Wasserzeichen verfügbar.
       </div>
     </section>
   </main>
@@ -112,7 +112,7 @@
       <button id="closePrintPreview" class="print-preview__close" type="button" aria-label="Schließen">×</button>
 
       <button id="buyPreviewPng" class="print-preview__buy" type="button">
-        PNG ohne Wasserzeichen kaufen
+        ✨ Dein Mandala freischalten – 11 €
       </button>
 
       <div class="print-preview__image-wrap">
@@ -120,8 +120,9 @@
       </div>
 
       <div class="print-preview__caption">
-        Diese Druckvorschau enthält Wasserzeichen.<br>
-        Der PNG Download ist ohne Wasserzeichen.
+        Dies ist eine Vorschau deines Mandalas.<br>
+        Der Download ist ohne Wasserzeichen verfügbar.<br><br>
+        <strong>Einführungspreis: 11 €</strong>
       </div>
     </div>
   </div>
@@ -141,7 +142,7 @@
   </div>
 
   <script>
-    const PAYMENT_URL = "#";
+    const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73LOk";
 
     const state = {
       engine: "quadrat",
@@ -407,7 +408,7 @@
         alert("Der Zahlungslink wird noch hinterlegt.");
         return;
       }
-      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
+      window.location.href = PAYMENT_URL;
     }
 
     function buildSlidersInto(containerEl) {

@@ -1136,3 +1136,16 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     max-height:260px;
   }
 }
+
+.print-preview__caption strong{
+  display:inline-block;
+  margin-top:8px;
+  padding:4px 10px;
+  border-radius:999px;
+  background:rgba(201,161,74,.12);
+  border:1px solid rgba(201,161,74,.28);
+  color:var(--gold-light);
+  font-family:var(--font-brand);
+  letter-spacing:.04em;
+  font-weight:700;
+}

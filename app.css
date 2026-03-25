@@ -893,12 +893,12 @@ body{
 
 /* Rund etwas höher */
 .engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(0%, -32%) rotate(-18deg);
+  transform:translate(0%, -26%) rotate(-18deg);
 }
 
 /* Wabe am höchsten */
 .engine-wrap.wm-wabe .viewer-watermark img{
-  transform:translate(0%, -38%) rotate(-18deg);
+  transform:translate(0%, -28%) rotate(-18deg);
 }
   .preview-info{
     bottom:14px;

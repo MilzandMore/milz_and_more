@@ -889,17 +889,17 @@ body{
 
 /* Quadrat – exakt mittig */
 .engine-wrap.wm-quadrat .viewer-watermark img{
-  transform:translate(3%, -3%) rotate(-18deg);
+  transform:translate(4%, -6%) rotate(-18deg);
 }
 
 /* Rund – minimal höher fürs optische Zentrum */
 .engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(4%, -4%) rotate(-18deg);
+  transform:translate(5%, -8%) rotate(-18deg);
 }
 
 /* Wabe – leicht höher wegen Form */
 .engine-wrap.wm-wabe .viewer-watermark img{
-  transform:translate(4%, -4%) rotate(-18deg);
+  transform:translate(6%, -8%) rotate(-18deg);
 }
   .preview-info{
     bottom:14px;

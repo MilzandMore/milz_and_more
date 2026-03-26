@@ -6,116 +6,591 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <title>Milz & More</title>
+  <meta name="description" content="Lebenscode Mandala">
   <meta name="theme-color" content="#c9a14a">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 
-  <link rel="stylesheet" href="app.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Milz & More">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <link rel="stylesheet" href="app.css?v=clean-preview-8">
 </head>
 
 <body>
+  <header class="app-header">
+    <div class="brand">
+      <a href="index.html" class="brand-link">
+        <img class="brand-logo" src="assets/Logo_gold.png" alt="Milz & More Logo">
+      </a>
+    </div>
 
-<header class="app-header">
-  <img class="brand-logo" src="assets/Logo_gold.png">
-</header>
+    <div class="controls">
+      <div class="field">
+        <label for="mode">Modus</label>
+        <select id="mode">
+          <option value="geburtstag">Geburtstag</option>
+          <option value="text">Text / Affirmation</option>
+        </select>
+      </div>
 
-<main class="app-main">
-  <section id="stage" class="stage">
+      <div class="field">
+        <label for="input">Eingabe</label>
+        <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT">
+      </div>
 
-    <div class="engine-wrap wm-quadrat" id="engineWrap">
-      <iframe id="engineFrame" class="engine-frame"></iframe>
+      <div class="field field-code">
+        <label for="codeOutput">Code</label>
+        <input id="codeOutput" type="text" value="" readonly>
+      </div>
 
-      <div class="viewer-watermark">
-        <img src="assets/Logo_gold.png">
+      <div class="field">
+        <label for="direction">Richtung</label>
+        <select id="direction">
+          <option value="aussen">Außen</option>
+          <option value="innen">Innen</option>
+        </select>
+      </div>
+
+      <div class="field" id="sectorWrap">
+        <label for="sector">Sektor</label>
+        <select id="sector">
+          <option value="6">6</option>
+          <option value="8" selected>8</option>
+          <option value="10">10</option>
+          <option value="12">12</option>
+          <option value="13">13</option>
+        </select>
+      </div>
+
+      <button id="download" class="primary" type="button">Druckvorschau</button>
+      <button id="openSliders" class="engine-btn mobile-only" type="button">Farben</button>
+    </div>
+
+    <div class="right">
+      <nav class="engine-nav" aria-label="Form auswählen">
+        <button class="engine-btn active" data-engine="quadrat" type="button">Quadrat</button>
+        <button class="engine-btn" data-engine="rund" type="button">Rund</button>
+        <button class="engine-btn" data-engine="wabe" type="button">Wabe</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <aside class="slider-panel desktop-only">
+      <div class="slider-title">Farbintensität</div>
+      <div id="sliders" class="sliders"></div>
+      <div class="hint">Tipp: Regler steuern jede Farbe von sanftem Pastell bis leuchtend kräftig.</div>
+    </aside>
+
+    <section id="stage" class="stage paper">
+      <div id="loading" class="loading">Engine lädt…</div>
+
+      <div class="engine-wrap wm-quadrat" id="engineWrap">
+        <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
+
+        <div class="viewer-watermark" aria-hidden="true">
+          <img src="assets/Logo_gold.png" alt="">
+        </div>
+      </div>
+
+      <div id="previewInfo" class="preview-info" aria-live="polite">
+        Diese Druckvorschau enthält Wasserzeichen.<br>
+        Der Download ist ohne Wasserzeichen verfügbar.
+      </div>
+    </section>
+  </main>
+
+  <div id="printPreview" class="print-preview" hidden>
+    <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
+
+    <div class="print-preview__panel">
+      <button id="closePrintPreview" class="print-preview__close" type="button" aria-label="Schließen">×</button>
+
+      <button id="buyPreviewPng" class="print-preview__buy" type="button">
+        ✨ Dein Mandala freischalten 11,-€
+      </button>
+
+      <div class="print-preview__image-wrap">
+        <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
+      </div>
+
+      <div class="print-preview__caption">
+        Dies ist eine Vorschau deines Mandalas.<br>
+        Der Download ist ohne Wasserzeichen verfügbar.<br><br>
+        <strong>Einführungspreis: 11,-€</strong>
       </div>
     </div>
-
-    <button id="download" class="primary">Druckvorschau</button>
-
-  </section>
-</main>
-
-<div id="printPreview" class="print-preview" hidden>
-
-  <div class="print-preview__panel">
-
-    <button id="closePrintPreview">X</button>
-
-    <button id="buyPreviewPng">
-      ✨ Dein Mandala freischalten – 11€
-    </button>
-
-    <img id="printPreviewImage">
-
-    <div id="printPreviewCaption">
-      Vorschau mit Wasserzeichen<br>
-      <strong>Einführungspreis: 11€</strong>
-    </div>
-
   </div>
 
-</div>
+  <div id="sliderSheet" class="slider-sheet">
+    <div class="slider-sheet__backdrop" id="sliderBackdrop"></div>
+    <div class="slider-sheet__panel">
+      <div class="slider-sheet__header">
+        <div class="slider-sheet__title">Farbintensität</div>
+        <button id="closeSliders" class="engine-btn" type="button">Schließen</button>
+      </div>
+      <div class="slider-sheet__body">
+        <div id="slidersMobile" class="sliders"></div>
+        <div class="hint">Tipp: Regler steuern jede Farbe von sanftem Pastell bis leuchtend kräftig.</div>
+      </div>
+    </div>
+  </div>
 
-<script>
-const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
-const IS_ADMIN = new URLSearchParams(window.location.search).get("admin") === "1";
+  <script>
+    const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
-const els = {
-  frame: document.getElementById("engineFrame"),
-  download: document.getElementById("download"),
-  printPreview: document.getElementById("printPreview"),
-  printPreviewImage: document.getElementById("printPreviewImage"),
-  printPreviewCaption: document.getElementById("printPreviewCaption"),
-  closePrintPreview: document.getElementById("closePrintPreview"),
-  buyPreviewPng: document.getElementById("buyPreviewPng")
-};
+    const state = {
+      engine: "quadrat",
+      mode: "geburtstag",
+      input: "15011987",
+      computedCode: "15011987",
+      direction: "aussen",
+      sector: 8,
+      sliders: Array(10).fill(85),
+      colors: [],
+      paperLook: true
+    };
 
-function openPrintPreview(dataUrl) {
-  els.printPreviewImage.src = dataUrl;
-  els.printPreview.hidden = false;
+    const charMap = {
+      A:1, J:1, S:1, Ä:1,
+      B:2, K:2, T:2, Ö:2,
+      C:3, L:3, U:3, Ü:3,
+      D:4, M:4, V:4, ß:4,
+      E:5, N:5, W:5,
+      F:6, O:6, X:6,
+      G:7, P:7, Y:7,
+      H:8, Q:8, Z:8,
+      I:9, R:9
+    };
 
-  if (IS_ADMIN) {
-    document.querySelector(".viewer-watermark").style.display = "none";
-    els.printPreviewCaption.innerHTML = "Admin-Modus – Download ohne Wasserzeichen";
-  }
-}
+    const PALETTE_RAMPS = [
+      { soft: "#F4C7BD", vivid: "#FF0000" },
+      { soft: "#C9D6FF", vivid: "#00008B" },
+      { soft: "#D8F3C7", vivid: "#00FF00" },
+      { soft: "#FFF1A6", vivid: "#FFFF00" },
+      { soft: "#D3F0FF", vivid: "#87CEEB" },
+      { soft: "#9FE3E0", vivid: "#40E0D0" },
+      { soft: "#F4B6D9", vivid: "#FF00A8" },
+      { soft: "#F8D4B4", vivid: "#FFA500" },
+      { soft: "#DDD0FA", vivid: "#9400D3" }
+    ];
 
-function closePrintPreview() {
-  els.printPreview.hidden = true;
-}
+    const els = {
+      stage: document.getElementById("stage"),
+      frame: document.getElementById("engineFrame"),
+      engineWrap: document.getElementById("engineWrap"),
+      loading: document.getElementById("loading"),
+      mode: document.getElementById("mode"),
+      input: document.getElementById("input"),
+      direction: document.getElementById("direction"),
+      sectorWrap: document.getElementById("sectorWrap"),
+      sector: document.getElementById("sector"),
+      download: document.getElementById("download"),
+      previewInfo: document.getElementById("previewInfo"),
+      sliders: document.getElementById("sliders"),
+      slidersMobile: document.getElementById("slidersMobile"),
+      openSliders: document.getElementById("openSliders"),
+      closeSliders: document.getElementById("closeSliders"),
+      sliderSheet: document.getElementById("sliderSheet"),
+      sliderBackdrop: document.getElementById("sliderBackdrop"),
+      codeOutput: document.getElementById("codeOutput"),
+      printPreview: document.getElementById("printPreview"),
+      printPreviewBackdrop: document.getElementById("printPreviewBackdrop"),
+      printPreviewImage: document.getElementById("printPreviewImage"),
+      closePrintPreview: document.getElementById("closePrintPreview"),
+      buyPreviewPng: document.getElementById("buyPreviewPng")
+    };
 
-function handlePaidDownload() {
+    function ex(a, b) {
+      const s = (a || 0) + (b || 0);
+      return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
+    }
 
-  if (IS_ADMIN) {
-    requestExport();
-    return;
-  }
+    function codeFromDate(str) {
+      const raw = String(str || "").replace(/\D/g, "").split("").map(Number);
+      while (raw.length < 8) raw.push(0);
+      return raw.slice(0, 8);
+    }
 
-  window.open(PAYMENT_URL, "_blank");
-}
+    function codeFromText(text) {
+      let arr = String(text || "")
+        .toUpperCase()
+        .replace(/[^A-ZÄÖÜß]/g, "")
+        .split("")
+        .map(c => charMap[c])
+        .filter(Boolean);
 
-function requestExport() {
-  els.frame.contentWindow.postMessage({ type: "EXPORT" }, "*");
-}
+      if (arr.length === 0) arr = [9];
 
-function loadEngine() {
-  els.frame.src = "engines/quadrat/index.html";
-}
+      while (arr.length > 8) {
+        const next = [];
+        for (let i = 0; i < arr.length - 1; i++) {
+          next.push(ex(arr[i], arr[i + 1]));
+        }
+        arr = next;
+      }
 
-window.addEventListener("message", (ev) => {
-  if (ev.data.type === "EXPORT_RESULT") {
-    openPrintPreview(ev.data.dataUrl);
-  }
-});
+      while (arr.length < 8) {
+        const len = arr.length;
+        const a = arr[len - 2] ?? arr[len - 1] ?? 9;
+        const b = arr[len - 1] ?? 9;
+        arr.push(ex(a, b));
+      }
 
-els.download.addEventListener("click", requestExport);
-els.closePrintPreview.addEventListener("click", closePrintPreview);
-els.buyPreviewPng.addEventListener("click", handlePaidDownload);
+      return arr.slice(0, 8);
+    }
 
-loadEngine();
-</script>
+    function getComputedCodeArray() {
+      return state.mode === "text"
+        ? codeFromText(state.input)
+        : codeFromDate(state.input);
+    }
 
+    function syncComputedCode() {
+      state.computedCode = getComputedCodeArray().join("");
+      els.codeOutput.value = state.computedCode;
+    }
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function hexToRgb(hex) {
+      const clean = hex.replace("#", "");
+      const full = clean.length === 3
+        ? clean.split("").map(ch => ch + ch).join("")
+        : clean;
+
+      const num = parseInt(full, 16);
+
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b]
+        .map(v => clamp(Math.round(v), 0, 255).toString(16).padStart(2, "0"))
+        .join("")
+        .toUpperCase();
+    }
+
+    function interpolateHex(hex1, hex2, t) {
+      const a = hexToRgb(hex1);
+      const b = hexToRgb(hex2);
+
+      return rgbToHex(
+        a.r + (b.r - a.r) * t,
+        a.g + (b.g - a.g) * t,
+        a.b + (b.b - a.b) * t
+      );
+    }
+
+    function rotateRampsBySeed(seedDigit) {
+      const shift = clamp((seedDigit || 1) - 1, 0, 8);
+      return PALETTE_RAMPS.map((_, i) => PALETTE_RAMPS[(i + shift) % PALETTE_RAMPS.length]);
+    }
+
+    function getRampColor(ramp, sliderValue) {
+      const tLinear = (clamp(Number(sliderValue) || 85, 20, 100) - 20) / 80;
+      const t = Math.pow(tLinear, 0.86);
+      return interpolateHex(ramp.soft, ramp.vivid, t);
+    }
+
+    function computeFinalColors() {
+      const seedDigit = Number(state.computedCode?.charAt(0) || 1);
+      const rotatedRamps = rotateRampsBySeed(seedDigit);
+
+      state.colors = rotatedRamps.map((ramp, index) => {
+        const digit = index + 1;
+        const sliderValue = state.sliders[digit] ?? 85;
+        return getRampColor(ramp, sliderValue);
+      });
+    }
+
+    function setSliderVisual(input) {
+      input.style.setProperty("--val", input.value + "%");
+    }
+
+    function syncSameDigitSliders(digit, value, sourceInput = null) {
+      const sliders = document.querySelectorAll(
+        '.slider-row input[type="range"][data-digit="' + digit + '"]'
+      );
+
+      sliders.forEach(slider => {
+        if (slider !== sourceInput) slider.value = value;
+        setSliderVisual(slider);
+      });
+    }
+
+    function applySliderColorsToUI() {
+      for (let i = 1; i <= 9; i++) {
+        const color = state.colors[i - 1] || "#D8B45A";
+
+        const dotDesktop = document.getElementById("sliders_dot" + i);
+        const dotMobile = document.getElementById("slidersMobile_dot" + i);
+
+        if (dotDesktop) dotDesktop.style.background = color;
+        if (dotMobile) dotMobile.style.background = color;
+
+        const digitEls = document.querySelectorAll(
+          '.slider-row .digit[data-digit="' + i + '"]'
+        );
+        digitEls.forEach(el => {
+          el.style.color = color;
+        });
+
+        const inputs = document.querySelectorAll(
+          '.slider-row input[type="range"][data-digit="' + i + '"]'
+        );
+        inputs.forEach(input => {
+          input.style.setProperty("--accent", color);
+          setSliderVisual(input);
+        });
+      }
+    }
+
+    function refreshComputedCodeAndColors() {
+      syncComputedCode();
+      computeFinalColors();
+      applySliderColorsToUI();
+    }
+
+    function getEnginePayloadState() {
+      refreshComputedCodeAndColors();
+
+      return {
+        ...state,
+        mode: "geburtstag",
+        input: state.computedCode,
+        colors: [...state.colors]
+      };
+    }
+
+    function showLoading() {
+      els.loading.style.display = "grid";
+    }
+
+    function hideLoading() {
+      els.loading.style.display = "none";
+    }
+
+    function showPreviewInfo() {
+      if (!els.previewInfo) return;
+      els.previewInfo.classList.add("show");
+      clearTimeout(showPreviewInfo._timer);
+      showPreviewInfo._timer = setTimeout(() => {
+        els.previewInfo.classList.remove("show");
+      }, 1800);
+    }
+
+    function openPrintPreview(dataUrl) {
+      els.printPreviewImage.src = dataUrl;
+      els.printPreview.hidden = false;
+      document.body.style.overflow = "hidden";
+    }
+
+    function closePrintPreview() {
+      els.printPreview.hidden = true;
+      els.printPreviewImage.src = "";
+      document.body.style.overflow = "";
+    }
+
+    function handlePaidDownload() {
+      if (!PAYMENT_URL || PAYMENT_URL === "#") {
+        alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");
+        return;
+      }
+      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
+    }
+
+    function buildSlidersInto(containerEl) {
+      if (!containerEl) return;
+      containerEl.innerHTML = "";
+
+      for (let i = 1; i <= 9; i++) {
+        const row = document.createElement("div");
+        row.className = "slider-row";
+
+        const dot = document.createElement("div");
+        dot.className = "dot";
+        dot.id = containerEl.id + "_dot" + i;
+
+        const label = document.createElement("div");
+        label.className = "digit";
+        label.dataset.digit = String(i);
+        label.textContent = String(i);
+
+        const input = document.createElement("input");
+        input.type = "range";
+        input.min = "20";
+        input.max = "100";
+        input.value = String(state.sliders[i] ?? 85);
+        input.dataset.digit = String(i);
+
+        setSliderVisual(input);
+
+        input.addEventListener("input", () => {
+          state.sliders[i] = Number(input.value);
+          setSliderVisual(input);
+          syncSameDigitSliders(i, input.value, input);
+          refreshComputedCodeAndColors();
+          pushStateToEngine();
+        });
+
+        row.appendChild(dot);
+        row.appendChild(label);
+        row.appendChild(input);
+        containerEl.appendChild(row);
+      }
+    }
+
+    function buildSliders() {
+      buildSlidersInto(els.sliders);
+      buildSlidersInto(els.slidersMobile);
+    }
+
+    function setActiveEngineButton(engine) {
+      document.querySelectorAll(".engine-btn").forEach(btn => {
+        if (!btn.dataset.engine) return;
+        btn.classList.toggle("active", btn.dataset.engine === engine);
+      });
+    }
+
+    function updateViewerWatermarkPosition() {
+      if (!els.engineWrap) return;
+      els.engineWrap.classList.remove("wm-quadrat", "wm-rund", "wm-wabe");
+      els.engineWrap.classList.add("wm-" + state.engine);
+    }
+
+    function updateConditionalFields() {
+      if (els.sectorWrap) {
+        els.sectorWrap.style.display = state.engine === "rund" ? "flex" : "none";
+      }
+    }
+
+    function pushStateToEngine() {
+      if (!els.frame.contentWindow) return;
+
+      const enginePayload = getEnginePayloadState();
+      els.frame.contentWindow.postMessage(
+        { type: "SET_STATE", payload: enginePayload },
+        "*"
+      );
+    }
+
+    function requestExport() {
+      if (!els.frame.contentWindow) return;
+
+      showLoading();
+
+      const enginePayload = getEnginePayloadState();
+      els.frame.contentWindow.postMessage(
+        { type: "EXPORT", payload: enginePayload },
+        "*"
+      );
+    }
+
+    function loadEngine(engine) {
+      state.engine = engine;
+      setActiveEngineButton(engine);
+      updateConditionalFields();
+      updateViewerWatermarkPosition();
+      showLoading();
+
+      els.frame.onload = () => {
+        hideLoading();
+        pushStateToEngine();
+      };
+
+      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+    }
+
+    function openSheet() {
+      els.sliderSheet.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeSheet() {
+      els.sliderSheet.classList.remove("open");
+      if (els.printPreview.hidden) {
+        document.body.style.overflow = "";
+      }
+    }
+
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== "object") return;
+
+      if (msg.type === "READY") {
+        hideLoading();
+        pushStateToEngine();
+        return;
+      }
+
+      if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
+        state.colors = [...msg.colors];
+        applySliderColorsToUI();
+        return;
+      }
+
+      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+        hideLoading();
+        openPrintPreview(msg.dataUrl);
+        return;
+      }
+    });
+
+    document.querySelectorAll(".engine-btn").forEach(btn => {
+      if (!btn.dataset.engine) return;
+      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+    });
+
+    els.mode.addEventListener("change", () => {
+      state.mode = els.mode.value;
+      refreshComputedCodeAndColors();
+      pushStateToEngine();
+    });
+
+    els.input.addEventListener("input", () => {
+      state.input = els.input.value;
+      refreshComputedCodeAndColors();
+      pushStateToEngine();
+    });
+
+    els.direction.addEventListener("change", () => {
+      state.direction = els.direction.value;
+      pushStateToEngine();
+    });
+
+    els.sector.addEventListener("change", () => {
+      state.sector = Number(els.sector.value);
+      pushStateToEngine();
+    });
+
+    els.download.addEventListener("click", () => {
+      showPreviewInfo();
+      requestExport();
+    });
+
+    els.openSliders.addEventListener("click", openSheet);
+    els.closeSliders.addEventListener("click", closeSheet);
+    els.sliderBackdrop.addEventListener("click", closeSheet);
+    els.closePrintPreview.addEventListener("click", closePrintPreview);
+    els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
+    els.buyPreviewPng.addEventListener("click", handlePaidDownload);
+
+    buildSliders();
+    refreshComputedCodeAndColors();
+    updateConditionalFields();
+    updateViewerWatermarkPosition();
+    loadEngine("quadrat");
+  </script>
 </body>
 </html>

@@ -1163,3 +1163,22 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     max-height:260px;
   }
 }
+/* =========================
+   DOWNLOAD WATERMARK PATTERN
+   ========================= */
+
+.download-watermark{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:5;
+}
+
+.download-watermark img{
+  position:absolute;
+  width:200px;
+  opacity:0.14;
+  transform:rotate(-18deg);
+  user-select:none;
+  -webkit-user-drag:none;
+}

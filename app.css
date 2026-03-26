@@ -900,26 +900,30 @@ body{
   z-index:3;
 }
 
-/* Intensität stärker */
 .viewer-watermark img{
   width:min(90%, 900px);
   max-width:95vw;
-  opacity:0.55;
+
+  /* DEUTLICH stärker */
+  opacity:0.7;
+
   transform-origin:center center;
-  filter: brightness(1.15) contrast(1.1);
+
+  /* Gold kräftiger */
+  filter: brightness(1.25) contrast(1.15);
 }
 
-/* Quadrat – minimal nach links */
+/* Quadrat – minimal höher */
 .engine-wrap.wm-quadrat .viewer-watermark img{
-  transform:translate(3%, -10%) rotate(-18deg);
+  transform:translate(3%, -12%) rotate(-18deg);
 }
 
-/* Rund – etwas nach links + höher */
+/* Rund – deutlich höher */
 .engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(4%, -11%) rotate(-18deg);
+  transform:translate(4%, -14%) rotate(-18deg);
 }
 
-/* Wabe – passt */
+/* Wabe – NICHT ANFASSEN */
 .engine-wrap.wm-wabe .viewer-watermark img{
   transform:translate(3%, -11%) rotate(-18deg);
 }

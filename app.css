@@ -920,12 +920,12 @@ body{
 
 /* Rund – deutlich höher */
 .engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(4%, -14%) rotate(-18deg);
+  transform:translate(4%, -15%) rotate(-18deg);
 }
 
 /* Wabe – NICHT ANFASSEN */
 .engine-wrap.wm-wabe .viewer-watermark img{
-  transform:translate(3%, -11%) rotate(-18deg);
+  transform:translate(3%, -13%) rotate(-18deg);
 }
   .preview-info{
     bottom:14px;

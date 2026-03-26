@@ -890,28 +890,36 @@ body{
   z-index:3;
 }
 
+.viewer-watermark{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  z-index:3;
+}
+
 .viewer-watermark img{
   width:min(90%, 900px);
   max-width:95vw;
-  opacity:0.6;
-
-  /* DAS ist der entscheidende Fix */
-  transform:rotate(-18deg);
+  opacity:0.32;
   transform-origin:center center;
 }
-   /* Quadrat bleibt echte Mitte */
+
+/* Quadrat */
 .engine-wrap.wm-quadrat .viewer-watermark img{
-  transform:translate(0%, 0%) rotate(-18deg);
+  transform:translate(-2%, -4%) rotate(-18deg);
 }
 
-/* Rund → optisches Zentrum ist tiefer → wir gehen hoch */
+/* Rund */
 .engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(0%, -7%) rotate(-18deg);
+  transform:translate(-2%, -9%) rotate(-18deg);
 }
 
-/* Wabe → noch stärker nach oben */
+/* Wabe */
 .engine-wrap.wm-wabe .viewer-watermark img{
-  transform:translate(0%, -10%) rotate(-18deg);
+  transform:translate(-2%, -11%) rotate(-18deg);
 }
   .preview-info{
     bottom:14px;

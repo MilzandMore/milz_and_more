@@ -906,12 +906,12 @@ body{
 
 /* Rund → optisches Zentrum ist tiefer → wir gehen hoch */
 .engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(0%, -6%) rotate(-18deg);
+  transform:translate(0%, -7%) rotate(-18deg);
 }
 
 /* Wabe → noch stärker nach oben */
 .engine-wrap.wm-wabe .viewer-watermark img{
-  transform:translate(0%, -8%) rotate(-18deg);
+  transform:translate(0%, -10%) rotate(-18deg);
 }
   .preview-info{
     bottom:14px;

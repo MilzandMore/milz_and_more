@@ -397,6 +397,7 @@
       els.printPreviewImage.src = dataUrl;
       els.printPreview.hidden = false;
       document.body.style.overflow = "hidden";
+      buildDownloadWatermark();
     }
 
     function closePrintPreview() {
@@ -404,7 +405,30 @@
       els.printPreviewImage.src = "";
       document.body.style.overflow = "";
     }
+function buildDownloadWatermark(){
+  const container = document.getElementById("downloadWatermark");
+  if (!container) return;
 
+  container.innerHTML = "";
+
+  const stepY = 220;
+  const stepX = 300;
+
+  for(let y = -100; y < 1200; y += stepY){
+    for(let x = -100; x < 1200; x += stepX){
+
+      const img = document.createElement("img");
+      img.src = "assets/Logo_gold.png";
+
+      const offset = (Math.floor(y / stepY) % 2 === 0) ? 0 : stepX / 2;
+
+      img.style.top = y + "px";
+      img.style.left = (x + offset) + "px";
+
+      container.appendChild(img);
+    }
+  }
+}
     function handlePaidDownload() {
       if (!PAYMENT_URL || PAYMENT_URL === "#") {
         alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");

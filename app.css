@@ -881,24 +881,25 @@ body{
   }
 
  .viewer-watermark img{
-  width:min(82%, 820px);
-  max-width:92vw;
-  opacity:0.7.5;
+  width:min(90%, 900px);
+  max-width:95vw;
+  opacity:0.38; /* stärker, aber noch elegant */
+  transform-origin:center center;
 }
 
-/* Quadrat bleibt */
+/* Quadrat – exakt mittig */
 .engine-wrap.wm-quadrat .viewer-watermark img{
-  transform:translate(0%, -22%) rotate(-18deg);
+  transform:translate(0%, 0%) rotate(-18deg);
 }
 
-/* Rund etwas höher */
+/* Rund – minimal höher fürs optische Zentrum */
 .engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(0%, -20%) rotate(-18deg);
+  transform:translate(0%, -3%) rotate(-18deg);
 }
 
-/* Wabe am höchsten */
+/* Wabe – leicht höher wegen Form */
 .engine-wrap.wm-wabe .viewer-watermark img{
-  transform:translate(0%, -20%) rotate(-18deg);
+  transform:translate(0%, -4%) rotate(-18deg);
 }
   .preview-info{
     bottom:14px;

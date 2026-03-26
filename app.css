@@ -907,19 +907,19 @@ body{
   transform-origin:center center;
 }
 
-/* Quadrat */
+/* Quadrat – mehr nach rechts + höher */
 .engine-wrap.wm-quadrat .viewer-watermark img{
-  transform:translate(-2%, -4%) rotate(-18deg);
+  transform:translate(4%, -10%) rotate(-18deg);
 }
 
-/* Rund */
+/* Rund – deutlich nach rechts */
 .engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(-2%, -9%) rotate(-18deg);
+  transform:translate(6%, -9%) rotate(-18deg);
 }
 
-/* Wabe */
+/* Wabe – leicht nach rechts */
 .engine-wrap.wm-wabe .viewer-watermark img{
-  transform:translate(-2%, -11%) rotate(-18deg);
+  transform:translate(3%, -11%) rotate(-18deg);
 }
   .preview-info{
     bottom:14px;

@@ -899,6 +899,20 @@ body{
   transform:rotate(-18deg);
   transform-origin:center center;
 }
+   /* Quadrat bleibt echte Mitte */
+.engine-wrap.wm-quadrat .viewer-watermark img{
+  transform:translate(0%, 0%) rotate(-18deg);
+}
+
+/* Rund → optisches Zentrum ist tiefer → wir gehen hoch */
+.engine-wrap.wm-rund .viewer-watermark img{
+  transform:translate(0%, -6%) rotate(-18deg);
+}
+
+/* Wabe → noch stärker nach oben */
+.engine-wrap.wm-wabe .viewer-watermark img{
+  transform:translate(0%, -8%) rotate(-18deg);
+}
   .preview-info{
     bottom:14px;
     font-size:11px;

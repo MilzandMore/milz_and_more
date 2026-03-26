@@ -915,7 +915,7 @@ body{
 
 /* Quadrat – minimal höher */
 .engine-wrap.wm-quadrat .viewer-watermark img{
-  transform:translate(3%, -12%) rotate(-18deg);
+  transform:translate(3%, -10%) rotate(-18deg);
 }
 
 /* Rund – deutlich höher */
@@ -925,7 +925,7 @@ body{
 
 /* Wabe – NICHT ANFASSEN */
 .engine-wrap.wm-wabe .viewer-watermark img{
-  transform:translate(3%, -13%) rotate(-18deg);
+  transform:translate(3%, -15%) rotate(-18deg);
 }
   .preview-info{
     bottom:14px;

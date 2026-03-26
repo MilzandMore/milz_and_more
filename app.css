@@ -883,13 +883,13 @@ body{
  .viewer-watermark img{
   width:min(90%, 900px);
   max-width:95vw;
-  opacity:0.38; /* stärker, aber noch elegant */
+  opacity:0.42; /* stärker, aber noch elegant */
   transform-origin:center center;
 }
 
 /* Quadrat – exakt mittig */
 .engine-wrap.wm-quadrat .viewer-watermark img{
-  transform:translate(0%, 0%) rotate(-18deg);
+  transform:translate(0%, -3%) rotate(-18deg);
 }
 
 /* Rund – minimal höher fürs optische Zentrum */

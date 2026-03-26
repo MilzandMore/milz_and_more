@@ -900,24 +900,26 @@ body{
   z-index:3;
 }
 
+/* Intensität stärker */
 .viewer-watermark img{
   width:min(90%, 900px);
   max-width:95vw;
-  opacity:0.32;
+  opacity:0.55;
   transform-origin:center center;
+  filter: brightness(1.15) contrast(1.1);
 }
 
-/* Quadrat – mehr nach rechts + höher */
+/* Quadrat – minimal nach links */
 .engine-wrap.wm-quadrat .viewer-watermark img{
-  transform:translate(4%, -10%) rotate(-18deg);
+  transform:translate(3%, -10%) rotate(-18deg);
 }
 
-/* Rund – deutlich nach rechts */
+/* Rund – etwas nach links + höher */
 .engine-wrap.wm-rund .viewer-watermark img{
-  transform:translate(6%, -9%) rotate(-18deg);
+  transform:translate(4%, -11%) rotate(-18deg);
 }
 
-/* Wabe – leicht nach rechts */
+/* Wabe – passt */
 .engine-wrap.wm-wabe .viewer-watermark img{
   transform:translate(3%, -11%) rotate(-18deg);
 }

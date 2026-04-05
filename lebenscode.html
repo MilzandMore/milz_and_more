@@ -618,28 +618,32 @@ function buildDownloadWatermark(){
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
- 
-<!-- Dein HTML-Body-Inhalt endet hier -->
+ <script>
+/* Dein gesamter JS-Code hier (ohne ein weiteres <script> im Code) */
 
-<script>
-  const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
+// z.B. Block für Rechtsklick-Schutz am PrintPreview
+(function () {
+  function blockContextMenu() {
+    document.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+    });
+  }
 
-  // Rechtsklick-Schutz
-  (function () {
-    function blockContextMenu() {
-      document.addEventListener("contextmenu", function (e) {
-        e.preventDefault();
-      });
-    }
-    blockContextMenu();
-    window.addEventListener("load", blockContextMenu);
-    setTimeout(blockContextMenu, 500);
+  // sofort aktiv
+  blockContextMenu();
 
-    const preview = document.getElementById("printPreview");
-    if (preview) {
-      preview.addEventListener("contextmenu", function (e) {
-        e.preventDefault();
-      });
-    }
-  })();
-</script> 
+  // extra Absicherung
+  window.addEventListener("load", blockContextMenu);
+  setTimeout(blockContextMenu, 500);
+
+  // zusätzlich für Print Preview
+  const preview = document.getElementById("printPreview");
+  if (preview) {
+    preview.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+    });
+  }
+})();
+</script>
+</body>
+</html>

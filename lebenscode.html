@@ -623,19 +623,11 @@ function buildDownloadWatermark(){
 
 const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
-/* ... HIER BLEIBT DEIN GANZER CODE WIE ER IST ... */
+<script>
+/* Dein gesamter JS-Code hier (ohne ein weiteres <script> im Code) */
 
-buildSliders();
-refreshComputedCodeAndColors();
-updateConditionalFields();
-updateViewerWatermarkPosition();
-loadEngine("quadrat");
-
-
-<!-- 🔒 GLOBALER RECHTSKLICK-SCHUTZ -->
-
+// z.B. Block für Rechtsklick-Schutz am PrintPreview
 (function () {
-
   function blockContextMenu() {
     document.addEventListener("contextmenu", function (e) {
       e.preventDefault();
@@ -651,12 +643,10 @@ loadEngine("quadrat");
 
   // zusätzlich für Print Preview
   const preview = document.getElementById("printPreview");
-
   if (preview) {
     preview.addEventListener("contextmenu", function (e) {
       e.preventDefault();
     });
   }
-
 })();
 </script>

@@ -618,14 +618,22 @@ function buildDownloadWatermark(){
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
-    <!-- GANZER CODE UNVERÄNDERT BIS GANZ UNTEN -->
+  <script>
+/* ===== DEIN GESAMTER BESTEHENDER CODE (UNVERÄNDERT) ===== */
 
-<!-- ⬇️ HIER KOMMT DEIN BESTEHENDER SCRIPT (UNVERÄNDERT) ⬇️ -->
-<script>
-/* DEIN KOMPLETTER BESTEHENDER JS CODE BLEIBT GENAU SO WIE ER IST */
+const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
+
+/* ... HIER BLEIBT DEIN GANZER CODE WIE ER IST ... */
+
+buildSliders();
+refreshComputedCodeAndColors();
+updateConditionalFields();
+updateViewerWatermarkPosition();
+loadEngine("quadrat");
+
 </script>
 
-<!-- 🔒 NEU: GLOBALER RECHTSKLICK-SCHUTZ -->
+<!-- 🔒 GLOBALER RECHTSKLICK-SCHUTZ -->
 <script>
 (function () {
 
@@ -638,11 +646,11 @@ function buildDownloadWatermark(){
   // sofort aktiv
   blockContextMenu();
 
-  // extra Absicherung (falls etwas überschreibt)
+  // extra Absicherung
   window.addEventListener("load", blockContextMenu);
   setTimeout(blockContextMenu, 500);
 
-  // speziell für Print Preview (dein Problemfall)
+  // zusätzlich für Print Preview
   const preview = document.getElementById("printPreview");
 
   if (preview) {
@@ -653,6 +661,3 @@ function buildDownloadWatermark(){
 
 })();
 </script>
-  </script>
-</body>
-</html>

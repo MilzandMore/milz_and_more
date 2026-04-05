@@ -619,32 +619,28 @@ function buildDownloadWatermark(){
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
   <script>
-/* ===== DEIN GESAMTER BESTEHENDER CODE (UNVERÄNDERT) ===== */
-
-const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
-
 <script>
-/* ===== HIER KOMMT DEIN GANZER EXISTIERENDER JS-CODE ===== */
-    /* ... alle Funktionen ex, codeFromDate, codeFromText, computeFinalColors, buildSliders usw. bleiben unverändert ... */
+  const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
-    // Rechtsklick-Schutz am PrintPreview
-    (function () {
-      function blockContextMenu() {
-        document.addEventListener("contextmenu", function (e) {
-          e.preventDefault();
-        });
-      }
-      blockContextMenu();
-      window.addEventListener("load", blockContextMenu);
-      setTimeout(blockContextMenu, 500);
+  /* ===== HIER KOMMT DEIN GANZER EXISTIERENDER JS-CODE ===== */
+  /* alle Funktionen wie ex(), codeFromDate(), codeFromText(), computeFinalColors(), buildSliders(), pushStateToEngine() usw. hier einfügen */
 
-      const preview = document.getElementById("printPreview");
-      if (preview) {
-        preview.addEventListener("contextmenu", function (e) {
-          e.preventDefault();
-        });
-      }
-    })();
-  </script>
-</body>
-</html>
+  // Rechtsklick-Schutz am PrintPreview
+  (function () {
+    function blockContextMenu() {
+      document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
+    }
+    blockContextMenu();
+    window.addEventListener("load", blockContextMenu);
+    setTimeout(blockContextMenu, 500);
+
+    const preview = document.getElementById("printPreview");
+    if (preview) {
+      preview.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
+    }
+  })();
+</script>

@@ -629,24 +629,31 @@ const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 // z.B. Block für Rechtsklick-Schutz am PrintPreview
 (function () {
   function blockContextMenu() {
-    document.addEventListener("contextmenu", function (e) {
-      e.preventDefault();
-    });
-  }
+   <script>
+  /* ===== DEIN GESAMTER BESTEHENDER CODE (UNVERÄNDERT) ===== */
+  const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
-  // sofort aktiv
-  blockContextMenu();
+  // z.B. Block für Rechtsklick-Schutz am PrintPreview
+  (function () {
+    function blockContextMenu() {
+      document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
+    }
 
-  // extra Absicherung
-  window.addEventListener("load", blockContextMenu);
-  setTimeout(blockContextMenu, 500);
+    // sofort aktiv
+    blockContextMenu();
 
-  // zusätzlich für Print Preview
-  const preview = document.getElementById("printPreview");
-  if (preview) {
-    preview.addEventListener("contextmenu", function (e) {
-      e.preventDefault();
-    });
-  }
-})();
+    // extra Absicherung
+    window.addEventListener("load", blockContextMenu);
+    setTimeout(blockContextMenu, 500);
+
+    // zusätzlich für Print Preview
+    const preview = document.getElementById("printPreview");
+    if (preview) {
+      preview.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
+    }
+  })();
 </script>

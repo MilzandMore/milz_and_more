@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
@@ -115,11 +115,11 @@
       </button>
 
      <div class="print-preview__image-wrap">
-      <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
+  <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
 
-      <!-- ✨ NEU: Watermark Pattern -->
-      <div class="download-watermark" id="downloadWatermark"></div>
-    </div>
+  <!-- ✨ NEU: Watermark Pattern -->
+  <div class="download-watermark" id="downloadWatermark"></div>
+</div>
 
       <div class="print-preview__caption">
         Dies ist eine Vorschau deines Mandalas.<br>
@@ -144,10 +144,6 @@
   </div>
 
   <script>
-    // ============================
-    // Milz & More JS - korrigierte Version
-    // ============================
-
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
     const state = {
@@ -162,7 +158,17 @@
       paperLook: true
     };
 
-    const charMap = { A:1,J:1,S:1,Ä:1,B:2,K:2,T:2,Ö:2,C:3,L:3,U:3,Ü:3,D:4,M:4,V:4,ß:4,E:5,N:5,W:5,F:6,O:6,X:6,G:7,P:7,Y:7,H:8,Q:8,Z:8,I:9,R:9 };
+    const charMap = {
+      A:1, J:1, S:1, Ä:1,
+      B:2, K:2, T:2, Ö:2,
+      C:3, L:3, U:3, Ü:3,
+      D:4, M:4, V:4, ß:4,
+      E:5, N:5, W:5,
+      F:6, O:6, X:6,
+      G:7, P:7, Y:7,
+      H:8, Q:8, Z:8,
+      I:9, R:9
+    };
 
     const PALETTE_RAMPS = [
       { soft: "#F4C7BD", vivid: "#FF0000" },
@@ -202,19 +208,421 @@
       buyPreviewPng: document.getElementById("buyPreviewPng")
     };
 
-    // ======= Funktionen bleiben 1:1 =======
-    // ... ex(), codeFromDate(), codeFromText(), getComputedCodeArray(), syncComputedCode(), clamp(), hexToRgb(), rgbToHex(), interpolateHex(), rotateRampsBySeed(), getRampColor(), computeFinalColors(), setSliderVisual(), syncSameDigitSliders(), applySliderColorsToUI(), refreshComputedCodeAndColors(), getEnginePayloadState(), showLoading(), hideLoading(), showPreviewInfo(), openPrintPreview(), closePrintPreview(), buildDownloadWatermark(), handlePaidDownload(), buildSlidersInto(), buildSliders(), setActiveEngineButton(), updateViewerWatermarkPosition(), updateConditionalFields(), pushStateToEngine(), requestExport(), loadEngine(), openSheet(), closeSheet()
+    function ex(a, b) {
+      const s = (a || 0) + (b || 0);
+      return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
+    }
 
-    // ======= Event-Listener & Initialisierung =======
-    window.addEventListener("message", (ev) => { /* ... wie vorher ... */ });
+    function codeFromDate(str) {
+      const raw = String(str || "").replace(/\D/g, "").split("").map(Number);
+      while (raw.length < 8) raw.push(0);
+      return raw.slice(0, 8);
+    }
 
-    document.querySelectorAll(".engine-btn").forEach(btn => { /* ... wie vorher ... */ });
+    function codeFromText(text) {
+      let arr = String(text || "")
+        .toUpperCase()
+        .replace(/[^A-ZÄÖÜß]/g, "")
+        .split("")
+        .map(c => charMap[c])
+        .filter(Boolean);
 
-    els.mode.addEventListener("change", () => { /* ... wie vorher ... */ });
-    els.input.addEventListener("input", () => { /* ... wie vorher ... */ });
-    els.direction.addEventListener("change", () => { /* ... wie vorher ... */ });
-    els.sector.addEventListener("change", () => { /* ... wie vorher ... */ });
-    els.download.addEventListener("click", () => { /* ... wie vorher ... */ });
+      if (arr.length === 0) arr = [9];
+
+      while (arr.length > 8) {
+        const next = [];
+        for (let i = 0; i < arr.length - 1; i++) {
+          next.push(ex(arr[i], arr[i + 1]));
+        }
+        arr = next;
+      }
+
+      while (arr.length < 8) {
+        const len = arr.length;
+        const a = arr[len - 2] ?? arr[len - 1] ?? 9;
+        const b = arr[len - 1] ?? 9;
+        arr.push(ex(a, b));
+      }
+
+      return arr.slice(0, 8);
+    }
+
+    function getComputedCodeArray() {
+      return state.mode === "text"
+        ? codeFromText(state.input)
+        : codeFromDate(state.input);
+    }
+
+    function syncComputedCode() {
+      state.computedCode = getComputedCodeArray().join("");
+      els.codeOutput.value = state.computedCode;
+    }
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function hexToRgb(hex) {
+      const clean = hex.replace("#", "");
+      const full = clean.length === 3
+        ? clean.split("").map(ch => ch + ch).join("")
+        : clean;
+
+      const num = parseInt(full, 16);
+
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b]
+        .map(v => clamp(Math.round(v), 0, 255).toString(16).padStart(2, "0"))
+        .join("")
+        .toUpperCase();
+    }
+
+    function interpolateHex(hex1, hex2, t) {
+      const a = hexToRgb(hex1);
+      const b = hexToRgb(hex2);
+
+      return rgbToHex(
+        a.r + (b.r - a.r) * t,
+        a.g + (b.g - a.g) * t,
+        a.b + (b.b - a.b) * t
+      );
+    }
+
+    function rotateRampsBySeed(seedDigit) {
+      const shift = clamp((seedDigit || 1) - 1, 0, 8);
+      return PALETTE_RAMPS.map((_, i) => PALETTE_RAMPS[(i + shift) % PALETTE_RAMPS.length]);
+    }
+
+    function getRampColor(ramp, sliderValue) {
+      const tLinear = (clamp(Number(sliderValue) || 85, 20, 100) - 20) / 80;
+      const t = Math.pow(tLinear, 0.86);
+      return interpolateHex(ramp.soft, ramp.vivid, t);
+    }
+
+    function computeFinalColors() {
+      const seedDigit = Number(state.computedCode?.charAt(0) || 1);
+      const rotatedRamps = rotateRampsBySeed(seedDigit);
+
+      state.colors = rotatedRamps.map((ramp, index) => {
+        const digit = index + 1;
+        const sliderValue = state.sliders[digit] ?? 85;
+        return getRampColor(ramp, sliderValue);
+      });
+    }
+
+    function setSliderVisual(input) {
+      input.style.setProperty("--val", input.value + "%");
+    }
+
+    function syncSameDigitSliders(digit, value, sourceInput = null) {
+      const sliders = document.querySelectorAll(
+        '.slider-row input[type="range"][data-digit="' + digit + '"]'
+      );
+
+      sliders.forEach(slider => {
+        if (slider !== sourceInput) slider.value = value;
+        setSliderVisual(slider);
+      });
+    }
+
+    function applySliderColorsToUI() {
+      for (let i = 1; i <= 9; i++) {
+        const color = state.colors[i - 1] || "#D8B45A";
+
+        const dotDesktop = document.getElementById("sliders_dot" + i);
+        const dotMobile = document.getElementById("slidersMobile_dot" + i);
+
+        if (dotDesktop) dotDesktop.style.background = color;
+        if (dotMobile) dotMobile.style.background = color;
+
+        const digitEls = document.querySelectorAll(
+          '.slider-row .digit[data-digit="' + i + '"]'
+        );
+        digitEls.forEach(el => {
+          el.style.color = color;
+        });
+
+        const inputs = document.querySelectorAll(
+          '.slider-row input[type="range"][data-digit="' + i + '"]'
+        );
+        inputs.forEach(input => {
+          input.style.setProperty("--accent", color);
+          setSliderVisual(input);
+        });
+      }
+    }
+
+    function refreshComputedCodeAndColors() {
+      syncComputedCode();
+      computeFinalColors();
+      applySliderColorsToUI();
+    }
+
+    function getEnginePayloadState() {
+      refreshComputedCodeAndColors();
+
+      return {
+        ...state,
+        mode: "geburtstag",
+        input: state.computedCode,
+        colors: [...state.colors]
+      };
+    }
+
+    function showLoading() {
+      els.loading.style.display = "grid";
+    }
+
+    function hideLoading() {
+      els.loading.style.display = "none";
+    }
+
+    function showPreviewInfo() {
+      if (!els.previewInfo) return;
+      els.previewInfo.classList.add("show");
+      clearTimeout(showPreviewInfo._timer);
+      showPreviewInfo._timer = setTimeout(() => {
+        els.previewInfo.classList.remove("show");
+      }, 1800);
+    }
+
+    function openPrintPreview(dataUrl) {
+      els.printPreviewImage.src = dataUrl;
+      els.printPreview.hidden = false;
+      document.body.style.overflow = "hidden";
+      buildDownloadWatermark();
+    }
+
+    function closePrintPreview() {
+      els.printPreview.hidden = true;
+      els.printPreviewImage.src = "";
+      document.body.style.overflow = "";
+    }
+function buildDownloadWatermark(){
+  const container = document.getElementById("downloadWatermark");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const stepY = 220;
+  const stepX = 300;
+
+  for(let y = -100; y < 1200; y += stepY){
+    for(let x = -100; x < 1200; x += stepX){
+
+      const img = document.createElement("img");
+      img.src = "assets/Logo_gold.png";
+
+      const offset = (Math.floor(y / stepY) % 2 === 0) ? 0 : stepX / 2;
+
+      img.style.top = y + "px";
+      img.style.left = (x + offset) + "px";
+
+      container.appendChild(img);
+    }
+  }
+}
+    function handlePaidDownload() {
+      if (!PAYMENT_URL || PAYMENT_URL === "#") {
+        alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");
+        return;
+      }
+      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
+    }
+
+    function buildSlidersInto(containerEl) {
+      if (!containerEl) return;
+      containerEl.innerHTML = "";
+
+      for (let i = 1; i <= 9; i++) {
+        const row = document.createElement("div");
+        row.className = "slider-row";
+
+        const dot = document.createElement("div");
+        dot.className = "dot";
+        dot.id = containerEl.id + "_dot" + i;
+
+        const label = document.createElement("div");
+        label.className = "digit";
+        label.dataset.digit = String(i);
+        label.textContent = String(i);
+
+        const input = document.createElement("input");
+        input.type = "range";
+        input.min = "20";
+        input.max = "100";
+        input.value = String(state.sliders[i] ?? 85);
+        input.dataset.digit = String(i);
+
+        setSliderVisual(input);
+
+        input.addEventListener("input", () => {
+          state.sliders[i] = Number(input.value);
+          setSliderVisual(input);
+          syncSameDigitSliders(i, input.value, input);
+          refreshComputedCodeAndColors();
+          pushStateToEngine();
+        });
+
+        row.appendChild(dot);
+        row.appendChild(label);
+        row.appendChild(input);
+        containerEl.appendChild(row);
+      }
+    }
+
+    function buildSliders() {
+      buildSlidersInto(els.sliders);
+      buildSlidersInto(els.slidersMobile);
+    }
+
+    function setActiveEngineButton(engine) {
+      document.querySelectorAll(".engine-btn").forEach(btn => {
+        if (!btn.dataset.engine) return;
+        btn.classList.toggle("active", btn.dataset.engine === engine);
+      });
+    }
+
+    function updateViewerWatermarkPosition() {
+      if (!els.engineWrap) return;
+      els.engineWrap.classList.remove("wm-quadrat", "wm-rund", "wm-wabe");
+      els.engineWrap.classList.add("wm-" + state.engine);
+    }
+
+    function updateConditionalFields() {
+      if (els.sectorWrap) {
+        els.sectorWrap.style.display = state.engine === "rund" ? "flex" : "none";
+      }
+    }
+
+    function pushStateToEngine() {
+      if (!els.frame.contentWindow) return;
+
+      const enginePayload = getEnginePayloadState();
+      els.frame.contentWindow.postMessage(
+        { type: "SET_STATE", payload: enginePayload },
+        "*"
+      );
+    }
+
+    function requestExport() {
+      if (!els.frame.contentWindow) return;
+
+      showLoading();
+
+      const enginePayload = getEnginePayloadState();
+      els.frame.contentWindow.postMessage(
+        { type: "EXPORT", payload: enginePayload },
+        "*"
+      );
+    }
+
+    function loadEngine(engine) {
+      state.engine = engine;
+      setActiveEngineButton(engine);
+      updateConditionalFields();
+      updateViewerWatermarkPosition();
+      showLoading();
+
+      els.frame.onload = () => {
+        hideLoading();
+        pushStateToEngine();
+      };
+
+      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+    }
+
+    function openSheet() {
+      els.sliderSheet.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeSheet() {
+      els.sliderSheet.classList.remove("open");
+      if (els.printPreview.hidden) {
+        document.body.style.overflow = "";
+      }
+    }
+function openSheet() {
+  const sheet = document.getElementById("sliderSheet");
+  if(sheet) sheet.classList.add("active");
+}
+
+function closeSheet() {
+  const sheet = document.getElementById("sliderSheet");
+  if(sheet) sheet.classList.remove("active");
+}
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== "object") return;
+
+      if (msg.type === "READY") {
+        hideLoading();
+        pushStateToEngine();
+        return;
+      }
+
+      if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
+        state.colors = [...msg.colors];
+        applySliderColorsToUI();
+        return;
+      }
+(function() {
+  const preview = document.getElementById("printPreview");
+
+  // Block für gesamte Seite (optional, falls gewünscht)
+  document.addEventListener("contextmenu", function(e){
+    if(preview && preview.contains(e.target)) {
+      e.preventDefault(); // nur auf der Print-Preview blocken
+    }
+  });
+})();
+      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+        hideLoading();
+        openPrintPreview(msg.dataUrl);
+        return;
+      }
+    });
+
+    document.querySelectorAll(".engine-btn").forEach(btn => {
+      if (!btn.dataset.engine) return;
+      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+    });
+
+    els.mode.addEventListener("change", () => {
+      state.mode = els.mode.value;
+      refreshComputedCodeAndColors();
+      pushStateToEngine();
+    });
+
+    els.input.addEventListener("input", () => {
+      state.input = els.input.value;
+      refreshComputedCodeAndColors();
+      pushStateToEngine();
+    });
+
+    els.direction.addEventListener("change", () => {
+      state.direction = els.direction.value;
+      pushStateToEngine();
+    });
+
+    els.sector.addEventListener("change", () => {
+      state.sector = Number(els.sector.value);
+      pushStateToEngine();
+    });
+
+    els.download.addEventListener("click", () => {
+      showPreviewInfo();
+      requestExport();
+    });
+
     els.openSliders.addEventListener("click", openSheet);
     els.closeSliders.addEventListener("click", closeSheet);
     els.sliderBackdrop.addEventListener("click", closeSheet);
@@ -227,18 +635,6 @@
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
-
-    // ======= Block für Rechtsklick-Schutz am PrintPreview =======
-    (function () {
-      function blockContextMenu() {
-        document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
-      }
-      blockContextMenu();
-      window.addEventListener("load", blockContextMenu);
-      setTimeout(blockContextMenu, 500);
-      const preview = document.getElementById("printPreview");
-      if (preview) preview.addEventListener("contextmenu", function (e) { e.preventDefault(); });
-    })();
   </script>
 </body>
 </html>

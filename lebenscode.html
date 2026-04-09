@@ -18,6 +18,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="stylesheet" href="app.css?v=clean-preview-8">
+  <script src="https://www.paypal.com/sdk/js?client-id=AYwApQvq8SiMYPEHcgMpcN8q77ffjb2_47JkkL4voZk8uEfk8daNM6sbgTIwOHqTbgk-IfCmSKbc8VXE&currency=EUR"></script>
 </head>
 
 <body>
@@ -104,18 +105,11 @@
     </section>
   </main>
 
-  <div id="printPreview" class="print-preview" hidden>
-    <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
+ <div id="paypal-button-container" style="margin-top:15px;"></div>
 
-    <div class="print-preview__panel">
-      <button id="closePrintPreview" class="print-preview__close" type="button" aria-label="Schließen">×</button>
-
-      <button id="buyPreviewPng" class="print-preview__buy" type="button">
-        ✨ Dein Mandala freischalten 11,-€
-      </button>
-
-     <div class="print-preview__image-wrap">
-  <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
+<div style="text-align:center;font-size:14px;margin-top:10px;">
+  ✨ Bitte Fenster nach Zahlung nicht schließen – dein Download startet automatisch.
+</div>
 
   <!-- ✨ NEU: Watermark Pattern -->
   <div class="download-watermark" id="downloadWatermark"></div>
@@ -635,6 +629,30 @@ function closeSheet() {
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
+    document.addEventListener("DOMContentLoaded", function() {
+
+  paypal.Buttons({
+
+    createOrder: function(data, actions) {
+      return actions.order.create({
+        purchase_units: [{
+          amount: { value: "11.00" }
+        }]
+      });
+    },
+
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
+
+        // 👉 HIER NUR DEIN BESTEHENDER EXPORT
+        requestExport();
+
+      });
+    }
+
+  }).render('#paypal-button-container');
+
+});
   </script>
 </body>
 </html>

@@ -617,11 +617,25 @@ function closeSheet() {
       requestExport();
     });
 
-    els.openSliders.addEventListener("click", openSheet);
-    els.closeSliders.addEventListener("click", closeSheet);
-    els.sliderBackdrop.addEventListener("click", closeSheet);
-    els.closePrintPreview.addEventListener("click", closePrintPreview);
-    els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
+   if (els.openSliders) {
+  els.openSliders.addEventListener("click", openSheet);
+}
+
+if (els.closeSliders) {
+  els.closeSliders.addEventListener("click", closeSheet);
+}
+
+if (els.sliderBackdrop) {
+  els.sliderBackdrop.addEventListener("click", closeSheet);
+}
+
+if (els.closePrintPreview) {
+  els.closePrintPreview.addEventListener("click", closePrintPreview);
+}
+
+if (els.printPreviewBackdrop) {
+  els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
+}
 
     buildSliders();
     refreshComputedCodeAndColors();

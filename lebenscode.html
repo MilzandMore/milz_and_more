@@ -18,7 +18,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="stylesheet" href="app.css?v=clean-preview-8">
-  <script src="https://www.paypal.com/sdk/js?client-id=DEINE_CLIENT_ID_HIER&currency=EUR"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=AYwApQvq8SiMYPEHcgMpcN8q77ffjb2_47JkkL4voZk8uEfk8daNM6sbgTIwOHqTbgk-IfCmSKbc8VXE&currency=EUR"></script>
+
 </head>
 
 <body>
@@ -648,14 +649,29 @@ function closeSheet() {
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
-      paypal.Buttons({
+    window.addEventListener("load", function() {
 
-  createOrder: function(data, actions) {
-    return actions.order.create({
-      purchase_units: [{
-        amount: { value: "11.00" }
-      }]
-    });
+  paypal.Buttons({
+
+    createOrder: function(data, actions) {
+      return actions.order.create({
+        purchase_units: [{
+          amount: { value: "11.00" }
+        }]
+      });
+    },
+
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
+
+        requestExport("final");
+
+      });
+    }
+
+  }).render('#paypal-button-container');
+
+});
   },
 
   onApprove: function(data, actions) {

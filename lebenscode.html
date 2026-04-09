@@ -651,7 +651,7 @@ if (els.printPreviewBackdrop) {
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
-    document.addEventListener("DOMContentLoaded", function() {
+   document.addEventListener("DOMContentLoaded", function() {
 
   paypal.Buttons({
 
@@ -664,10 +664,10 @@ if (els.printPreviewBackdrop) {
     },
 
     onApprove: function(data, actions) {
-  return actions.order.capture().then(function(details) {
-    requestExport("final");
-  });
-}
+      return actions.order.capture().then(function(details) {
+        requestExport("final");
+      });
+    }
 
   }).render('#paypal-button-container');
 

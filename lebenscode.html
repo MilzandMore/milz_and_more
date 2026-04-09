@@ -567,11 +567,21 @@ window.addEventListener("message", (ev) => {
   }
 
   if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+
     hideLoading();
+
+    if (msg.exportType === "final") {
+      const link = document.createElement("a");
+      link.href = msg.dataUrl;
+      link.download = "mandala.png";
+      link.click();
+      return;
+    }
+
     openPrintPreview(msg.dataUrl);
   }
 
-}); 
+});
     
       if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
         state.colors = [...msg.colors];

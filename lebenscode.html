@@ -18,6 +18,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="stylesheet" href="app.css?v=clean-preview-8">
+  <script src="https://www.paypal.com/sdk/js?client-id=DEINE_CLIENT_ID_HIER&currency=EUR"></script>
 </head>
 
 <body>
@@ -110,9 +111,11 @@
     <div class="print-preview__panel">
       <button id="closePrintPreview" class="print-preview__close" type="button" aria-label="Schließen">×</button>
 
-      <button id="buyPreviewPng" class="print-preview__buy" type="button">
-        ✨ Dein Mandala freischalten 11,-€
-      </button>
+    <div id="paypal-button-container" style="margin-top:15px;"></div>
+
+<div style="text-align:center;font-size:14px;margin-top:10px;">
+  ✨ Bitte Fenster nach Zahlung nicht schließen – dein Download startet automatisch.
+</div>
 
      <div class="print-preview__image-wrap">
   <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
@@ -144,7 +147,6 @@
   </div>
 
   <script>
-    const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
     const state = {
       engine: "quadrat",
@@ -429,14 +431,7 @@ function buildDownloadWatermark(){
     }
   }
 }
-    function handlePaidDownload() {
-      if (!PAYMENT_URL || PAYMENT_URL === "#") {
-        alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");
-        return;
-      }
-      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
-    }
-
+  
     function buildSlidersInto(containerEl) {
       if (!containerEl) return;
       containerEl.innerHTML = "";
@@ -585,11 +580,19 @@ function closeSheet() {
   });
 })();
       if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-        hideLoading();
-        openPrintPreview(msg.dataUrl);
-        return;
-      }
-    });
+
+  hideLoading();
+
+  if (msg.exportType === "final") {
+    const link = document.createElement("a");
+    link.href = msg.dataUrl;
+    link.download = "mandala.png";
+    link.click();
+    return;
+  }
+
+  openPrintPreview(msg.dataUrl);
+}
 
     document.querySelectorAll(".engine-btn").forEach(btn => {
       if (!btn.dataset.engine) return;
@@ -628,13 +631,43 @@ function closeSheet() {
     els.sliderBackdrop.addEventListener("click", closeSheet);
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-    els.buyPreviewPng.addEventListener("click", handlePaidDownload);
+    function requestExport(type = "preview") {
+  if (!els.frame.contentWindow) return;
 
+  showLoading();
+
+  const enginePayload = getEnginePayloadState();
+
+  els.frame.contentWindow.postMessage(
+    { type: "EXPORT", exportType: type, payload: enginePayload },
+    "*"
+  );
+}
     buildSliders();
     refreshComputedCodeAndColors();
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
+      paypal.Buttons({
+
+  createOrder: function(data, actions) {
+    return actions.order.create({
+      purchase_units: [{
+        amount: { value: "11.00" }
+      }]
+    });
+  },
+
+  onApprove: function(data, actions) {
+    return actions.order.capture().then(function(details) {
+
+      // 🔥 Nach Zahlung → Download starten
+      requestExport("final");
+
+    });
+  }
+
+}).render('#paypal-button-container');
   </script>
 </body>
 </html>

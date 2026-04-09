@@ -596,60 +596,77 @@ function closeSheet() {
     }
   });
 })();
-      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+ window.addEventListener("message", (ev) => {
+  const msg = ev.data;
+  if (!msg || typeof msg !== "object") return;
 
-  hideLoading();
+  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
 
-  if (msg.exportType === "final") {
-    const link = document.createElement("a");
-    link.href = msg.dataUrl;
-    link.download = "mandala.png";
-    link.click();
-    return;
+    hideLoading();
+
+    if (msg.exportType === "final") {
+      const link = document.createElement("a");
+      link.href = msg.dataUrl;
+      link.download = "mandala.png";
+      link.click();
+      return;
+    }
+
+    openPrintPreview(msg.dataUrl);
   }
+});
 
-  openPrintPreview(msg.dataUrl);
-}
+document.querySelectorAll(".engine-btn").forEach(btn => {
+  if (!btn.dataset.engine) return;
+  btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+});
 
-    document.querySelectorAll(".engine-btn").forEach(btn => {
-      if (!btn.dataset.engine) return;
-      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
-    });
+els.mode.addEventListener("change", () => {
+  state.mode = els.mode.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
 
-    els.mode.addEventListener("change", () => {
-      state.mode = els.mode.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
+els.input.addEventListener("input", () => {
+  state.input = els.input.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
 
-    els.input.addEventListener("input", () => {
-      state.input = els.input.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
+els.direction.addEventListener("change", () => {
+  state.direction = els.direction.value;
+  pushStateToEngine();
+});
 
-    els.direction.addEventListener("change", () => {
-      state.direction = els.direction.value;
-      pushStateToEngine();
-    });
+els.sector.addEventListener("change", () => {
+  state.sector = Number(els.sector.value);
+  pushStateToEngine();
+});
 
-    els.sector.addEventListener("change", () => {
-      state.sector = Number(els.sector.value);
-      pushStateToEngine();
-    });
+els.download.addEventListener("click", () => {
+  showPreviewInfo();
+  requestExport("preview");
+});
 
-    els.download.addEventListener("click", () => {
-      showPreviewInfo();
-      requestExport();
-    });
+els.openSliders.addEventListener("click", openSheet);
+els.closeSliders.addEventListener("click", closeSheet);
+els.sliderBackdrop.addEventListener("click", closeSheet);
+els.closePrintPreview.addEventListener("click", closePrintPreview);
+els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-    els.openSliders.addEventListener("click", openSheet);
-    els.closeSliders.addEventListener("click", closeSheet);
-    els.sliderBackdrop.addEventListener("click", closeSheet);
-    els.closePrintPreview.addEventListener("click", closePrintPreview);
-    els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-    function requestExport(type = "preview") {
+// 🔥 WICHTIGE FUNKTION – WAR BEI DIR KAPUTT
+function requestExport(type = "preview") {
   if (!els.frame.contentWindow) return;
+
+  showLoading();
+
+  const enginePayload = getEnginePayloadState();
+
+  els.frame.contentWindow.postMessage(
+    { type: "EXPORT", exportType: type, payload: enginePayload },
+    "*"
+  );
+}
 
  showLoading();
 

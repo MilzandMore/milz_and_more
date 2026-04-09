@@ -649,7 +649,7 @@ function closeSheet() {
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
-    window.addEventListener("load", function() {
+   window.addEventListener("load", function() {
 
   paypal.Buttons({
 
@@ -663,17 +663,13 @@ function closeSheet() {
 
     onApprove: function(data, actions) {
       return actions.order.capture().then(function(details) {
-
         requestExport("final");
-
       });
     }
 
   }).render('#paypal-button-container');
 
 });
-  },
-
   onApprove: function(data, actions) {
     return actions.order.capture().then(function(details) {
 

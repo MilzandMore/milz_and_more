@@ -576,8 +576,7 @@ window.addEventListener("message", (ev) => {
       if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
         state.colors = [...msg.colors];
         applySliderColorsToUI();
-        return;
-      }
+     }
 (function() {
   const preview = document.getElementById("printPreview");
 

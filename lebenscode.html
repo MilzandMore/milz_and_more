@@ -651,21 +651,23 @@ function closeSheet() {
     function requestExport(type = "preview") {
   if (!els.frame.contentWindow) return;
 
-  showLoading();
+ showLoading();
 
-  const enginePayload = getEnginePayloadState();
+const enginePayload = getEnginePayloadState();
 
-  els.frame.contentWindow.postMessage(
-    { type: "EXPORT", exportType: type, payload: enginePayload },
-    "*"
-  );
+els.frame.contentWindow.postMessage(
+  { type: "EXPORT", exportType: type, payload: enginePayload },
+  "*"
+);
 }
-    buildSliders();
-    refreshComputedCodeAndColors();
-    updateConditionalFields();
-    updateViewerWatermarkPosition();
-    loadEngine("quadrat");
-   window.addEventListener("load", function() {
+
+buildSliders();
+refreshComputedCodeAndColors();
+updateConditionalFields();
+updateViewerWatermarkPosition();
+loadEngine("quadrat");
+
+window.addEventListener("load", function() {
 
   paypal.Buttons({
 
@@ -686,16 +688,6 @@ function closeSheet() {
   }).render('#paypal-button-container');
 
 });
-  onApprove: function(data, actions) {
-    return actions.order.capture().then(function(details) {
-
-      // 🔥 Nach Zahlung → Download starten
-      requestExport("final");
-
-    });
-  }
-
-}).render('#paypal-button-container');
-  </script>
+</script>
 </body>
 </html>

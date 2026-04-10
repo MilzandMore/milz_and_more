@@ -667,7 +667,7 @@ function closeSheet() {
     onApprove: function(data, actions) {
       return actions.order.capture().then(function() {
 
-        requestExport(); // NICHT ändern!
+        alert("Zahlung erfolgreich!"); // NICHT ändern!
 
       });
     }

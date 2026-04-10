@@ -406,7 +406,7 @@
     function openPrintPreview(dataUrl) {
       els.printPreviewImage.src = dataUrl;
       els.printPreview.hidden = false;
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = "auto";
       buildDownloadWatermark();
     }
 

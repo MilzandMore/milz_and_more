@@ -1191,8 +1191,10 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
   display: flex;
   gap: 30px;
   align-items: flex-start;
-  max-height: 80vh;
-  overflow: hidden;
+}
+.print-preview__panel {
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .preview-left {
@@ -1226,7 +1228,16 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     align-items: center;
   }
 
+  .preview-left {
+    width: 100%;
+  }
+
   .preview-right {
     width: 100%;
+    padding: 10px 0;
+  }
+
+  .print-preview__image {
+    max-height: 50vh;
   }
 }

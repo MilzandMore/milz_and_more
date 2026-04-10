@@ -1143,6 +1143,11 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
 
   body.portal-body .portal-tagline{
     font-size:11px;
+     .paypal-box {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
     letter-spacing:.18em;
   }
 

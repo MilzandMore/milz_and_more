@@ -656,23 +656,30 @@ function closeSheet() {
 
   paypal.Buttons({
 
-    createOrder: function(data, actions) {
-      return actions.order.create({
-        purchase_units: [{
-          amount: { value: "11.00" }
-        }]
-      });
-    },
+  createOrder: function(data, actions) {
+    return actions.order.create({
+      purchase_units: [{
+        amount: { value: "11.00" }
+      }]
+    });
+  },
 
-    onApprove: function(data, actions) {
-      return actions.order.capture().then(function() {
+  onApprove: function(data, actions) {
+    return actions.order.capture().then(function(details) {
 
-        alert("Zahlung erfolgreich!"); // NICHT ändern!
+      requestExport();
 
-      });
+    });
+  },
+
+  onClick: function() {
+    // 👉 WICHTIG für Mobile / PWA
+    if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+      alert("Bitte öffne die Seite im Browser, um mit PayPal zu zahlen.");
     }
+  }
 
-  }).render('#paypal-button-container');
+}).render('#paypal-button-container');
 
 });
   </script>

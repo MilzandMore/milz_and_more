@@ -545,9 +545,9 @@ function requestExport(type = "preview") {
   showLoading();
 
   els.frame.contentWindow.postMessage(
-    { type: "EXPORT", exportType: type, payload: getEnginePayloadState() },
-    "*"
-  );
+  { type: "EXPORT", exportType: type, payload: enginePayload },
+  "*"
+);
 }
 
 function loadEngine(engine) {

@@ -387,19 +387,27 @@
       }, 1800);
     }
 
-    function openPrintPreview(dataUrl) {
-      els.printPreviewImage.src = dataUrl;
-      els.printPreview.hidden = false;
-      document.body.style.overflow = "hidden";
-      buildDownloadWatermark();
-    }
+  <script>
+// ==========================
+// PRINT PREVIEW
+// ==========================
+function openPrintPreview(dataUrl) {
+  els.printPreviewImage.src = dataUrl;
+  els.printPreview.hidden = false;
+  document.body.style.overflow = "hidden";
+  buildDownloadWatermark();
+}
 
-    function closePrintPreview() {
-      els.printPreview.hidden = true;
-      els.printPreviewImage.src = "";
-      document.body.style.overflow = "";
-    }
-function buildDownloadWatermark(){
+function closePrintPreview() {
+  els.printPreview.hidden = true;
+  els.printPreviewImage.src = "";
+  document.body.style.overflow = "";
+}
+
+// ==========================
+// WATERMARK
+// ==========================
+function buildDownloadWatermark() {
   const container = document.getElementById("downloadWatermark");
   if (!container) return;
 
@@ -408,8 +416,8 @@ function buildDownloadWatermark(){
   const stepY = 220;
   const stepX = 300;
 
-  for(let y = -100; y < 1200; y += stepY){
-    for(let x = -100; x < 1200; x += stepX){
+  for (let y = -100; y < 1200; y += stepY) {
+    for (let x = -100; x < 1200; x += stepX) {
 
       const img = document.createElement("img");
       img.src = "assets/Logo_gold.png";
@@ -423,136 +431,143 @@ function buildDownloadWatermark(){
     }
   }
 }
-    function handlePaidDownload() {
-      if (!PAYMENT_URL || PAYMENT_URL === "#") {
-        alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");
-        return;
-      }
-      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
-    }
 
-    function buildSlidersInto(containerEl) {
-      if (!containerEl) return;
-      containerEl.innerHTML = "";
+// ==========================
+// PAYPAL LINK FALLBACK
+// ==========================
+function handlePaidDownload() {
+  if (!PAYMENT_URL || PAYMENT_URL === "#") {
+    alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");
+    return;
+  }
+  window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
+}
 
-      for (let i = 1; i <= 9; i++) {
-        const row = document.createElement("div");
-        row.className = "slider-row";
+// ==========================
+// SLIDERS
+// ==========================
+function buildSlidersInto(containerEl) {
+  if (!containerEl) return;
+  containerEl.innerHTML = "";
 
-        const dot = document.createElement("div");
-        dot.className = "dot";
-        dot.id = containerEl.id + "_dot" + i;
+  for (let i = 1; i <= 9; i++) {
+    const row = document.createElement("div");
+    row.className = "slider-row";
 
-        const label = document.createElement("div");
-        label.className = "digit";
-        label.dataset.digit = String(i);
-        label.textContent = String(i);
+    const dot = document.createElement("div");
+    dot.className = "dot";
 
-        const input = document.createElement("input");
-        input.type = "range";
-        input.min = "20";
-        input.max = "100";
-        input.value = String(state.sliders[i] ?? 85);
-        input.dataset.digit = String(i);
+    const label = document.createElement("div");
+    label.className = "digit";
+    label.textContent = String(i);
 
-        setSliderVisual(input);
+    const input = document.createElement("input");
+    input.type = "range";
+    input.min = "20";
+    input.max = "100";
+    input.value = String(state.sliders[i] ?? 85);
 
-        input.addEventListener("input", () => {
-          state.sliders[i] = Number(input.value);
-          setSliderVisual(input);
-          syncSameDigitSliders(i, input.value, input);
-          refreshComputedCodeAndColors();
-          pushStateToEngine();
-        });
+    setSliderVisual(input);
 
-        row.appendChild(dot);
-        row.appendChild(label);
-        row.appendChild(input);
-        containerEl.appendChild(row);
-      }
-    }
+    input.addEventListener("input", () => {
+      state.sliders[i] = Number(input.value);
+      setSliderVisual(input);
+      syncSameDigitSliders(i, input.value, input);
+      refreshComputedCodeAndColors();
+      pushStateToEngine();
+    });
 
-    function buildSliders() {
-      buildSlidersInto(els.sliders);
-      buildSlidersInto(els.slidersMobile);
-    }
+    row.appendChild(dot);
+    row.appendChild(label);
+    row.appendChild(input);
+    containerEl.appendChild(row);
+  }
+}
 
-    function setActiveEngineButton(engine) {
-      document.querySelectorAll(".engine-btn").forEach(btn => {
-        if (!btn.dataset.engine) return;
-        btn.classList.toggle("active", btn.dataset.engine === engine);
-      });
-    }
+function buildSliders() {
+  buildSlidersInto(els.sliders);
+  buildSlidersInto(els.slidersMobile);
+}
 
-    function updateViewerWatermarkPosition() {
-      if (!els.engineWrap) return;
-      els.engineWrap.classList.remove("wm-quadrat", "wm-rund", "wm-wabe");
-      els.engineWrap.classList.add("wm-" + state.engine);
-    }
+// ==========================
+// ENGINE / UI
+// ==========================
+function setActiveEngineButton(engine) {
+  document.querySelectorAll(".engine-btn").forEach(btn => {
+    if (!btn.dataset.engine) return;
+    btn.classList.toggle("active", btn.dataset.engine === engine);
+  });
+}
 
-    function updateConditionalFields() {
-      if (els.sectorWrap) {
-        els.sectorWrap.style.display = state.engine === "rund" ? "flex" : "none";
-      }
-    }
+function updateViewerWatermarkPosition() {
+  if (!els.engineWrap) return;
+  els.engineWrap.classList.remove("wm-quadrat", "wm-rund", "wm-wabe");
+  els.engineWrap.classList.add("wm-" + state.engine);
+}
 
-    function pushStateToEngine() {
-      if (!els.frame.contentWindow) return;
+function updateConditionalFields() {
+  if (els.sectorWrap) {
+    els.sectorWrap.style.display = state.engine === "rund" ? "flex" : "none";
+  }
+}
 
-      const enginePayload = getEnginePayloadState();
-      els.frame.contentWindow.postMessage(
-        { type: "SET_STATE", payload: enginePayload },
-        "*"
-      );
-    }
-
-    function requestExport(type = "preview") {
+function pushStateToEngine() {
   if (!els.frame.contentWindow) return;
 
-  showLoading();
-
-  const enginePayload = getEnginePayloadState();
-
   els.frame.contentWindow.postMessage(
-    { type: "EXPORT", exportType: type, payload: enginePayload },
+    { type: "SET_STATE", payload: getEnginePayloadState() },
     "*"
   );
 }
 
-    function loadEngine(engine) {
-      state.engine = engine;
-      setActiveEngineButton(engine);
-      updateConditionalFields();
-      updateViewerWatermarkPosition();
-      showLoading();
+function requestExport(type = "preview") {
+  if (!els.frame.contentWindow) return;
 
-      els.frame.onload = () => {
-        hideLoading();
-        pushStateToEngine();
-      };
+  showLoading();
 
-      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
-    }
-
-    function openSheet() {
-      els.sliderSheet.classList.add("open");
-      document.body.style.overflow = "hidden";
-    }
-
-    function closeSheet() {
-      els.sliderSheet.classList.remove("open");
-      if (els.printPreview.hidden) {
-        document.body.style.overflow = "";
-      }
-    }
-function openSheet() {
-  const sheet = document.getElementById("sliderSheet");
-  if(sheet) sheet.classList.add("active");
+  els.frame.contentWindow.postMessage(
+    { type: "EXPORT", exportType: type, payload: getEnginePayloadState() },
+    "*"
+  );
 }
 
+function loadEngine(engine) {
+  state.engine = engine;
+  setActiveEngineButton(engine);
+  updateConditionalFields();
+  updateViewerWatermarkPosition();
+  showLoading();
+
+  els.frame.onload = () => {
+    hideLoading();
+    pushStateToEngine();
+  };
+
+  els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+}
+
+// ==========================
+// SHEET
+// ==========================
+function openSheet() {
+  const sheet = document.getElementById("sliderSheet");
+  if (sheet) sheet.classList.add("active");
+}
+
+function closeSheet() {
+  const sheet = document.getElementById("sliderSheet");
+  if (sheet) sheet.classList.remove("active");
+
+  if (els.printPreview.hidden) {
+    document.body.style.overflow = "";
+  }
+}
+
+// ==========================
+// MESSAGE HANDLER (FIXED!)
+// ==========================
 window.addEventListener("message", (ev) => {
   const msg = ev.data;
-
   if (!msg || typeof msg !== "object") return;
 
   if (msg.type === "READY") {
@@ -586,98 +601,81 @@ window.addEventListener("message", (ev) => {
     return;
   }
 });
-    
-      if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
-        state.colors = [...msg.colors];
-        applySliderColorsToUI();
-     }
-(function() {
+
+// ==========================
+// CONTEXT MENU BLOCK (PREVIEW)
+// ==========================
+(function () {
   const preview = document.getElementById("printPreview");
 
-  // Block für gesamte Seite (optional, falls gewünscht)
-  document.addEventListener("contextmenu", function(e){
-    if(preview && preview.contains(e.target)) {
-      e.preventDefault(); // nur auf der Print-Preview blocken
+  document.addEventListener("contextmenu", function (e) {
+    if (preview && preview.contains(e.target)) {
+      e.preventDefault();
     }
   });
 })();
-   if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
 
-  hideLoading();
+// ==========================
+// EVENTS
+// ==========================
+document.querySelectorAll(".engine-btn").forEach(btn => {
+  if (!btn.dataset.engine) return;
+  btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+});
 
-  if (msg.exportType === "final") {
-    const link = document.createElement("a");
-    link.href = msg.dataUrl;
-    link.download = "mandala.png";
-    link.click();
-    return;
-  }
+els.mode.addEventListener("change", () => {
+  state.mode = els.mode.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
 
-  openPrintPreview(msg.dataUrl);
-}
+els.input.addEventListener("input", () => {
+  state.input = els.input.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
 
-    document.querySelectorAll(".engine-btn").forEach(btn => {
-      if (!btn.dataset.engine) return;
-      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
-    });
+els.direction.addEventListener("change", () => {
+  state.direction = els.direction.value;
+  pushStateToEngine();
+});
 
-    els.mode.addEventListener("change", () => {
-      state.mode = els.mode.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
+els.sector.addEventListener("change", () => {
+  state.sector = Number(els.sector.value);
+  pushStateToEngine();
+});
 
-    els.input.addEventListener("input", () => {
-      state.input = els.input.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
-
-    els.direction.addEventListener("change", () => {
-      state.direction = els.direction.value;
-      pushStateToEngine();
-    });
-
-    els.sector.addEventListener("change", () => {
-      state.sector = Number(els.sector.value);
-      pushStateToEngine();
-    });
-
-   els.download.addEventListener("click", () => {
+els.download.addEventListener("click", () => {
   showPreviewInfo();
   requestExport("preview");
 });
 
-   if (els.openSliders) {
-  els.openSliders.addEventListener("click", openSheet);
-}
+if (els.openSliders) els.openSliders.addEventListener("click", openSheet);
+if (els.closeSliders) els.closeSliders.addEventListener("click", closeSheet);
+if (els.sliderBackdrop) els.sliderBackdrop.addEventListener("click", closeSheet);
+if (els.closePrintPreview) els.closePrintPreview.addEventListener("click", closePrintPreview);
+if (els.printPreviewBackdrop) els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-if (els.closeSliders) {
-  els.closeSliders.addEventListener("click", closeSheet);
-}
+// ==========================
+// INIT
+// ==========================
+buildSliders();
+refreshComputedCodeAndColors();
+updateConditionalFields();
+updateViewerWatermarkPosition();
+loadEngine("quadrat");
 
-if (els.sliderBackdrop) {
-  els.sliderBackdrop.addEventListener("click", closeSheet);
-}
-
-if (els.closePrintPreview) {
-  els.closePrintPreview.addEventListener("click", closePrintPreview);
-}
-
-if (els.printPreviewBackdrop) {
-  els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-}
-
-    buildSliders();
-    refreshComputedCodeAndColors();
-    updateConditionalFields();
-    updateViewerWatermarkPosition();
-    loadEngine("quadrat");
-   document.addEventListener("DOMContentLoaded", function() {
+// ==========================
+// PAYPAL
+// ==========================
+document.addEventListener("DOMContentLoaded", function () {
+  if (typeof paypal === "undefined") {
+    console.error("PayPal SDK nicht geladen");
+    return;
+  }
 
   paypal.Buttons({
-
-    createOrder: function(data, actions) {
+    createOrder: function (data, actions) {
       return actions.order.create({
         purchase_units: [{
           amount: { value: "11.00" }
@@ -685,15 +683,11 @@ if (els.printPreviewBackdrop) {
       });
     },
 
-    onApprove: function(data, actions) {
-      return actions.order.capture().then(function(details) {
+    onApprove: function (data, actions) {
+      return actions.order.capture().then(function () {
         requestExport("final");
       });
     }
-
   }).render('#paypal-button-container');
-
 });
-  </script>
-</body>
-</html>
+</script>

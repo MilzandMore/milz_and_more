@@ -124,7 +124,13 @@
     <!-- RECHTS (PayPal + Text) -->
     <div class="preview-right">
 
-      <div id="paypal-button-container" style="width:100%;"></div>
+     <div id="paypal-button-container"></div>
+
+<a href="https://www.paypal.com/ncp/payment/G7ZXADZZXL73L" target="_blank">
+  <button style="margin-top:10px;">
+    👉 Falls PayPal nicht lädt – hier klicken
+  </button>
+</a>
 
       <div class="preview-text">
         ✨ Bitte Fenster nach Zahlung nicht schließen – dein Download startet automatisch.
@@ -648,34 +654,31 @@ function closeSheet() {
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
     document.addEventListener("DOMContentLoaded", function() {
+      
+if (typeof paypal === "undefined") {
+  console.error("PayPal SDK nicht geladen");
+} else {
 
-  if (typeof paypal === "undefined") {
-    console.error("PayPal SDK nicht geladen");
-    return;
-  }
-
-      <a href="https://www.paypal.com/ncp/payment/G7ZXADZZXL73L" target="_blank">
-  <button style="margin-bottom:10px;">
-    👉 Falls PayPal nicht lädt – hier klicken
-  </button>
-</a>
   paypal.Buttons({
 
-  createOrder: function(data, actions) {
-    return actions.order.create({
-      purchase_units: [{
-        amount: { value: "0.01" }
-      }]
-    });
-  },
+    createOrder: function(data, actions) {
+      return actions.order.create({
+        purchase_units: [{
+          amount: { value: "0.01" }
+        }]
+      });
+    },
 
-  onApprove: function(data, actions) {
-    return actions.order.capture().then(function(details) {
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
+        requestExport();
+      });
+    }
 
-      requestExport();
+  }).render('#paypal-button-container');
 
-    });
-  },
+
+}
 
   onCancel: function () {
     window.location.href = window.location.href;

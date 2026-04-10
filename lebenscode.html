@@ -656,6 +656,10 @@ function closeSheet() {
 
   paypal.Buttons({
 
+  style: {
+    layout: 'vertical'
+  },
+
   createOrder: function(data, actions) {
     return actions.order.create({
       purchase_units: [{
@@ -672,11 +676,9 @@ function closeSheet() {
     });
   },
 
-  onClick: function() {
-    // 👉 WICHTIG für Mobile / PWA
-    if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
-      alert("Bitte öffne die Seite im Browser, um mit PayPal zu zahlen.");
-    }
+  onError: function(err) {
+    alert("PayPal Fehler – bitte im Browser öffnen.");
+    console.error(err);
   }
 
 }).render('#paypal-button-container');

@@ -378,16 +378,19 @@
       els.loading.style.display = "none";
     }
 
-    function showPreviewInfo() {
-      if (!els.previewInfo) return;
-      els.previewInfo.classList.add("show");
-      clearTimeout(showPreviewInfo._timer);
-      showPreviewInfo._timer = setTimeout(() => {
-        els.previewInfo.classList.remove("show");
-      }, 1800);
-    }
+    <script>
+// ==========================
+// PREVIEW INFO
+// ==========================
+function showPreviewInfo() {
+  if (!els.previewInfo) return;
+  els.previewInfo.classList.add("show");
+  clearTimeout(showPreviewInfo._timer);
+  showPreviewInfo._timer = setTimeout(() => {
+    els.previewInfo.classList.remove("show");
+  }, 1800);
+}
 
-  <script>
 // ==========================
 // PRINT PREVIEW
 // ==========================

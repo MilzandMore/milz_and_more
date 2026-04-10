@@ -137,7 +137,6 @@
     </div>
   </div>
 
-  <script>
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
     const state = {
@@ -301,87 +300,84 @@
     }
 
     function computeFinalColors() {
-      const seedDigit = Number(state.computedCode?.charAt(0) || 1);
-      const rotatedRamps = rotateRampsBySeed(seedDigit);
+  const seedDigit = Number(state.computedCode?.charAt(0) || 1);
+  const rotatedRamps = rotateRampsBySeed(seedDigit);
 
-      state.colors = rotatedRamps.map((ramp, index) => {
-        const digit = index + 1;
-        const sliderValue = state.sliders[digit] ?? 85;
-        return getRampColor(ramp, sliderValue);
-      });
-    }
+  state.colors = rotatedRamps.map((ramp, index) => {
+    const digit = index + 1;
+    const sliderValue = state.sliders[digit] ?? 85;
+    return getRampColor(ramp, sliderValue);
+  });
+}
 
-    function setSliderVisual(input) {
-      input.style.setProperty("--val", input.value + "%");
-    }
+function setSliderVisual(input) {
+  input.style.setProperty("--val", input.value + "%");
+}
 
-    function syncSameDigitSliders(digit, value, sourceInput = null) {
-      const sliders = document.querySelectorAll(
-        '.slider-row input[type="range"][data-digit="' + digit + '"]'
-      );
+function syncSameDigitSliders(digit, value, sourceInput = null) {
+  const sliders = document.querySelectorAll(
+    '.slider-row input[type="range"][data-digit="' + digit + '"]'
+  );
 
-      sliders.forEach(slider => {
-        if (slider !== sourceInput) slider.value = value;
-        setSliderVisual(slider);
-      });
-    }
+  sliders.forEach(slider => {
+    if (slider !== sourceInput) slider.value = value;
+    setSliderVisual(slider);
+  });
+}
 
-    function applySliderColorsToUI() {
-      for (let i = 1; i <= 9; i++) {
-        const color = state.colors[i - 1] || "#D8B45A";
+function applySliderColorsToUI() {
+  for (let i = 1; i <= 9; i++) {
+    const color = state.colors[i - 1] || "#D8B45A";
 
-        const dotDesktop = document.getElementById("sliders_dot" + i);
-        const dotMobile = document.getElementById("slidersMobile_dot" + i);
+    const dotDesktop = document.getElementById("sliders_dot" + i);
+    const dotMobile = document.getElementById("slidersMobile_dot" + i);
 
-        if (dotDesktop) dotDesktop.style.background = color;
-        if (dotMobile) dotMobile.style.background = color;
+    if (dotDesktop) dotDesktop.style.background = color;
+    if (dotMobile) dotMobile.style.background = color;
 
-        const digitEls = document.querySelectorAll(
-          '.slider-row .digit[data-digit="' + i + '"]'
-        );
-        digitEls.forEach(el => {
-          el.style.color = color;
-        });
+    const digitEls = document.querySelectorAll(
+      '.slider-row .digit[data-digit="' + i + '"]'
+    );
 
-        const inputs = document.querySelectorAll(
-          '.slider-row input[type="range"][data-digit="' + i + '"]'
-        );
-        inputs.forEach(input => {
-          input.style.setProperty("--accent", color);
-          setSliderVisual(input);
-        });
-      }
-    }
+    digitEls.forEach(el => {
+      el.style.color = color;
+    });
 
-    function refreshComputedCodeAndColors() {
-      syncComputedCode();
-      computeFinalColors();
-      applySliderColorsToUI();
-    }
+    const inputs = document.querySelectorAll(
+      '.slider-row input[type="range"][data-digit="' + i + '"]'
+    );
 
-    function getEnginePayloadState() {
-      refreshComputedCodeAndColors();
+    inputs.forEach(input => {
+      input.style.setProperty("--accent", color);
+      setSliderVisual(input);
+    });
+  }
+}
 
-      return {
-        ...state,
-        mode: "geburtstag",
-        input: state.computedCode,
-        colors: [...state.colors]
-      };
-    }
+function refreshComputedCodeAndColors() {
+  syncComputedCode();
+  computeFinalColors();
+  applySliderColorsToUI();
+}
 
-    function showLoading() {
-      els.loading.style.display = "grid";
-    }
+function getEnginePayloadState() {
+  refreshComputedCodeAndColors();
 
-    function hideLoading() {
-      els.loading.style.display = "none";
-    }
+  return {
+    ...state,
+    mode: "geburtstag",
+    input: state.computedCode,
+    colors: [...state.colors]
+  };
+}
 
-    <script>
-// ==========================
-// PREVIEW INFO
-// ==========================
+function showLoading() {
+  els.loading.style.display = "grid";
+}
+
+function hideLoading() {
+  els.loading.style.display = "none";
+}
 function showPreviewInfo() {
   if (!els.previewInfo) return;
   els.previewInfo.classList.add("show");

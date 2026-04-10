@@ -18,6 +18,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="stylesheet" href="app.css?v=clean-preview-8">
+  <script src="https://www.paypal.com/sdk/js?client-id=AYwApQvq8SiMYPEHcgMpcN8q77ffjb2_47JkkL4voZk8uEfk8daNM6sbgTIwOHqTbgk-IfCmSKbc8VXE&currency=EUR"></script>
 </head>
 
 <body>
@@ -110,9 +111,11 @@
     <div class="print-preview__panel">
       <button id="closePrintPreview" class="print-preview__close" type="button" aria-label="Schließen">×</button>
 
-      <button id="buyPreviewPng" class="print-preview__buy" type="button">
-        ✨ Dein Mandala freischalten 11,-€
-      </button>
+      <div id="paypal-button-container" style="margin-top:15px;"></div>
+
+<div style="text-align:center;font-size:14px;margin-top:10px;">
+  ✨ Bitte Fenster nach Zahlung nicht schließen – dein Download startet automatisch.
+</div>
 
      <div class="print-preview__image-wrap">
   <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
@@ -205,7 +208,7 @@
       printPreviewBackdrop: document.getElementById("printPreviewBackdrop"),
       printPreviewImage: document.getElementById("printPreviewImage"),
       closePrintPreview: document.getElementById("closePrintPreview"),
-      buyPreviewPng: document.getElementById("buyPreviewPng")
+      buyPreviewPng: document.getElementById("buyPreviewPng") || null
     };
 
     function ex(a, b) {
@@ -628,13 +631,43 @@ function closeSheet() {
     els.sliderBackdrop.addEventListener("click", closeSheet);
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-    els.buyPreviewPng.addEventListener("click", handlePaidDownload);
+    if (els.buyPreviewPng) {
+  els.buyPreviewPng.addEventListener("click", handlePaidDownload);
+}
 
     buildSliders();
     refreshComputedCodeAndColors();
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
+    document.addEventListener("DOMContentLoaded", function() {
+
+  if (typeof paypal === "undefined") {
+    console.error("PayPal SDK nicht geladen");
+    return;
+  }
+
+  paypal.Buttons({
+
+    createOrder: function(data, actions) {
+      return actions.order.create({
+        purchase_units: [{
+          amount: { value: "11.00" }
+        }]
+      });
+    },
+
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function() {
+
+        requestExport(); // NICHT ändern!
+
+      });
+    }
+
+  }).render('#paypal-button-container');
+
+});
   </script>
 </body>
 </html>

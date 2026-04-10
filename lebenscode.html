@@ -156,7 +156,7 @@
       </div>
     </div>
   </div>
-
+<script>
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
     const state = {
@@ -550,19 +550,17 @@ function requestExport(type = "preview") {
 );
 }
 
-function loadEngine(engine) {
-  state.engine = engine;
-  setActiveEngineButton(engine);
-  updateConditionalFields();
-  updateViewerWatermarkPosition();
+function requestExport(type = "preview") {
+  if (!els.frame.contentWindow) return;
+
   showLoading();
 
-  els.frame.onload = () => {
-    hideLoading();
-    pushStateToEngine();
-  };
+  const enginePayload = getEnginePayloadState();
 
-  els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+  els.frame.contentWindow.postMessage(
+    { type: "EXPORT", exportType: type, payload: enginePayload },
+    "*"
+  );
 }
 
 // ==========================

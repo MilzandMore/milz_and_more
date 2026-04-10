@@ -129,7 +129,8 @@
     </button>
 
     <img id="printPreviewImage" class="print-preview__image" src="" alt="Mandala Vorschau">
-
+<div id="paypal-button-container" class="paypal-box"></div>
+    
     <div class="print-preview__caption">
       Dies ist eine Vorschau deines Mandalas.<br>
       Der Download ist ohne Wasserzeichen verfügbar.<br><br>
@@ -555,14 +556,15 @@ function requestExport(type = "preview") {
 
   showLoading();
 
-  const enginePayload = getEnginePayloadState();
-
   els.frame.contentWindow.postMessage(
-    { type: "EXPORT", exportType: type, payload: enginePayload },
+    {
+      type: "EXPORT",
+      exportType: type,
+      payload: getEnginePayloadState()
+    },
     "*"
   );
 }
-
 // ==========================
 // SHEET
 // ==========================

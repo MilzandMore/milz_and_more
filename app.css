@@ -1241,3 +1241,9 @@ body.portal-body .portal-pill--disabled .portal-pill__hint{
     max-height: 50vh;
   }
 }
+.print-preview {
+  overflow-y: auto;
+}
+.print-preview {
+  overflow-y: auto;
+}

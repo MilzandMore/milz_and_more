@@ -594,11 +594,23 @@ function closeSheet() {
     }
   });
 })();
-      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-        hideLoading();
-        openPrintPreview(msg.dataUrl);
-        return;
-      }
+     if (msg.type === "EXPORT_RESULT") {
+  if (!msg.dataUrl) return;
+
+  hideLoading();
+
+  // 👉 Wenn bezahlt → Download
+  if (msg.exportType === "final") {
+    const link = document.createElement("a");
+    link.href = msg.dataUrl;
+    link.download = "mandala.png";
+    link.click();
+    return;
+  }
+
+  // 👉 sonst nur Vorschau
+  openPrintPreview(msg.dataUrl);
+}
     });
 
     document.querySelectorAll(".engine-btn").forEach(btn => {
@@ -668,13 +680,11 @@ function closeSheet() {
     });
   },
 
-  onApprove: function(data, actions) {
-    return actions.order.capture().then(function(details) {
-
-      requestExport();
-
-    });
-  },
+  onApprove: function (data, actions) {
+  return actions.order.capture().then(function () {
+    requestExport("final"); // 🔥 DAS ist entscheidend
+  });
+}
 
   onError: function(err) {
     alert("PayPal Fehler – bitte im Browser öffnen.");

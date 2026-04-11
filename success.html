@@ -1,15 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Danke für deinen Kauf</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background: radial-gradient(circle at top, #1a1a1a, #000);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(201,161,74,0.3);
+      border-radius: 20px;
+      padding: 40px 25px;
+      width: 90%;
+      max-width: 400px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 40px rgba(201,161,74,0.15);
+    }
+
+    .logo {
+      width: 80px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-family: "Cinzel", serif;
+      font-size: 22px;
+      color: #c9a14a;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 25px;
+    }
+
+    .loader {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.2);
+      border-top: 3px solid #c9a14a;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 25px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    button {
+      background: linear-gradient(135deg, #c9a14a, #f1d27a);
+      border: none;
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #000;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .hint {
+      margin-top: 15px;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>🎉 Zahlung erfolgreich!</h2>
-<p>Dein Download startet automatisch...</p>
+<div class="card">
 
-<button onclick="startDownload()">Falls nichts passiert → hier klicken</button>
+  <img src="assets/Logo_gold.png" class="logo">
+
+  <h2>✨ Zahlung erfolgreich</h2>
+  <p>Dein persönliches Mandala wird jetzt vorbereitet…</p>
+
+  <div class="loader"></div>
+
+  <button onclick="startDownload()">
+    Falls nichts passiert → Download starten
+  </button>
+
+  <div class="hint">
+    Bitte kurz warten – dein Download startet automatisch.
+  </div>
+
+</div>
 
 <iframe id="engineFrame" src="engines/quadrat/index.html" style="display:none;"></iframe>
 
@@ -19,41 +118,29 @@ const supabaseClient = supabase.createClient(
   "sb_publishable_InYZSFWEdUgm8oS1OWcHQQ_chg3NQMv"
 );
 
-async function markAsPaid() {
+async function startDownload() {
+
   await supabaseClient
     .from("orders")
     .insert([{ paid: true }]);
-}
 
-function requestExport() {
   const frame = document.getElementById("engineFrame");
 
-  frame.contentWindow.postMessage({
-    type: "EXPORT"
-  }, "*");
-}
-
-async function startDownload() {
-  await markAsPaid();   // Zahlung speichern
-  requestExport();      // Download starten
-}
-
-window.onload = async () => {
-
-  const { data } = await supabaseClient
-    .from("orders")
-    .select("*")
-    .eq("paid", true);
-
-  if (data && data.length > 0) {
-    setTimeout(() => {
-      startDownload();
-    }, 1000);
-  } else {
-    document.body.innerHTML += "<p>❌ Keine Zahlung gefunden</p>";
+  if (frame.contentWindow) {
+    frame.contentWindow.postMessage({ type: "EXPORT" }, "*");
   }
 
+  frame.onload = () => {
+    frame.contentWindow.postMessage({ type: "EXPORT" }, "*");
+  };
+}
+
+window.onload = () => {
+  setTimeout(() => {
+    startDownload();
+  }, 1500);
 };
 </script>
+
 </body>
 </html>

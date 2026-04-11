@@ -594,72 +594,64 @@ function closeSheet() {
     }
   });
 })();
-     if (msg.type === "EXPORT_RESULT") {
-  if (!msg.dataUrl) return;
-
+      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   hideLoading();
-
-  // 👉 Wenn bezahlt → Download
-  if (msg.exportType === "final") {
-    const link = document.createElement("a");
-    link.href = msg.dataUrl;
-    link.download = "mandala.png";
-    link.click();
-    return;
-  }
-
-  // 👉 sonst nur Vorschau
   openPrintPreview(msg.dataUrl);
+  return;
 }
-    });
+});
 
-    document.querySelectorAll(".engine-btn").forEach(btn => {
-      if (!btn.dataset.engine) return;
-      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
-    });
+document.querySelectorAll(".engine-btn").forEach(btn => {
+  if (!btn.dataset.engine) return;
+  btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+});
 
-    els.mode.addEventListener("change", () => {
-      state.mode = els.mode.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
+els.mode.addEventListener("change", () => {
+  state.mode = els.mode.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
 
-    els.input.addEventListener("input", () => {
-      state.input = els.input.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
+els.input.addEventListener("input", () => {
+  state.input = els.input.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
 
-    els.direction.addEventListener("change", () => {
-      state.direction = els.direction.value;
-      pushStateToEngine();
-    });
+els.direction.addEventListener("change", () => {
+  state.direction = els.direction.value;
+  pushStateToEngine();
+});
 
-    els.sector.addEventListener("change", () => {
-      state.sector = Number(els.sector.value);
-      pushStateToEngine();
-    });
+els.sector.addEventListener("change", () => {
+  state.sector = Number(els.sector.value);
+  pushStateToEngine();
+});
 
-    els.download.addEventListener("click", () => {
-      showPreviewInfo();
-      requestExport();
-    });
+els.download.addEventListener("click", () => {
+  showPreviewInfo();
+  requestExport();
+});
 
-    els.openSliders.addEventListener("click", openSheet);
-    els.closeSliders.addEventListener("click", closeSheet);
-    els.sliderBackdrop.addEventListener("click", closeSheet);
-    els.closePrintPreview.addEventListener("click", closePrintPreview);
-    els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-    if (els.buyPreviewPng) {
+els.openSliders.addEventListener("click", openSheet);
+els.closeSliders.addEventListener("click", closeSheet);
+els.sliderBackdrop.addEventListener("click", closeSheet);
+els.closePrintPreview.addEventListener("click", closePrintPreview);
+els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
+
+if (els.buyPreviewPng) {
   els.buyPreviewPng.addEventListener("click", handlePaidDownload);
 }
 
-    buildSliders();
-    refreshComputedCodeAndColors();
-    updateConditionalFields();
-    updateViewerWatermarkPosition();
-    loadEngine("quadrat");
-    document.addEventListener("DOMContentLoaded", function() {
+buildSliders();
+refreshComputedCodeAndColors();
+updateConditionalFields();
+updateViewerWatermarkPosition();
+loadEngine("quadrat");
+
+
+// ✅ PAYPAL – SAUBER GETRENNT
+document.addEventListener("DOMContentLoaded", function () {
 
   if (typeof paypal === "undefined") {
     console.error("PayPal SDK nicht geladen");
@@ -668,32 +660,32 @@ function closeSheet() {
 
   paypal.Buttons({
 
-  style: {
-    layout: 'vertical'
-  },
+    style: {
+      layout: 'vertical'
+    },
 
-  createOrder: function(data, actions) {
-    return actions.order.create({
-      purchase_units: [{
-        amount: { value: "0.01" }
-      }]
-    });
-  },
+    createOrder: function (data, actions) {
+      return actions.order.create({
+        purchase_units: [{
+          amount: { value: "0.01" } // 👉 TESTPREIS
+        }]
+      });
+    },
 
-  onApprove: function (data, actions) {
-  return actions.order.capture().then(function () {
-    requestExport("final"); // 🔥 DAS ist entscheidend
-  });
-}
+    onApprove: function (data, actions) {
+      return actions.order.capture().then(function () {
 
-  onError: function(err) {
-    alert("PayPal Fehler – bitte im Browser öffnen.");
-    console.error(err);
-  }
+        // 👉 NUR BESTEHENDER EXPORT (STABIL!)
+        requestExport();
 
-}).render('#paypal-button-container');
+      });
+    },
+
+    onError: function (err) {
+      alert("PayPal Fehler – bitte im Browser öffnen.");
+      console.error(err);
+    }
+
+  }).render('#paypal-button-container');
 
 });
-  </script>
-</body>
-</html>

@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Danke für deinen Kauf</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
 
@@ -13,6 +14,17 @@
 <iframe id="engineFrame" src="engines/quadrat/index.html" style="display:none;"></iframe>
 
 <script>
+const supabaseClient = supabase.createClient(
+  "https://pufxpxdxlmtvmgcaaqsh.supabase.co",
+  "sb_publishable_InYZSFWEdUgm8oS1OWcHQQ_chg3NQMv"
+);
+
+async function markAsPaid() {
+  await supabaseClient
+    .from("orders")
+    .insert([{ paid: true }]);
+}
+
 function requestExport() {
   const frame = document.getElementById("engineFrame");
 
@@ -21,23 +33,27 @@ function requestExport() {
   }, "*");
 }
 
-function startDownload() {
-  requestExport();
+async function startDownload() {
+  await markAsPaid();   // Zahlung speichern
+  requestExport();      // Download starten
 }
 
-// ✅ NEU: prüft PayPal Rückkehr
-const urlParams = new URLSearchParams(window.location.search);
-const payer = urlParams.get("PayerID");
+window.onload = async () => {
 
-if (payer) {
+  const { data } = await supabaseClient
+    .from("orders")
+    .select("*")
+    .eq("paid", true);
 
-  setTimeout(() => {
-    startDownload();
-  }, 1500);
+  if (data && data.length > 0) {
+    setTimeout(() => {
+      startDownload();
+    }, 1000);
+  } else {
+    document.body.innerHTML += "<p>❌ Keine Zahlung gefunden</p>";
+  }
 
-} else {
-  document.body.innerHTML += "<p>❌ Keine Zahlung gefunden</p>";
-}
+};
 </script>
 </body>
 </html>

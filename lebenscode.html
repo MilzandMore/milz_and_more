@@ -649,12 +649,11 @@ refreshComputedCodeAndColors();
 updateConditionalFields();
 updateViewerWatermarkPosition();
 loadEngine("quadrat");
-    // ===== PAYPAL =====
 
+// ===== PAYPAL =====
 if (typeof paypal !== "undefined") {
 
   paypal.Buttons({
-
     createOrder: function (data, actions) {
       return actions.order.create({
         purchase_units: [{
@@ -662,26 +661,23 @@ if (typeof paypal !== "undefined") {
         }]
       });
     },
-
     onApprove: function (data, actions) {
       return actions.order.capture().then(function () {
         requestExport();
       });
     },
-
     onError: function (err) {
       console.error(err);
       alert("PayPal Fehler – bitte im Browser öffnen.");
     }
-
   }).render('#paypal-button-container');
 
 } else {
   console.error("PayPal SDK nicht geladen");
 }
-    });
+
+}); // ← DAS ist die eine korrekte schließende Klammer
+
 </script>
 </body>
 </html>
-
-  

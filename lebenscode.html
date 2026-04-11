@@ -654,31 +654,32 @@ function closeSheet() {
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
     document.addEventListener("DOMContentLoaded", function() {
-      
-if (typeof paypal === "undefined") {
-  console.error("PayPal SDK nicht geladen");
-} else {
 
-  paypal.Buttons({
+  if (typeof paypal === "undefined") {
+    console.error("PayPal SDK nicht geladen");
+  } else {
 
-    createOrder: function(data, actions) {
-      return actions.order.create({
-        purchase_units: [{
-          amount: { value: "0.01" }
-        }]
-      });
-    },
+    paypal.Buttons({
 
-    onApprove: function(data, actions) {
-      return actions.order.capture().then(function(details) {
-        requestExport();
-      });
-    }
+      createOrder: function(data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            amount: { value: "0.01" }
+          }]
+        });
+      },
 
-  }).render('#paypal-button-container');
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          requestExport();
+        });
+      }
 
+    }).render('#paypal-button-container');
 
-}
+  }
+
+});
 
   onCancel: function () {
     window.location.href = window.location.href;

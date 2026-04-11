@@ -3,15 +3,6 @@
 <head>
   <title>Danke für deinen Kauf</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-</head>
-<body>
-
-<h2>🎉 Zahlung erfolgreich!</h2>
-<p>Dein Download startet automatisch...</p>
-
-<button onclick="startDownload()">Falls nichts passiert → hier klicken</button>
-
-<iframe id="engineFrame" src="engines/quadrat/index.html" style="display:none;"></iframe>
 
 <script>
 const supabaseClient = supabase.createClient(
@@ -19,40 +10,25 @@ const supabaseClient = supabase.createClient(
   "sb_publishable_InYZSFWEdUgm8oS1OWcHQQ_chg3NQMv"
 );
 
-async function markAsPaid() {
+async function startDownload() {
+
+  // 🔥 Zahlung speichern
   await supabaseClient
     .from("orders")
     .insert([{ paid: true }]);
-}
 
-function requestExport() {
+  // 🔥 Download starten
   const frame = document.getElementById("engineFrame");
-
   frame.contentWindow.postMessage({
     type: "EXPORT"
   }, "*");
 }
 
-async function startDownload() {
-  await markAsPaid();   // Zahlung speichern
-  requestExport();      // Download starten
-}
-
-window.onload = async () => {
-
-  const { data } = await supabaseClient
-    .from("orders")
-    .select("*")
-    .eq("paid", true);
-
-  if (data && data.length > 0) {
-    setTimeout(() => {
-      startDownload();
-    }, 1000);
-  } else {
-    document.body.innerHTML += "<p>❌ Keine Zahlung gefunden</p>";
-  }
-
+// 🔥 AUTOMATISCH starten (kein check mehr!)
+window.onload = () => {
+  setTimeout(() => {
+    startDownload();
+  }, 1000);
 };
 </script>
 </body>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Danke für deinen Kauf</title>
+</head>
+<body>
+
+<h2>🎉 Zahlung erfolgreich!</h2>
+<p>Dein Download startet automatisch...</p>
+
+<button onclick="startDownload()">Falls nichts passiert → hier klicken</button>
+
+<iframe id="engineFrame" src="engines/quadrat/index.html" style="display:none;"></iframe>
+
+<script>
+function requestExport() {
+  const frame = document.getElementById("engineFrame");
+
+  frame.contentWindow.postMessage({
+    type: "EXPORT"
+  }, "*");
+}
+
+function startDownload() {
+  requestExport();
+}
+
+if (localStorage.getItem("downloadReady") === "true") {
+
+  localStorage.removeItem("downloadReady");
+
+  setTimeout(() => {
+    startDownload();
+  }, 1500);
+
+} else {
+  document.body.innerHTML += "<p>❌ Keine Zahlung gefunden</p>";
+}
+</script>
+
+</body>
+</html>

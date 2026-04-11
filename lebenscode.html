@@ -653,7 +653,8 @@ function closeSheet() {
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
-    document.addEventListener("DOMContentLoaded", function() {
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
 
   if (typeof paypal === "undefined") {
     console.error("PayPal SDK nicht geladen");
@@ -680,6 +681,7 @@ function closeSheet() {
   }
 
 });
+</script>
 
   onCancel: function () {
     window.location.href = window.location.href;

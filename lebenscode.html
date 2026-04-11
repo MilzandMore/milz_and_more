@@ -647,13 +647,14 @@ function closeSheet() {
     if (els.buyPreviewPng) {
   els.buyPreviewPng.addEventListener("click", handlePaidDownload);
 }
+    
+buildSliders();
+refreshComputedCodeAndColors();
+updateConditionalFields();
+updateViewerWatermarkPosition();
+loadEngine("quadrat");
 
-    buildSliders();
-    refreshComputedCodeAndColors();
-    updateConditionalFields();
-    updateViewerWatermarkPosition();
-    loadEngine("quadrat");
-    <script>
+    // --- PAYPAL START ---
 document.addEventListener("DOMContentLoaded", function() {
 
   if (typeof paypal === "undefined") {
@@ -670,6 +671,18 @@ document.addEventListener("DOMContentLoaded", function() {
         });
       },
 
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          requestExport();
+        });
+      }
+
+    }).render('#paypal-button-container');
+
+  }
+
+});
+// --- PAYPAL ENDE ---
       onApprove: function(data, actions) {
         return actions.order.capture().then(function(details) {
           requestExport();

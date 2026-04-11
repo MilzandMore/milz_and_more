@@ -654,7 +654,9 @@ function closeSheet() {
     return;
   }
 
- paypal.Buttons({
+ const isInApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+paypal.Buttons({
 
   style: {
     layout: 'vertical'
@@ -662,10 +664,25 @@ function closeSheet() {
 
   createOrder: function(data, actions) {
 
-    // 🔥 STATE SPEICHERN
+    // 🔥 Mandala speichern
     const exportState = getEnginePayloadState();
     localStorage.setItem("mandalaState", JSON.stringify(exportState));
 
+    // 🔥 WENN APP → in Browser öffnen
+    if (isInApp) {
+
+      const url = window.location.origin + "/lebenscode.html";
+
+      // Hinweis für User
+      alert("Für die Zahlung öffnet sich dein Browser.");
+
+      window.open(url, "_blank");
+
+      // ❌ PayPal abbrechen
+      return;
+    }
+
+    // ✅ NORMALER FLOW (Browser)
     return actions.order.create({
       purchase_units: [{
         amount: { value: "0.01" }
@@ -680,7 +697,6 @@ function closeSheet() {
   onApprove: function(data, actions) {
     return actions.order.capture().then(function(details) {
 
-      // 🔥 Weiterleitung nach Zahlung
       window.location.href = "success.html";
 
     });

@@ -120,19 +120,30 @@ const supabaseClient = supabase.createClient(
 
 async function startDownload() {
 
-  await supabaseClient
-    .from("orders")
-    .insert([{ paid: true }]);
+  const saved = localStorage.getItem("mandalaState");
 
-  const frame = document.getElementById("engineFrame");
-
-  if (frame.contentWindow) {
-    frame.contentWindow.postMessage({ type: "EXPORT" }, "*");
+  if (!saved) {
+    alert("❌ Keine Mandala-Daten gefunden");
+    return;
   }
 
-  frame.onload = () => {
-    frame.contentWindow.postMessage({ type: "EXPORT" }, "*");
+  const payload = JSON.parse(saved);
+  const frame = document.getElementById("engineFrame");
+
+  const sendExport = () => {
+    frame.contentWindow.postMessage({
+      type: "EXPORT",
+      payload: payload
+    }, "*");
   };
+
+  // 🔥 IMMER versuchen zu senden
+  setTimeout(sendExport, 1000);
+
+  // 🔥 falls iframe später lädt
+  frame.onload = sendExport;
+
+  localStorage.removeItem("mandalaState");
 }
 
 window.onload = () => {

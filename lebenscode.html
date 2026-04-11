@@ -125,6 +125,10 @@
     <div class="preview-right">
 
       <div id="paypal-button-container" style="margin-top:15px;"></div>
+      
+      <a href="https://www.paypal.com/ncp/payment/G7ZXADZZXL73L" target="_blank">
+    👉 Falls PayPal nicht lädt – hier klicken
+  </a>
 
       <div class="preview-text">
         ✨ Bitte Fenster nach Zahlung nicht schließen – dein Download startet automatisch.
@@ -647,6 +651,10 @@ function closeSheet() {
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
+    if (localStorage.getItem("paid") === "true") {
+  requestExport();
+  localStorage.removeItem("paid");
+}
     document.addEventListener("DOMContentLoaded", function() {
 
   if (typeof paypal === "undefined") {
@@ -669,12 +677,15 @@ function closeSheet() {
   },
 
   onApprove: function(data, actions) {
-    return actions.order.capture().then(function(details) {
+  return actions.order.capture().then(function(details) {
 
-      requestExport();
+    // Zahlung merken
+    localStorage.setItem("paid", "true");
 
-    });
-  },
+    requestExport();
+
+  });
+}
 
   onError: function(err) {
     alert("PayPal Fehler – bitte im Browser öffnen.");

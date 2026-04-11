@@ -649,14 +649,9 @@ refreshComputedCodeAndColors();
 updateConditionalFields();
 updateViewerWatermarkPosition();
 loadEngine("quadrat");
+    // ===== PAYPAL =====
 
-    // --- PAYPAL START ---
-document.addEventListener("DOMContentLoaded", function () {
-
-  if (typeof paypal === "undefined") {
-    console.error("PayPal SDK nicht geladen");
-    return;
-  }
+if (typeof paypal !== "undefined") {
 
   paypal.Buttons({
 
@@ -672,31 +667,21 @@ document.addEventListener("DOMContentLoaded", function () {
       return actions.order.capture().then(function () {
         requestExport();
       });
+    },
+
+    onError: function (err) {
+      console.error(err);
+      alert("PayPal Fehler – bitte im Browser öffnen.");
     }
 
   }).render('#paypal-button-container');
 
-});
-  }
-
-});
+} else {
+  console.error("PayPal SDK nicht geladen");
+}
+    });
 </script>
-
-  onCancel: function () {
-    window.location.href = window.location.href;
-  },
-
-  onError: function (err) {
-    console.error(err);
-    alert("Bitte im Browser öffnen, falls PayPal nicht reagiert.");
-  }
-
-}).render('#paypal-button-container');
-  }
-
-}).render('#paypal-button-container');
-
-});
-  </script>
 </body>
 </html>
+
+  

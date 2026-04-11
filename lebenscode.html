@@ -654,17 +654,16 @@ function closeSheet() {
     return;
   }
 
-      <a href="https://www.paypal.com/ncp/payment/G7ZXADZZXL73L" target="_blank">
-  <button style="margin-bottom:10px;">
-    👉 Falls PayPal nicht lädt – hier klicken
-  </button>
-</a>
   paypal.Buttons({
+
+  style: {
+    layout: 'vertical'
+  },
 
   createOrder: function(data, actions) {
     return actions.order.create({
       purchase_units: [{
-        amount: { value: "0.01" }
+        amount: { value: "11.00" }
       }]
     });
   },
@@ -677,16 +676,9 @@ function closeSheet() {
     });
   },
 
-  onCancel: function () {
-    window.location.href = window.location.href;
-  },
-
-  onError: function (err) {
+  onError: function(err) {
+    alert("PayPal Fehler – bitte im Browser öffnen.");
     console.error(err);
-    alert("Bitte im Browser öffnen, falls PayPal nicht reagiert.");
-  }
-
-}).render('#paypal-button-container');
   }
 
 }).render('#paypal-button-container');

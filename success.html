@@ -25,9 +25,11 @@ function startDownload() {
   requestExport();
 }
 
-if (localStorage.getItem("downloadReady") === "true") {
+// ✅ NEU: prüft PayPal Rückkehr
+const urlParams = new URLSearchParams(window.location.search);
+const payer = urlParams.get("PayerID");
 
-  localStorage.removeItem("downloadReady");
+if (payer) {
 
   setTimeout(() => {
     startDownload();
@@ -37,6 +39,5 @@ if (localStorage.getItem("downloadReady") === "true") {
   document.body.innerHTML += "<p>❌ Keine Zahlung gefunden</p>";
 }
 </script>
-
 </body>
 </html>

@@ -218,6 +218,8 @@
       buyPreviewPng: document.getElementById("buyPreviewPng") || null
     };
 
+    const IS_ADMIN = true;
+    
     function ex(a, b) {
       const s = (a || 0) + (b || 0);
       return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
@@ -522,23 +524,45 @@ function buildDownloadWatermark(){
       );
     }
 
-    function requestExport() {
-      if (!els.frame.contentWindow) return;
+   function requestExport() {
+  if (!els.frame.contentWindow) return;
 
-      showLoading();
+  showLoading();
 
-      const enginePayload = getEnginePayloadState();
-      els.frame.contentWindow.postMessage(
-        { type: "EXPORT", payload: enginePayload },
-        "*"
-      );
-    }
+  const enginePayload = getEnginePayloadState();
+  els.frame.contentWindow.postMessage(
+    { type: "EXPORT", payload: enginePayload },
+    "*"
+  );
+}
 
-    function uploadToCloudinary(dataUrl) {
+function requestExportAdmin() {
+  showLoading();
+
+  const target = document.getElementById("engineWrap");
+
+  html2canvas(target, {
+    useCORS: true,
+    backgroundColor: "#ffffff",
+    scale: 2
+  }).then(canvas => {
+    const dataUrl = canvas.toDataURL("image/png");
+
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = "mandala.png";
+    link.click();
+
+    hideLoading();
+  });
+}
+
+// 👇 HIER REIN (direkt darunter)
+function uploadToCloudinary(dataUrl) {
   const formData = new FormData();
 
   formData.append("file", dataUrl);
-  formData.append("upload_preset", "mandala_upload"); // dein Preset Name
+  formData.append("upload_preset", "mandala_upload");
 
   fetch("https://api.cloudinary.com/v1_1/dy5wmudxp/image/upload", {
     method: "POST",
@@ -550,17 +574,13 @@ function buildDownloadWatermark(){
 
     const imageUrl = data.secure_url;
 
-    // 👉 TEST: öffnet Bild direkt
-    window.open(imageUrl, "_blank");
-
-    // 👉 später für EmailJS speichern
+    window.open(imageUrl, "_blank"); // Test
     window.__mandalaDownloadLink = imageUrl;
   })
   .catch(err => {
     console.error("Upload Fehler:", err);
   });
 }
-    
     function loadEngine(engine) {
       state.engine = engine;
       setActiveEngineButton(engine);
@@ -615,15 +635,16 @@ window.addEventListener("message", (ev) => {
   }
 
   if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-    hideLoading();
-    openPrintPreview(msg.dataUrl);
+  hideLoading();
 
-    // 👉 HIER Cloudinary Upload (wenn du willst)
-    uploadToCloudinary(msg.dataUrl);
+  // ❌ Vorschau raus (sonst kann man speichern!)
+  // openPrintPreview(msg.dataUrl);
 
-    return;
-  }
+  // ✅ direkt hochladen
+  uploadToCloudinary(msg.dataUrl);
 
+  return;
+}
 });
     document.querySelectorAll(".engine-btn").forEach(btn => {
       if (!btn.dataset.engine) return;
@@ -652,10 +673,13 @@ window.addEventListener("message", (ev) => {
       pushStateToEngine();
     });
 
-    els.download.addEventListener("click", () => {
-      showPreviewInfo();
-      requestExport();
-    });
+   els.download.addEventListener("click", () => {
+  if (IS_ADMIN) {
+    requestExportAdmin(); // direkt downloaden
+  } else {
+    showPreviewInfo(); // PayPal anzeigen
+  }
+});
 
     els.openSliders.addEventListener("click", openSheet);
     els.closeSliders.addEventListener("click", closeSheet);

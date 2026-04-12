@@ -37,12 +37,16 @@
 }
 
 html,
-body{
-  height:100%;
-  margin:0;
-  font-family:var(--font-ui);
-  color:var(--text);
-  overflow:hidden;
+body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-ui);
+  color: var(--text);
+
+  /* 🔥 WICHTIG: overflow fix */
+  overflow-x: hidden;
+  overflow-y: auto;
+
   background:
     radial-gradient(900px 600px at 18% 18%, rgba(122,92,255,.12), transparent 60%),
     radial-gradient(700px 500px at 82% 22%, rgba(0,255,209,.10), transparent 55%),
@@ -50,8 +54,8 @@ body{
     linear-gradient(180deg, var(--bgA), var(--bgB));
 }
 
-body{
-  position:relative;
+body {
+  position: relative;
 }
 
 .mobile-only{

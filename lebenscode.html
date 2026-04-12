@@ -443,12 +443,17 @@ function buildDownloadWatermark(){
     }
   }
 }
-    function handlePaidDownload() {
-  // ❌ KEIN Export hier
-  // ❌ KEIN Download hier
+ function handlePaidDownload() {
+  const dataUrl = window.__latestMandala;
 
-  // 👉 NUR PayPal anzeigen
-  showPreviewInfo();
+  if (!dataUrl) {
+    alert("Fehler: Kein Mandala gefunden");
+    return;
+  }
+
+  showLoading();
+
+  uploadToCloudinary(dataUrl);
 }
 
     function buildSlidersInto(containerEl) {
@@ -639,13 +644,10 @@ window.addEventListener("message", (ev) => {
   if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   hideLoading();
 
-  // ✅ Druckvorschau IMMER anzeigen
   openPrintPreview(msg.dataUrl);
 
-  // ✅ NUR nach Zahlung hochladen (nicht immer!)
-  if (!IS_ADMIN) {
-    uploadToCloudinary(msg.dataUrl);
-  }
+  // 👉 HIER speichern
+  window.__latestMandala = msg.dataUrl;
 
   return;
 }

@@ -65,32 +65,35 @@
       { soft: "#DDD0FA", vivid: "#9400D3" }
     ];
 
-    const els = {
-      stage: document.getElementById("stage"),
-      frame: document.getElementById("engineFrame"),
-      engineWrap: document.getElementById("engineWrap"),
-      loading: document.getElementById("loading"),
-      mode: document.getElementById("mode"),
-      input: document.getElementById("input"),
-      direction: document.getElementById("direction"),
-      sectorWrap: document.getElementById("sectorWrap"),
-      sector: document.getElementById("sector"),
-      download: document.getElementById("download"),
-      previewInfo: document.getElementById("previewInfo"),
-      sliders: document.getElementById("sliders"),
-      slidersMobile: document.getElementById("slidersMobile"),
-      openSliders: document.getElementById("openSliders"),
-      closeSliders: document.getElementById("closeSliders"),
-      sliderSheet: document.getElementById("sliderSheet"),
-      sliderBackdrop: document.getElementById("sliderBackdrop"),
-      codeOutput: document.getElementById("codeOutput"),
-      printPreview: document.getElementById("printPreview"),
-      printPreviewBackdrop: document.getElementById("printPreviewBackdrop"),
-      printPreviewImage: document.getElementById("printPreviewImage"),
-      closePrintPreview: document.getElementById("closePrintPreview"),
-      buyPreviewPng: document.getElementById("buyPreviewPng") || null
-    };
+    document.addEventListener("DOMContentLoaded", function() {
 
+  const els = {
+    stage: document.getElementById("stage"),
+    frame: document.getElementById("engineFrame"),
+    engineWrap: document.getElementById("engineWrap"),
+    loading: document.getElementById("loading"),
+    mode: document.getElementById("mode"),
+    input: document.getElementById("input"),
+    direction: document.getElementById("direction"),
+    sectorWrap: document.getElementById("sectorWrap"),
+    sector: document.getElementById("sector"),
+    download: document.getElementById("download"),
+    previewInfo: document.getElementById("previewInfo"),
+    sliders: document.getElementById("sliders"),
+    slidersMobile: document.getElementById("slidersMobile"),
+    openSliders: document.getElementById("openSliders"),
+    closeSliders: document.getElementById("closeSliders"),
+    sliderSheet: document.getElementById("sliderSheet"),
+    sliderBackdrop: document.getElementById("sliderBackdrop"),
+    codeOutput: document.getElementById("codeOutput"),
+    printPreview: document.getElementById("printPreview"),
+    printPreviewBackdrop: document.getElementById("printPreviewBackdrop"),
+    printPreviewImage: document.getElementById("printPreviewImage"),
+    closePrintPreview: document.getElementById("closePrintPreview"),
+    buyPreviewPng: document.getElementById("buyPreviewPng")
+  };
+
+  // 👉 REST DEINES CODES HIER DRIN LASSEN
     function ex(a, b) {
       const s = (a || 0) + (b || 0);
       return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);

@@ -447,97 +447,11 @@ containerEl.appendChild(row);
       updateConditionalFields();
       updateViewerWatermarkPosition();
       showLoading();
-
-      els.frame.onload = () => {
-        hideLoading();
-        pushStateToEngine();
-      };
-
-      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
-    }
-
-    // 🔥 DOPPELTE FUNKTIONEN ENTFERNT & BEREINIGT
-    function openSheet() {
-      const sheet = document.getElementById("sliderSheet");
-      if(sheet) sheet.classList.add("active");
-    }
-
-    function closeSheet() {
-      const sheet = document.getElementById("sliderSheet");
-      if(sheet) sheet.classList.remove("active");
-    }
-
-    window.addEventListener("message", (ev) => {
-      const msg = ev.data;
-      if (!msg || typeof msg !== "object") return;
-
-      if (msg.type === "READY") {
-        hideLoading();
-        pushStateToEngine();
-        return;
-      }
-
-      if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
-        state.colors = [...msg.colors];
-        applySliderColorsToUI();
-        return;
-      }
-
-      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-        hideLoading();
-        openPrintPreview(msg.dataUrl);
-        return;
-      }
-    });
-
-    // 🔥 Context Menu sauber außerhalb
-    (function() {
-      const preview = document.getElementById("printPreview");
-
-      document.addEventListener("contextmenu", function(e){
-        if(preview && preview.contains(e.target)) {
-          e.preventDefault();
-        }
-      });
-    })();
-
-    document.querySelectorAll(".engine-btn").forEach(btn => {
-      if (!btn.dataset.engine) return;
-      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
-    });
-
-    if (els.mode) {
-  els.mode.addEventListener("change", () => {
-    state.mode = els.mode.value;
-    refreshComputedCodeAndColors();
-    pushStateToEngine();
-  });
-}
-
-if (els.input) {
-  els.input.addEventListener("input", () => {
-    state.input = els.input.value;
-    refreshComputedCodeAndColors();
-    pushStateToEngine();
-  });
-}
-
-if (els.direction) {
-  els.direction.addEventListener("change", () => {
-    state.direction = els.direction.value;
-    pushStateToEngine();
-  });
-}
-
-    els.openSliders.addEventListener("click", openSheet);
-    els.closeSliders.addEventListener("click", closeSheet);
-    els.sliderBackdrop.addEventListener("click", closeSheet);
-    els.closePrintPreview.addEventListener("click", closePrintPreview);
-    els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-
-    if (els.buyPreviewPng) {
-      els.buyPreviewPng.addEventListener("click", handlePaidDownload);
-    }
+if (els.openSliders) els.openSliders.addEventListener("click", openSheet);
+if (els.closeSliders) els.closeSliders.addEventListener("click", closeSheet);
+if (els.sliderBackdrop) els.sliderBackdrop.addEventListener("click", closeSheet);
+if (els.closePrintPreview) els.closePrintPreview.addEventListener("click", closePrintPreview);
+if (els.printPreviewBackdrop) els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
   document.addEventListener("DOMContentLoaded", function() {
 

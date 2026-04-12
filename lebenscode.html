@@ -647,7 +647,7 @@ function closeSheet() {
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
-    <script>
+<script>
 document.addEventListener("DOMContentLoaded", function() {
 
   if (typeof paypal === "undefined") {
@@ -663,7 +663,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     createOrder: function(data, actions) {
 
-      // 🔥 Mandala speichern (WICHTIG für success.html)
       const exportState = getEnginePayloadState();
       localStorage.setItem("mandalaState", JSON.stringify(exportState));
 
@@ -674,13 +673,13 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     },
 
-   onApprove: function(data, actions) {
-    return actions.order.capture().then(function(details) {
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
 
-      requestExport();
+        requestExport(); // ✅ BLEIBT
 
-    });
-  },
+      });
+    },
 
     onError: function(err) {
       alert("PayPal Fehler – bitte im Browser öffnen.");

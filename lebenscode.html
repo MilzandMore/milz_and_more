@@ -661,6 +661,11 @@ function closeSheet() {
   },
 
   createOrder: function(data, actions) {
+
+    // 🔥 Mandala speichern (optional Backup)
+    const exportState = getEnginePayloadState();
+    window.__mandalaState = exportState; // 👉 WICHTIG: im RAM behalten
+
     return actions.order.create({
       purchase_units: [{
         amount: { value: "11.00" }
@@ -671,7 +676,11 @@ function closeSheet() {
   onApprove: function(data, actions) {
     return actions.order.capture().then(function(details) {
 
+      // 🔥 DIREKT EXPORT – KEIN REDIRECT
       requestExport();
+
+      // Optional UX
+      alert("Zahlung erfolgreich – dein Download startet jetzt");
 
     });
   },

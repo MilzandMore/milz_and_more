@@ -444,12 +444,12 @@ function buildDownloadWatermark(){
   }
 }
     function handlePaidDownload() {
-      if (!PAYMENT_URL || PAYMENT_URL === "#") {
-        alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");
-        return;
-      }
-      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
-    }
+  // ❌ KEIN Export hier
+  // ❌ KEIN Download hier
+
+  // 👉 NUR PayPal anzeigen
+  showPreviewInfo();
+}
 
     function buildSlidersInto(containerEl) {
       if (!containerEl) return;

@@ -663,8 +663,8 @@ function closeSheet() {
   createOrder: function(data, actions) {
 
     // 🔥 Mandala speichern (WICHTIG für Download später)
-    const exportState = getEnginePayloadState();
-    localStorage.setItem("mandalaState", JSON.stringify(exportState));
+   const exportState = getEnginePayloadState();
+localStorage.setItem("mandalaState", JSON.stringify(exportState));
 
     return actions.order.create({
       purchase_units: [{

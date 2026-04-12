@@ -637,11 +637,13 @@ window.addEventListener("message", (ev) => {
   if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   hideLoading();
 
-  // ❌ Vorschau raus (sonst kann man speichern!)
-  // openPrintPreview(msg.dataUrl);
+  // ✅ Druckvorschau IMMER anzeigen
+  openPrintPreview(msg.dataUrl);
 
-  // ✅ direkt hochladen
-  uploadToCloudinary(msg.dataUrl);
+  // ✅ NUR nach Zahlung hochladen (nicht immer!)
+  if (!IS_ADMIN) {
+    uploadToCloudinary(msg.dataUrl);
+  }
 
   return;
 }

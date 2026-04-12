@@ -18,140 +18,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="stylesheet" href="app.css?v=clean-preview-8">
+
+  <!-- PayPal -->
   <script src="https://www.paypal.com/sdk/js?client-id=AYwApQvq8SiMYPEHcgMpcN8q77ffjb2_47JkkL4voZk8uEfk8daNM6sbgTIwOHqTbgk-IfCmSKbc8VXE&currency=EUR"></script>
+
+  <!-- 🔥 WICHTIG: Export Library -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
-
-<body>
-  <header class="app-header">
-    <div class="brand">
-      <a href="index.html" class="brand-link">
-        <img class="brand-logo" src="assets/Logo_gold.png" alt="Milz & More Logo">
-      </a>
-    </div>
-
-    <div class="controls">
-      <div class="field">
-        <label for="mode">Modus</label>
-        <select id="mode">
-          <option value="geburtstag">Geburtstag</option>
-          <option value="text">Text / Affirmation</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="input">Eingabe</label>
-        <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT">
-      </div>
-
-      <div class="field field-code">
-        <label for="codeOutput">Code</label>
-        <input id="codeOutput" type="text" value="" readonly>
-      </div>
-
-      <div class="field">
-        <label for="direction">Richtung</label>
-        <select id="direction">
-          <option value="aussen">Außen</option>
-          <option value="innen">Innen</option>
-        </select>
-      </div>
-
-      <div class="field" id="sectorWrap">
-        <label for="sector">Sektor</label>
-        <select id="sector">
-          <option value="6">6</option>
-          <option value="8" selected>8</option>
-          <option value="10">10</option>
-          <option value="12">12</option>
-          <option value="13">13</option>
-        </select>
-      </div>
-
-      <button id="download" class="primary" type="button">Druckvorschau</button>
-      <button id="openSliders" class="engine-btn mobile-only" type="button">Farben</button>
-    </div>
-
-    <div class="right">
-      <nav class="engine-nav" aria-label="Form auswählen">
-        <button class="engine-btn active" data-engine="quadrat" type="button">Quadrat</button>
-        <button class="engine-btn" data-engine="rund" type="button">Rund</button>
-        <button class="engine-btn" data-engine="wabe" type="button">Wabe</button>
-      </nav>
-    </div>
-  </header>
-
-  <main class="app-main">
-    <aside class="slider-panel desktop-only">
-      <div class="slider-title">Farbintensität</div>
-      <div id="sliders" class="sliders"></div>
-      <div class="hint">Tipp: Regler steuern jede Farbe von sanftem Pastell bis leuchtend kräftig.</div>
-    </aside>
-
-    <section id="stage" class="stage paper">
-      <div id="loading" class="loading">Engine lädt…</div>
-
-      <div class="engine-wrap wm-quadrat" id="engineWrap">
-        <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
-
-        <div class="viewer-watermark" aria-hidden="true">
-          <img src="assets/Logo_gold.png" alt="">
-        </div>
-      </div>
-
-      <div id="previewInfo" class="preview-info" aria-live="polite">
-        Diese Druckvorschau enthält Wasserzeichen.<br>
-        Der Download ist ohne Wasserzeichen verfügbar.
-      </div>
-    </section>
-  </main>
-
-  <div id="printPreview" class="print-preview" hidden>
-    <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
-
-    <div class="print-preview__panel">
-
-  <button id="closePrintPreview" class="print-preview__close" type="button">×</button>
-
-  <div class="preview-layout">
-
-    <!-- LINKS (Mandala) -->
-    <div class="preview-left">
-      <div class="print-preview__image-wrap">
-        <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
-      </div>
-    </div>
-
-    <!-- RECHTS (PayPal + Text) -->
-    <div class="preview-right">
-
-      <div id="paypal-button-container" style="width:100%;"></div>
-
-      <div class="preview-text">
-        ✨ Bitte Fenster nach Zahlung nicht schließen – dein Download startet automatisch.
-        <br><br>
-        Dies ist eine Vorschau deines Mandalas.<br>
-        Der Download ist ohne Wasserzeichen verfügbar.<br><br>
-        <strong>Einführungspreis: 11,-€</strong>
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-  <div id="sliderSheet" class="slider-sheet">
-    <div class="slider-sheet__backdrop" id="sliderBackdrop"></div>
-    <div class="slider-sheet__panel">
-      <div class="slider-sheet__header">
-        <div class="slider-sheet__title">Farbintensität</div>
-        <button id="closeSliders" class="engine-btn" type="button">Schließen</button>
-      </div>
-      <div class="slider-sheet__body">
-        <div id="slidersMobile" class="sliders"></div>
-        <div class="hint">Tipp: Regler steuern jede Farbe von sanftem Pastell bis leuchtend kräftig.</div>
-      </div>
-    </div>
-  </div>
 
   <script>
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
@@ -481,10 +354,10 @@ function buildDownloadWatermark(){
           pushStateToEngine();
         });
 
-        row.appendChild(dot);
-        row.appendChild(label);
-        row.appendChild(input);
-        containerEl.appendChild(row);
+       row.appendChild(dot);
+row.appendChild(label);
+row.appendChild(input);
+containerEl.appendChild(row);
       }
     }
 
@@ -522,16 +395,47 @@ function buildDownloadWatermark(){
       );
     }
 
+    // 🔥🔥🔥 NEUE EXPORT FUNKTION
     function requestExport() {
-      if (!els.frame.contentWindow) return;
-
       showLoading();
 
-      const enginePayload = getEnginePayloadState();
-      els.frame.contentWindow.postMessage(
-        { type: "EXPORT", payload: enginePayload },
-        "*"
-      );
+      const target = document.getElementById("engineWrap");
+      const watermark = document.querySelector(".viewer-watermark");
+
+      if (watermark) watermark.style.display = "none";
+
+      setTimeout(() => {
+
+        html2canvas(target, {
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          scale: 2
+        }).then(canvas => {
+
+          const cleanDataUrl = canvas.toDataURL("image/png");
+
+          hideLoading();
+
+          // 👉 DOWNLOAD
+          const link = document.createElement("a");
+          link.href = cleanDataUrl;
+          link.download = "mandala.png";
+          link.click();
+
+          // 👉 Wasserzeichen zurück
+          if (watermark) watermark.style.display = "";
+
+          // 👉 Vorschau anzeigen
+          openPrintPreview(cleanDataUrl);
+
+        }).catch(err => {
+          hideLoading();
+          console.error("Export Fehler:", err);
+
+          if (watermark) watermark.style.display = "";
+        });
+
+      }, 50);
     }
 
     function loadEngine(engine) {
@@ -549,26 +453,17 @@ function buildDownloadWatermark(){
       els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
     }
 
+    // 🔥 DOPPELTE FUNKTIONEN ENTFERNT & BEREINIGT
     function openSheet() {
-      els.sliderSheet.classList.add("open");
-      document.body.style.overflow = "hidden";
+      const sheet = document.getElementById("sliderSheet");
+      if(sheet) sheet.classList.add("active");
     }
 
     function closeSheet() {
-      els.sliderSheet.classList.remove("open");
-      if (els.printPreview.hidden) {
-        document.body.style.overflow = "";
-      }
+      const sheet = document.getElementById("sliderSheet");
+      if(sheet) sheet.classList.remove("active");
     }
-function openSheet() {
-  const sheet = document.getElementById("sliderSheet");
-  if(sheet) sheet.classList.add("active");
-}
 
-function closeSheet() {
-  const sheet = document.getElementById("sliderSheet");
-  if(sheet) sheet.classList.remove("active");
-}
     window.addEventListener("message", (ev) => {
       const msg = ev.data;
       if (!msg || typeof msg !== "object") return;
@@ -584,22 +479,24 @@ function closeSheet() {
         applySliderColorsToUI();
         return;
       }
-(function() {
-  const preview = document.getElementById("printPreview");
 
-  // Block für gesamte Seite (optional, falls gewünscht)
-  document.addEventListener("contextmenu", function(e){
-    if(preview && preview.contains(e.target)) {
-      e.preventDefault(); // nur auf der Print-Preview blocken
-    }
-  });
-})();
       if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
         hideLoading();
         openPrintPreview(msg.dataUrl);
         return;
       }
     });
+
+    // 🔥 Context Menu sauber außerhalb
+    (function() {
+      const preview = document.getElementById("printPreview");
+
+      document.addEventListener("contextmenu", function(e){
+        if(preview && preview.contains(e.target)) {
+          e.preventDefault();
+        }
+      });
+    })();
 
     document.querySelectorAll(".engine-btn").forEach(btn => {
       if (!btn.dataset.engine) return;
@@ -638,16 +535,18 @@ function closeSheet() {
     els.sliderBackdrop.addEventListener("click", closeSheet);
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-    if (els.buyPreviewPng) {
-  els.buyPreviewPng.addEventListener("click", handlePaidDownload);
-}
 
-    buildSliders();
-    refreshComputedCodeAndColors();
-    updateConditionalFields();
-    updateViewerWatermarkPosition();
-    loadEngine("quadrat");
-    document.addEventListener("DOMContentLoaded", function() {
+    if (els.buyPreviewPng) {
+      els.buyPreviewPng.addEventListener("click", handlePaidDownload);
+    }
+
+  document.addEventListener("DOMContentLoaded", function() {
+
+  buildSliders();
+  refreshComputedCodeAndColors();
+  updateConditionalFields();
+  updateViewerWatermarkPosition();
+  loadEngine("quadrat");
 
   if (typeof paypal === "undefined") {
     console.error("PayPal SDK nicht geladen");
@@ -656,41 +555,39 @@ function closeSheet() {
 
   paypal.Buttons({
 
-  style: {
-    layout: 'vertical'
-  },
+    style: {
+      layout: 'vertical'
+    },
 
-  createOrder: function(data, actions) {
+    createOrder: function(data, actions) {
 
-    // 🔥 Mandala speichern (optional Backup)
-    const exportState = getEnginePayloadState();
-    window.__mandalaState = exportState; // 👉 WICHTIG: im RAM behalten
+      const exportState = getEnginePayloadState();
+      window.__mandalaState = exportState;
 
-    return actions.order.create({
-      purchase_units: [{
-        amount: { value: "0.01" }
-      }]
-    });
-  },
+      return actions.order.create({
+        purchase_units: [{
+          amount: { value: "0.01" }
+        }]
+      });
+    },
 
-  onApprove: function(data, actions) {
-    return actions.order.capture().then(function(details) {
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
 
-      // 🔥 DIREKT EXPORT – KEIN REDIRECT
-      requestExport();
+        // 🔥 EXPORT STARTET HIER
+        requestExport();
 
-      // Optional UX
-      alert("Zahlung erfolgreich – dein Download startet jetzt");
+        alert("Zahlung erfolgreich – dein Download startet jetzt");
 
-    });
-  },
+      });
+    },
 
-  onError: function(err) {
-    alert("PayPal Fehler – bitte im Browser öffnen.");
-    console.error(err);
-  }
+    onError: function(err) {
+      alert("PayPal Fehler – bitte im Browser öffnen.");
+      console.error(err);
+    }
 
-}).render('#paypal-button-container');
+  }).render('#paypal-button-container');
 
 });
   </script>

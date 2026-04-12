@@ -534,6 +534,33 @@ function buildDownloadWatermark(){
       );
     }
 
+    function uploadToCloudinary(dataUrl) {
+  const formData = new FormData();
+
+  formData.append("file", dataUrl);
+  formData.append("upload_preset", "mandala_upload"); // dein Preset Name
+
+  fetch("https://api.cloudinary.com/v1_1/dy5wmudxp/image/upload", {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Cloudinary Upload:", data);
+
+    const imageUrl = data.secure_url;
+
+    // 👉 TEST: öffnet Bild direkt
+    window.open(imageUrl, "_blank");
+
+    // 👉 später für EmailJS speichern
+    window.__mandalaDownloadLink = imageUrl;
+  })
+  .catch(err => {
+    console.error("Upload Fehler:", err);
+  });
+}
+    
     function loadEngine(engine) {
       state.engine = engine;
       setActiveEngineButton(engine);

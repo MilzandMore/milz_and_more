@@ -647,8 +647,7 @@ function closeSheet() {
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
-<script>
-document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function() {
 
   if (typeof paypal === "undefined") {
     console.error("PayPal SDK nicht geladen");
@@ -657,38 +656,34 @@ document.addEventListener("DOMContentLoaded", function() {
 
   paypal.Buttons({
 
-    style: {
-      layout: 'vertical'
-    },
+  style: {
+    layout: 'vertical'
+  },
 
-    createOrder: function(data, actions) {
+  createOrder: function(data, actions) {
+    return actions.order.create({
+      purchase_units: [{
+        amount: { value: "11.00" }
+      }]
+    });
+  },
 
-      const exportState = getEnginePayloadState();
-      localStorage.setItem("mandalaState", JSON.stringify(exportState));
+  onApprove: function(data, actions) {
+    return actions.order.capture().then(function(details) {
 
-      return actions.order.create({
-        purchase_units: [{
-          amount: { value: "11.00" }
-        }]
-      });
-    },
+      requestExport();
 
-    onApprove: function(data, actions) {
-      return actions.order.capture().then(function(details) {
+    });
+  },
 
-        requestExport(); // ✅ BLEIBT
+  onError: function(err) {
+    alert("PayPal Fehler – bitte im Browser öffnen.");
+    console.error(err);
+  }
 
-      });
-    },
-
-    onError: function(err) {
-      alert("PayPal Fehler – bitte im Browser öffnen.");
-      console.error(err);
-    }
-
-  }).render('#paypal-button-container');
+}).render('#paypal-button-container');
 
 });
-</script>
+  </script>
 </body>
 </html>

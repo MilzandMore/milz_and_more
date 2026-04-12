@@ -7,8 +7,6 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
   <style>
     body {
       margin: 0;
@@ -74,11 +72,6 @@
       font-weight: 600;
       cursor: pointer;
       color: #000;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
     }
 
     .hint {
@@ -110,15 +103,11 @@
 
 </div>
 
+<!-- Engine -->
 <iframe id="engineFrame" src="engines/quadrat/index.html" style="display:none;"></iframe>
 
 <script>
-const supabaseClient = supabase.createClient(
-  "https://pufxpxdxlmtvmgcaaqsh.supabase.co",
-  "sb_publishable_InYZSFWEdUgm8oS1OWcHQQ_chg3NQMv"
-);
-
-async function startDownload() {
+function startDownload() {
 
   const saved = localStorage.getItem("mandalaState");
 
@@ -130,22 +119,42 @@ async function startDownload() {
   const payload = JSON.parse(saved);
   const frame = document.getElementById("engineFrame");
 
-  const sendExport = () => {
-    frame.contentWindow.postMessage({
-      type: "EXPORT",
-      payload: payload
-    }, "*");
-  };
+  // 🔥 AUF READY WARTEN
+  window.addEventListener("message", function handler(event) {
 
-  // 🔥 IMMER versuchen zu senden
-  setTimeout(sendExport, 1000);
+    if (!event.data) return;
 
-  // 🔥 falls iframe später lädt
-  frame.onload = sendExport;
+    if (event.data.type === "READY") {
 
-  localStorage.removeItem("mandalaState");
+      frame.contentWindow.postMessage({
+        type: "EXPORT",
+        payload: payload
+      }, "*");
+
+      window.removeEventListener("message", handler);
+    }
+
+  });
+
 }
 
+// 🔥 DOWNLOAD EMPFANGEN
+window.addEventListener("message", (event) => {
+
+  if (!event.data) return;
+
+  if (event.data.type === "EXPORT_RESULT") {
+
+    const link = document.createElement("a");
+    link.href = event.data.dataUrl;
+    link.download = "mandala.png";
+    link.click();
+
+  }
+
+});
+
+// 🔥 AUTO START
 window.onload = () => {
   setTimeout(() => {
     startDownload();

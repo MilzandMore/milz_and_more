@@ -572,6 +572,7 @@ function closeSheet() {
    // ✅ 1. MESSAGE LISTENER
 window.addEventListener("message", (ev) => {
   const msg = ev.data;
+
   if (!msg || typeof msg !== "object") return;
 
   if (msg.type === "READY") {
@@ -587,52 +588,16 @@ window.addEventListener("message", (ev) => {
   }
 
   if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+    hideLoading();
+    openPrintPreview(msg.dataUrl);
 
-    (async () => {
-
-      const blob = await (await fetch(msg.dataUrl)).blob();
-
-      const formData = new FormData();
-      formData.append("file", blob);
-      formData.append("upload_preset", "mandala_upload");
-
-      const res = await fetch("https://api.cloudinary.com/v1_1/dy5wmudxp/image/upload", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await res.json();
-      const imageUrl = data.secure_url;
-
-      window.open(imageUrl, "_blank");
-
-      hideLoading();
-
-    })();
+    // 👉 HIER Cloudinary Upload (wenn du willst)
+    uploadToCloudinary(msg.dataUrl);
 
     return;
   }
+
 });
-
-
-// ✅ 2. DIREKT DARUNTER (separat!)
-(function() {
-  const preview = document.getElementById("printPreview");
-
-  document.addEventListener("contextmenu", function(e){
-    if(preview && preview.contains(e.target)) {
-      e.preventDefault();
-    }
-  });
-})();
-   
-      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-        hideLoading();
-        openPrintPreview(msg.dataUrl);
-        return;
-      }
-    });
-
     document.querySelectorAll(".engine-btn").forEach(btn => {
       if (!btn.dataset.engine) return;
       btn.addEventListener("click", () => loadEngine(btn.dataset.engine));

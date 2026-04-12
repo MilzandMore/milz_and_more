@@ -654,33 +654,33 @@ function closeSheet() {
     return;
   }
 
- paypal.Buttons({
+  paypal.Buttons({
 
   style: {
     layout: 'vertical'
   },
 
- createOrder: function(data, actions) {
+  createOrder: function(data, actions) {
 
-  // 🔥 STATE SPEICHERN
-  const exportState = getEnginePayloadState();
-  localStorage.setItem("mandalaState", JSON.stringify(exportState));
+    // 🔥 Mandala speichern (WICHTIG für Download später)
+    const exportState = getEnginePayloadState();
+    localStorage.setItem("mandalaState", JSON.stringify(exportState));
 
-  return actions.order.create({
-    purchase_units: [{
-      amount: { value: "0.01" }
-    }],
-    application_context: {
-      return_url: window.location.origin + "/success.html",
-      cancel_url: window.location.origin + "/index.html"
-    }
-  });
-}
+    return actions.order.create({
+      purchase_units: [{
+        amount: { value: "11.00" }
+      }],
+      application_context: {
+        return_url: window.location.origin + "/success.html",
+        cancel_url: window.location.origin + "/index.html"
+      }
+    });
+  },
 
   onApprove: function(data, actions) {
     return actions.order.capture().then(function(details) {
 
-      // 🔥 WICHTIG: Weiterleitung nach Zahlung
+      // 🔥 Weiterleitung (KEIN requestExport mehr hier!)
       window.location.href = "success.html";
 
     });
@@ -692,6 +692,7 @@ function closeSheet() {
   }
 
 }).render('#paypal-button-container');
+
 });
   </script>
 </body>

@@ -506,32 +506,28 @@ containerEl.appendChild(row);
       btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
     });
 
-    els.mode.addEventListener("change", () => {
-      state.mode = els.mode.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
+    if (els.mode) {
+  els.mode.addEventListener("change", () => {
+    state.mode = els.mode.value;
+    refreshComputedCodeAndColors();
+    pushStateToEngine();
+  });
+}
 
-    els.input.addEventListener("input", () => {
-      state.input = els.input.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
+if (els.input) {
+  els.input.addEventListener("input", () => {
+    state.input = els.input.value;
+    refreshComputedCodeAndColors();
+    pushStateToEngine();
+  });
+}
 
-    els.direction.addEventListener("change", () => {
-      state.direction = els.direction.value;
-      pushStateToEngine();
-    });
-
-    els.sector.addEventListener("change", () => {
-      state.sector = Number(els.sector.value);
-      pushStateToEngine();
-    });
-
-    els.download.addEventListener("click", () => {
-      showPreviewInfo();
-      requestExport();
-    });
+if (els.direction) {
+  els.direction.addEventListener("change", () => {
+    state.direction = els.direction.value;
+    pushStateToEngine();
+  });
+}
 
     els.openSliders.addEventListener("click", openSheet);
     els.closeSliders.addEventListener("click", closeSheet);

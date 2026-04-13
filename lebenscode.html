@@ -155,7 +155,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<script>
 const IS_ADMIN = false;
 
 console.log("IS_ADMIN:", IS_ADMIN);
@@ -163,7 +162,6 @@ console.log("IS_ADMIN:", IS_ADMIN);
 // 👉 HIER ALLES JS
 // KEIN HTML MEHR!!!
 
-</script>
 
 // dein restlicher Code...
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
@@ -230,7 +228,6 @@ console.log("IS_ADMIN:", IS_ADMIN);
       buyPreviewPng: document.getElementById("buyPreviewPng") || null
     };
 
-    const IS_ADMIN = true;
     
     function ex(a, b) {
       const s = (a || 0) + (b || 0);
@@ -598,20 +595,6 @@ function uploadToCloudinary(dataUrl) {
     console.error("Upload Fehler:", err);
   });
 }
-    function loadEngine(engine) {
-      state.engine = engine;
-      setActiveEngineButton(engine);
-      updateConditionalFields();
-      updateViewerWatermarkPosition();
-      showLoading();
-
-      els.frame.onload = () => {
-        hideLoading();
-        pushStateToEngine();
-      };
-
-     els.frame.src = `milz_and_more/engines/${engine}/index.html?embed=1&v=${Date.now()}`;
-    }
 
     function openSheet() {
       els.sliderSheet.classList.add("open");
@@ -711,7 +694,6 @@ window.addEventListener("message", (ev) => {
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
-    document.addEventListener("DOMContentLoaded", function() {
 
   if (typeof paypal === "undefined") {
     console.error("PayPal SDK nicht geladen");
@@ -771,14 +753,12 @@ function loadEngine(engine) {
     pushStateToEngine();
   };
 
-  els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+  // ✅ WICHTIG: KEIN milz_and_more davor!
+  els.frame.src = `./engines/${engine}/index.html?embed=1&v=${Date.now()}`;
 }
 
 
 // ✅ ENGINE BEIM LADEN STARTEN (WICHTIG!)
-window.onload = () => {
-  loadEngine("quadrat");
-};;
         
   </script>
 </body>

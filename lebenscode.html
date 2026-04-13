@@ -756,9 +756,15 @@ window.addEventListener("message", (ev) => {
 
 }).render('#paypal-button-container');
       
-        loadEngine("quadrat");
+       function loadEngine(engine) {
+  console.log("ENGINE STARTET:", engine);
+  // dein Code...
+}
 
+document.addEventListener("DOMContentLoaded", () => {
+  loadEngine("quadrat");
 });
+        
   </script>
 </body>
 </html>

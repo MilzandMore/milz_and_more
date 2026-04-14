@@ -590,8 +590,7 @@ window.addEventListener("message", (ev) => {
 if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   hideLoading();
 
-  console.log("EXPORT RESULT KOMMT AN");
-  console.log("DATA URL START:", msg.dataUrl.slice(0, 50));
+  console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50)); // 👈 HIER
 
   window.__FINAL_MANDALA = msg.dataUrl;
 
@@ -674,6 +673,8 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   onApprove: function(data, actions) {
   return actions.order.capture().then(function(details) {
 
+    console.log("DOWNLOAD:", window.__FINAL_MANDALA?.slice(0,50)); // 👈 HIER
+
     const dataUrl = window.__FINAL_MANDALA;
 
     if (!dataUrl) {
@@ -688,7 +689,7 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
 
     alert("Download gestartet 🎉");
   });
-},
+}
     
   onError: function(err) {
     alert("PayPal Fehler – bitte im Browser öffnen.");

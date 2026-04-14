@@ -569,23 +569,23 @@ function closeSheet() {
 }
    // ✅ 1. MESSAGE LISTENER
 window.addEventListener("message", (ev) => {
-  if (ev.data?.type === "EXPORT_RESULT") {
+  const msg = ev.data;
 
-    console.log("FINAL EMPFANGEN");
+  if (!msg || msg.type !== "EXPORT_RESULT" || !msg.dataUrl) return;
 
-    window.__FINAL_MANDALA = ev.data.dataUrl;
+  console.log("FINAL EMPFANGEN");
 
-    // 👉 AUTO DOWNLOAD HIER
-    if (window.__AUTO_DOWNLOAD_AFTER_PAY) {
-      const link = document.createElement("a");
-      link.href = window.__FINAL_MANDALA;
-      link.download = "mandala.png";
-      link.click();
+  window.__FINAL_MANDALA = msg.dataUrl;
 
-      alert("Download gestartet 🎉");
+  if (window.__AUTO_DOWNLOAD_AFTER_PAY) {
+    window.__AUTO_DOWNLOAD_AFTER_PAY = false;
 
-      window.__AUTO_DOWNLOAD_AFTER_PAY = false;
-    }
+    const link = document.createElement("a");
+    link.href = window.__FINAL_MANDALA;
+    link.download = "mandala.png";
+    link.click();
+
+    alert("Download gestartet 🎉");
   }
 });
 

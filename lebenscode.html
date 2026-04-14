@@ -587,16 +587,15 @@ window.addEventListener("message", (ev) => {
     return;
   }
 
-  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   hideLoading();
 
-  // ✅ Vorschau anzeigen
+  console.log("EXPORT RESULT KOMMT AN");
+  console.log("DATA URL START:", msg.dataUrl.slice(0, 50));
+
+  window.__FINAL_MANDALA = msg.dataUrl;
+
   openPrintPreview(msg.dataUrl);
-
-  // ✅ Bild speichern für späteren Download
-  window.__latestMandala = msg.dataUrl;
-
-  return;
 }
 
 });
@@ -675,14 +674,13 @@ window.addEventListener("message", (ev) => {
   onApprove: function(data, actions) {
   return actions.order.capture().then(function(details) {
 
-    const dataUrl = window.__latestMandala;
+    const dataUrl = window.__FINAL_MANDALA;
 
     if (!dataUrl) {
       alert("Fehler – bitte Vorschau zuerst öffnen");
       return;
     }
 
-    // ✅ DOWNLOAD STARTEN
     const link = document.createElement("a");
     link.href = dataUrl;
     link.download = "mandala.png";

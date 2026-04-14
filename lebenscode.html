@@ -678,25 +678,31 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
     });
   },
 
+  paypal.Buttons({
+
   onApprove: function(data, actions) {
-  return actions.order.capture().then(function(details) {
+    return actions.order.capture().then(function(details) {
 
-    // 👉 WICHTIG: Flag setzen
-    window.__AUTO_DOWNLOAD_AFTER_PAY = true;
+      // 👉 Flag setzen (wichtig!)
+      window.__AUTO_DOWNLOAD_AFTER_PAY = true;
 
-    // 👉 FINAL EXPORT anstoßen
-    const iframe = document.querySelector("iframe");
+      // 👉 FINAL Export auslösen
+      const iframe = document.querySelector("iframe");
 
-    iframe.contentWindow.postMessage({
-      type: "EXPORT",
-      payload: {
-        exportKind: "final"
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: "EXPORT",
+          payload: {
+            exportKind: "final"
+          }
+        }, "*");
+      } else {
+        console.error("Iframe nicht gefunden!");
       }
-    }, "*");
 
-  });
-},
-    
+    });
+  },
+
   onError: function(err) {
     alert("PayPal Fehler – bitte im Browser öffnen.");
     console.error(err);

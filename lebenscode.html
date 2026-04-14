@@ -569,15 +569,25 @@ function closeSheet() {
 }
    // ✅ 1. MESSAGE LISTENER
 window.addEventListener("message", (ev) => {
-  const msg = ev.data;
+  if (ev.data?.type === "EXPORT_RESULT") {
 
-  if (!msg || typeof msg !== "object") return;
+    console.log("FINAL EMPFANGEN");
 
-  if (msg.type === "READY") {
-    hideLoading();
-    pushStateToEngine();
-    return;
+    window.__FINAL_MANDALA = ev.data.dataUrl;
+
+    // 👉 AUTO DOWNLOAD HIER
+    if (window.__AUTO_DOWNLOAD_AFTER_PAY) {
+      const link = document.createElement("a");
+      link.href = window.__FINAL_MANDALA;
+      link.download = "mandala.png";
+      link.click();
+
+      alert("Download gestartet 🎉");
+
+      window.__AUTO_DOWNLOAD_AFTER_PAY = false;
+    }
   }
+});
 
   if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
     state.colors = [...msg.colors];
@@ -671,30 +681,18 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   onApprove: function(data, actions) {
   return actions.order.capture().then(function(details) {
 
-    // 🔥 1. FINAL EXPORT ANFORDERN
-    requestExport("final");
+    // 👉 WICHTIG: Flag setzen
+    window.__AUTO_DOWNLOAD_AFTER_PAY = true;
 
-    // 🔥 2. WARTEN bis Engine antwortet
-    setTimeout(() => {
+    // 👉 FINAL EXPORT anstoßen
+    const iframe = document.querySelector("iframe");
 
-      console.log("DOWNLOAD:", window.__FINAL_MANDALA?.slice(0,50));
-
-      const dataUrl = window.__FINAL_MANDALA;
-
-      if (!dataUrl) {
-        alert("Fehler – kein Mandala erhalten");
-        return;
+    iframe.contentWindow.postMessage({
+      type: "EXPORT",
+      payload: {
+        exportKind: "final"
       }
-
-      // 🔥 3. DOWNLOAD STARTEN
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "mandala.png";
-      link.click();
-
-      alert("Download gestartet 🎉");
-
-    }, 700); // ⏱ leicht erhöht für Sicherheit
+    }, "*");
 
   });
 },

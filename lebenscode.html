@@ -571,23 +571,13 @@ function closeSheet() {
 window.addEventListener("message", (ev) => {
   const msg = ev.data;
 
-  if (!msg || msg.type !== "EXPORT_RESULT" || !msg.dataUrl) return;
+  if (!msg || typeof msg !== "object") return;
 
-  console.log("FINAL EMPFANGEN");
-
-  window.__FINAL_MANDALA = msg.dataUrl;
-
-  if (window.__AUTO_DOWNLOAD_AFTER_PAY) {
-    window.__AUTO_DOWNLOAD_AFTER_PAY = false;
-
-    const link = document.createElement("a");
-    link.href = window.__FINAL_MANDALA;
-    link.download = "mandala.png";
-    link.click();
-
-    alert("Download gestartet 🎉");
+  if (msg.type === "READY") {
+    hideLoading();
+    pushStateToEngine();
+    return;
   }
-});
 
   if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
     state.colors = [...msg.colors];

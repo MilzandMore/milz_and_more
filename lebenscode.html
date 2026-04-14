@@ -153,17 +153,7 @@
     </div>
   </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-const IS_ADMIN = false;
-
-console.log("IS_ADMIN:", IS_ADMIN);
-
-// 👉 HIER ALLES JS
-// KEIN HTML MEHR!!!
-
-
-// dein restlicher Code...
+  <script>
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
     const state = {
@@ -228,7 +218,6 @@ console.log("IS_ADMIN:", IS_ADMIN);
       buyPreviewPng: document.getElementById("buyPreviewPng") || null
     };
 
-    
     function ex(a, b) {
       const s = (a || 0) + (b || 0);
       return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
@@ -450,18 +439,13 @@ function buildDownloadWatermark(){
     }
   }
 }
- function handlePaidDownload() {
-  const dataUrl = window.__latestMandala;
-
-  if (!dataUrl) {
-    alert("Fehler: Kein Mandala gefunden");
-    return;
-  }
-
-  showLoading();
-
-  uploadToCloudinary(dataUrl);
-}
+    function handlePaidDownload() {
+      if (!PAYMENT_URL || PAYMENT_URL === "#") {
+        alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");
+        return;
+      }
+      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
+    }
 
     function buildSlidersInto(containerEl) {
       if (!containerEl) return;
@@ -538,63 +522,32 @@ function buildDownloadWatermark(){
       );
     }
 
-   function requestExport() {
-  if (!els.frame.contentWindow) return;
+    function requestExport() {
+      if (!els.frame.contentWindow) return;
 
-  showLoading();
+      showLoading();
 
-  const enginePayload = getEnginePayloadState();
-  els.frame.contentWindow.postMessage(
-    { type: "EXPORT", payload: enginePayload },
-    "*"
-  );
-}
+      const enginePayload = getEnginePayloadState();
+      els.frame.contentWindow.postMessage(
+        { type: "EXPORT", payload: enginePayload },
+        "*"
+      );
+    }
 
-function requestExportAdmin() {
-  showLoading();
+    function loadEngine(engine) {
+      state.engine = engine;
+      setActiveEngineButton(engine);
+      updateConditionalFields();
+      updateViewerWatermarkPosition();
+      showLoading();
 
-  const target = document.getElementById("engineWrap");
+      els.frame.onload = () => {
+        hideLoading();
+        pushStateToEngine();
+      };
 
-  html2canvas(target, {
-    useCORS: true,
-    backgroundColor: "#ffffff",
-    scale: 2
-  }).then(canvas => {
-    const dataUrl = canvas.toDataURL("image/png");
-
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = "mandala.png";
-    link.click();
-
-    hideLoading();
-  });
-}
-
-// 👇 HIER REIN (direkt darunter)
-function uploadToCloudinary(dataUrl) {
-  const formData = new FormData();
-
-  formData.append("file", dataUrl);
-  formData.append("upload_preset", "mandala_upload");
-
-  fetch("https://api.cloudinary.com/v1_1/dy5wmudxp/image/upload", {
-    method: "POST",
-    body: formData
-  })
-  .then(res => res.json())
-  .then(data => {
-    console.log("Cloudinary Upload:", data);
-
-    const imageUrl = data.secure_url;
-
-    window.open(imageUrl, "_blank"); // Test
-    window.__mandalaDownloadLink = imageUrl;
-  })
-  .catch(err => {
-    console.error("Upload Fehler:", err);
-  });
-}
+      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+    }
 
     function openSheet() {
       els.sliderSheet.classList.add("open");
@@ -637,13 +590,15 @@ window.addEventListener("message", (ev) => {
   if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   hideLoading();
 
+  // ✅ Vorschau anzeigen
   openPrintPreview(msg.dataUrl);
 
-  // 👉 HIER speichern
+  // ✅ Bild speichern für späteren Download
   window.__latestMandala = msg.dataUrl;
 
   return;
 }
+
 });
     document.querySelectorAll(".engine-btn").forEach(btn => {
       if (!btn.dataset.engine) return;
@@ -672,13 +627,10 @@ window.addEventListener("message", (ev) => {
       pushStateToEngine();
     });
 
-   els.download.addEventListener("click", () => {
-  if (IS_ADMIN) {
-    requestExportAdmin(); // direkt downloaden
-  } else {
-    showPreviewInfo(); // PayPal anzeigen
-  }
-});
+    els.download.addEventListener("click", () => {
+      showPreviewInfo();
+      requestExport();
+    });
 
     els.openSliders.addEventListener("click", openSheet);
     els.closeSliders.addEventListener("click", closeSheet);
@@ -694,6 +646,7 @@ window.addEventListener("message", (ev) => {
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
+    document.addEventListener("DOMContentLoaded", function() {
 
   if (typeof paypal === "undefined") {
     console.error("PayPal SDK nicht geladen");
@@ -719,47 +672,34 @@ window.addEventListener("message", (ev) => {
     });
   },
 
- onApprove: function(data, actions) {
+  onApprove: function(data, actions) {
   return actions.order.capture().then(function(details) {
 
-    // 🔥 NACH ZAHLUNG → EXPORT STARTEN
-    requestExport();
+    const dataUrl = window.__latestMandala;
 
-    alert("Zahlung erfolgreich – dein Download startet jetzt");
+    if (!dataUrl) {
+      alert("Fehler – bitte Vorschau zuerst öffnen");
+      return;
+    }
 
+    // ✅ DOWNLOAD STARTEN
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = "mandala.png";
+    link.click();
+
+    alert("Download gestartet 🎉");
   });
 },
-
-onError: function(err) {
-  alert("PayPal Fehler – bitte im Browser öffnen.");
-  console.error(err);
-}
+    
+  onError: function(err) {
+    alert("PayPal Fehler – bitte im Browser öffnen.");
+    console.error(err);
+  }
 
 }).render('#paypal-button-container');
 
-
-// ✅ SAUBERE loadEngine FUNKTION
-function loadEngine(engine) {
-  console.log("ENGINE STARTET:", engine);
-
-  state.engine = engine;
-  setActiveEngineButton(engine);
-  updateConditionalFields();
-  updateViewerWatermarkPosition();
-  showLoading();
-
-  els.frame.onload = () => {
-    hideLoading();
-    pushStateToEngine();
-  };
-
-  // ✅ WICHTIG: KEIN milz_and_more davor!
-  els.frame.src = `./engines/${engine}/index.html?embed=1&v=${Date.now()}`;
-}
-
-
-// ✅ ENGINE BEIM LADEN STARTEN (WICHTIG!)
-        
+});
   </script>
 </body>
 </html>

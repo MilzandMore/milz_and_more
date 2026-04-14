@@ -339,11 +339,9 @@ async function exportHighRes(kind = "preview") {
 
   const exportLogo = await waitForLogo(settings.logoWaitMs);
 
-  if (kind === "final") {
-    drawExportWatermark(pg, exportLogo);
-  } else {
-    drawPreviewWatermark(pg, exportLogo);
-  }
+  if (kind !== "final") {
+  drawPreviewWatermark(pg, exportLogo);
+}
 
   if (exportLogo) {
     pg.push();

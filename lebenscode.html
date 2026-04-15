@@ -689,7 +689,7 @@ window.addEventListener("message", (ev) => {
  onApprove: function(data, actions) {
   return actions.order.capture().then(function(details) {
 
-    console.log("PAYPAL onApprove FEUER 🔥"); // ✅ HIER rein
+    console.log("PAYPAL onApprove FEUER 🔥");
 
     window.__AUTO_DOWNLOAD_AFTER_PAY = true;
 
@@ -708,7 +708,7 @@ window.addEventListener("message", (ev) => {
     }, "*");
 
   });
-},
+},   // ⚠️ HIER oft der Fehler!
     
   onError: function(err) {
     alert("PayPal Fehler – bitte im Browser öffnen.");

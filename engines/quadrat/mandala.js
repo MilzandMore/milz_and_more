@@ -299,6 +299,7 @@ function drawExportWatermark(g, wmImg) {
 }
 
 async function exportHighRes(kind = "preview") {
+  console.log("EXPORT START:", kind);
   const settings = getExportSettings(kind);
   const exportW = settings.width;
   const exportH = settings.height;
@@ -306,6 +307,7 @@ async function exportHighRes(kind = "preview") {
   const cacheKey = buildPreviewCacheKey(kind, settings);
   if (settings.useCache && cacheKey === lastPreviewKey && lastPreviewDataUrl) {
     try {
+      console.log("EXPORT FERTIG:", kind);
       window.parent.postMessage({
         type: "EXPORT_RESULT",
         dataUrl: lastPreviewDataUrl

@@ -689,14 +689,16 @@ window.addEventListener("message", (ev) => {
  onApprove: function(data, actions) {
   return actions.order.capture().then(function(details) {
 
-    console.log("PAYPAL onApprove FEUER 🔥");
+    console.log("PAYMENT OK → FINAL EXPORT");
 
+    // 👉 Flag setzen (für Auto-Download)
     window.__AUTO_DOWNLOAD_AFTER_PAY = true;
 
-    const iframe = document.querySelector("iframe[src*='" + state.engine + "']");
+    // 👉 GANZ WICHTIG: FINAL EXPORT triggern
+    const iframe = document.querySelector("iframe");
 
     if (!iframe) {
-      alert("Fehler: iframe nicht gefunden");
+      console.error("❌ iframe nicht gefunden");
       return;
     }
 
@@ -708,7 +710,7 @@ window.addEventListener("message", (ev) => {
     }, "*");
 
   });
-},   // ⚠️ HIER oft der Fehler!
+},
     
   onError: function(err) {
     alert("PayPal Fehler – bitte im Browser öffnen.");

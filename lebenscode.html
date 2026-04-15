@@ -154,10 +154,6 @@
   </div>
 
   <script>
-    window.__PAID = false;
-window.__FINAL_IMAGE = null;
-    window.__AUTO_DOWNLOAD_AFTER_PAY = false;
-    
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
     const state = {
@@ -527,37 +523,14 @@ function buildDownloadWatermark(){
     }
 
     function requestExport(kind = "preview") {
-  return new Promise((resolve) => {
+  const enginePayload = getEnginePayloadState();
+  enginePayload.exportKind = kind;
 
-    const requestId = "exp_" + Date.now();
-
-    function handler(ev) {
-      if (
-        ev.data?.type === "EXPORT_RESULT" &&
-        ev.data.requestId === requestId
-      ) {
-        window.removeEventListener("message", handler);
-        resolve(ev.data.dataUrl);
-      }
-    }
-
-    window.addEventListener("message", (ev) => {
-  const msg = ev.data;
-
-  if (!msg || typeof msg !== "object") return;
-
-  if (msg.type === "READY") {
-    hideLoading();
-    pushStateToEngine();
-    return;
-  }
-
-  if (msg.type === "COLORS" && Array.isArray(msg.colors)) {
-    state.colors = [...msg.colors];
-    applySliderColorsToUI();
-    return;
-  }
-});
+  els.frame.contentWindow.postMessage(
+    { type: "EXPORT", payload: enginePayload },
+    "*"
+  );
+}
 
     function loadEngine(engine) {
       state.engine = engine;
@@ -612,31 +585,17 @@ window.addEventListener("message", (ev) => {
     return;
   }
 
-  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+  hideLoading();
 
-    // 👉 FINAL speichern (wichtig für später!)
-    window.__FINAL_IMAGE = msg.dataUrl;
+  console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50)); // 👈 HIER
 
-    // 👉 AUTO DOWNLOAD nur nach Zahlung
-    if (window.__AUTO_DOWNLOAD_AFTER_PAY === true) {
-      window.__AUTO_DOWNLOAD_AFTER_PAY = false;
+  window.__FINAL_MANDALA = msg.dataUrl;
 
-      const link = document.createElement("a");
-      link.href = msg.dataUrl;
-      link.download = "mandala.png";
-      link.click();
+  openPrintPreview(msg.dataUrl);
+}
 
-      alert("Download gestartet 🎉");
-      return;
-    }
-
-    // 👉 sonst normale Preview anzeigen
-    openPrintPreview(msg.dataUrl);
-    return;
-  }
-  
 });
-
     document.querySelectorAll(".engine-btn").forEach(btn => {
       if (!btn.dataset.engine) return;
       btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
@@ -696,16 +655,11 @@ window.addEventListener("message", (ev) => {
     layout: 'vertical'
   },
 
-  paypal.Buttons({
-
-  style: {
-    layout: 'vertical'
-  },
-
   createOrder: function(data, actions) {
 
+    // 🔥 Mandala speichern (optional Backup)
     const exportState = getEnginePayloadState();
-    window.__mandalaState = exportState;
+    window.__mandalaState = exportState; // 👉 WICHTIG: im RAM behalten
 
     return actions.order.create({
       purchase_units: [{
@@ -714,14 +668,25 @@ window.addEventListener("message", (ev) => {
     });
   },
 
-  onApprove: async function(data, actions) {
-    await actions.order.capture();
+  onApprove: function(data, actions) {
+  return actions.order.capture().then(function(details) {
 
-    console.log("PAYMENT OK → FINAL EXPORT");
+    // 🔥 1. FINAL EXPORT ANFORDERN
+    requestExport("final");
 
-    try {
-      const dataUrl = await requestExport("final");
+    // 🔥 2. WARTEN bis Engine antwortet
+    setTimeout(() => {
 
+      console.log("DOWNLOAD:", window.__FINAL_MANDALA?.slice(0,50));
+
+      const dataUrl = window.__FINAL_MANDALA;
+
+      if (!dataUrl) {
+        alert("Fehler – kein Mandala erhalten");
+        return;
+      }
+
+      // 🔥 3. DOWNLOAD STARTEN
       const link = document.createElement("a");
       link.href = dataUrl;
       link.download = "mandala.png";
@@ -729,18 +694,18 @@ window.addEventListener("message", (ev) => {
 
       alert("Download gestartet 🎉");
 
-    } catch (err) {
-      console.error("Export fehlgeschlagen", err);
-    }
-  }, // ✅ WICHTIG: Komma hier!
+    }, 700); // ⏱ leicht erhöht für Sicherheit
 
+  });
+},
+    
   onError: function(err) {
     alert("PayPal Fehler – bitte im Browser öffnen.");
     console.error(err);
   }
 
 }).render('#paypal-button-container');
-      
+
 });
   </script>
 </body>

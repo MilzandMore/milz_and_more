@@ -154,6 +154,8 @@
   </div>
 
   <script>
+    window.__PAID = false;
+window.__FINAL_IMAGE = null;
     window.__AUTO_DOWNLOAD_AFTER_PAY = false;
     
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
@@ -587,27 +589,29 @@ window.addEventListener("message", (ev) => {
     return;
   }
 
-if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
 
-  window.__FINAL_MANDALA = msg.dataUrl;
+    // 👉 FINAL speichern (wichtig für später!)
+    window.__FINAL_IMAGE = msg.dataUrl;
 
-  // 👉 nur nach Zahlung automatisch downloaden
-  if (window.__AUTO_DOWNLOAD_AFTER_PAY) {
-    window.__AUTO_DOWNLOAD_AFTER_PAY = false;
+    // 👉 AUTO DOWNLOAD nur nach Zahlung
+    if (window.__AUTO_DOWNLOAD_AFTER_PAY === true) {
+      window.__AUTO_DOWNLOAD_AFTER_PAY = false;
 
-    const link = document.createElement("a");
-    link.href = msg.dataUrl;
-    link.download = "mandala.png";
-    link.click();
+      const link = document.createElement("a");
+      link.href = msg.dataUrl;
+      link.download = "mandala.png";
+      link.click();
 
-    alert("Download gestartet 🎉");
+      alert("Download gestartet 🎉");
+      return;
+    }
+
+    // 👉 sonst normale Preview anzeigen
+    openPrintPreview(msg.dataUrl);
     return;
   }
-
-  // 👉 normale Vorschau
-  openPrintPreview(msg.dataUrl);
-  return;
-}
+});
 
 });
     document.querySelectorAll(".engine-btn").forEach(btn => {

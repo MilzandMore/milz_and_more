@@ -696,11 +696,16 @@ window.addEventListener("message", (ev) => {
     layout: 'vertical'
   },
 
+  paypal.Buttons({
+
+  style: {
+    layout: 'vertical'
+  },
+
   createOrder: function(data, actions) {
 
-    // 🔥 Mandala speichern (optional Backup)
     const exportState = getEnginePayloadState();
-    window.__mandalaState = exportState; // 👉 WICHTIG: im RAM behalten
+    window.__mandalaState = exportState;
 
     return actions.order.create({
       purchase_units: [{
@@ -709,36 +714,33 @@ window.addEventListener("message", (ev) => {
     });
   },
 
- onApprove: async function(data, actions) {
-  await actions.order.capture();
+  onApprove: async function(data, actions) {
+    await actions.order.capture();
 
-  console.log("PAYMENT OK → FINAL EXPORT");
+    console.log("PAYMENT OK → FINAL EXPORT");
 
-  try {
-    const dataUrl = await requestExport("final");
+    try {
+      const dataUrl = await requestExport("final");
 
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = "mandala.png";
-    link.click();
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = "mandala.png";
+      link.click();
 
-    alert("Download gestartet 🎉");
+      alert("Download gestartet 🎉");
 
-  } catch (err) {
-    console.error("Export fehlgeschlagen", err);
-  }
-}
+    } catch (err) {
+      console.error("Export fehlgeschlagen", err);
+    }
+  }, // ✅ WICHTIG: Komma hier!
 
-  });
-},
-    
   onError: function(err) {
     alert("PayPal Fehler – bitte im Browser öffnen.");
     console.error(err);
   }
 
 }).render('#paypal-button-container');
-
+      
 });
   </script>
 </body>

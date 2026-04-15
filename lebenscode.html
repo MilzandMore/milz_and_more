@@ -154,6 +154,8 @@
   </div>
 
   <script>
+    window.__AUTO_DOWNLOAD_AFTER_PAY = false;
+    
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
     const state = {
@@ -586,13 +588,25 @@ window.addEventListener("message", (ev) => {
   }
 
 if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-  hideLoading();
-
-  console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50)); // 👈 HIER
 
   window.__FINAL_MANDALA = msg.dataUrl;
 
+  // 👉 nur nach Zahlung automatisch downloaden
+  if (window.__AUTO_DOWNLOAD_AFTER_PAY) {
+    window.__AUTO_DOWNLOAD_AFTER_PAY = false;
+
+    const link = document.createElement("a");
+    link.href = msg.dataUrl;
+    link.download = "mandala.png";
+    link.click();
+
+    alert("Download gestartet 🎉");
+    return;
+  }
+
+  // 👉 normale Vorschau
   openPrintPreview(msg.dataUrl);
+  return;
 }
 
 });
@@ -671,30 +685,11 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   onApprove: function(data, actions) {
   return actions.order.capture().then(function(details) {
 
-    // 🔥 1. FINAL EXPORT ANFORDERN
+    // 👉 Flag setzen
+    window.__AUTO_DOWNLOAD_AFTER_PAY = true;
+
+    // 👉 FINAL Export starten
     requestExport("final");
-
-    // 🔥 2. WARTEN bis Engine antwortet
-    setTimeout(() => {
-
-      console.log("DOWNLOAD:", window.__FINAL_MANDALA?.slice(0,50));
-
-      const dataUrl = window.__FINAL_MANDALA;
-
-      if (!dataUrl) {
-        alert("Fehler – kein Mandala erhalten");
-        return;
-      }
-
-      // 🔥 3. DOWNLOAD STARTEN
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "mandala.png";
-      link.click();
-
-      alert("Download gestartet 🎉");
-
-    }, 700); // ⏱ leicht erhöht für Sicherheit
 
   });
 },

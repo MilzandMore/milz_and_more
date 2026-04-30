@@ -668,44 +668,52 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
     });
   },
 
-  // Variable, um den Kaufstatus zu tracken
+ // Variable, um den Kaufstatus zu tracken (NUR EINMAL DEFINIEREN)
 let isPurchaseActive = false;
 
-// 1. Oben im Script-Bereich definieren
-let isPurchaseActive = false;
+// PayPal-Button-Konfiguration
+// Stelle sicher, dass dieser Teil innerhalb deines paypal.Buttons({...}) Objekts steht
+const paypalConfig = {
+    onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+            console.log("Zahlung erfolgreich!");
+            isPurchaseActive = true;
+            
+            // Nachricht an den Engine-Iframe senden
+            // Wir suchen gezielt nach dem Iframe
+            const engineIframe = document.querySelector('iframe');
+            if (engineIframe) {
+                engineIframe.contentWindow.postMessage({
+                    type: "EXPORT",
+                    payload: { exportKind: "final" }
+                }, "*");
+                alert("Zahlung erfolgreich! Dein Bild wird generiert...");
+            } else {
+                alert("Fehler: Zeichen-Engine nicht gefunden.");
+            }
+        });
+    }
+};
 
-// 2. In deinem PayPal-Button-Code
-onApprove: function(data, actions) {
-    return actions.order.capture().then(function(details) {
-        isPurchaseActive = true;
-        
-        // Nachricht an den Engine-Iframe senden
-        const engineIframe = document.querySelector('iframe');
-        if (engineIframe) {
-            engineIframe.contentWindow.postMessage({
-                type: "EXPORT",
-                payload: { exportKind: "final" }
-            }, "*");
-        }
-        
-        // Optional: Kleiner Hinweis für den User im Modal
-        alert("Zahlung erfolgreich! Dein Bild wird generiert...");
-    });
-},
-
-// 3. Der Listener, der auf das fertige Bild wartet
+// Der Listener für den Download (kann einfach so im Script stehen)
 window.addEventListener("message", function(event) {
+    // Sicherstellen, dass die Datenstruktur stimmt
+    if (!event.data || typeof event.data !== 'object') return;
+    
     const { type, dataUrl, exportKind } = event.data;
 
-    if (type === "EXPORT_RESULT" && exportKind === "final" && isPurchaseActive) {
-        const link = document.createElement("a");
-        link.href = dataUrl;
-        link.download = "lebenscode-final.png";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        isPurchaseActive = false; // Reset
+    if (type === "EXPORT_RESULT" && exportKind === "final") {
+        if (isPurchaseActive) {
+            const link = document.createElement("a");
+            link.href = dataUrl;
+            link.download = "lebenscode-final.png";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            isPurchaseActive = false; // Zurücksetzen für den nächsten Kauf
+            console.log("Finaler Download gestartet.");
+        }
     }
 });
   </script>

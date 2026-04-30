@@ -671,61 +671,41 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   // Variable, um den Kaufstatus zu tracken
 let isPurchaseActive = false;
 
+// 1. Oben im Script-Bereich definieren
+let isPurchaseActive = false;
+
+// 2. In deinem PayPal-Button-Code
 onApprove: function(data, actions) {
     return actions.order.capture().then(function(details) {
-        console.log("Zahlung erfolgreich, starte Export...");
-        
-        // 1. Kauf-Status aktivieren
         isPurchaseActive = true;
-
-        // 2. Den Export direkt anfordern
-        // Wir nutzen hier direkt die Nachricht an das Iframe
+        
+        // Nachricht an den Engine-Iframe senden
         const engineIframe = document.querySelector('iframe');
         if (engineIframe) {
             engineIframe.contentWindow.postMessage({
                 type: "EXPORT",
                 payload: { exportKind: "final" }
             }, "*");
-        } else {
-            alert("Fehler: Zeichen-Engine nicht gefunden.");
         }
+        
+        // Optional: Kleiner Hinweis für den User im Modal
+        alert("Zahlung erfolgreich! Dein Bild wird generiert...");
     });
 },
 
-onError: function(err) {
-    alert("PayPal Fehler – bitte stelle sicher, dass du Cookies erlaubt hast.");
-    console.error(err);
-}
-}).render('#paypal-button-container');
-
-// --- DER ENTSCHEIDENDE LISTENER ---
-// Wir warten nicht passiv (setTimeout), sondern wir hören aktiv zu!
+// 3. Der Listener, der auf das fertige Bild wartet
 window.addEventListener("message", function(event) {
     const { type, dataUrl, exportKind } = event.data;
 
-    // Nur reagieren, wenn es das Ergebnis eines Exports ist
-    if (type === "EXPORT_RESULT") {
+    if (type === "EXPORT_RESULT" && exportKind === "final" && isPurchaseActive) {
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = "lebenscode-final.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         
-        // A: Es war ein Kauf-Export
-        if (exportKind === "final" && isPurchaseActive) {
-            const link = document.createElement("a");
-            link.href = dataUrl;
-            link.download = "mein-mandala-final.png";
-            document.body.appendChild(link); // Notwendig für Firefox
-            link.click();
-            document.body.removeChild(link);
-            
-            isPurchaseActive = false; // Status zurücksetzen
-            alert("Dein hochauflösendes Bild wurde gespeichert! 🎉");
-        } 
-        
-        // B: Es war nur die normale Vorschau
-        else if (exportKind === "preview") {
-            console.log("Vorschau empfangen");
-            // Hier ggf. das Vorschaubild im Modal aktualisieren
-            const previewImg = document.getElementById("preview-img");
-            if (previewImg) previewImg.src = dataUrl;
-        }
+        isPurchaseActive = false; // Reset
     }
 });
   </script>

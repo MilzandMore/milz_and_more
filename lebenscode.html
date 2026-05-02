@@ -142,8 +142,7 @@
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
    <script>
-    // 1. State und Konstanten
-    // 1. State & Konfiguration
+    // 1. Variablen & State
     const state = {
       engine: "quadrat",
       mode: "geburtstag",
@@ -163,15 +162,6 @@
       H:8, Q:8, Z:8, I:9, R:9
     };
 
-    const PALETTE_RAMPS = [
-      { soft: "#F4C7BD", vivid: "#FF0000" }, { soft: "#C9D6FF", vivid: "#00008B" },
-      { soft: "#D8F3C7", vivid: "#00FF00" }, { soft: "#FFF1A6", vivid: "#FFFF00" },
-      { soft: "#D3F0FF", vivid: "#87CEEB" }, { soft: "#9FE3E0", vivid: "#40E0D0" },
-      { soft: "#F4B6D9", vivid: "#FF00A8" }, { soft: "#F8D4B4", vivid: "#FFA500" },
-      { soft: "#DDD0FA", vivid: "#9400D3" }
-    ];
-
-    // 2. Element-Referenzen
     const els = {
       get frame() { return document.getElementById("engineFrame"); },
       get loading() { return document.getElementById("loading"); },
@@ -187,18 +177,13 @@
       get sliderBackdrop() { return document.getElementById("sliderBackdrop"); }
     };
 
-    // 3. Kern-Funktionen (Hier ist loadEngine!)
+    // 2. Funktionen
     function loadEngine(name) {
       state.engine = name;
       if (els.loading) els.loading.style.display = "grid";
       if (els.frame) {
         els.frame.src = `engines/${name}/index.html?embed=1&v=${Date.now()}`;
       }
-    }
-
-    function ex(a, b) {
-      const s = (a || 0) + (b || 0);
-      return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
     }
 
     function syncComputedCode() {
@@ -215,7 +200,6 @@
     function pushStateToEngine() {
       if (!els.frame || !els.frame.contentWindow) return;
       syncComputedCode();
-      // Hier Farben berechnen & UI updaten (vereinfacht für Stabilität)
       els.frame.contentWindow.postMessage({ 
         type: "SET_STATE", 
         payload: { ...state, input: state.computedCode, mode: "geburtstag" } 
@@ -233,7 +217,7 @@
       }
     }
 
-    // 4. Kommunikation
+    // 3. Event Listener
     window.addEventListener("message", (ev) => {
       const msg = ev.data;
       if (!msg || typeof msg !== "object") return;
@@ -255,9 +239,8 @@
       }
     });
 
-    // 5. Startschuss
     document.addEventListener("DOMContentLoaded", () => {
-      loadEngine("quadrat"); // Jetzt ist es definiert!
+      loadEngine("quadrat");
 
       document.querySelectorAll(".engine-btn").forEach(btn => {
         btn.onclick = () => loadEngine(btn.dataset.engine);

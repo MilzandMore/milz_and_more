@@ -1,6 +1,6 @@
 /* ====== QUADRAT engine / engines/quadrat/mandala.js ====== */
 
-console.log("QUADRAT mandala.js LOADED v=1014");
+console.log("QUADRAT mandala.js LOADED v=1015 - Watermark Fixed");
 
 var qMatrix = [];
 var logoImg = null;
@@ -64,32 +64,14 @@ function preload() {}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
   const c = document.querySelector("canvas");
   if (c) {
     c.addEventListener("contextmenu", (e) => e.preventDefault());
     c.addEventListener("dragstart", (e) => e.preventDefault());
   }
-
   colorMode(HSB, 360, 100, 100, 100);
   pixelDensity(2);
-
-  loadImage(
-    "../../assets/Logo_black.png",
-    img => { logoImg = img; },
-    () => loadImage(
-      "/milz_and_more/assets/Logo_black.png",
-      img => { logoImg = img; },
-      () => {
-        loadImage(
-          "../../assets/Logo.png",
-          img => { logoImg = img; },
-          () => { logoImg = null; }
-        );
-      }
-    )
-  );
-
+  loadImage("../../assets/Logo_black.png", img => { logoImg = img; }, () => loadImage("/milz_and_more/assets/Logo_black.png", img => { logoImg = img; }, () => { loadImage("../../assets/Logo.png", img => { logoImg = img; }, () => { logoImg = null; }); }));
   if (EMBED) {
     noLoop();
     window.addEventListener("message", onMessageFromParent);
@@ -112,31 +94,13 @@ function waitForLogo(maxMs = 5000) {
 
 function getExportSettings(kind = "preview") {
   const isMobileViewport = windowWidth < 900;
-
   if (kind === "final") {
-    return {
-      width: 2480,
-      height: 3508,
-      logoWaitMs: 5000,
-      useCache: false
-    };
+    return { width: 2480, height: 3508, logoWaitMs: 5000, useCache: false };
   }
-
   if (isMobileViewport) {
-    return {
-      width: 1240,
-      height: 1754,
-      logoWaitMs: 350,
-      useCache: true
-    };
+    return { width: 1240, height: 1754, logoWaitMs: 350, useCache: true };
   }
-
-  return {
-    width: 1800,
-    height: 2545,
-    logoWaitMs: 800,
-    useCache: true
-  };
+  return { width: 1800, height: 2545, logoWaitMs: 800, useCache: true };
 }
 
 function buildPreviewCacheKey(kind, settings) {
@@ -160,54 +124,40 @@ function getQuadratScale(exportW) {
   const targetSizePx = exportW / 1.33;
   return targetSizePx / gridSize;
 }
-function drawPreviewWatermark(g, wmImg) {
+
+function drawPreviewWatermark(g, wmImg, kind = "preview") {
+  // DIE KORREKTUR: Wenn kind "final" ist, wird nichts gezeichnet
+  if (kind === "final") return;
   if (!g || !wmImg || isAdmin) return;
 
   g.push();
   g.resetMatrix();
-
   const ctx = g.drawingContext;
-  if (ctx) ctx.save();
-  if (ctx) ctx.globalAlpha = 0.32;
+  if (ctx) { ctx.save(); ctx.globalAlpha = 0.32; }
 
-  /* Größe exakt wie Wabe */
   const wWidth = Math.round(g.width * 0.18);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
-
-  /* saubere Abstände */
   const stepX = wWidth * 1.8;
   const stepY = wHeight * 2.2;
 
-  const startX = -wWidth * 0.4;
-  const startY = -wHeight * 0.6;
-  const endX = g.width + wWidth;
-  const endY = g.height + wHeight;
-
-  for (let x = startX; x < endX; x += stepX) {
-    for (let y = startY; y < endY; y += stepY) {
+  for (let x = -wWidth * 0.4; x < g.width + wWidth; x += stepX) {
+    for (let y = -wHeight * 0.6; y < g.height + wHeight; y += stepY) {
       g.image(wmImg, x, y, wWidth, wHeight);
     }
   }
-
   if (ctx) ctx.restore();
   g.pop();
 }
 
 function draw() {
   background(12);
-
-  const baseCode = (getMode() === "geburtstag")
-    ? getCodeFromDate(getInput())
-    : getCodeFromText(getInput());
-
+  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
-
   push();
   const scaleFactor = (min(width, height) / 850) * 0.9;
   translate(width / 2, height / 2);
   scale(scaleFactor);
-
   calcQuadratMatrix(drawCode);
   drawQuadrat(startDigit, null, { stroke: true });
   pop();
@@ -215,19 +165,8 @@ function draw() {
 
 function getRenderPalette(startDigit) {
   if (Array.isArray(extState.colors) && extState.colors.length === 9) {
-    return {
-      1: extState.colors[0],
-      2: extState.colors[1],
-      3: extState.colors[2],
-      4: extState.colors[3],
-      5: extState.colors[4],
-      6: extState.colors[5],
-      7: extState.colors[6],
-      8: extState.colors[7],
-      9: extState.colors[8]
-    };
+    return { 1: extState.colors[0], 2: extState.colors[1], 3: extState.colors[2], 4: extState.colors[3], 5: extState.colors[4], 6: extState.colors[5], 7: extState.colors[6], 8: extState.colors[7], 9: extState.colors[8] };
   }
-
   return (colorMatrix[startDigit] || mapZ);
 }
 
@@ -235,84 +174,31 @@ function drawQuadrat(startDigit, target, opts) {
   var ctx = target || window;
   var ts = 16;
   const strokeOn = opts && opts.stroke === true;
-
   ctx.rectMode(CORNER);
-
-  if (strokeOn) {
-    ctx.stroke(0, 0, 0, 35);
-    ctx.strokeWeight(0.6);
-  } else {
-    ctx.noStroke();
-  }
-
+  if (strokeOn) { ctx.stroke(0, 0, 0, 35); ctx.strokeWeight(0.6); } else { ctx.noStroke(); }
   const renderPalette = getRenderPalette(startDigit);
-
   for (var r = 0; r < 20; r++) {
     for (var c = 0; c < 20; c++) {
       var val = qMatrix[r][c];
-
-      if (val === 0) {
-        ctx.fill(0, 0, 100, 100);
-      } else {
+      if (val === 0) { ctx.fill(0, 0, 100, 100); } else {
         var hex = renderPalette[val] || mapZ[val];
         var col = color(hex);
         var sVal = getSlider(val);
-
-        ctx.fill(
-          hue(col),
-          map(sVal, 20, 100, 35, saturation(col)),
-          map(sVal, 20, 100, 100, brightness(col)),
-          100
-        );
+        ctx.fill(hue(col), map(sVal, 20, 100, 35, saturation(col)), map(sVal, 20, 100, 100, brightness(col)), 100);
       }
-
-      ctx.rect(c * ts, -(r + 1) * ts, ts, ts);
-      ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts);
-      ctx.rect(c * ts, r * ts, ts, ts);
-      ctx.rect(-(c + 1) * ts, r * ts, ts, ts);
+      ctx.rect(c * ts, -(r + 1) * ts, ts, ts); ctx.rect(-(c + 1) * ts, -(r + 1) * ts, ts, ts); ctx.rect(c * ts, r * ts, ts, ts); ctx.rect(-(c + 1) * ts, r * ts, ts, ts);
     }
   }
-}
-
-function drawExportWatermark(g, wmImg) {
-  if (!g || !wmImg || isAdmin) return;
-
-  g.push();
-  g.resetMatrix();
-
-  const ctx = g.drawingContext;
-  if (ctx) ctx.save();
-  if (ctx) ctx.globalAlpha = 0.45;
-
-  const wWidth = 380;
-  const wHeight = (wmImg.height / wmImg.width) * wWidth;
-  const yShift = -200;
-
-  for (let x = -100; x < g.width + 400; x += 500) {
-    for (let y = -700; y < g.height + 400; y += 500) {
-      g.image(wmImg, x, y + yShift, wWidth, wHeight);
-    }
-  }
-
-  if (ctx) ctx.restore();
-  g.pop();
 }
 
 async function exportHighRes(kind = "preview") {
-  console.log("EXPORT START:", kind);
   const settings = getExportSettings(kind);
   const exportW = settings.width;
   const exportH = settings.height;
-
   const cacheKey = buildPreviewCacheKey(kind, settings);
+
   if (settings.useCache && cacheKey === lastPreviewKey && lastPreviewDataUrl) {
-    try {
-      console.log("EXPORT FERTIG:", kind);
-      window.parent.postMessage({
-        type: "EXPORT_RESULT",
-        dataUrl: lastPreviewDataUrl
-      }, "*");
-    } catch (_) {}
+    window.parent.postMessage({ type: "EXPORT_RESULT", dataUrl: lastPreviewDataUrl }, "*");
     return;
   }
 
@@ -320,13 +206,9 @@ async function exportHighRes(kind = "preview") {
   pg.colorMode(HSB, 360, 100, 100, 100);
   pg.background(255);
 
-  const baseCode = (getMode() === "geburtstag")
-    ? getCodeFromDate(getInput())
-    : getCodeFromText(getInput());
-
+  const baseCode = (getMode() === "geburtstag") ? getCodeFromDate(getInput()) : getCodeFromText(getInput());
   const startDigit = baseCode[0] || 1;
   const drawCode = (getDirection() === "innen") ? [...baseCode].reverse() : baseCode;
-
   calcQuadratMatrix(drawCode);
 
   const centerX = exportW / 2;
@@ -341,36 +223,22 @@ async function exportHighRes(kind = "preview") {
 
   const exportLogo = await waitForLogo(settings.logoWaitMs);
 
-  if (kind !== "final") {
-  drawPreviewWatermark(pg, exportLogo);
-}
+  // KORREKTUR: kind an die Watermark-Funktion übergeben
+  drawPreviewWatermark(pg, exportLogo, kind);
 
   if (exportLogo) {
     pg.push();
     pg.resetMatrix();
-    pg.noTint();
-
     const lW = kind === "final" ? 500 : Math.round(exportW * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
     const margin = kind === "final" ? 100 : Math.round(exportW * 0.04);
-
     pg.image(exportLogo, exportW - lW - margin, exportH - lH - margin, lW, lH);
     pg.pop();
   }
 
   const dataUrl = pg.canvas.toDataURL("image/png");
-
-  if (settings.useCache) {
-    lastPreviewKey = cacheKey;
-    lastPreviewDataUrl = dataUrl;
-  }
-
-  try {
-    window.parent.postMessage({
-      type: "EXPORT_RESULT",
-      dataUrl: dataUrl
-    }, "*");
-  } catch (_) {}
+  if (settings.useCache) { lastPreviewKey = cacheKey; lastPreviewDataUrl = dataUrl; }
+  window.parent.postMessage({ type: "EXPORT_RESULT", dataUrl: dataUrl }, "*");
 }
 
 function getCodeFromDate(str) {
@@ -383,105 +251,57 @@ function getCodeFromDate(str) {
 function getCodeFromText(textStr) {
   var t = String(textStr || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
   if (t.length === 0) return [1, 1, 1, 1, 1, 1, 1, 1];
-
   var firstRow = [];
-  for (var char of t) {
-    if (charMap[char]) firstRow.push(charMap[char]);
-  }
-
+  for (var char of t) { if (charMap[char]) firstRow.push(charMap[char]); }
   var currentRow = firstRow;
   while (currentRow.length < 8) currentRow.push(9);
-
   while (currentRow.length > 8) {
     var nextRow = [];
-    for (var i = 0; i < currentRow.length - 1; i++) {
-      nextRow.push(ex(currentRow[i], currentRow[i + 1]));
-    }
+    for (var i = 0; i < currentRow.length - 1; i++) { nextRow.push(ex(currentRow[i], currentRow[i + 1])); }
     currentRow = nextRow;
   }
-
   return currentRow;
 }
 
 function calcQuadratMatrix(code) {
   qMatrix = Array(20).fill().map(() => Array(20).fill(0));
   var d = [code[0], code[1]], m = [code[2], code[3]], j1 = [code[4], code[5]], j2 = [code[6], code[7]];
-
   function set2(r, c, v1, v2) {
     if (r >= 20 || c >= 20) return;
-    qMatrix[r][c] = v1;
-    if (c + 1 < 20) qMatrix[r][c + 1] = v2;
-    if (r + 1 < 20) qMatrix[r + 1][c] = v2;
-    if (r + 1 < 20 && c + 1 < 20) qMatrix[r + 1][c + 1] = v1;
+    qMatrix[r][c] = v1; if (c + 1 < 20) qMatrix[r][c + 1] = v2; if (r + 1 < 20) qMatrix[r + 1][c] = v2; if (r + 1 < 20 && c + 1 < 20) qMatrix[r + 1][c + 1] = v1;
   }
-
   for (var i = 0; i < 8; i += 2) set2(i, i, d[0], d[1]);
-  for (var i = 0; i < 6; i += 2) {
-    set2(i, i + 2, m[0], m[1]);
-    set2(i + 2, i, m[0], m[1]);
-  }
-  for (var i = 0; i < 4; i += 2) {
-    set2(i, i + 4, j1[0], j1[1]);
-    set2(i + 4, i, j1[0], j1[1]);
-  }
-  set2(0, 6, j2[0], j2[1]);
-  set2(6, 0, j2[0], j2[1]);
-
-  for (var r = 0; r < 8; r++) {
-    for (var c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c - 2], qMatrix[r][c - 1]);
-  }
-  for (var c = 0; c < 20; c++) {
-    for (var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r - 2][c], qMatrix[r - 1][c]);
-  }
+  for (var i = 0; i < 6; i += 2) { set2(i, i + 2, m[0], m[1]); set2(i + 2, i, m[0], m[1]); }
+  for (var i = 0; i < 4; i += 2) { set2(i, i + 4, j1[0], j1[1]); set2(i + 4, i, j1[0], j1[1]); }
+  set2(0, 6, j2[0], j2[1]); set2(6, 0, j2[0], j2[1]);
+  for (var r = 0; r < 8; r++) { for (var c = 8; c < 20; c++) qMatrix[r][c] = ex(qMatrix[r][c - 2], qMatrix[r][c - 1]); }
+  for (var c = 0; c < 20; c++) { for (var r = 8; r < 20; r++) qMatrix[r][c] = ex(qMatrix[r - 2][c], qMatrix[r - 1][c]); }
 }
 
 function onMessageFromParent(ev) {
   const msg = ev.data;
   if (!msg || typeof msg !== "object") return;
-
   if (msg.type === "SET_STATE" && msg.payload) {
     extState = Object.assign(extState, msg.payload);
-    if (!Array.isArray(extState.colors)) extState.colors = [];
     isAdmin = !!extState.isAdmin;
     redraw();
     return;
   }
-
   if (msg.type === "EXPORT") {
     if (msg.payload) {
       extState = Object.assign(extState, msg.payload);
-      if (!Array.isArray(extState.colors)) extState.colors = [];
       isAdmin = !!extState.isAdmin;
-      exportKind = msg.payload.exportKind === "final" ? "final" : "preview";
+      exportKind = (msg.payload.exportKind === "final" || msg.exportKind === "final") ? "final" : "preview";
     } else {
       exportKind = "preview";
     }
-
     exportHighRes(exportKind);
     return;
   }
 }
 
-function getMode() {
-  return EMBED ? (extState.mode || "geburtstag") : "geburtstag";
-}
-
-function getInput() {
-  return EMBED ? (extState.input ?? "15011987") : "15011987";
-}
-
-function getDirection() {
-  return EMBED ? (extState.direction || "aussen") : "aussen";
-}
-
-function getSlider(val) {
-  if (!EMBED) return 85;
-  const arr = extState.sliders || [];
-  const v = arr[val];
-  return (typeof v === "number") ? v : 85;
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  if (EMBED) redraw();
-}
+function getMode() { return EMBED ? (extState.mode || "geburtstag") : "geburtstag"; }
+function getInput() { return EMBED ? (extState.input ?? "15011987") : "15011987"; }
+function getDirection() { return EMBED ? (extState.direction || "aussen") : "aussen"; }
+function getSlider(val) { if (!EMBED) return 85; const arr = extState.sliders || []; const v = arr[val]; return (typeof v === "number") ? v : 85; }
+function windowResized() { resizeCanvas(windowWidth, windowHeight); if (EMBED) redraw(); }

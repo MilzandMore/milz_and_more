@@ -73,21 +73,14 @@ window.addEventListener("message", (ev) => {
   }
 
   if (msg.type === "EXPORT") {
-    if (msg.payload) {
-      APP = {
-        ...APP,
-        ...msg.payload,
-        colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : APP.colors
-      };
-      isAdmin = !!APP.isAdmin;
-      exportKind = msg.payload.exportKind === "final" ? "final" : "preview";
-    } else {
-      exportKind = "preview";
-    }
-
-    exportHighRes(exportKind);
-    return;
+  if (msg.payload) {
+    extState = Object.assign(extState, msg.payload);
+    // Diese Zeile ist entscheidend:
+    exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
   }
+  exportHighRes(exportKind);
+  return;
+}
 });
 
 // --------- p5 ----------

@@ -198,7 +198,8 @@ function drawSector(m, colors, target) {
 }
 
 // --------- EXPORT-WASSERZEICHEN ----------
-function drawPreviewWatermark(g, wmImg) {
+function drawPreviewWatermark(g, wmImg, kind = "preview") {
+  if (kind === "final") return; // Das verhindert das Wasserzeichen beim Kauf
   if (!g || !wmImg || isAdmin) return;
 
   g.push();

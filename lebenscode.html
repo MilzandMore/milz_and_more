@@ -18,7 +18,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="stylesheet" href="app.css?v=clean-preview-8">
-  <script src="https://www.paypal.com/sdk/js?client-id=AYwApQvq8SiMYPEHcgMpcN8q77ffjb2_47JkkL4voZk8uEfk8daNM6sbgTIwOHqTbgk-IfCmSKbc8VXE&currency&currency=EUR"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=AYwApQvq8SiMYPEHcgMpcN8q77ffjb2_47JkkL4voZk8uEfk8daNM6sbgTIwOHqTbgk-IfCmSKbc8VXE&currency=EUR"></script>
 </head>
 
 <body>
@@ -56,7 +56,7 @@
         </select>
       </div>
 
-      <div class="field" id="sectorWrap">
+      <div class="field" id="sectorWrap" style="display:none;">
         <label for="sector">Sektor</label>
         <select id="sector">
           <option value="6">6</option>
@@ -72,7 +72,7 @@
     </div>
 
     <div class="right">
-      <nav class="engine-nav" aria-label="Form auswählen">
+      <nav class="engine-nav">
         <button class="engine-btn active" data-engine="quadrat" type="button">Quadrat</button>
         <button class="engine-btn" data-engine="rund" type="button">Rund</button>
         <button class="engine-btn" data-engine="wabe" type="button">Wabe</button>
@@ -92,7 +92,6 @@
 
       <div class="engine-wrap wm-quadrat" id="engineWrap">
         <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
-
         <div class="viewer-watermark" aria-hidden="true">
           <img src="assets/Logo_gold.png" alt="">
         </div>
@@ -120,8 +119,6 @@
           <div class="preview-text">
             ✨ Bitte Fenster nach Zahlung nicht schließen – dein Download startet automatisch.
             <br><br>
-            Dies ist eine Vorschau deines Mandalas.<br>
-            Der Download ist ohne Wasserzeichen verfügbar.<br><br>
             <strong>Einführungspreis: 11,-€</strong>
           </div>
         </div>
@@ -138,7 +135,6 @@
       </div>
       <div class="slider-sheet__body">
         <div id="slidersMobile" class="sliders"></div>
-        <div class="hint">Tipp: Regler steuern jede Farbe von sanftem Pastell bis leuchtend kräftig.</div>
       </div>
     </div>
   </div>
@@ -196,7 +192,6 @@
       sliderBackdrop: document.getElementById("sliderBackdrop"),
       codeOutput: document.getElementById("codeOutput"),
       printPreview: document.getElementById("printPreview"),
-      printPreviewBackdrop: document.getElementById("printPreviewBackdrop"),
       printPreviewImage: document.getElementById("printPreviewImage"),
       closePrintPreview: document.getElementById("closePrintPreview")
     };
@@ -206,15 +201,10 @@
       return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
     }
 
-    function codeFromDate(str) {
-      const raw = String(str || "").replace(/\D/g, "").split("").map(Number);
-      while (raw.length < 8) raw.push(0);
-      return raw.slice(0, 8);
-    }
-
+    // --- URSPRÜNGLICHE AFFIRMATIONS-LOGIK ---
     function codeFromText(text) {
       let arr = String(text || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => charMap[c]).filter(Boolean);
-      if (arr.length === 0) arr = [9];
+      if (arr.length === 0) return [1,1,1,1,1,1,1,1];
       while (arr.length > 8) {
         const next = [];
         for (let i = 0; i < arr.length - 1; i++) { next.push(ex(arr[i], arr[i + 1])); }
@@ -229,12 +219,14 @@
       return arr.slice(0, 8);
     }
 
-    function getComputedCodeArray() {
-      return state.mode === "text" ? codeFromText(state.input) : codeFromDate(state.input);
-    }
-
     function syncComputedCode() {
-      state.computedCode = getComputedCodeArray().join("");
+      const val = state.input;
+      const codeArr = state.mode === "text" 
+        ? codeFromText(val) 
+        : String(val || "").replace(/\D/g, "").split("").map(Number);
+      
+      while (codeArr.length < 8) codeArr.push(0);
+      state.computedCode = codeArr.slice(0, 8).join("");
       els.codeOutput.value = state.computedCode;
     }
 
@@ -245,17 +237,6 @@
       return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
     }
 
-    function rgbToHex(r, g, b) {
-      const f = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
-      return "#" + f(r) + f(g) + f(b).toUpperCase();
-    }
-
-    function interpolateHex(hex1, hex2, t) {
-      const a = hexToRgb(hex1);
-      const b = hexToRgb(hex2);
-      return rgbToHex(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t);
-    }
-
     function computeFinalColors() {
       const seedDigit = Number(state.computedCode?.charAt(0) || 1);
       const shift = Math.max(0, Math.min(8, seedDigit - 1));
@@ -264,32 +245,34 @@
       state.colors = rotatedRamps.map((ramp, index) => {
         const val = state.sliders[index + 1] ?? 85;
         const t = Math.pow((val - 20) / 80, 0.86);
-        return interpolateHex(ramp.soft, ramp.vivid, t);
+        const a = hexToRgb(ramp.soft);
+        const b = hexToRgb(ramp.vivid);
+        const f = (v1, v2) => Math.max(0, Math.min(255, Math.round(v1 + (v2 - v1) * t))).toString(16).padStart(2, "0");
+        return "#" + f(a.r, b.r) + f(a.g, b.g) + f(a.b, b.b).toUpperCase();
       });
     }
 
     function applySliderColorsToUI() {
-      for (let i = 1; i <= 9; i++) {
-        const color = state.colors[i - 1] || "#D8B45A";
-        document.querySelectorAll(`.slider-row .digit[data-digit="${i}"], .slider-row input[data-digit="${i}"]`).forEach(el => {
-          if(el.type === "range") { el.style.setProperty("--accent", color); el.style.setProperty("--val", el.value + "%"); }
-          else el.style.color = color;
+      state.colors.forEach((c, i) => {
+        document.querySelectorAll(`[data-digit="${i+1}"]`).forEach(el => {
+          if(el.type === "range") { el.style.setProperty("--accent", c); el.style.setProperty("--val", el.value + "%"); }
+          else el.style.color = c;
         });
-        const dD = document.getElementById("sliders_dot" + i), dM = document.getElementById("slidersMobile_dot" + i);
-        if (dD) dD.style.background = color; if (dM) dM.style.background = color;
-      }
+        const dD = document.getElementById("sliders_dot" + (i+1)), dM = document.getElementById("slidersMobile_dot" + (i+1));
+        if (dD) dD.style.background = c; if (dM) dM.style.background = c;
+      });
     }
 
     function pushStateToEngine() {
       if (!els.frame.contentWindow) return;
-      syncComputedCode(); computeFinalColors(); applySliderColorsToUI();
-      els.frame.contentWindow.postMessage({ type: "SET_STATE", payload: { ...state, input: state.computedCode } }, "*");
-    }
-
-    function requestExport(kind = "preview") {
-      if (!els.frame.contentWindow) return;
-      els.loading.style.display = "grid";
-      els.frame.contentWindow.postMessage({ type: "EXPORT", payload: { ...state, input: state.computedCode, exportKind: kind } }, "*");
+      syncComputedCode(); 
+      computeFinalColors(); 
+      applySliderColorsToUI();
+      // Wir senden den State IMMER als "geburtstag" Modus, weil die Engine bereits den fertigen Code erhält
+      els.frame.contentWindow.postMessage({ 
+        type: "SET_STATE", 
+        payload: { ...state, input: state.computedCode, mode: "geburtstag" } 
+      }, "*");
     }
 
     window.addEventListener("message", (ev) => {
@@ -301,7 +284,7 @@
         if (state.isPaid) {
           const link = document.createElement("a"); link.href = msg.dataUrl; link.download = `Mandala_${state.computedCode}.png`;
           document.body.appendChild(link); link.click(); document.body.removeChild(link);
-          state.isPaid = false; alert("Download gestartet! 🎉");
+          state.isPaid = false; 
         } else {
           els.printPreviewImage.src = msg.dataUrl; els.printPreview.hidden = false;
         }
@@ -314,6 +297,7 @@
       els.sectorWrap.style.display = engine === "rund" ? "flex" : "none";
       els.engineWrap.className = "engine-wrap wm-" + engine;
       els.loading.style.display = "grid";
+      // Cache-Busting für die Iframes
       els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
     }
 
@@ -324,10 +308,10 @@
         const row = document.createElement("div"); row.className = "slider-row";
         row.innerHTML = `<div class="dot" id="${containerEl.id}_dot${i}"></div><div class="digit" data-digit="${i}">${i}</div>
                          <input type="range" min="20" max="100" value="${state.sliders[i] ?? 85}" data-digit="${i}">`;
-        const input = row.querySelector("input");
-        input.addEventListener("input", () => {
-          state.sliders[i] = Number(input.value);
-          document.querySelectorAll(`input[data-digit="${i}"]`).forEach(inp => { inp.value = input.value; inp.style.setProperty("--val", input.value + "%"); });
+        row.querySelector("input").addEventListener("input", (e) => {
+          const val = Number(e.target.value);
+          state.sliders[i] = val;
+          document.querySelectorAll(`input[data-digit="${i}"]`).forEach(inp => { inp.value = val; inp.style.setProperty("--val", val + "%"); });
           pushStateToEngine();
         });
         containerEl.appendChild(row);
@@ -335,21 +319,37 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      buildSlidersInto(els.sliders); buildSlidersInto(els.slidersMobile); loadEngine("quadrat");
-      els.mode.addEventListener("change", (e) => { state.mode = e.target.value; pushStateToEngine(); });
-      els.input.addEventListener("input", (e) => { state.input = e.target.value; pushStateToEngine(); });
-      els.direction.addEventListener("change", (e) => { state.direction = e.target.value; pushStateToEngine(); });
-      els.sector.addEventListener("change", (e) => { state.sector = Number(e.target.value); pushStateToEngine(); });
-      els.download.addEventListener("click", () => requestExport("preview"));
-      els.closePrintPreview.addEventListener("click", () => els.printPreview.hidden = true);
-      els.openSliders.addEventListener("click", () => els.sliderSheet.classList.add("active"));
-      els.closeSliders.addEventListener("click", () => els.sliderSheet.classList.remove("active"));
-      els.sliderBackdrop.addEventListener("click", () => els.sliderSheet.classList.remove("active"));
+      buildSlidersInto(els.sliders); 
+      buildSlidersInto(els.slidersMobile); 
+      loadEngine("quadrat");
+
+      // Fix für die Navigation
+      document.querySelectorAll(".engine-nav .engine-btn").forEach(btn => {
+        btn.onclick = () => loadEngine(btn.dataset.engine);
+      });
+
+      els.mode.onchange = (e) => { state.mode = e.target.value; pushStateToEngine(); };
+      els.input.oninput = (e) => { state.input = e.target.value; pushStateToEngine(); };
+      els.direction.onchange = (e) => { state.direction = e.target.value; pushStateToEngine(); };
+      els.sector.onchange = (e) => { state.sector = Number(e.target.value); pushStateToEngine(); };
+      
+      els.download.onclick = () => {
+        els.loading.style.display = "grid";
+        els.frame.contentWindow.postMessage({ type: "EXPORT", payload: { ...state, input: state.computedCode, mode: "geburtstag" } }, "*");
+      };
+
+      els.closePrintPreview.onclick = () => els.printPreview.hidden = true;
+      els.openSliders.onclick = () => els.sliderSheet.classList.add("active");
+      els.closeSliders.onclick = () => els.sliderSheet.classList.remove("active");
+      els.sliderBackdrop.onclick = () => els.sliderSheet.classList.remove("active");
 
       if (typeof paypal !== "undefined") {
         paypal.Buttons({
-          createOrder: (data, actions) => actions.order.create({ purchase_units: [{ amount: { value: "11.00" } }] }),
-          onApprove: (data, actions) => actions.order.capture().then(() => { state.isPaid = true; requestExport("final"); })
+          createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: "11.00" } }] }),
+          onApprove: (d, a) => a.order.capture().then(() => { 
+            state.isPaid = true; 
+            els.frame.contentWindow.postMessage({ type: "EXPORT", payload: { ...state, input: state.computedCode, mode: "geburtstag", exportKind: "final" } }, "*"); 
+          })
         }).render('#paypal-button-container');
       }
     });

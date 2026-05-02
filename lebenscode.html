@@ -184,7 +184,7 @@
         els.frame.src = `engines/${name}/index.html?embed=1&v=${Date.now()}`;
       }
     }
-
+    
     function syncComputedCode() {
       const val = state.input;
       let codeArr = state.mode === "text" 
@@ -206,13 +206,34 @@
     }
 
     function showFinalDownloadUI(url) {
+      // Wir suchen den Container, in dem normalerweise die Vorschau oder PayPal sitzt
       const container = document.querySelector(".preview-right");
+      
+      // Sicherheits-Check: Falls .preview-right nicht existiert (z.B. mobil anders benannt)
       if (container) {
-        container.innerHTML = `<div style="text-align:center; padding: 20px; background: #c9a14a22; border: 2px solid #c9a14a; border-radius: 10px;">
-            <h3 style="color: #c9a14a; font-family: Cinzel, serif;">Zahlung Bestätigt!</h3>
-            <a href="${url}" download="Mandala.png" style="display:block; background:#c9a14a; color:black; padding:15px; text-decoration:none; font-weight:bold; border-radius:5px; margin-top:10px;">HIER MANUELL SPEICHERN</a>
-            <button onclick="location.reload()" style="background:transparent; color:white; border:none; margin-top:15px; cursor:pointer; text-decoration:underline;">Zurück</button>
-          </div>`;
+        // Wir nutzen state.computedCode für einen individuellen Dateinamen
+        const fileName = `Mandala_${state.computedCode || "Download"}.png`;
+
+        container.innerHTML = `
+          <div style="text-align:center; padding: 20px; background: #c9a14a22; border: 2px solid #c9a14a; border-radius: 10px; margin-top: 20px;">
+            <h3 style="color: #c9a14a; font-family: Cinzel, serif; margin-bottom: 10px;">Zahlung Bestätigt!</h3>
+            <p style="color: white; font-size: 0.9em; margin-bottom: 15px;">Dein hochauflösendes Mandala ohne Wasserzeichen wurde generiert.</p>
+            
+            <a href="${url}" download="${fileName}" 
+               style="display:block; background:#c9a14a; color:black; padding:15px; text-decoration:none; font-weight:bold; border-radius:5px; transition: transform 0.2s;">
+               HIER MANUELL SPEICHERN
+            </a>
+            
+            <button onclick="location.reload()" 
+                    style="background:transparent; color:#aaa; border:none; margin-top:15px; cursor:pointer; text-decoration:underline; font-size: 0.8em;">
+               Neues Mandala erstellen
+            </button>
+          </div>
+        `;
+      } else {
+        // Notfall-Plan: Falls der Container nicht gefunden wird, direktes Fenster öffnen
+        console.error("Container .preview-right nicht gefunden. Öffne Bild in neuem Tab.");
+        window.open(url, '_blank');
       }
     }
 

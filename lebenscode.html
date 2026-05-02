@@ -331,23 +331,24 @@ function showFinalDownloadUI(url) {
 }
 
 // 4. Der PayPal Block (Anpassen von onApprove)
-if (typeof paypal !== "undefined") {
-  paypal.Buttons({
-    createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: "0.01" } }] }),
-    onApprove: (data, actions) => {
-      return actions.order.capture().then(() => {
-        state.isPaid = true;
-        showLoading();
-        // Hier fordern wir den Export OHNE Wasserzeichen an
-        els.frame.contentWindow.postMessage({ 
-          type: "EXPORT", 
-          payload: { ...state, input: state.computedCode, exportKind: "final" } 
-        }, "*");
-      });
-    }
-  }).render('#paypal-button-container');
-}
-    });
+// --- PAYPAL INTEGRATION ---
+      if (typeof paypal !== "undefined") {
+        paypal.Buttons({
+          style: { layout: 'vertical', shape: 'rect', color: 'gold' },
+          createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: "0.01" } }] }),
+          onApprove: (data, actions) => {
+            return actions.order.capture().then(() => { 
+              state.isPaid = true; 
+              els.loading.style.display = "grid";
+              els.frame.contentWindow.postMessage({ 
+                type: "EXPORT", 
+                payload: { ...state, input: state.computedCode, mode: "geburtstag", exportKind: "final" } 
+              }, "*"); 
+            });
+          }
+        }).render('#paypal-button-container');
+      }
+    }); // Ende von DOMContentLoaded
   </script>
 </body>
 </html>

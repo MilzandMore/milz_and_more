@@ -38,17 +38,16 @@ var affirmMap = {
 };
 
 var ex = (a, b) => (a + b) % 9 === 0 ? 9 : (a + b) % 9;
-
-// --------- VARIABLEN ----------
+// --------- 1. VARIABLEN (Ganz oben in der Datei) ----------
 let logoImg = null;
 let colorSeed = 1;
 let isAdmin = false;
-
 let exportKind = "preview";
 let lastPreviewKey = "";
 let lastPreviewDataUrl = "";
 
-// --------- Messaging ----------
+// --------- 2. MESSAGING & LISTENER (Ganz unten in der Datei) ----------
+
 function sendReady() {
   if (window.parent) window.parent.postMessage({ type: "READY" }, "*");
 }
@@ -57,27 +56,49 @@ function sendColors(colors) {
   if (window.parent) window.parent.postMessage({ type: "COLORS", colors }, "*");
 }
 
-if (msg.type === "EXPORT") {
+// Der zentrale Empfänger für Befehle von der Hauptseite
+window.addEventListener("message", (ev) => {
+  const msg = ev.data;
+  if (!msg || typeof msg !== "object") return;
+
+  // SET_STATE: Wenn sich Regler oder Eingaben ändern
+  if (msg.type === "SET_STATE" && msg.payload) {
+    // Falls du APP oder extState nutzt, hier aktualisieren
+    if (typeof APP !== 'undefined') APP = { ...APP, ...msg.payload };
+    if (typeof extState !== 'undefined') Object.assign(extState, msg.payload);
+    
+    isAdmin = !!msg.payload.isAdmin;
+    if (typeof redraw === "function") redraw(); // Zeichnet das Vorschaubild neu
+    return;
+  }
+
+  // EXPORT: Wenn die Druckvorschau oder der Kauf geklickt wird
+  if (msg.type === "EXPORT") {
     if (msg.payload) {
-      extState = Object.assign(extState, msg.payload);
+      if (typeof extState !== 'undefined') Object.assign(extState, msg.payload);
       exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
     }
 
-    // 1. Hochauflösendes Bild generieren
-    // WICHTIG: exportHighRes muss das Bild auf dem Canvas zeichnen
-    exportHighRes(exportKind);
+    // 1. Hochauflösendes Bild auf dem Canvas generieren
+    if (typeof exportHighRes === "function") {
+      exportHighRes(exportKind);
 
-    // 2. Das Bild vom Canvas abgreifen
-    const dataUrl = canvas.toDataURL("image/png");
+      // 2. Das Bild vom Canvas abgreifen
+      // Wir nutzen document.querySelector, um sicherzugehen, dass wir das Canvas-Element finden
+      const canvasEl = document.querySelector("canvas");
+      if (canvasEl) {
+        const dataUrl = canvasEl.toDataURL("image/png");
 
-    // 3. Das Bild an die Hauptseite senden
-    window.parent.postMessage({
-      type: "EXPORT_RESULT",
-      dataUrl: dataUrl
-    }, "*");
-    
+        // 3. Das Bild an die Hauptseite senden
+        window.parent.postMessage({
+          type: "EXPORT_RESULT",
+          dataUrl: dataUrl
+        }, "*");
+      }
+    }
     return;
   }
+});
 
 // --------- p5 ----------
 function preload() {

@@ -61,14 +61,26 @@ window.addEventListener("message", (ev) => {
   }
 
   if (msg.type === "EXPORT") {
-  if (msg.payload) {
-    extState = Object.assign(extState, msg.payload);
-    // Diese Zeile ist entscheidend:
-    exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
+    if (msg.payload) {
+      extState = Object.assign(extState, msg.payload);
+      exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
+    }
+
+    // 1. Hochauflösendes Bild generieren
+    // WICHTIG: exportHighRes muss das Bild auf dem Canvas zeichnen
+    exportHighRes(exportKind);
+
+    // 2. Das Bild vom Canvas abgreifen
+    const dataUrl = canvas.toDataURL("image/png");
+
+    // 3. Das Bild an die Hauptseite senden
+    window.parent.postMessage({
+      type: "EXPORT_RESULT",
+      dataUrl: dataUrl
+    }, "*");
+    
+    return;
   }
-  exportHighRes(exportKind);
-  return;
-}
 });
 
 function preload() {

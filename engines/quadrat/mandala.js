@@ -288,16 +288,14 @@ function onMessageFromParent(ev) {
     return;
   }
   if (msg.type === "EXPORT") {
-    if (msg.payload) {
-      extState = Object.assign(extState, msg.payload);
-      isAdmin = !!extState.isAdmin;
-      exportKind = (msg.payload.exportKind === "final" || msg.exportKind === "final") ? "final" : "preview";
-    } else {
-      exportKind = "preview";
-    }
-    exportHighRes(exportKind);
-    return;
+  if (msg.payload) {
+    extState = Object.assign(extState, msg.payload);
+    // Diese Zeile ist entscheidend:
+    exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
   }
+  exportHighRes(exportKind);
+  return;
+}
 }
 
 function getMode() { return EMBED ? (extState.mode || "geburtstag") : "geburtstag"; }

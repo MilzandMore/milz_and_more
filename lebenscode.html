@@ -330,7 +330,6 @@ function showFinalDownloadUI(url) {
   }
 }
 
-// 4. Der PayPal Block (Anpassen von onApprove)
 // --- PAYPAL INTEGRATION ---
       if (typeof paypal !== "undefined") {
         paypal.Buttons({
@@ -339,7 +338,9 @@ function showFinalDownloadUI(url) {
           onApprove: (data, actions) => {
             return actions.order.capture().then(() => { 
               state.isPaid = true; 
-              els.loading.style.display = "grid";
+              if (typeof showLoading === "function") showLoading();
+              else if (els.loading) els.loading.style.display = "grid";
+
               els.frame.contentWindow.postMessage({ 
                 type: "EXPORT", 
                 payload: { ...state, input: state.computedCode, mode: "geburtstag", exportKind: "final" } 
@@ -348,7 +349,7 @@ function showFinalDownloadUI(url) {
           }
         }).render('#paypal-button-container');
       }
-    }); // Ende von DOMContentLoaded
+    }); // Schließt das DOMContentLoaded-Event korrekt ab
   </script>
 </body>
 </html>

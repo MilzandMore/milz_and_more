@@ -141,7 +141,7 @@
   <script>
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
-    // 1. Variablen & State
+    // 1. State & Konstanten (DEINE ORIGINAL-LOGIK)
     const state = {
       engine: "quadrat",
       mode: "geburtstag",
@@ -161,6 +161,14 @@
       H:8, Q:8, Z:8, I:9, R:9
     };
 
+    const PALETTE_RAMPS = [
+      { soft: "#F4C7BD", vivid: "#FF0000" }, { soft: "#C9D6FF", vivid: "#00008B" },
+      { soft: "#D8F3C7", vivid: "#00FF00" }, { soft: "#FFF1A6", vivid: "#FFFF00" },
+      { soft: "#D3F0FF", vivid: "#87CEEB" }, { soft: "#9FE3E0", vivid: "#40E0D0" },
+      { soft: "#F4B6D9", vivid: "#FF00A8" }, { soft: "#F8D4B4", vivid: "#FFA500" },
+      { soft: "#DDD0FA", vivid: "#9400D3" }
+    ];
+
     const els = {
       get frame() { return document.getElementById("engineFrame"); },
       get loading() { return document.getElementById("loading"); },
@@ -168,83 +176,112 @@
       get input() { return document.getElementById("input"); },
       get download() { return document.getElementById("download"); },
       get codeOutput() { return document.getElementById("codeOutput"); },
-      get printPreview() { return document.getElementById("printPreview"); },
-      get printPreviewImage() { return document.getElementById("printPreviewImage"); },
+      get sliders() { return document.getElementById("sliders"); },
+      get slidersMobile() { return document.getElementById("slidersMobile"); },
       get openSliders() { return document.getElementById("openSliders"); },
       get closeSliders() { return document.getElementById("closeSliders"); },
-      get sliderSheet() { return document.getElementById("sliderSheet"); },
-      get sliderBackdrop() { return document.getElementById("sliderBackdrop"); }
+      get sliderSheet() { return document.getElementById("sliderSheet"); }
     };
 
-    // 2. Funktionen
-    function loadEngine(name) {
-      state.engine = name;
-      if (els.loading) els.loading.style.display = "grid";
-      if (els.frame) {
-        els.frame.src = `engines/${name}/index.html?embed=1&v=${Date.now()}`;
+    // 2. Farbberechnung & Logik (DEINE ORIGINAL-FORMELN)
+    function hexToRgb(hex) {
+      const clean = hex.replace("#", "");
+      const num = parseInt(clean.length === 3 ? clean.split("").map(ch => ch + ch).join("") : clean, 16);
+      return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+    }
+
+    function computeFinalColors() {
+      const seedDigit = Number(state.computedCode?.charAt(0) || 1);
+      const shift = Math.max(0, Math.min(8, seedDigit - 1));
+      const rotatedRamps = PALETTE_RAMPS.map((_, i) => PALETTE_RAMPS[(i + shift) % 9]);
+
+      state.colors = rotatedRamps.map((ramp, index) => {
+        const val = state.sliders[index + 1] ?? 85;
+        const t = Math.pow((val - 20) / 80, 0.86);
+        const a = hexToRgb(ramp.soft);
+        const b = hexToRgb(ramp.vivid);
+        const f = (v1, v2) => Math.max(0, Math.min(255, Math.round(v1 + (v2 - v1) * t))).toString(16).padStart(2, "0");
+        return "#" + f(a.r, b.r) + f(a.g, b.g) + f(a.b, b.b).toUpperCase();
+      });
+    }
+
+    function applySliderColorsToUI() {
+      state.colors.forEach((c, i) => {
+        document.querySelectorAll(`[data-digit="${i+1}"]`).forEach(el => {
+          if(el.type === "range") { 
+            el.style.setProperty("--accent", c); 
+            el.style.setProperty("--val", el.value + "%"); 
+          } else el.style.color = c;
+        });
+        const dD = document.getElementById("sliders_dot" + (i+1)), dM = document.getElementById("slidersMobile_dot" + (i+1));
+        if (dD) dD.style.background = c; if (dM) dM.style.background = c;
+      });
+    }
+
+    // 3. Slider-Bau (MIT 75PX BREITE)
+    function buildSlidersInto(container) {
+      if (!container) return;
+      container.innerHTML = "";
+      for (let i = 1; i <= 9; i++) {
+        const wrap = document.createElement("div");
+        wrap.className = "slider-item";
+        const isMobile = window.innerWidth <= 768;
+        const width = isMobile ? "75px" : "100%";
+        wrap.innerHTML = `
+          <div class="slider-dot" id="${container.id}_dot${i}" data-digit="${i}"></div>
+          <input type="range" min="20" max="100" value="85" data-digit="${i}" 
+                 style="width: ${width};" oninput="updateSliderVal(this, ${i})">`;
+        container.appendChild(wrap);
       }
     }
-    
-    function syncComputedCode() {
-      const val = state.input;
-      let codeArr = state.mode === "text" 
-        ? String(val || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => charMap[c]).filter(Boolean)
-        : String(val || "").replace(/\D/g, "").split("").map(Number);
-      
-      while (codeArr.length < 8) codeArr.push(0);
-      state.computedCode = codeArr.slice(0, 8).join("");
-      if (els.codeOutput) els.codeOutput.value = state.computedCode;
+
+    function updateSliderVal(el, idx) {
+      state.sliders[idx] = parseInt(el.value);
+      pushStateToEngine();
     }
 
     function pushStateToEngine() {
       if (!els.frame || !els.frame.contentWindow) return;
-      syncComputedCode();
+      computeFinalColors(); 
+      applySliderColorsToUI();
       els.frame.contentWindow.postMessage({ 
-        type: "SET_STATE", 
-        payload: { ...state, input: state.computedCode, mode: "geburtstag" } 
+        type: "SET_STATE", payload: { ...state, input: state.computedCode, mode: "geburtstag" } 
       }, "*");
     }
 
-    function showFinalDownloadUI(url) {
-      // Wir suchen den Container, in dem normalerweise die Vorschau oder PayPal sitzt
-      const container = document.querySelector(".preview-right");
-      
-      // Sicherheits-Check: Falls .preview-right nicht existiert (z.B. mobil anders benannt)
-      if (container) {
-        // Wir nutzen state.computedCode für einen individuellen Dateinamen
-        const fileName = `Mandala_${state.computedCode || "Download"}.png`;
-
-        container.innerHTML = `
-          <div style="text-align:center; padding: 20px; background: #c9a14a22; border: 2px solid #c9a14a; border-radius: 10px; margin-top: 20px;">
-            <h3 style="color: #c9a14a; font-family: Cinzel, serif; margin-bottom: 10px;">Zahlung Bestätigt!</h3>
-            <p style="color: white; font-size: 0.9em; margin-bottom: 15px;">Dein hochauflösendes Mandala ohne Wasserzeichen wurde generiert.</p>
-            
-            <a href="${url}" download="${fileName}" 
-               style="display:block; background:#c9a14a; color:black; padding:15px; text-decoration:none; font-weight:bold; border-radius:5px; transition: transform 0.2s;">
-               HIER MANUELL SPEICHERN
-            </a>
-            
-            <button onclick="location.reload()" 
-                    style="background:transparent; color:#aaa; border:none; margin-top:15px; cursor:pointer; text-decoration:underline; font-size: 0.8em;">
-               Neues Mandala erstellen
-            </button>
-          </div>
-        `;
-      } else {
-        // Notfall-Plan: Falls der Container nicht gefunden wird, direktes Fenster öffnen
-        console.error("Container .preview-right nicht gefunden. Öffne Bild in neuem Tab.");
-        window.open(url, '_blank');
-      }
+    function loadEngine(name) {
+      state.engine = name;
+      if (els.loading) els.loading.style.display = "grid";
+      els.frame.src = `engines/${name}/index.html?embed=1&v=${Date.now()}`;
     }
 
-    // 3. Event Listener
+    // 4. Initialisierung & Navigation
+    document.addEventListener("DOMContentLoaded", () => {
+      buildSlidersInto(els.sliders);
+      buildSlidersInto(els.slidersMobile);
+      loadEngine("quadrat");
+
+      const engineButtons = document.querySelectorAll(".engine-btn");
+      engineButtons.forEach(btn => {
+        btn.onclick = () => {
+          engineButtons.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          loadEngine(btn.dataset.engine);
+        };
+      });
+
+      if (els.mode) els.mode.onchange = (e) => { state.mode = e.target.value; pushStateToEngine(); };
+      if (els.input) els.input.oninput = (e) => { state.input = e.target.value; pushStateToEngine(); };
+      if (els.openSliders) els.openSliders.onclick = () => els.sliderSheet.classList.add("active");
+      if (els.closeSliders) els.closeSliders.onclick = () => els.sliderSheet.classList.remove("active");
+    });
+
     window.addEventListener("message", (ev) => {
-      const msg = ev.data;
-      if (!msg || typeof msg !== "object") return;
-      if (msg.type === "READY") {
+      if (ev.data.type === "READY") {
         if (els.loading) els.loading.style.display = "none";
         pushStateToEngine();
       }
+    });
       if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
         if (els.loading) els.loading.style.display = "none";
         if (state.isPaid) {

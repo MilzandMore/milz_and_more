@@ -279,38 +279,39 @@
 let lastGeneratedDataUrl = null;
 
 // 2. Den Message-Listener anpassen
-window.addEventListener("message", (ev) => {
-  const msg = ev.data;
-  if (!msg || typeof msg !== "object") return;
+// --- KOMMUNIKATION MIT DER ENGINE ---
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== "object") return;
+      
+      if (msg.type === "READY") { 
+        if (els.loading) els.loading.style.display = "none"; 
+        pushStateToEngine(); 
+      }
+      
+      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+        if (els.loading) els.loading.style.display = "none";
+        
+        if (state.isPaid) {
+          // Automatischer Download
+          const link = document.createElement("a");
+          link.href = msg.dataUrl;
+          link.download = `Mandala_${state.computedCode}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Notfall-Button anzeigen
+          showFinalDownloadUI(msg.dataUrl);
+          state.isPaid = false; 
+        } else {
+          if (els.printPreviewImage) els.printPreviewImage.src = msg.dataUrl;
+          if (els.printPreview) els.printPreview.hidden = false;
+        }
+      }
+    });
 
-  if (msg.type === "READY") {
-    hideLoading();
-    pushStateToEngine();
-  }
-
-  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-    hideLoading();
-    lastGeneratedDataUrl = msg.dataUrl; // Bild für Notfälle zwischenspeichern
-
-    if (state.isPaid) {
-      // Versuch des automatischen Downloads
-      const link = document.createElement("a");
-      link.href = msg.dataUrl;
-      link.download = `Mandala_${state.computedCode}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Den "Notfall-Button" anzeigen, falls der Browser den Klick blockiert hat
-      showFinalDownloadUI(msg.dataUrl);
-    } else {
-      els.printPreviewImage.src = msg.dataUrl;
-      els.printPreview.hidden = false;
-    }
-  }
-});
-
-// 3. Funktion für die Notfall-UI (außerhalb definiert, damit sie immer verfügbar ist)
+    // 3. Funktion für die Notfall-UI (muss außerhalb stehen)
     function showFinalDownloadUI(url) {
       const container = document.querySelector(".preview-right");
       if (container) {
@@ -330,10 +331,31 @@ window.addEventListener("message", (ev) => {
       }
     }
 
-    // Dieser Teil muss innerhalb deines DOMContentLoaded-Listeners stehen
     document.addEventListener("DOMContentLoaded", () => {
-      // ... (dein restlicher Initialisierungs-Code hier) ...
+      // Initialisierung
+      if (typeof buildSlidersInto === "function") {
+        buildSlidersInto(els.sliders); 
+        buildSlidersInto(els.slidersMobile); 
+      }
+      loadEngine("quadrat");
 
+      // Event Listener
+      document.querySelectorAll(".engine-nav .engine-btn").forEach(btn => {
+        btn.onclick = () => loadEngine(btn.dataset.engine);
+      });
+
+      if (els.mode) els.mode.onchange = (e) => { state.mode = e.target.value; pushStateToEngine(); };
+      if (els.input) els.input.oninput = (e) => { state.input = e.target.value; pushStateToEngine(); };
+      
+      if (els.download) {
+        els.download.onclick = () => {
+          if (els.loading) els.loading.style.display = "grid";
+          els.frame.contentWindow.postMessage({ type: "EXPORT", payload: { ...state, input: state.computedCode, mode: "geburtstag" } }, "*");
+        };
+      }
+
+      if (els.closePrintPreview) els.closePrintPreview.onclick = () => els.printPreview.hidden = true;
+      if (els.openSliders) els.openSliders.onclick = () => els.sliderSheet.classList.add("active");
       if (els.closeSliders) els.closeSliders.onclick = () => els.sliderSheet.classList.remove("active");
       if (els.sliderBackdrop) els.sliderBackdrop.onclick = () => els.sliderSheet.classList.remove("active");
 
@@ -346,7 +368,6 @@ window.addEventListener("message", (ev) => {
             return actions.order.capture().then(() => { 
               state.isPaid = true; 
               if (els.loading) els.loading.style.display = "grid";
-
               els.frame.contentWindow.postMessage({ 
                 type: "EXPORT", 
                 payload: { ...state, input: state.computedCode, mode: "geburtstag", exportKind: "final" } 
@@ -355,7 +376,7 @@ window.addEventListener("message", (ev) => {
           }
         }).render('#paypal-button-container');
       }
-    }); // Schließt DOMContentLoaded sauber ab
+    });
   </script>
 </body>
 </html>

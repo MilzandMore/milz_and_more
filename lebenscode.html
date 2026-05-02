@@ -330,7 +330,10 @@ function showFinalDownloadUI(url) {
   }
 }
 
-// --- PAYPAL INTEGRATION ---
+els.closeSliders.onclick = () => els.sliderSheet.classList.remove("active");
+      els.sliderBackdrop.onclick = () => els.sliderSheet.classList.remove("active");
+
+      // --- PAYPAL INTEGRATION ---
       if (typeof paypal !== "undefined") {
         paypal.Buttons({
           style: { layout: 'vertical', shape: 'rect', color: 'gold' },
@@ -338,8 +341,7 @@ function showFinalDownloadUI(url) {
           onApprove: (data, actions) => {
             return actions.order.capture().then(() => { 
               state.isPaid = true; 
-              if (typeof showLoading === "function") showLoading();
-              else if (els.loading) els.loading.style.display = "grid";
+              if (els.loading) els.loading.style.display = "grid";
 
               els.frame.contentWindow.postMessage({ 
                 type: "EXPORT", 
@@ -349,7 +351,7 @@ function showFinalDownloadUI(url) {
           }
         }).render('#paypal-button-container');
       }
-    }); // Schließt das DOMContentLoaded-Event korrekt ab
+    }); // <--- Diese Klammer schließt DOMContentLoaded
   </script>
 </body>
 </html>

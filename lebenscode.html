@@ -89,10 +89,8 @@
 
     <section id="stage" class="stage paper">
       <div id="loading" class="loading">Engine lädt…</div>
-
       <div class="engine-wrap wm-quadrat" id="engineWrap">
         <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
-
         <div class="viewer-watermark" aria-hidden="true">
           <img src="assets/Logo_gold.png" alt="">
         </div>
@@ -107,38 +105,28 @@
 
   <div id="printPreview" class="print-preview" hidden>
     <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
-
     <div class="print-preview__panel">
-
-  <button id="closePrintPreview" class="print-preview__close" type="button">×</button>
-
-  <div class="preview-layout">
-
-    <!-- LINKS (Mandala) -->
-    <div class="preview-left">
-      <div class="print-preview__image-wrap">
-        <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
+      <button id="closePrintPreview" class="print-preview__close" type="button">×</button>
+      <div class="preview-layout">
+        <div class="preview-left">
+          <div class="print-preview__image-wrap">
+            <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
+          </div>
+        </div>
+        <div class="preview-right">
+          <div id="paypal-button-container" style="width:100%;"></div>
+          <div class="preview-text">
+            ✨ Bitte Fenster nach Zahlung nicht schließen – dein Download startet automatisch.
+            <br><br>
+            Dies ist eine Vorschau deines Mandalas.<br>
+            Der Download ist ohne Wasserzeichen verfügbar.<br><br>
+            <strong>Einführungspreis: 11,-€</strong>
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- RECHTS (PayPal + Text) -->
-    <div class="preview-right">
-
-      <div id="paypal-button-container" style="width:100%;"></div>
-
-      <div class="preview-text">
-        ✨ Bitte Fenster nach Zahlung nicht schließen – dein Download startet automatisch.
-        <br><br>
-        Dies ist eine Vorschau deines Mandalas.<br>
-        Der Download ist ohne Wasserzeichen verfügbar.<br><br>
-        <strong>Einführungspreis: 11,-€</strong>
-      </div>
-
-    </div>
-
   </div>
 
-</div>
   <div id="sliderSheet" class="slider-sheet">
     <div class="slider-sheet__backdrop" id="sliderBackdrop"></div>
     <div class="slider-sheet__panel">
@@ -152,7 +140,6 @@
       </div>
     </div>
   </div>
-
   <script>
     const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
 
@@ -165,30 +152,21 @@
       sector: 8,
       sliders: Array(10).fill(85),
       colors: [],
-      paperLook: true
+      paperLook: true,
+      isPaid: false
     };
 
     const charMap = {
-      A:1, J:1, S:1, Ä:1,
-      B:2, K:2, T:2, Ö:2,
-      C:3, L:3, U:3, Ü:3,
-      D:4, M:4, V:4, ß:4,
-      E:5, N:5, W:5,
-      F:6, O:6, X:6,
-      G:7, P:7, Y:7,
-      H:8, Q:8, Z:8,
-      I:9, R:9
+      A:1, J:1, S:1, Ä:1, B:2, K:2, T:2, Ö:2, C:3, L:3, U:3, Ü:3,
+      D:4, M:4, V:4, ß:4, E:5, N:5, W:5, F:6, O:6, X:6, G:7, P:7, Y:7,
+      H:8, Q:8, Z:8, I:9, R:9
     };
 
     const PALETTE_RAMPS = [
-      { soft: "#F4C7BD", vivid: "#FF0000" },
-      { soft: "#C9D6FF", vivid: "#00008B" },
-      { soft: "#D8F3C7", vivid: "#00FF00" },
-      { soft: "#FFF1A6", vivid: "#FFFF00" },
-      { soft: "#D3F0FF", vivid: "#87CEEB" },
-      { soft: "#9FE3E0", vivid: "#40E0D0" },
-      { soft: "#F4B6D9", vivid: "#FF00A8" },
-      { soft: "#F8D4B4", vivid: "#FFA500" },
+      { soft: "#F4C7BD", vivid: "#FF0000" }, { soft: "#C9D6FF", vivid: "#00008B" },
+      { soft: "#D8F3C7", vivid: "#00FF00" }, { soft: "#FFF1A6", vivid: "#FFFF00" },
+      { soft: "#D3F0FF", vivid: "#87CEEB" }, { soft: "#9FE3E0", vivid: "#40E0D0" },
+      { soft: "#F4B6D9", vivid: "#FF00A8" }, { soft: "#F8D4B4", vivid: "#FFA500" },
       { soft: "#DDD0FA", vivid: "#9400D3" }
     ];
 
@@ -214,14 +192,10 @@
       printPreview: document.getElementById("printPreview"),
       printPreviewBackdrop: document.getElementById("printPreviewBackdrop"),
       printPreviewImage: document.getElementById("printPreviewImage"),
-      closePrintPreview: document.getElementById("closePrintPreview"),
-      buyPreviewPng: document.getElementById("buyPreviewPng") || null
+      closePrintPreview: document.getElementById("closePrintPreview")
     };
 
-    function ex(a, b) {
-      const s = (a || 0) + (b || 0);
-      return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
-    }
+    function ex(a, b) { const s = (a || 0) + (b || 0); return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9); }
 
     function codeFromDate(str) {
       const raw = String(str || "").replace(/\D/g, "").split("").map(Number);
@@ -230,483 +204,135 @@
     }
 
     function codeFromText(text) {
-      let arr = String(text || "")
-        .toUpperCase()
-        .replace(/[^A-ZÄÖÜß]/g, "")
-        .split("")
-        .map(c => charMap[c])
-        .filter(Boolean);
-
+      let arr = String(text || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => charMap[c]).filter(Boolean);
       if (arr.length === 0) arr = [9];
-
       while (arr.length > 8) {
         const next = [];
-        for (let i = 0; i < arr.length - 1; i++) {
-          next.push(ex(arr[i], arr[i + 1]));
-        }
+        for (let i = 0; i < arr.length - 1; i++) { next.push(ex(arr[i], arr[i + 1])); }
         arr = next;
       }
-
       while (arr.length < 8) {
-        const len = arr.length;
-        const a = arr[len - 2] ?? arr[len - 1] ?? 9;
-        const b = arr[len - 1] ?? 9;
+        const a = arr[arr.length - 2] ?? arr[arr.length - 1] ?? 9;
+        const b = arr[arr.length - 1] ?? 9;
         arr.push(ex(a, b));
       }
-
       return arr.slice(0, 8);
     }
 
-    function getComputedCodeArray() {
-      return state.mode === "text"
-        ? codeFromText(state.input)
-        : codeFromDate(state.input);
-    }
-
     function syncComputedCode() {
-      state.computedCode = getComputedCodeArray().join("");
+      const codeArr = state.mode === "text" ? codeFromText(state.input) : codeFromDate(state.input);
+      state.computedCode = codeArr.join("");
       els.codeOutput.value = state.computedCode;
-    }
-
-    function clamp(n, min, max) {
-      return Math.max(min, Math.min(max, n));
-    }
-
-    function hexToRgb(hex) {
-      const clean = hex.replace("#", "");
-      const full = clean.length === 3
-        ? clean.split("").map(ch => ch + ch).join("")
-        : clean;
-
-      const num = parseInt(full, 16);
-
-      return {
-        r: (num >> 16) & 255,
-        g: (num >> 8) & 255,
-        b: num & 255
-      };
-    }
-
-    function rgbToHex(r, g, b) {
-      return "#" + [r, g, b]
-        .map(v => clamp(Math.round(v), 0, 255).toString(16).padStart(2, "0"))
-        .join("")
-        .toUpperCase();
-    }
-
-    function interpolateHex(hex1, hex2, t) {
-      const a = hexToRgb(hex1);
-      const b = hexToRgb(hex2);
-
-      return rgbToHex(
-        a.r + (b.r - a.r) * t,
-        a.g + (b.g - a.g) * t,
-        a.b + (b.b - a.b) * t
-      );
-    }
-
-    function rotateRampsBySeed(seedDigit) {
-      const shift = clamp((seedDigit || 1) - 1, 0, 8);
-      return PALETTE_RAMPS.map((_, i) => PALETTE_RAMPS[(i + shift) % PALETTE_RAMPS.length]);
-    }
-
-    function getRampColor(ramp, sliderValue) {
-      const tLinear = (clamp(Number(sliderValue) || 85, 20, 100) - 20) / 80;
-      const t = Math.pow(tLinear, 0.86);
-      return interpolateHex(ramp.soft, ramp.vivid, t);
     }
 
     function computeFinalColors() {
       const seedDigit = Number(state.computedCode?.charAt(0) || 1);
-      const rotatedRamps = rotateRampsBySeed(seedDigit);
-
+      const shift = Math.max(0, Math.min(8, seedDigit - 1));
+      const rotatedRamps = PALETTE_RAMPS.map((_, i) => PALETTE_RAMPS[(i + shift) % PALETTE_RAMPS.length]);
       state.colors = rotatedRamps.map((ramp, index) => {
-        const digit = index + 1;
-        const sliderValue = state.sliders[digit] ?? 85;
-        return getRampColor(ramp, sliderValue);
-      });
-    }
-
-    function setSliderVisual(input) {
-      input.style.setProperty("--val", input.value + "%");
-    }
-
-    function syncSameDigitSliders(digit, value, sourceInput = null) {
-      const sliders = document.querySelectorAll(
-        '.slider-row input[type="range"][data-digit="' + digit + '"]'
-      );
-
-      sliders.forEach(slider => {
-        if (slider !== sourceInput) slider.value = value;
-        setSliderVisual(slider);
+        const sliderValue = state.sliders[index + 1] ?? 85;
+        const tLinear = (Math.max(20, Math.min(100, sliderValue)) - 20) / 80;
+        const t = Math.pow(tLinear, 0.86);
+        const hexToRgb = (hex) => {
+          const c = hex.replace("#", "");
+          const num = parseInt(c.length === 3 ? c.split("").map(x => x+x).join("") : c, 16);
+          return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+        };
+        const a = hexToRgb(ramp.soft);
+        const b = hexToRgb(ramp.vivid);
+        const f = (val1, val2) => Math.max(0, Math.min(255, Math.round(val1 + (val2 - val1) * t))).toString(16).padStart(2, "0");
+        return "#" + f(a.r, b.r) + f(a.g, b.g) + f(a.b, b.b).toUpperCase();
       });
     }
 
     function applySliderColorsToUI() {
       for (let i = 1; i <= 9; i++) {
         const color = state.colors[i - 1] || "#D8B45A";
-
-        const dotDesktop = document.getElementById("sliders_dot" + i);
-        const dotMobile = document.getElementById("slidersMobile_dot" + i);
-
-        if (dotDesktop) dotDesktop.style.background = color;
-        if (dotMobile) dotMobile.style.background = color;
-
-        const digitEls = document.querySelectorAll(
-          '.slider-row .digit[data-digit="' + i + '"]'
-        );
-        digitEls.forEach(el => {
-          el.style.color = color;
+        document.querySelectorAll(`.slider-row .digit[data-digit="${i}"], .slider-row input[data-digit="${i}"]`).forEach(el => {
+          el.style.color = color; el.style.setProperty("--accent", color); el.style.setProperty("--val", el.value + "%");
         });
-
-        const inputs = document.querySelectorAll(
-          '.slider-row input[type="range"][data-digit="' + i + '"]'
-        );
-        inputs.forEach(input => {
-          input.style.setProperty("--accent", color);
-          setSliderVisual(input);
-        });
-      }
-    }
-
-    function refreshComputedCodeAndColors() {
-      syncComputedCode();
-      computeFinalColors();
-      applySliderColorsToUI();
-    }
-
-    function getEnginePayloadState() {
-      refreshComputedCodeAndColors();
-
-      return {
-        ...state,
-        mode: "geburtstag",
-        input: state.computedCode,
-        colors: [...state.colors]
-      };
-    }
-
-    function showLoading() {
-      els.loading.style.display = "grid";
-    }
-
-    function hideLoading() {
-      els.loading.style.display = "none";
-    }
-
-    function showPreviewInfo() {
-      if (!els.previewInfo) return;
-      els.previewInfo.classList.add("show");
-      clearTimeout(showPreviewInfo._timer);
-      showPreviewInfo._timer = setTimeout(() => {
-        els.previewInfo.classList.remove("show");
-      }, 1800);
-    }
-
-    function openPrintPreview(dataUrl) {
-      els.printPreviewImage.src = dataUrl;
-      els.printPreview.hidden = false;
-      document.body.style.overflow = "auto";
-      buildDownloadWatermark();
-    }
-
-    function closePrintPreview() {
-      els.printPreview.hidden = true;
-      els.printPreviewImage.src = "";
-      document.body.style.overflow = "";
-    }
-function buildDownloadWatermark(){
-  const container = document.getElementById("downloadWatermark");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  const stepY = 220;
-  const stepX = 300;
-
-  for(let y = -100; y < 1200; y += stepY){
-    for(let x = -100; x < 1200; x += stepX){
-
-      const img = document.createElement("img");
-      img.src = "assets/Logo_gold.png";
-
-      const offset = (Math.floor(y / stepY) % 2 === 0) ? 0 : stepX / 2;
-
-      img.style.top = y + "px";
-      img.style.left = (x + offset) + "px";
-
-      container.appendChild(img);
-    }
-  }
-}
-    function handlePaidDownload() {
-      if (!PAYMENT_URL || PAYMENT_URL === "#") {
-        alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");
-        return;
-      }
-      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
-    }
-
-    function buildSlidersInto(containerEl) {
-      if (!containerEl) return;
-      containerEl.innerHTML = "";
-
-      for (let i = 1; i <= 9; i++) {
-        const row = document.createElement("div");
-        row.className = "slider-row";
-
-        const dot = document.createElement("div");
-        dot.className = "dot";
-        dot.id = containerEl.id + "_dot" + i;
-
-        const label = document.createElement("div");
-        label.className = "digit";
-        label.dataset.digit = String(i);
-        label.textContent = String(i);
-
-        const input = document.createElement("input");
-        input.type = "range";
-        input.min = "20";
-        input.max = "100";
-        input.value = String(state.sliders[i] ?? 85);
-        input.dataset.digit = String(i);
-
-        setSliderVisual(input);
-
-        input.addEventListener("input", () => {
-          state.sliders[i] = Number(input.value);
-          setSliderVisual(input);
-          syncSameDigitSliders(i, input.value, input);
-          refreshComputedCodeAndColors();
-          pushStateToEngine();
-        });
-
-        row.appendChild(dot);
-        row.appendChild(label);
-        row.appendChild(input);
-        containerEl.appendChild(row);
-      }
-    }
-
-    function buildSliders() {
-      buildSlidersInto(els.sliders);
-      buildSlidersInto(els.slidersMobile);
-    }
-
-    function setActiveEngineButton(engine) {
-      document.querySelectorAll(".engine-btn").forEach(btn => {
-        if (!btn.dataset.engine) return;
-        btn.classList.toggle("active", btn.dataset.engine === engine);
-      });
-    }
-
-    function updateViewerWatermarkPosition() {
-      if (!els.engineWrap) return;
-      els.engineWrap.classList.remove("wm-quadrat", "wm-rund", "wm-wabe");
-      els.engineWrap.classList.add("wm-" + state.engine);
-    }
-
-    function updateConditionalFields() {
-      if (els.sectorWrap) {
-        els.sectorWrap.style.display = state.engine === "rund" ? "flex" : "none";
+        const dD = document.getElementById("sliders_dot" + i), dM = document.getElementById("slidersMobile_dot" + i);
+        if (dD) dD.style.background = color; if (dM) dM.style.background = color;
       }
     }
 
     function pushStateToEngine() {
       if (!els.frame.contentWindow) return;
-
-      const enginePayload = getEnginePayloadState();
-      els.frame.contentWindow.postMessage(
-        { type: "SET_STATE", payload: enginePayload },
-        "*"
-      );
+      syncComputedCode(); computeFinalColors(); applySliderColorsToUI();
+      els.frame.contentWindow.postMessage({ type: "SET_STATE", payload: { ...state, input: state.computedCode } }, "*");
     }
 
     function requestExport(kind = "preview") {
-  const enginePayload = getEnginePayloadState();
-  enginePayload.exportKind = kind;
+      if (!els.frame.contentWindow) return;
+      showLoading();
+      els.frame.contentWindow.postMessage({ type: "EXPORT", payload: { ...state, input: state.computedCode, exportKind: kind } }, "*");
+    }
 
-  els.frame.contentWindow.postMessage(
-    { type: "EXPORT", payload: enginePayload },
-    "*"
-  );
-}
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== "object") return;
+      if (msg.type === "READY") { hideLoading(); pushStateToEngine(); }
+      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+        hideLoading();
+        if (state.isPaid) {
+          const link = document.createElement("a"); link.href = msg.dataUrl; link.download = `Mandala_${state.computedCode}.png`;
+          document.body.appendChild(link); link.click(); document.body.removeChild(link);
+          state.isPaid = false; alert("Download gestartet! 🎉");
+        } else {
+          els.printPreviewImage.src = msg.dataUrl; els.printPreview.hidden = false;
+        }
+      }
+    });
 
     function loadEngine(engine) {
       state.engine = engine;
-      setActiveEngineButton(engine);
-      updateConditionalFields();
-      updateViewerWatermarkPosition();
-      showLoading();
-
-      els.frame.onload = () => {
-        hideLoading();
-        pushStateToEngine();
-      };
-
-      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+      document.querySelectorAll(".engine-nav .engine-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.engine === engine));
+      els.sectorWrap.style.display = engine === "rund" ? "flex" : "none";
+      els.engineWrap.className = "engine-wrap wm-" + engine;
+      showLoading(); els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
     }
 
-    function openSheet() {
-      els.sliderSheet.classList.add("open");
-      document.body.style.overflow = "hidden";
-    }
+    function showLoading() { els.loading.style.display = "grid"; }
+    function hideLoading() { els.loading.style.display = "none"; }
+    function openSheet() { els.sliderSheet.classList.add("active"); document.body.style.overflow = "hidden"; }
+    function closeSheet() { els.sliderSheet.classList.remove("active"); document.body.style.overflow = ""; }
+    function closePrintPreview() { els.printPreview.hidden = true; els.printPreviewImage.src = ""; }
 
-    function closeSheet() {
-      els.sliderSheet.classList.remove("open");
-      if (els.printPreview.hidden) {
-        document.body.style.overflow = "";
+    function buildSlidersInto(containerEl) {
+      if (!containerEl) return; containerEl.innerHTML = "";
+      for (let i = 1; i <= 9; i++) {
+        const row = document.createElement("div"); row.className = "slider-row";
+        row.innerHTML = `<div class="dot" id="${containerEl.id}_dot${i}"></div><div class="digit" data-digit="${i}">${i}</div>
+                         <input type="range" min="20" max="100" value="${state.sliders[i] || 85}" data-digit="${i}">`;
+        const input = row.querySelector("input");
+        input.addEventListener("input", () => {
+          const val = Number(input.value); state.sliders[i] = val;
+          document.querySelectorAll(`input[data-digit="${i}"]`).forEach(el => { el.value = val; el.style.setProperty("--val", val + "%"); });
+          pushStateToEngine();
+        });
+        containerEl.appendChild(row);
       }
     }
-function openSheet() {
-  const sheet = document.getElementById("sliderSheet");
-  if(sheet) sheet.classList.add("active");
-}
 
-function closeSheet() {
-  const sheet = document.getElementById("sliderSheet");
-  if(sheet) sheet.classList.remove("active");
-}
-   // ✅ 1. MESSAGE LISTENER
-window.addEventListener("message", (ev) => {
-  const msg = ev.data;
+    document.addEventListener("DOMContentLoaded", () => {
+      buildSlidersInto(els.sliders); buildSlidersInto(els.slidersMobile); loadEngine("quadrat");
+      els.mode.addEventListener("change", (e) => { state.mode = e.target.value; pushStateToEngine(); });
+      els.input.addEventListener("input", (e) => { state.input = e.target.value; pushStateToEngine(); });
+      els.direction.addEventListener("change", (e) => { state.direction = e.target.value; pushStateToEngine(); });
+      els.sector.addEventListener("change", (e) => { state.sector = Number(e.target.value); pushStateToEngine(); });
+      els.download.addEventListener("click", () => requestExport("preview"));
+      els.closePrintPreview.addEventListener("click", closePrintPreview);
+      els.openSliders.addEventListener("click", openSheet); els.closeSliders.addEventListener("click", closeSheet);
+      els.sliderBackdrop.addEventListener("click", closeSheet);
 
-  if (!msg || typeof msg !== "object") return;
-
-  if (msg.type === "READY") {
-    hideLoading();
-    pushStateToEngine();
-    return;
-  }
-
-  if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
-    state.colors = [...msg.colors];
-    applySliderColorsToUI();
-    return;
-  }
-
-if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-  hideLoading();
-
-  console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50)); // 👈 HIER
-
-  window.__FINAL_MANDALA = msg.dataUrl;
-
-  openPrintPreview(msg.dataUrl);
-}
-
-});
-    document.querySelectorAll(".engine-btn").forEach(btn => {
-      if (!btn.dataset.engine) return;
-      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+      if (typeof paypal !== "undefined") {
+        paypal.Buttons({
+          createOrder: (data, actions) => actions.order.create({ purchase_units: [{ amount: { value: "11.00" } }] }),
+          onApprove: (data, actions) => actions.order.capture().then(() => { state.isPaid = true; requestExport("final"); }),
+          onError: (err) => alert("PayPal Fehler.")
+        }).render('#paypal-button-container');
+      }
     });
-
-    els.mode.addEventListener("change", () => {
-      state.mode = els.mode.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
-
-    els.input.addEventListener("input", () => {
-      state.input = els.input.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
-
-    els.direction.addEventListener("change", () => {
-      state.direction = els.direction.value;
-      pushStateToEngine();
-    });
-
-    els.sector.addEventListener("change", () => {
-      state.sector = Number(els.sector.value);
-      pushStateToEngine();
-    });
-
-    els.download.addEventListener("click", () => {
-      showPreviewInfo();
-      requestExport();
-    });
-
-    els.openSliders.addEventListener("click", openSheet);
-    els.closeSliders.addEventListener("click", closeSheet);
-    els.sliderBackdrop.addEventListener("click", closeSheet);
-    els.closePrintPreview.addEventListener("click", closePrintPreview);
-    els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-    if (els.buyPreviewPng) {
-  els.buyPreviewPng.addEventListener("click", handlePaidDownload);
-}
-
-    buildSliders();
-    refreshComputedCodeAndColors();
-    updateConditionalFields();
-    updateViewerWatermarkPosition();
-    loadEngine("quadrat");
-    document.addEventListener("DOMContentLoaded", function() {
-
-  if (typeof paypal === "undefined") {
-    console.error("PayPal SDK nicht geladen");
-    return;
-  }
-
-  paypal.Buttons({
-
-  style: {
-    layout: 'vertical'
-  },
-
-  createOrder: function(data, actions) {
-
-    // 🔥 Mandala speichern (optional Backup)
-    const exportState = getEnginePayloadState();
-    window.__mandalaState = exportState; // 👉 WICHTIG: im RAM behalten
-
-    return actions.order.create({
-      purchase_units: [{
-        amount: { value: "0.01" }
-      }]
-    });
-  },
-
-onApprove: function(data, actions) {
-  return actions.order.capture().then(function(details) {
-
-    // 🔥 1. FINAL EXPORT ANFORDERN
-    requestExport("final");
-
-    // 🔥 2. WARTEN bis Engine antwortet
-    setTimeout(() => {
-
-      console.log("DOWNLOAD:", window.__FINAL_MANDALA?.slice(0,50));
-
-      const dataUrl = window.__FINAL_MANDALA;
-
-      if (!dataUrl) {
-        alert("Fehler – kein Mandala erhalten");
-        return;
-      }
-
-      // 🔥 3. DOWNLOAD STARTEN
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "mandala.png";
-      link.click();
-
-      alert("Download gestartet 🎉");
-
-    }, 700); // ⏱ leicht erhöht für Sicherheit
-
-  });
-},
-    
-  onError: function(err) {
-    alert("PayPal Fehler – bitte im Browser öffnen.");
-    console.error(err);
-  }
-
-}).render('#paypal-button-container');
-
-});
-  </script>
+  </script>
 </body>
 </html>

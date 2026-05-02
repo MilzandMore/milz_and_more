@@ -275,18 +275,50 @@
       }, "*");
     }
 
+    // --- KOMMUNIKATION MIT DER ENGINE ---
     window.addEventListener("message", (ev) => {
       const msg = ev.data;
       if (!msg || typeof msg !== "object") return;
-      if (msg.type === "READY") { els.loading.style.display = "none"; pushStateToEngine(); }
+      
+      if (msg.type === "READY") { 
+        els.loading.style.display = "none"; 
+        pushStateToEngine(); 
+      }
+      
       if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
         els.loading.style.display = "none";
+        
         if (state.isPaid) {
-          const link = document.createElement("a"); link.href = msg.dataUrl; link.download = `Mandala_${state.computedCode}.png`;
-          document.body.appendChild(link); link.click(); document.body.removeChild(link);
-          state.isPaid = false; 
+          // 1. Automatischer Download-Versuch
+          const link = document.createElement("a");
+          link.href = msg.dataUrl;
+          link.download = `Mandala_${state.computedCode}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          state.isPaid = false; // Reset für nächste Transaktion
+
+          // 2. Sicherheits-Fallback: Manuellen Button im PayPal-Bereich einblenden
+          const previewRight = document.querySelector(".preview-right");
+          if(previewRight) {
+            previewRight.innerHTML = `
+              <div style="text-align:center; padding: 20px; background: #c9a14a22; border: 2px solid #c9a14a; border-radius: 10px;">
+                <h3 style="color: #c9a14a; font-family: Cinzel, serif; margin-bottom:10px;">Zahlung Erfolgreich!</h3>
+                <p style="font-size: 0.9em; margin-bottom: 15px;">Dein hochauflösendes Mandala wurde erstellt.</p>
+                <a href="${msg.dataUrl}" download="Mandala_${state.computedCode}.png" 
+                   style="display:block; background:#c9a14a; color:black; padding:15px; text-decoration:none; font-weight:bold; border-radius:5px; transition: transform 0.2s;">
+                   JETZT MANUELL SPEICHERN
+                </a>
+                <p style="font-size: 0.75em; margin-top: 12px; opacity: 0.8;">Tipp: Falls kein Download startet, klicke auf den goldenen Button oder halte ihn gedrückt.</p>
+              </div>
+            `;
+          }
+          alert("Zahlung bestätigt! Dein Download sollte jetzt starten.");
         } else {
-          els.printPreviewImage.src = msg.dataUrl; els.printPreview.hidden = false;
+          // Normaler Vorschau-Modus (Wasserzeichen-Vorschau)
+          els.printPreviewImage.src = msg.dataUrl;
+          els.printPreview.hidden = false;
         }
       }
     });
@@ -323,7 +355,7 @@
       buildSlidersInto(els.slidersMobile); 
       loadEngine("quadrat");
 
-      // Fix für die Navigation
+      // Navigation
       document.querySelectorAll(".engine-nav .engine-btn").forEach(btn => {
         btn.onclick = () => loadEngine(btn.dataset.engine);
       });
@@ -343,13 +375,25 @@
       els.closeSliders.onclick = () => els.sliderSheet.classList.remove("active");
       els.sliderBackdrop.onclick = () => els.sliderSheet.classList.remove("active");
 
+      // --- PAYPAL INTEGRATION ---
       if (typeof paypal !== "undefined") {
         paypal.Buttons({
+          style: { layout: 'vertical', shape: 'rect', color: 'gold' },
           createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: "0.01" } }] }),
-          onApprove: (d, a) => a.order.capture().then(() => { 
-            state.isPaid = true; 
-            els.frame.contentWindow.postMessage({ type: "EXPORT", payload: { ...state, input: state.computedCode, mode: "geburtstag", exportKind: "final" } }, "*"); 
-          })
+          onApprove: (data, actions) => {
+            return actions.order.capture().then(() => { 
+              state.isPaid = true; 
+              els.loading.style.display = "grid"; // Zeige Lade-Animation während High-Res Erstellung
+              els.frame.contentWindow.postMessage({ 
+                type: "EXPORT", 
+                payload: { ...state, input: state.computedCode, mode: "geburtstag", exportKind: "final" } 
+              }, "*"); 
+            });
+          },
+          onError: (err) => {
+            alert("PayPal Fehler – bitte versuche es erneut.");
+            els.loading.style.display = "none";
+          }
         }).render('#paypal-button-container');
       }
     });

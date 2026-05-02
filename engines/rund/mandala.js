@@ -57,31 +57,27 @@ function sendColors(colors) {
   if (window.parent) window.parent.postMessage({ type: "COLORS", colors }, "*");
 }
 
-window.addEventListener("message", (ev) => {
-  const msg = ev.data;
-  if (!msg || typeof msg !== "object") return;
+if (msg.type === "EXPORT") {
+    if (msg.payload) {
+      extState = Object.assign(extState, msg.payload);
+      exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
+    }
 
-  if (msg.type === "SET_STATE" && msg.payload) {
-    APP = {
-      ...APP,
-      ...msg.payload,
-      colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : APP.colors
-    };
-    isAdmin = !!APP.isAdmin;
-    redraw();
+    // 1. Hochauflösendes Bild generieren
+    // WICHTIG: exportHighRes muss das Bild auf dem Canvas zeichnen
+    exportHighRes(exportKind);
+
+    // 2. Das Bild vom Canvas abgreifen
+    const dataUrl = canvas.toDataURL("image/png");
+
+    // 3. Das Bild an die Hauptseite senden
+    window.parent.postMessage({
+      type: "EXPORT_RESULT",
+      dataUrl: dataUrl
+    }, "*");
+    
     return;
   }
-
-  if (msg.type === "EXPORT") {
-  if (msg.payload) {
-    extState = Object.assign(extState, msg.payload);
-    // Diese Zeile ist entscheidend:
-    exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
-  }
-  exportHighRes(exportKind);
-  return;
-}
-});
 
 // --------- p5 ----------
 function preload() {

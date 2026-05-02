@@ -275,134 +275,78 @@
       }, "*");
     }
 
-   // --- KOMMUNIKATION MIT DER ENGINE ---
-    window.addEventListener("message", (ev) => {
-      const msg = ev.data;
-      if (!msg || typeof msg !== "object") return;
-      
-      if (msg.type === "READY") { 
-        els.loading.style.display = "none"; 
-        pushStateToEngine(); 
-      }
-      
-      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-        els.loading.style.display = "none";
-        
-        // WICHTIG: Wir speichern das Bild global, damit wir es jederzeit ziehen können
-        window.__LAST_EXPORT_URL = msg.dataUrl;
+   // 1. Variable zur Speicherung der Bilddaten hinzufügen (ganz oben im Script)
+let lastGeneratedDataUrl = null;
 
-        if (state.isPaid) {
-          triggerDownload(msg.dataUrl);
-          showManualDownloadButton(msg.dataUrl);
-          state.isPaid = false; 
-        } else {
-          els.printPreviewImage.src = msg.dataUrl;
-          els.printPreview.hidden = false;
-        }
-      }
-    });
+// 2. Den Message-Listener anpassen
+window.addEventListener("message", (ev) => {
+  const msg = ev.data;
+  if (!msg || typeof msg !== "object") return;
 
-    function triggerDownload(url) {
+  if (msg.type === "READY") {
+    hideLoading();
+    pushStateToEngine();
+  }
+
+  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+    hideLoading();
+    lastGeneratedDataUrl = msg.dataUrl; // Bild für Notfälle zwischenspeichern
+
+    if (state.isPaid) {
+      // Versuch des automatischen Downloads
       const link = document.createElement("a");
-      link.href = url;
+      link.href = msg.dataUrl;
       link.download = `Mandala_${state.computedCode}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // Den "Notfall-Button" anzeigen, falls der Browser den Klick blockiert hat
+      showFinalDownloadUI(msg.dataUrl);
+    } else {
+      els.printPreviewImage.src = msg.dataUrl;
+      els.printPreview.hidden = false;
     }
+  }
+});
 
-    function showManualDownloadButton(url) {
-      const previewRight = document.querySelector(".preview-right");
-      if(previewRight) {
-        previewRight.innerHTML = `
-          <div style="text-align:center; padding: 20px; background: #c9a14a22; border: 2px solid #c9a14a; border-radius: 10px; margin-top: 20px;">
-            <h3 style="color: #c9a14a; font-family: Cinzel, serif;">Zahlung Erfolgreich!</h3>
-            <p>Falls der Download nicht gestartet ist:</p>
-            <a href="${url}" download="Mandala_${state.computedCode}.png" 
-               style="display:block; background:#c9a14a; color:black; padding:15px; text-decoration:none; font-weight:bold; border-radius:5px; margin-top:10px;">
-               HIER MANDALA SPEICHERN
-            </a>
-          </div>
-        `;
-      }
-    }
+// 3. Funktion für die Notfall-UI (erscheint nach der Zahlung)
+function showFinalDownloadUI(url) {
+  const container = document.querySelector(".preview-right");
+  if (container) {
+    container.innerHTML = `
+      <div style="text-align:center; padding: 20px; background: #c9a14a22; border: 2px solid #c9a14a; border-radius: 10px;">
+        <h3 style="color: #c9a14a; font-family: Cinzel, serif;">Zahlung Bestätigt!</h3>
+        <p>Dein Mandala ohne Wasserzeichen ist bereit.</p>
+        <a href="${url}" download="Mandala_${state.computedCode}.png" 
+           style="display:block; background:#c9a14a; color:black; padding:15px; text-decoration:none; font-weight:bold; border-radius:5px; margin-top:10px;">
+           HIER MANUELL SPEICHERN
+        </a>
+        <button onclick="location.reload()" style="background:transparent; color:white; border:none; margin-top:15px; cursor:pointer; text-decoration:underline;">
+          Zurück zum Editor
+        </button>
+      </div>
+    `;
+  }
+}
 
-    function loadEngine(engine) {
-      state.engine = engine;
-      document.querySelectorAll(".engine-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.engine === engine));
-      els.sectorWrap.style.display = engine === "rund" ? "flex" : "none";
-      els.engineWrap.className = "engine-wrap wm-" + engine;
-      els.loading.style.display = "grid";
-      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
-    }
-
-    function buildSlidersInto(containerEl) {
-      if (!containerEl) return;
-      containerEl.innerHTML = "";
-      for (let i = 1; i <= 9; i++) {
-        const row = document.createElement("div"); row.className = "slider-row";
-        row.innerHTML = `<div class="dot" id="${containerEl.id}_dot${i}"></div><div class="digit" data-digit="${i}">${i}</div>
-                         <input type="range" min="20" max="100" value="${state.sliders[i] ?? 85}" data-digit="${i}">`;
-        row.querySelector("input").addEventListener("input", (e) => {
-          const val = Number(e.target.value);
-          state.sliders[i] = val;
-          document.querySelectorAll(`input[data-digit="${i}"]`).forEach(inp => { inp.value = val; inp.style.setProperty("--val", val + "%"); });
-          pushStateToEngine();
-        });
-        containerEl.appendChild(row);
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      buildSlidersInto(els.sliders); 
-      buildSlidersInto(els.slidersMobile); 
-      loadEngine("quadrat");
-
-      document.querySelectorAll(".engine-nav .engine-btn").forEach(btn => {
-        btn.onclick = () => loadEngine(btn.dataset.engine);
+// 4. Der PayPal Block (Anpassen von onApprove)
+if (typeof paypal !== "undefined") {
+  paypal.Buttons({
+    createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: "0.01" } }] }),
+    onApprove: (data, actions) => {
+      return actions.order.capture().then(() => {
+        state.isPaid = true;
+        showLoading();
+        // Hier fordern wir den Export OHNE Wasserzeichen an
+        els.frame.contentWindow.postMessage({ 
+          type: "EXPORT", 
+          payload: { ...state, input: state.computedCode, exportKind: "final" } 
+        }, "*");
       });
-
-      els.mode.onchange = (e) => { state.mode = e.target.value; pushStateToEngine(); };
-      els.input.oninput = (e) => { state.input = e.target.value; pushStateToEngine(); };
-      els.direction.onchange = (e) => { state.direction = e.target.value; pushStateToEngine(); };
-      els.sector.onchange = (e) => { state.sector = Number(e.target.value); pushStateToEngine(); };
-      
-      els.download.onclick = () => {
-        els.loading.style.display = "grid";
-        els.frame.contentWindow.postMessage({ type: "EXPORT", payload: { ...state, input: state.computedCode, mode: "geburtstag" } }, "*");
-      };
-
-      els.closePrintPreview.onclick = () => els.printPreview.hidden = true;
-      els.openSliders.onclick = () => els.sliderSheet.classList.add("active");
-      els.closeSliders.onclick = () => els.sliderSheet.classList.remove("active");
-      els.sliderBackdrop.onclick = () => els.sliderSheet.classList.remove("active");
-
-      if (typeof paypal !== "undefined") {
-        paypal.Buttons({
-          style: { layout: 'vertical', shape: 'rect', color: 'gold' },
-          createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: "0.01" } }] }),
-          onApprove: (data, actions) => {
-            return actions.order.capture().then(() => { 
-              state.isPaid = true; 
-              els.loading.style.display = "grid";
-              
-              // Sofort-Maßnahme: Falls das Bild schon im Cache ist, Button zeigen
-              if(window.__LAST_EXPORT_URL) {
-                showManualDownloadButton(window.__LAST_EXPORT_URL);
-              }
-
-              els.frame.contentWindow.postMessage({ 
-                type: "EXPORT", 
-                payload: { ...state, input: state.computedCode, mode: "geburtstag", exportKind: "final" } 
-              }, "*"); 
-            });
-          },
-          onError: (err) => {
-            alert("PayPal Fehler – bitte Seite neu laden.");
-            els.loading.style.display = "none";
-          }
-        }).render('#paypal-button-container');
-      }
+    }
+  }).render('#paypal-button-container');
+}
     });
   </script>
 </body>

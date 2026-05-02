@@ -310,28 +310,32 @@ window.addEventListener("message", (ev) => {
   }
 });
 
-// 3. Funktion für die Notfall-UI (erscheint nach der Zahlung)
-function showFinalDownloadUI(url) {
-  const container = document.querySelector(".preview-right");
-  if (container) {
-    container.innerHTML = `
-      <div style="text-align:center; padding: 20px; background: #c9a14a22; border: 2px solid #c9a14a; border-radius: 10px;">
-        <h3 style="color: #c9a14a; font-family: Cinzel, serif;">Zahlung Bestätigt!</h3>
-        <p>Dein Mandala ohne Wasserzeichen ist bereit.</p>
-        <a href="${url}" download="Mandala_${state.computedCode}.png" 
-           style="display:block; background:#c9a14a; color:black; padding:15px; text-decoration:none; font-weight:bold; border-radius:5px; margin-top:10px;">
-           HIER MANUELL SPEICHERN
-        </a>
-        <button onclick="location.reload()" style="background:transparent; color:white; border:none; margin-top:15px; cursor:pointer; text-decoration:underline;">
-          Zurück zum Editor
-        </button>
-      </div>
-    `;
-  }
-}
+// 3. Funktion für die Notfall-UI (außerhalb definiert, damit sie immer verfügbar ist)
+    function showFinalDownloadUI(url) {
+      const container = document.querySelector(".preview-right");
+      if (container) {
+        container.innerHTML = `
+          <div style="text-align:center; padding: 20px; background: #c9a14a22; border: 2px solid #c9a14a; border-radius: 10px;">
+            <h3 style="color: #c9a14a; font-family: Cinzel, serif;">Zahlung Bestätigt!</h3>
+            <p>Dein Mandala ohne Wasserzeichen ist bereit.</p>
+            <a href="${url}" download="Mandala_${state.computedCode}.png" 
+               style="display:block; background:#c9a14a; color:black; padding:15px; text-decoration:none; font-weight:bold; border-radius:5px; margin-top:10px;">
+               HIER MANUELL SPEICHERN
+            </a>
+            <button onclick="location.reload()" style="background:transparent; color:white; border:none; margin-top:15px; cursor:pointer; text-decoration:underline;">
+              Zurück zum Editor
+            </button>
+          </div>
+        `;
+      }
+    }
 
-els.closeSliders.onclick = () => els.sliderSheet.classList.remove("active");
-      els.sliderBackdrop.onclick = () => els.sliderSheet.classList.remove("active");
+    // Dieser Teil muss innerhalb deines DOMContentLoaded-Listeners stehen
+    document.addEventListener("DOMContentLoaded", () => {
+      // ... (dein restlicher Initialisierungs-Code hier) ...
+
+      if (els.closeSliders) els.closeSliders.onclick = () => els.sliderSheet.classList.remove("active");
+      if (els.sliderBackdrop) els.sliderBackdrop.onclick = () => els.sliderSheet.classList.remove("active");
 
       // --- PAYPAL INTEGRATION ---
       if (typeof paypal !== "undefined") {
@@ -351,7 +355,7 @@ els.closeSliders.onclick = () => els.sliderSheet.classList.remove("active");
           }
         }).render('#paypal-button-container');
       }
-    }); // <--- Diese Klammer schließt DOMContentLoaded
+    }); // Schließt DOMContentLoaded sauber ab
   </script>
 </body>
 </html>

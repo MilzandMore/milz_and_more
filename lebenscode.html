@@ -345,7 +345,7 @@
 
       if (typeof paypal !== "undefined") {
         paypal.Buttons({
-          createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: "11.00" } }] }),
+          createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: "0.01" } }] }),
           onApprove: (d, a) => a.order.capture().then(() => { 
             state.isPaid = true; 
             els.frame.contentWindow.postMessage({ type: "EXPORT", payload: { ...state, input: state.computedCode, mode: "geburtstag", exportKind: "final" } }, "*"); 

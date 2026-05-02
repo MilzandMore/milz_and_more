@@ -45,44 +45,66 @@ function sendColors(colors) {
   if (window.parent) window.parent.postMessage({ type: "COLORS", colors }, "*");
 }
 
+// --------- 1. INITIALISIERUNG DER VARIABLEN (Falls noch nicht vorhanden) ----------
+let exportKind = "preview"; 
+// Hinweis: extState und APP sollten bereits oben in deinem Code definiert sein.
+
+// --------- 2. DER KORRIGIERTE MESSAGE-LISTENER ----------
 window.addEventListener("message", (ev) => {
   const msg = ev.data;
   if (!msg || typeof msg !== "object") return;
 
+  // FALL 1: Daten aktualisieren (Regler, Text, Farben)
   if (msg.type === "SET_STATE" && msg.payload) {
-    APP = {
-      ...APP,
-      ...msg.payload,
-      colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : APP.colors
-    };
-    isAdmin = !!APP.isAdmin;
-    redraw();
+    // Sicherstellen, dass APP und extState existieren, bevor wir sie füllen
+    if (typeof APP !== 'undefined') {
+      APP = {
+        ...APP,
+        ...msg.payload,
+        colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : (APP.colors || [])
+      };
+      isAdmin = !!APP.isAdmin;
+    }
+    
+    if (typeof extState !== 'undefined') {
+      Object.assign(extState, msg.payload);
+    }
+
+    // Mandala mit neuen Werten neu zeichnen
+    if (typeof redraw === "function") redraw();
     return;
   }
 
+  // FALL 2: Export (Druckvorschau oder Kauf)
   if (msg.type === "EXPORT") {
     if (msg.payload) {
-      extState = Object.assign(extState, msg.payload);
+      if (typeof extState !== 'undefined') Object.assign(extState, msg.payload);
       exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
     }
 
-    // 1. Hochauflösendes Bild generieren
-    // WICHTIG: exportHighRes muss das Bild auf dem Canvas zeichnen
-    exportHighRes(exportKind);
+    // 1. Hochauflösendes Bild auf dem Canvas generieren
+    if (typeof exportHighRes === "function") {
+      exportHighRes(exportKind);
 
-    // 2. Das Bild vom Canvas abgreifen
-    const dataUrl = canvas.toDataURL("image/png");
+      // 2. Das Bild vom Canvas abgreifen
+      // Wir suchen das Canvas-Element direkt im Dokument
+      const canvasElement = document.querySelector("canvas");
+      
+      if (canvasElement) {
+        const dataUrl = canvasElement.toDataURL("image/png");
 
-    // 3. Das Bild an die Hauptseite senden
-    window.parent.postMessage({
-      type: "EXPORT_RESULT",
-      dataUrl: dataUrl
-    }, "*");
-    
+        // 3. Das Bild an die Hauptseite (lebenscode.html) zurücksenden
+        window.parent.postMessage({
+          type: "EXPORT_RESULT",
+          dataUrl: dataUrl
+        }, "*");
+      } else {
+        console.error("Canvas-Element wurde nicht gefunden!");
+      }
+    }
     return;
   }
 });
-
 function preload() {
   const p = (APP && APP.exportLogo) ? APP.exportLogo : "../../assets/Logo_black.png";
 

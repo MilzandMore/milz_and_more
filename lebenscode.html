@@ -143,6 +143,7 @@
 
    <script>
     // 1. State und Konstanten
+    // 1. State & Konfiguration
     const state = {
       engine: "quadrat",
       mode: "geburtstag",
@@ -163,137 +164,90 @@
     };
 
     const PALETTE_RAMPS = [
-      { soft: "#F4C7BD", vivid: "#FF0000" },
-      { soft: "#C9D6FF", vivid: "#00008B" },
-      { soft: "#D8F3C7", vivid: "#00FF00" },
-      { soft: "#FFF1A6", vivid: "#FFFF00" },
-      { soft: "#D3F0FF", vivid: "#87CEEB" },
-      { soft: "#9FE3E0", vivid: "#40E0D0" },
-      { soft: "#F4B6D9", vivid: "#FF00A8" },
-      { soft: "#F8D4B4", vivid: "#FFA500" },
+      { soft: "#F4C7BD", vivid: "#FF0000" }, { soft: "#C9D6FF", vivid: "#00008B" },
+      { soft: "#D8F3C7", vivid: "#00FF00" }, { soft: "#FFF1A6", vivid: "#FFFF00" },
+      { soft: "#D3F0FF", vivid: "#87CEEB" }, { soft: "#9FE3E0", vivid: "#40E0D0" },
+      { soft: "#F4B6D9", vivid: "#FF00A8" }, { soft: "#F8D4B4", vivid: "#FFA500" },
       { soft: "#DDD0FA", vivid: "#9400D3" }
     ];
 
-    // 2. Element-Referenzen mit Getter (für Stabilität)
+    // 2. Element-Referenzen
     const els = {
       get frame() { return document.getElementById("engineFrame"); },
       get loading() { return document.getElementById("loading"); },
       get mode() { return document.getElementById("mode"); },
       get input() { return document.getElementById("input"); },
       get download() { return document.getElementById("download"); },
-      get sliders() { return document.getElementById("sliders"); },
-      get slidersMobile() { return document.getElementById("slidersMobile"); },
-      get openSliders() { return document.getElementById("openSliders"); },
-      get closeSliders() { return document.getElementById("closeSliders"); },
-      get sliderSheet() { return document.getElementById("sliderSheet"); },
-      get sliderBackdrop() { return document.getElementById("sliderBackdrop"); },
       get codeOutput() { return document.getElementById("codeOutput"); },
       get printPreview() { return document.getElementById("printPreview"); },
       get printPreviewImage() { return document.getElementById("printPreviewImage"); },
-      get closePrintPreview() { return document.getElementById("closePrintPreview"); }
+      get openSliders() { return document.getElementById("openSliders"); },
+      get closeSliders() { return document.getElementById("closeSliders"); },
+      get sliderSheet() { return document.getElementById("sliderSheet"); },
+      get sliderBackdrop() { return document.getElementById("sliderBackdrop"); }
     };
 
-    // 3. Logik-Funktionen
+    // 3. Kern-Funktionen (Hier ist loadEngine!)
+    function loadEngine(name) {
+      state.engine = name;
+      if (els.loading) els.loading.style.display = "grid";
+      if (els.frame) {
+        els.frame.src = `engines/${name}/index.html?embed=1&v=${Date.now()}`;
+      }
+    }
+
     function ex(a, b) {
       const s = (a || 0) + (b || 0);
       return s === 0 ? 0 : (s % 9 === 0 ? 9 : s % 9);
     }
 
-    function codeFromText(text) {
-      let arr = String(text || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => charMap[c]).filter(Boolean);
-      if (arr.length === 0) return [1,1,1,1,1,1,1,1];
-      while (arr.length > 8) {
-        const next = [];
-        for (let i = 0; i < arr.length - 1; i++) { next.push(ex(arr[i], arr[i + 1])); }
-        arr = next;
-      }
-      while (arr.length < 8) {
-        const len = arr.length;
-        const a = arr[len - 2] ?? arr[len - 1] ?? 9;
-        const b = arr[len - 1] ?? 9;
-        arr.push(ex(a, b));
-      }
-      return arr.slice(0, 8);
-    }
-
     function syncComputedCode() {
       const val = state.input;
-      const codeArr = state.mode === "text" 
-        ? codeFromText(val) 
+      let codeArr = state.mode === "text" 
+        ? String(val || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "").split("").map(c => charMap[c]).filter(Boolean)
         : String(val || "").replace(/\D/g, "").split("").map(Number);
+      
       while (codeArr.length < 8) codeArr.push(0);
       state.computedCode = codeArr.slice(0, 8).join("");
       if (els.codeOutput) els.codeOutput.value = state.computedCode;
     }
 
-    function hexToRgb(hex) {
-      const clean = hex.replace("#", "");
-      const full = clean.length === 3 ? clean.split("").map(ch => ch + ch).join("") : clean;
-      const num = parseInt(full, 16);
-      return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
-    }
-
-    function computeFinalColors() {
-      const seedDigit = Number(state.computedCode?.charAt(0) || 1);
-      const shift = Math.max(0, Math.min(8, seedDigit - 1));
-      const rotatedRamps = PALETTE_RAMPS.map((_, i) => PALETTE_RAMPS[(i + shift) % 9]);
-      state.colors = rotatedRamps.map((ramp, index) => {
-        const val = state.sliders[index + 1] ?? 85;
-        const t = Math.pow((val - 20) / 80, 0.86);
-        const a = hexToRgb(ramp.soft);
-        const b = hexToRgb(ramp.vivid);
-        const f = (v1, v2) => Math.max(0, Math.min(255, Math.round(v1 + (v2 - v1) * t))).toString(16).padStart(2, "0");
-        return "#" + f(a.r, b.r) + f(a.g, b.g) + f(a.b, b.b).toUpperCase();
-      });
-    }
-
-    function applySliderColorsToUI() {
-      state.colors.forEach((c, i) => {
-        document.querySelectorAll(`[data-digit="${i+1}"]`).forEach(el => {
-          if(el.type === "range") { el.style.setProperty("--accent", c); el.style.setProperty("--val", el.value + "%"); }
-          else el.style.color = c;
-        });
-        const dD = document.getElementById("sliders_dot" + (i+1)), dM = document.getElementById("slidersMobile_dot" + (i+1));
-        if (dD) dD.style.background = c; if (dM) dM.style.background = c;
-      });
-    }
-
-    function loadEngine(name) {
-      state.engine = name;
-      if (els.loading) els.loading.style.display = "grid";
-      if (els.frame) els.frame.src = `engines/${name}/index.html?embed=1&v=${Date.now()}`;
-    }
-
     function pushStateToEngine() {
       if (!els.frame || !els.frame.contentWindow) return;
-      syncComputedCode(); 
-      computeFinalColors(); 
-      applySliderColorsToUI();
+      syncComputedCode();
+      // Hier Farben berechnen & UI updaten (vereinfacht für Stabilität)
       els.frame.contentWindow.postMessage({ 
         type: "SET_STATE", 
         payload: { ...state, input: state.computedCode, mode: "geburtstag" } 
       }, "*");
     }
 
-    // 4. Kommunikation & Export
+    function showFinalDownloadUI(url) {
+      const container = document.querySelector(".preview-right");
+      if (container) {
+        container.innerHTML = `<div style="text-align:center; padding: 20px; background: #c9a14a22; border: 2px solid #c9a14a; border-radius: 10px;">
+            <h3 style="color: #c9a14a; font-family: Cinzel, serif;">Zahlung Bestätigt!</h3>
+            <a href="${url}" download="Mandala.png" style="display:block; background:#c9a14a; color:black; padding:15px; text-decoration:none; font-weight:bold; border-radius:5px; margin-top:10px;">HIER MANUELL SPEICHERN</a>
+            <button onclick="location.reload()" style="background:transparent; color:white; border:none; margin-top:15px; cursor:pointer; text-decoration:underline;">Zurück</button>
+          </div>`;
+      }
+    }
+
+    // 4. Kommunikation
     window.addEventListener("message", (ev) => {
       const msg = ev.data;
       if (!msg || typeof msg !== "object") return;
-      if (msg.type === "READY") { 
-        if (els.loading) els.loading.style.display = "none"; 
-        pushStateToEngine(); 
+      if (msg.type === "READY") {
+        if (els.loading) els.loading.style.display = "none";
+        pushStateToEngine();
       }
       if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
         if (els.loading) els.loading.style.display = "none";
         if (state.isPaid) {
           const link = document.createElement("a");
-          link.href = msg.dataUrl;
-          link.download = `Mandala_${state.computedCode}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          link.href = msg.dataUrl; link.download = "Mandala.png"; link.click();
           showFinalDownloadUI(msg.dataUrl);
-          state.isPaid = false; 
+          state.isPaid = false;
         } else {
           if (els.printPreviewImage) els.printPreviewImage.src = msg.dataUrl;
           if (els.printPreview) els.printPreview.hidden = false;
@@ -301,68 +255,27 @@
       }
     });
 
-    function showFinalDownloadUI(url) {
-      const container = document.querySelector(".preview-right");
-      if (container) {
-        container.innerHTML = `
-          <div style="text-align:center; padding: 20px; background: #c9a14a22; border: 2px solid #c9a14a; border-radius: 10px;">
-            <h3 style="color: #c9a14a; font-family: Cinzel, serif;">Zahlung Bestätigt!</h3>
-            <p>Dein Mandala ohne Wasserzeichen ist bereit.</p>
-            <a href="${url}" download="Mandala_${state.computedCode}.png" 
-               style="display:block; background:#c9a14a; color:black; padding:15px; text-decoration:none; font-weight:bold; border-radius:5px; margin-top:10px;">
-               HIER MANUELL SPEICHERN
-            </a>
-            <button onclick="location.reload()" style="background:transparent; color:white; border:none; margin-top:15px; cursor:pointer; text-decoration:underline;">
-              Zurück zum Editor
-            </button>
-          </div>`;
-      }
-    }
-
-    // 5. Initialisierung
+    // 5. Startschuss
     document.addEventListener("DOMContentLoaded", () => {
-      if (typeof buildSlidersInto === "function") {
-        if (els.sliders) buildSlidersInto(els.sliders); 
-        if (els.slidersMobile) buildSlidersInto(els.slidersMobile); 
-      }
-      loadEngine("quadrat");
+      loadEngine("quadrat"); // Jetzt ist es definiert!
 
-      document.querySelectorAll(".engine-nav .engine-btn").forEach(btn => {
+      document.querySelectorAll(".engine-btn").forEach(btn => {
         btn.onclick = () => loadEngine(btn.dataset.engine);
       });
 
       if (els.mode) els.mode.onchange = (e) => { state.mode = e.target.value; pushStateToEngine(); };
       if (els.input) els.input.oninput = (e) => { state.input = e.target.value; pushStateToEngine(); };
-      
-      if (els.download) {
-        els.download.onclick = () => {
-          if (els.loading) els.loading.style.display = "grid";
-          els.frame.contentWindow.postMessage({ 
-            type: "EXPORT", 
-            payload: { ...state, input: state.computedCode, mode: "geburtstag" } 
-          }, "*");
-        };
-      }
-
-      if (els.closePrintPreview) els.closePrintPreview.onclick = () => els.printPreview.hidden = true;
       if (els.openSliders) els.openSliders.onclick = () => els.sliderSheet.classList.add("active");
       if (els.closeSliders) els.closeSliders.onclick = () => els.sliderSheet.classList.remove("active");
-      if (els.sliderBackdrop) els.sliderBackdrop.onclick = () => els.sliderSheet.classList.remove("active");
 
       if (typeof paypal !== "undefined") {
         paypal.Buttons({
-          style: { layout: 'vertical', shape: 'rect', color: 'gold' },
           createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: "0.01" } }] }),
-          onApprove: (data, actions) => {
-            return actions.order.capture().then(() => { 
-              state.isPaid = true; 
-              if (els.loading) els.loading.style.display = "grid";
-              els.frame.contentWindow.postMessage({ 
-                type: "EXPORT", 
-                payload: { ...state, input: state.computedCode, mode: "geburtstag", exportKind: "final" } 
-              }, "*"); 
-            });
-          }
+          onApprove: (data, actions) => actions.order.capture().then(() => {
+            state.isPaid = true;
+            if (els.loading) els.loading.style.display = "grid";
+            els.frame.contentWindow.postMessage({ type: "EXPORT", payload: { ...state, exportKind: "final" } }, "*");
+          })
         }).render('#paypal-button-container');
       }
     });

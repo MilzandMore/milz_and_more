@@ -13,7 +13,7 @@ let APP = {
 let extState = {}; 
 let logoImg = null;
 let isAdmin = false;
-let exportKind = "preview"; // Erste Definition
+let exportKind = "preview"; 
 let lastPreviewKey = "";
 let lastPreviewDataUrl = "";
 
@@ -54,7 +54,6 @@ window.addEventListener("message", (ev) => {
   if (msg.type === "EXPORT") {
     if (msg.payload) {
       Object.assign(extState, msg.payload);
-      // HIER stand das falsche "let". Jetzt korrigiert:
       exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
     }
     exportHighRes(exportKind);
@@ -135,13 +134,20 @@ function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
 
 function drawPreviewWatermark(g, wmImg, kind) {
   if (kind === "final" || !g || !wmImg || isAdmin) return;
-  g.push(); g.resetMatrix();
+  g.push(); 
+  g.resetMatrix();
   const ctx = g.drawingContext;
   if (ctx) { ctx.save(); ctx.globalAlpha = 0.32; }
-  const wWidth = Math.round(g.width * 0.18);
+  
+  const wWidth = 380;
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
-  for (let x = -wWidth; x < g.width + wWidth; x += wWidth * 1.8) {
-    for (let y = -wHeight; y < g.height + wHeight; y += wHeight * 2.2) g.image(wmImg, x, y, wWidth, wHeight);
+  const yShift = -200;
+
+  // Korrigierter Startwert x = -600 gegen den Rechtsversatz
+  for (let x = -600; x < g.width + 500; x += 500) {
+    for (let y = -700; y < g.height + 500; y += 500) {
+      g.image(wmImg, x, y + yShift, wWidth, wHeight);
+    }
   }
   if (ctx) ctx.restore();
   g.pop();
@@ -174,10 +180,18 @@ async function exportHighRes(kind) {
   if (kind !== "final") drawPreviewWatermark(pg, exportLogo, kind);
 
   if (exportLogo) {
+    pg.push();
+    pg.resetMatrix();
+    pg.noTint();
+
     const lW = kind === "final" ? 500 : Math.round(pg.width * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
-    const margin = kind === "final" ? 100 : Math.round(pg.width * 0.04);
+    
+    // OPTIMIERTER ABSTAND: margin von 100 auf 250 erhöht für Bilderrahmen-Sicherheit
+    const margin = kind === "final" ? 250 : Math.round(pg.width * 0.04);
+
     pg.image(exportLogo, pg.width - lW - margin, pg.height - lH - margin, lW, lH);
+    pg.pop();
   }
 
   const dUrl = pg.canvas.toDataURL("image/png");

@@ -113,6 +113,7 @@ window.addEventListener("message", (ev) => {
     return;
   }
 });
+    
 function preload() {
   const p = (APP && APP.exportLogo) ? APP.exportLogo : "../../assets/Logo_black.png";
 

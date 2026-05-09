@@ -1,3 +1,4 @@
+// --------- 1. VARIABLEN & KONSTANTEN (UNANTASTBAR) ----------
 let APP = {
   engine: "wabe",
   mode: "geburtstag",
@@ -9,9 +10,14 @@ let APP = {
   isAdmin: false
 };
 
-console.log("WABE mandala.js LOADED v=1015");
+let extState = {}; 
+let logoImg = null;
+let isAdmin = false;
+let exportKind = "preview";
+let lastPreviewKey = "";
+let lastPreviewDataUrl = "";
 
-var colorMatrix = {
+const colorMatrix = {
   1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
   2: ["#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000"],
   3: ["#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3", "#FF0000", "#00008B"],
@@ -23,19 +29,16 @@ var colorMatrix = {
   9: ["#9400D3", "#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500"]
 };
 
-var charMap = {
+const charMap = {
   'A':1,'J':1,'S':1,'Ä':1,'B':2,'K':2,'T':2,'Ö':2,'C':3,'L':3,'U':3,'Ü':3,'D':4,'M':4,'V':4,'ß':4,
   'E':5,'N':5,'W':5,'F':6,'O':6,'X':6,'G':7,'P':7,'Y':7,'H':8,'Q':8,'Z':8,'I':9,'R':9
 };
 
-var ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
+const ex = (a, b) => (a + b === 0) ? 0 : ((a + b) % 9 === 0 ? 9 : (a + b) % 9);
 
-let logoImg = null;
-let isAdmin = false;
+console.log("WABE mandala.js LOADED v=1015");
 
-let exportKind = "preview";
-let lastPreviewKey = "";
-let lastPreviewDataUrl = "";
+// --------- 2. MESSAGING (KOMMUNIKATION) ----------
 
 function sendReady() {
   if (window.parent) window.parent.postMessage({ type: "READY" }, "*");
@@ -45,138 +48,77 @@ function sendColors(colors) {
   if (window.parent) window.parent.postMessage({ type: "COLORS", colors }, "*");
 }
 
-// --------- 1. INITIALISIERUNG DER VARIABLEN (Falls noch nicht vorhanden) ----------
-let exportKind = "preview"; 
-// Hinweis: extState und APP sollten bereits oben in deinem Code definiert sein.
-
-// --------- 2. DER KORRIGIERTE MESSAGE-LISTENER ----------
 window.addEventListener("message", (ev) => {
   const msg = ev.data;
   if (!msg || typeof msg !== "object") return;
 
-  // FALL 1: Daten aktualisieren (Regler, Text, Farben)
   if (msg.type === "SET_STATE" && msg.payload) {
-    // Sicherstellen, dass APP und extState existieren, bevor wir sie füllen
-    if (typeof APP !== 'undefined') {
-      APP = {
-        ...APP,
-        ...msg.payload,
-        colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : (APP.colors || [])
-      };
-      isAdmin = !!APP.isAdmin;
-    }
-    
-    // --- INITIALISIERUNG DER VARIABLEN (Sicherstellen, dass sie da sind) ---
-if (typeof extState === 'undefined') {
-  var extState = {}; 
-}
-
-// --- DER KORRIGIERTE MESSAGE-LISTENER FÜR DIE WABE ---
-window.addEventListener("message", (ev) => {
-  const msg = ev.data;
-  if (!msg || typeof msg !== "object") return;
-
-  // 1. Daten-Update
-  if (msg.type === "SET_STATE" && msg.payload) {
-    if (typeof APP !== 'undefined') {
-      APP = { ...APP, ...msg.payload };
-    }
+    APP = {
+      ...APP,
+      ...msg.payload,
+      colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : (APP.colors || [])
+    };
     Object.assign(extState, msg.payload);
-    if (typeof redraw === "function") redraw();
-    return;
+    isAdmin = !!APP.isAdmin;
+    redraw();
   }
 
-  // 2. Export / Download (Druckvorschau & Kauf)
   if (msg.type === "EXPORT") {
-    let exportKind = "preview";
     if (msg.payload) {
       Object.assign(extState, msg.payload);
       exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
     }
-
-    // High-Res Bild generieren
-    if (typeof exportHighRes === "function") {
-      exportHighRes(exportKind);
-
-      // Bild vom Canvas abgreifen
-      const canvasElement = document.querySelector("canvas");
-      if (canvasElement) {
-        const dataUrl = canvasElement.toDataURL("image/png");
-
-        // Zurück an lebenscode.html senden
-        window.parent.postMessage({
-          type: "EXPORT_RESULT",
-          dataUrl: dataUrl
-        }, "*");
-      }
-    }
-    return;
+    exportHighRes(exportKind);
   }
 });
-    
+
+// --------- 3. P5.JS CORE FUNKTIONEN ----------
+
 function preload() {
   const p = (APP && APP.exportLogo) ? APP.exportLogo : "../../assets/Logo_black.png";
-
-  logoImg = loadImage(
-    p,
-    () => {},
-    () => {
-      logoImg = loadImage(
-        "../../assets/Logo.png",
-        () => {},
-        () => { logoImg = null; }
-      );
-    }
-  );
+  logoImg = loadImage(p, () => {}, () => {
+    logoImg = loadImage("../../assets/Logo.png", () => {}, () => { logoImg = null; });
+  });
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
   const c = document.querySelector("canvas");
   if (c) {
     c.addEventListener("contextmenu", (e) => e.preventDefault());
     c.addEventListener("dragstart", (e) => e.preventDefault());
   }
-
   colorMode(HSB, 360, 100, 100);
   smooth(8);
   noLoop();
   sendReady();
-  redraw();
 }
 
 function draw() {
   background(12);
-
   const rawVal = String(APP.input || "").trim();
   if (rawVal === "" || (APP.mode === "geburtstag" && rawVal.replace(/\D/g, "").length === 0)) return;
 
-  let code = (APP.mode === "text")
-    ? getCodeFromText(rawVal)
-    : rawVal.replace(/\D/g, "").split("").map(Number);
-
+  let code = (APP.mode === "text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split("").map(Number);
   while (code.length < 8) code.push(0);
   code = code.slice(0, 8);
-
   if (code.every(v => v === 0)) return;
 
   const cKey = code[0] || 1;
   const renderColors = getRenderColors(cKey);
-
   sendColors(renderColors);
 
   push();
   const isMobile = windowWidth < 600;
   const yOffset = isMobile ? -10 : 10;
   translate(width / 2, height / 2 + yOffset);
-
   const scaleFactor = (min(width, height) / 520) * (isMobile ? 0.45 : 0.48);
   scale(scaleFactor);
-
   renderWabeKorrekt(code, cKey, null, renderColors);
   pop();
 }
+
+// --------- 4. LOGIK-FUNKTIONEN (UNANTASTBAR) ----------
 
 function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
   const ctx = target || window;
@@ -186,42 +128,30 @@ function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
   ctx.stroke(0, 0, 0, 35);
   ctx.strokeWeight(0.6);
 
-  const path = (APP.direction === "innen")
-    ? [...code, ...[...code].reverse()]
-    : [...[...code].reverse(), ...code];
+  const path = (APP.direction === "innen") ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
 
   for (let s = 0; s < 6; s++) {
     ctx.push();
     ctx.rotate(s * PI / 3);
-
     const m = Array(17).fill().map(() => Array(17).fill(0));
     for (let i = 0; i < 16; i++) m[16][i] = path[i % path.length];
-
     for (let r = 15; r >= 1; r--) {
       for (let i = 0; i < r; i++) {
         m[r][i] = ex(m[r + 1][i], m[r + 1][i + 1]);
       }
     }
-
     for (let r = 1; r <= 16; r++) {
       for (let i = 0; i < r; i++) {
         const val = m[r][i];
-
         if (val >= 1 && val <= 9) {
           const col = color(renderColors[val - 1]);
           const sVal = (APP.sliders && typeof APP.sliders[val] === "number") ? APP.sliders[val] : 85;
-          ctx.fill(
-            hue(col),
-            map(sVal, 20, 100, 35, saturation(col)),
-            map(sVal, 20, 100, 100, brightness(col))
-          );
+          ctx.fill(hue(col), map(sVal, 20, 100, 35, saturation(col)), map(sVal, 20, 100, 100, brightness(col)));
         } else {
           ctx.fill(0, 0, 100);
         }
-
         const x = (i - (r - 1) / 2) * sz * sqrt(3);
         const y = -(r - 1) * sz * 1.5;
-
         ctx.beginShape();
         for (let a = PI / 6; a < TWO_PI; a += PI / 3) {
           ctx.vertex(x + cos(a) * sz, y + sin(a) * sz);
@@ -229,129 +159,27 @@ function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
         ctx.endShape(CLOSE);
       }
     }
-
     ctx.pop();
   }
 }
 
 function drawPreviewWatermark(g, wmImg, kind = "preview") {
-  if (kind === "final") return; // Das verhindert das Wasserzeichen beim Kauf
-  if (!g || !wmImg || isAdmin) return;
-
+  if (kind === "final" || !g || !wmImg || isAdmin) return;
   g.push();
   g.resetMatrix();
-
   const ctx = g.drawingContext;
-  if (ctx) ctx.save();
-  if (ctx) ctx.globalAlpha = 0.45;
-
-  const wWidth = 380;
-  const wHeight = (wmImg.height / wmImg.width) * wWidth;
-  const yShift = -200;
-
-  for (let x = -100; x < g.width + 400; x += 500) {
-    for (let y = -700; y < g.height + 400; y += 500) {
-      g.image(wmImg, x, y + yShift, wWidth, wHeight);
-    }
-  }
-
-  if (ctx) ctx.restore();
-  g.pop();
-}
-
-function drawPreviewWatermark(g, wmImg) {
-  if (!g || !wmImg || isAdmin) return;
-
-  g.push();
-  g.resetMatrix();
-
-  const ctx = g.drawingContext;
-  if (ctx) ctx.save();
-  if (ctx) ctx.globalAlpha = 0.32;
-
-  /* Größe exakt wie Wabe */
+  if (ctx) { ctx.save(); ctx.globalAlpha = 0.32; }
   const wWidth = Math.round(g.width * 0.18);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
-
-  /* saubere Abstände */
   const stepX = wWidth * 1.8;
   const stepY = wHeight * 2.2;
-
-  const startX = -wWidth * 0.4;
-  const startY = -wHeight * 0.6;
-  const endX = g.width + wWidth;
-  const endY = g.height + wHeight;
-
-  for (let x = startX; x < endX; x += stepX) {
-    for (let y = startY; y < endY; y += stepY) {
+  for (let x = -wWidth; x < g.width + wWidth; x += stepX) {
+    for (let y = -wHeight; y < g.height + wHeight; y += stepY) {
       g.image(wmImg, x, y, wWidth, wHeight);
     }
   }
-
   if (ctx) ctx.restore();
   g.pop();
-}
-
-function waitForLogo(maxMs = 5000) {
-  return new Promise(resolve => {
-    const start = Date.now();
-    const tick = () => {
-      if (logoImg) return resolve(logoImg);
-      if (Date.now() - start > maxMs) return resolve(null);
-      setTimeout(tick, 50);
-    };
-    tick();
-  });
-}
-
-function getExportSettings(kind = "preview") {
-  const isMobileViewport = windowWidth < 900;
-
-  if (kind === "final") {
-    return {
-      width: 2480,
-      height: 3508,
-      logoWaitMs: 5000,
-      useCache: false
-    };
-  }
-
-  if (isMobileViewport) {
-    return {
-      width: 1240,
-      height: 1754,
-      logoWaitMs: 350,
-      useCache: true
-    };
-  }
-
-  return {
-    width: 1800,
-    height: 2545,
-    logoWaitMs: 800,
-    useCache: true
-  };
-}
-
-function getExportScale(kind, exportW) {
-  const baseFinalScale = 2.4;
-  return baseFinalScale * (exportW / 2480);
-}
-
-function buildPreviewCacheKey(kind, settings) {
-  return JSON.stringify({
-    kind,
-    engine: APP.engine,
-    mode: APP.mode,
-    input: APP.input,
-    direction: APP.direction,
-    sector: APP.sector,
-    sliders: APP.sliders,
-    colors: APP.colors,
-    isAdmin: APP.isAdmin,
-    w: settings.width,
-    h: settings.height
-  });
 }
 
 async function exportHighRes(kind = "preview") {
@@ -361,25 +189,16 @@ async function exportHighRes(kind = "preview") {
 
   const cacheKey = buildPreviewCacheKey(kind, settings);
   if (settings.useCache && cacheKey === lastPreviewKey && lastPreviewDataUrl) {
-    try {
-      window.parent.postMessage({
-        type: "EXPORT_RESULT",
-        dataUrl: lastPreviewDataUrl
-      }, "*");
-    } catch (_) {}
+    window.parent.postMessage({ type: "EXPORT_RESULT", dataUrl: lastPreviewDataUrl }, "*");
     return;
   }
 
   const pg = createGraphics(exportW, exportH);
-
   pg.colorMode(HSB, 360, 100, 100);
   pg.background(255);
 
   const rawVal = String(APP.input || "").trim();
-  let code = (APP.mode === "text")
-    ? getCodeFromText(rawVal)
-    : rawVal.replace(/\D/g, "").split("").map(Number);
-
+  let code = (APP.mode === "text") ? getCodeFromText(rawVal) : rawVal.replace(/\D/g, "").split("").map(Number);
   while (code.length < 8) code.push(0);
   code = code.slice(0, 8);
 
@@ -388,76 +207,80 @@ async function exportHighRes(kind = "preview") {
 
   pg.push();
   pg.translate(exportW / 2, exportH * 0.40);
-
-  const exportScale = getExportScale(kind, exportW);
-  pg.scale(exportScale);
-
+  pg.scale(getExportScale(kind, exportW));
   renderWabeKorrekt(code, cKey, pg, renderColors);
   pg.pop();
 
   const exportLogo = await waitForLogo(settings.logoWaitMs);
-
-  if (kind === "final") {
-    drawExportWatermark(pg, exportLogo);
-  } else {
-    drawPreviewWatermark(pg, exportLogo);
+  if (kind !== "final") {
+    drawPreviewWatermark(pg, exportLogo, kind);
   }
 
   if (exportLogo) {
     pg.push();
     pg.resetMatrix();
-    pg.noTint();
-
     const lW = kind === "final" ? 500 : Math.round(exportW * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
     const margin = kind === "final" ? 100 : Math.round(exportW * 0.04);
-
     pg.image(exportLogo, exportW - lW - margin, exportH - lH - margin, lW, lH);
     pg.pop();
   }
 
-  const dataUrl = pg.canvas.toDataURL("image/png");
-
+  const dUrl = pg.canvas.toDataURL("image/png");
   if (settings.useCache) {
     lastPreviewKey = cacheKey;
-    lastPreviewDataUrl = dataUrl;
+    lastPreviewDataUrl = dUrl;
   }
+  window.parent.postMessage({ type: "EXPORT_RESULT", dataUrl: dUrl }, "*");
+}
 
-  try {
-    window.parent.postMessage({
-      type: "EXPORT_RESULT",
-      dataUrl: dataUrl
-    }, "*");
-  } catch (_) {}
+// --------- 5. HILFSFUNKTIONEN ----------
+
+function getExportSettings(kind) {
+  const isMob = windowWidth < 900;
+  if (kind === "final") return { width: 2480, height: 3508, logoWaitMs: 5000, useCache: false };
+  return { 
+    width: isMob ? 1240 : 1800, 
+    height: isMob ? 1754 : 2545, 
+    logoWaitMs: isMob ? 350 : 800, 
+    useCache: true 
+  };
+}
+
+function getExportScale(kind, exportW) {
+  return 2.4 * (exportW / 2480);
+}
+
+function buildPreviewCacheKey(kind, settings) {
+  return JSON.stringify({ kind, input: APP.input, sliders: APP.sliders, colors: APP.colors, w: settings.width });
+}
+
+function waitForLogo(maxMs) {
+  return new Promise(resolve => {
+    const start = Date.now();
+    const tick = () => {
+      if (logoImg || Date.now() - start > maxMs) return resolve(logoImg);
+      setTimeout(tick, 50);
+    };
+    tick();
+  });
 }
 
 function getCodeFromText(textStr) {
   const cleanText = String(textStr || "").toUpperCase().replace(/[^A-ZÄÖÜß]/g, "");
   if (cleanText.length === 0) return [0, 0, 0, 0, 0, 0, 0, 0];
-
-  let currentRow = cleanText.split("").map(c => charMap[c]).filter(n => n);
-  while (currentRow.length < 8) currentRow.push(9);
-
-  while (currentRow.length > 8) {
-    const nextRow = [];
-    for (let i = 0; i < currentRow.length - 1; i++) {
-      nextRow.push(ex(currentRow[i], currentRow[i + 1]));
-    }
-    currentRow = nextRow;
+  let row = cleanText.split("").map(c => charMap[c]).filter(n => n);
+  while (row.length < 8) row.push(9);
+  while (row.length > 8) {
+    const next = [];
+    for (let i = 0; i < row.length - 1; i++) next.push(ex(row[i], row[i + 1]));
+    row = next;
   }
-  return currentRow;
-}
-
-function getColorMatrix(seed) {
-  const s = (seed === 0 || !seed) ? 1 : seed;
-  return colorMatrix[s] || colorMatrix[1];
+  return row;
 }
 
 function getRenderColors(cKey) {
-  if (Array.isArray(APP.colors) && APP.colors.length === 9) {
-    return APP.colors;
-  }
-  return getColorMatrix(cKey);
+  return (Array.isArray(APP.colors) && APP.colors.length === 9) ? APP.colors : (colorMatrix[cKey] || colorMatrix[1]);
 }
 
 function windowResized() {

@@ -139,13 +139,13 @@ function drawPreviewWatermark(g, wmImg, kind) {
   const ctx = g.drawingContext;
   if (ctx) { ctx.save(); ctx.globalAlpha = 0.32; }
   
+  // FIX: Wir nutzen feste Werte für den Export, damit Mobil & Desktop identisch sind
   const wWidth = 380;
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
   const yShift = -200;
 
-  // Korrigierter Startwert x = -600 gegen den Rechtsversatz
-  for (let x = -600; x < g.width + 500; x += 500) {
-    for (let y = -700; y < g.height + 500; y += 500) {
+  for (let x = -600; x < g.width + 800; x += 500) {
+    for (let y = -700; y < g.height + 800; y += 500) {
       g.image(wmImg, x, y + yShift, wWidth, wHeight);
     }
   }
@@ -177,6 +177,8 @@ async function exportHighRes(kind) {
   pg.pop();
 
   const exportLogo = await waitForLogo(settings.logoWaitMs);
+  
+  // Wasserzeichen zeichnen (Logik jetzt innerhalb der Funktion fixiert)
   if (kind !== "final") drawPreviewWatermark(pg, exportLogo, kind);
 
   if (exportLogo) {
@@ -187,8 +189,8 @@ async function exportHighRes(kind) {
     const lW = kind === "final" ? 500 : Math.round(pg.width * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
     
-    // OPTIMIERTER ABSTAND: margin von 100 auf 250 erhöht für Bilderrahmen-Sicherheit
-    const margin = kind === "final" ? 250 : Math.round(pg.width * 0.04);
+    // LOGO-POSITION: margin auf 350 erhöht (weiter hoch und weiter links)
+    const margin = kind === "final" ? 350 : Math.round(pg.width * 0.04);
 
     pg.image(exportLogo, pg.width - lW - margin, pg.height - lH - margin, lW, lH);
     pg.pop();
@@ -199,6 +201,7 @@ async function exportHighRes(kind) {
   window.parent.postMessage({ type: "EXPORT_RESULT", dataUrl: dUrl }, "*");
 }
 
+// 5. HILFSFUNKTIONEN
 function getExportSettings(kind) {
   const isMob = windowWidth < 900;
   if (kind === "final") return { width: 2480, height: 3508, logoWaitMs: 5000, useCache: false };

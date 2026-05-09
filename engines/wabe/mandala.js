@@ -66,40 +66,48 @@ window.addEventListener("message", (ev) => {
       isAdmin = !!APP.isAdmin;
     }
     
-    if (typeof extState !== 'undefined') {
-      Object.assign(extState, msg.payload);
-    }
+    // --- INITIALISIERUNG DER VARIABLEN (Sicherstellen, dass sie da sind) ---
+if (typeof extState === 'undefined') {
+  var extState = {}; 
+}
 
-    // Mandala mit neuen Werten neu zeichnen
+// --- DER KORRIGIERTE MESSAGE-LISTENER FÜR DIE WABE ---
+window.addEventListener("message", (ev) => {
+  const msg = ev.data;
+  if (!msg || typeof msg !== "object") return;
+
+  // 1. Daten-Update
+  if (msg.type === "SET_STATE" && msg.payload) {
+    if (typeof APP !== 'undefined') {
+      APP = { ...APP, ...msg.payload };
+    }
+    Object.assign(extState, msg.payload);
     if (typeof redraw === "function") redraw();
     return;
   }
 
-  // FALL 2: Export (Druckvorschau oder Kauf)
+  // 2. Export / Download (Druckvorschau & Kauf)
   if (msg.type === "EXPORT") {
+    let exportKind = "preview";
     if (msg.payload) {
-      if (typeof extState !== 'undefined') Object.assign(extState, msg.payload);
+      Object.assign(extState, msg.payload);
       exportKind = (msg.payload.exportKind === "final") ? "final" : "preview";
     }
 
-    // 1. Hochauflösendes Bild auf dem Canvas generieren
+    // High-Res Bild generieren
     if (typeof exportHighRes === "function") {
       exportHighRes(exportKind);
 
-      // 2. Das Bild vom Canvas abgreifen
-      // Wir suchen das Canvas-Element direkt im Dokument
+      // Bild vom Canvas abgreifen
       const canvasElement = document.querySelector("canvas");
-      
       if (canvasElement) {
         const dataUrl = canvasElement.toDataURL("image/png");
 
-        // 3. Das Bild an die Hauptseite (lebenscode.html) zurücksenden
+        // Zurück an lebenscode.html senden
         window.parent.postMessage({
           type: "EXPORT_RESULT",
           dataUrl: dataUrl
         }, "*");
-      } else {
-        console.error("Canvas-Element wurde nicht gefunden!");
       }
     }
     return;

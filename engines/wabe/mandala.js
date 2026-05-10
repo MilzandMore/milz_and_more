@@ -1,4 +1,4 @@
-// 1. VARIABLEN (Hier einmalig definiert)
+// 1. VARIABLEN & KONSTANTEN
 let APP = {
   engine: "wabe",
   mode: "geburtstag",
@@ -43,14 +43,12 @@ function sendColors(colors) { if (window.parent) window.parent.postMessage({ typ
 window.addEventListener("message", (ev) => {
   const msg = ev.data;
   if (!msg || typeof msg !== "object") return;
-
   if (msg.type === "SET_STATE" && msg.payload) {
     APP = { ...APP, ...msg.payload, colors: Array.isArray(msg.payload.colors) ? msg.payload.colors : (APP.colors || []) };
     Object.assign(extState, msg.payload);
     isAdmin = !!APP.isAdmin;
     redraw();
   }
-
   if (msg.type === "EXPORT") {
     if (msg.payload) {
       Object.assign(extState, msg.payload);
@@ -60,17 +58,17 @@ window.addEventListener("message", (ev) => {
   }
 });
 
-// 3. P5.JS SETUP
+// 3. P5.JS CORE
 function preload() {
   const p = (APP && APP.exportLogo) ? APP.exportLogo : "../../assets/Logo_black.png";
-  logoImg = loadImage(p, () => {}, () => {
-    logoImg = loadImage("../../assets/Logo.png", () => {}, () => { logoImg = null; });
+  logoImg = loadImage(p, img => { logoImg = img; }, () => {
+    loadImage("../../assets/Logo.png", img => { logoImg = img; }, () => { logoImg = null; });
   });
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  colorMode(HSB, 360, 100, 100);
+  colorMode(HSB, 360, 100, 100, 100);
   smooth(8);
   noLoop();
   sendReady();
@@ -97,72 +95,35 @@ function draw() {
   pop();
 }
 
-// 4. LOGIK (UNANTASTBAR)
-function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
-  const ctx = target || window;
-  const sz = 16.2;
-  const renderColors = renderColorsOverride || getRenderColors(cKey);
-  ctx.stroke(0, 0, 0, 35);
-  ctx.strokeWeight(0.6);
-  const path = (APP.direction === "innen") ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
+// 4. WASSERZEICHEN-LOGIK (IDENTISCH ZU QUADRAT)
+function drawPreviewWatermark(g, wmImg, kind = "preview") {
+  if (kind === "final") return;
+  if (!g || !wmImg || isAdmin) return;
 
-  for (let s = 0; s < 6; s++) {
-    ctx.push(); ctx.rotate(s * PI / 3);
-    const m = Array(17).fill().map(() => Array(17).fill(0));
-    for (let i = 0; i < 16; i++) m[16][i] = path[i % path.length];
-    for (let r = 15; r >= 1; r--) {
-      for (let i = 0; i < r; i++) m[r][i] = ex(m[r + 1][i], m[r + 1][i + 1]);
-    }
-    for (let r = 1; r <= 16; r++) {
-      for (let i = 0; i < r; i++) {
-        const val = m[r][i];
-        if (val >= 1 && val <= 9) {
-          const col = color(renderColors[val - 1]);
-          const sVal = (APP.sliders && typeof APP.sliders[val] === "number") ? APP.sliders[val] : 85;
-          ctx.fill(hue(col), map(sVal, 20, 100, 35, saturation(col)), map(sVal, 20, 100, 100, brightness(col)));
-        } else { ctx.fill(0, 0, 100); }
-        const x = (i - (r - 1) / 2) * sz * sqrt(3);
-        const y = -(r - 1) * sz * 1.5;
-        ctx.beginShape();
-        for (let a = PI / 6; a < TWO_PI; a += PI / 3) ctx.vertex(x + cos(a) * sz, y + sin(a) * sz);
-        ctx.endShape(CLOSE);
-      }
-    }
-    ctx.pop();
-  }
-}
-
-function drawPreviewWatermark(g, wmImg, kind) {
-  if (kind === "final" || !g || !wmImg || isAdmin) return;
-  g.push(); 
+  g.push();
   g.resetMatrix();
   const ctx = g.drawingContext;
   if (ctx) { ctx.save(); ctx.globalAlpha = 0.32; }
-  
-  // FIX: Wir nutzen feste Werte für den Export, damit Mobil & Desktop identisch sind
-  const wWidth = 380;
-  const wHeight = (wmImg.height / wmImg.width) * wWidth;
-  const yShift = -200;
 
-  for (let x = -600; x < g.width + 800; x += 500) {
-    for (let y = -700; y < g.height + 800; y += 500) {
-      g.image(wmImg, x, y + yShift, wWidth, wHeight);
+  const wWidth = Math.round(g.width * 0.18);
+  const wHeight = (wmImg.height / wmImg.width) * wWidth;
+  const stepX = wWidth * 1.8;
+  const stepY = wHeight * 2.2;
+
+  for (let x = -wWidth * 0.4; x < g.width + wWidth; x += stepX) {
+    for (let y = -wHeight * 0.6; y < g.height + wHeight; y += stepY) {
+      g.image(wmImg, x, y, wWidth, wHeight);
     }
   }
   if (ctx) ctx.restore();
   g.pop();
 }
 
-async function exportHighRes(kind) {
+// 5. EXPORT & LOGO-POSITIONIERUNG
+async function exportHighRes(kind = "preview") {
   const settings = getExportSettings(kind);
-  const cacheKey = JSON.stringify({ kind, input: APP.input, sliders: APP.sliders });
-  if (settings.useCache && cacheKey === lastPreviewKey && lastPreviewDataUrl) {
-    window.parent.postMessage({ type: "EXPORT_RESULT", dataUrl: lastPreviewDataUrl }, "*");
-    return;
-  }
-
   const pg = createGraphics(settings.width, settings.height);
-  pg.colorMode(HSB, 360, 100, 100);
+  pg.colorMode(HSB, 360, 100, 100, 100);
   pg.background(255);
 
   const rawVal = String(APP.input || "").trim();
@@ -178,18 +139,16 @@ async function exportHighRes(kind) {
 
   const exportLogo = await waitForLogo(settings.logoWaitMs);
   
-  // Wasserzeichen zeichnen (Logik jetzt innerhalb der Funktion fixiert)
-  if (kind !== "final") drawPreviewWatermark(pg, exportLogo, kind);
+  // Wasserzeichen wie in Quadrat
+  drawPreviewWatermark(pg, exportLogo, kind);
 
   if (exportLogo) {
     pg.push();
     pg.resetMatrix();
-    pg.noTint();
-
     const lW = kind === "final" ? 500 : Math.round(pg.width * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
     
-    // LOGO-POSITION: margin auf 350 erhöht (weiter hoch und weiter links)
+    // LOGO-OPTIMIERUNG FÜR RAHMEN (Final: 350px / Preview: 4%)
     const margin = kind === "final" ? 350 : Math.round(pg.width * 0.04);
 
     pg.image(exportLogo, pg.width - lW - margin, pg.height - lH - margin, lW, lH);
@@ -197,11 +156,37 @@ async function exportHighRes(kind) {
   }
 
   const dUrl = pg.canvas.toDataURL("image/png");
-  if (settings.useCache) { lastPreviewKey = cacheKey; lastPreviewDataUrl = dUrl; }
   window.parent.postMessage({ type: "EXPORT_RESULT", dataUrl: dUrl }, "*");
 }
 
-// 5. HILFSFUNKTIONEN
+// 6. HILFSFUNKTIONEN (UNANTASTBAR)
+function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
+  const ctx = target || window;
+  const sz = 16.2;
+  const renderColors = renderColorsOverride || getRenderColors(cKey);
+  ctx.stroke(0, 0, 0, 35); ctx.strokeWeight(0.6);
+  const path = (APP.direction === "innen") ? [...code, ...[...code].reverse()] : [...[...code].reverse(), ...code];
+  for (let s = 0; s < 6; s++) {
+    ctx.push(); ctx.rotate(s * PI / 3);
+    const m = Array(17).fill().map(() => Array(17).fill(0));
+    for (let i = 0; i < 16; i++) m[16][i] = path[i % path.length];
+    for (let r = 15; r >= 1; r--) { for (let i = 0; i < r; i++) m[r][i] = ex(m[r + 1][i], m[r + 1][i + 1]); }
+    for (let r = 1; r <= 16; r++) {
+      for (let i = 0; i < r; i++) {
+        const val = m[r][i];
+        if (val >= 1 && val <= 9) {
+          const col = color(renderColors[val - 1]);
+          const sVal = (APP.sliders && typeof APP.sliders[val] === "number") ? APP.sliders[val] : 85;
+          ctx.fill(hue(col), map(sVal, 20, 100, 35, saturation(col)), map(sVal, 20, 100, 100, brightness(col)));
+        } else { ctx.fill(0, 0, 100); }
+        const x = (i - (r - 1) / 2) * sz * sqrt(3); const y = -(r - 1) * sz * 1.5;
+        ctx.beginShape(); for (let a = PI / 6; a < TWO_PI; a += PI / 3) ctx.vertex(x + cos(a) * sz, y + sin(a) * sz); ctx.endShape(CLOSE);
+      }
+    }
+    ctx.pop();
+  }
+}
+
 function getExportSettings(kind) {
   const isMob = windowWidth < 900;
   if (kind === "final") return { width: 2480, height: 3508, logoWaitMs: 5000, useCache: false };
@@ -211,10 +196,7 @@ function getExportSettings(kind) {
 function waitForLogo(maxMs) {
   return new Promise(resolve => {
     const start = Date.now();
-    const tick = () => {
-      if (logoImg || Date.now() - start > maxMs) return resolve(logoImg);
-      setTimeout(tick, 50);
-    };
+    const tick = () => { if (logoImg || Date.now() - start > maxMs) return resolve(logoImg); setTimeout(tick, 50); };
     tick();
   });
 }
@@ -224,15 +206,10 @@ function getCodeFromText(t) {
   if (r.length === 0) return [0,0,0,0,0,0,0,0];
   while (r.length < 8) r.push(9);
   while (r.length > 8) {
-    const next = [];
-    for (let i = 0; i < r.length - 1; i++) next.push(ex(r[i], r[i+1]));
-    r = next;
+    const next = []; for (let i = 0; i < r.length - 1; i++) next.push(ex(r[i], r[i+1])); r = next;
   }
   return r;
 }
 
-function getRenderColors(k) {
-  return (Array.isArray(APP.colors) && APP.colors.length === 9) ? APP.colors : (colorMatrix[k] || colorMatrix[1]);
-}
-
+function getRenderColors(k) { return (Array.isArray(APP.colors) && APP.colors.length === 9) ? APP.colors : (colorMatrix[k] || colorMatrix[1]); }
 function windowResized() { resizeCanvas(windowWidth, windowHeight); redraw(); }

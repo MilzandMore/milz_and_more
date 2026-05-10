@@ -105,11 +105,13 @@ function drawPreviewWatermark(g, wmImg, kind = "preview") {
   const ctx = g.drawingContext;
   if (ctx) { ctx.save(); ctx.globalAlpha = 0.32; }
 
+  // Exakte Quadrat-Logik: Relative Größen basierend auf Canvas-Breite
   const wWidth = Math.round(g.width * 0.18);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
   const stepX = wWidth * 1.8;
   const stepY = wHeight * 2.2;
 
+  // Startversatz für nahtloses Muster
   for (let x = -wWidth * 0.4; x < g.width + wWidth; x += stepX) {
     for (let y = -wHeight * 0.6; y < g.height + wHeight; y += stepY) {
       g.image(wmImg, x, y, wWidth, wHeight);
@@ -139,17 +141,19 @@ async function exportHighRes(kind = "preview") {
 
   const exportLogo = await waitForLogo(settings.logoWaitMs);
   
-  // Wasserzeichen wie in Quadrat
+  // Wasserzeichen-Aufruf
   drawPreviewWatermark(pg, exportLogo, kind);
 
   if (exportLogo) {
     pg.push();
     pg.resetMatrix();
+    
+    // Logo Größe
     const lW = kind === "final" ? 500 : Math.round(pg.width * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
     
-    // LOGO-OPTIMIERUNG FÜR RAHMEN (Final: 350px / Preview: 4%)
-    const margin = kind === "final" ? 350 : Math.round(pg.width * 0.04);
+    // LOGO-OPTIMIERUNG: Margin auf 450 erhöht für die Druckversion (Rahmen-Sicherheit)
+    const margin = kind === "final" ? 450 : Math.round(pg.width * 0.04);
 
     pg.image(exportLogo, pg.width - lW - margin, pg.height - lH - margin, lW, lH);
     pg.pop();

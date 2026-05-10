@@ -14,8 +14,7 @@ let extState = {};
 let logoImg = null;
 let isAdmin = false;
 let exportKind = "preview"; 
-let lastPreviewKey = "";
-let lastPreviewDataUrl = "";
+// Cache-Variablen entfernt für sofortige Aktualisierung
 
 const colorMatrix = {
   1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
@@ -105,13 +104,11 @@ function drawPreviewWatermark(g, wmImg, kind = "preview") {
   const ctx = g.drawingContext;
   if (ctx) { ctx.save(); ctx.globalAlpha = 0.32; }
 
-  // Exakte Quadrat-Logik: Relative Größen basierend auf Canvas-Breite
   const wWidth = Math.round(g.width * 0.18);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
   const stepX = wWidth * 1.8;
   const stepY = wHeight * 2.2;
 
-  // Startversatz für nahtloses Muster
   for (let x = -wWidth * 0.4; x < g.width + wWidth; x += stepX) {
     for (let y = -wHeight * 0.6; y < g.height + wHeight; y += stepY) {
       g.image(wmImg, x, y, wWidth, wHeight);
@@ -133,27 +130,30 @@ async function exportHighRes(kind = "preview") {
   while (code.length < 8) code.push(0);
   code = code.slice(0, 8);
 
+  const cKey = code[0] || 1;
+  const renderColors = getRenderColors(cKey);
+
   pg.push();
   pg.translate(pg.width / 2, pg.height * 0.40);
   pg.scale(2.4 * (pg.width / 2480));
-  renderWabeKorrekt(code, code[0] || 1, pg, getRenderColors(code[0] || 1));
+  renderWabeKorrekt(code, cKey, pg, renderColors);
   pg.pop();
 
   const exportLogo = await waitForLogo(settings.logoWaitMs);
   
-  // Wasserzeichen-Aufruf
+  // Wasserzeichen nur in der Vorschau zeichnen
   drawPreviewWatermark(pg, exportLogo, kind);
 
   if (exportLogo) {
     pg.push();
     pg.resetMatrix();
-    
-    // Logo Größe
+    pg.noTint();
+
     const lW = kind === "final" ? 500 : Math.round(pg.width * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
     
-    // LOGO-OPTIMIERUNG: Margin auf 450 erhöht für die Druckversion (Rahmen-Sicherheit)
-    const margin = kind === "final" ? 450 : Math.round(pg.width * 0.04);
+    // LOGO-POSITION: 650px Abstand für die Druckversion (Sicherheit für Rahmen)
+    const margin = kind === "final" ? 650 : Math.round(pg.width * 0.04);
 
     pg.image(exportLogo, pg.width - lW - margin, pg.height - lH - margin, lW, lH);
     pg.pop();
@@ -192,9 +192,9 @@ function renderWabeKorrekt(code, cKey, target, renderColorsOverride) {
 }
 
 function getExportSettings(kind) {
-  const isMob = windowWidth < 900;
   if (kind === "final") return { width: 2480, height: 3508, logoWaitMs: 5000, useCache: false };
-  return { width: isMob ? 1240 : 1800, height: isMob ? 1754 : 2545, logoWaitMs: isMob ? 350 : 800, useCache: true };
+  const isMob = windowWidth < 900;
+  return { width: isMob ? 1240 : 1800, height: isMob ? 1754 : 2545, logoWaitMs: isMob ? 350 : 800, useCache: false };
 }
 
 function waitForLogo(maxMs) {

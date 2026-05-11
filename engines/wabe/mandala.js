@@ -93,21 +93,18 @@ function draw() {
   pop();
 }
 
-// 4. WASSERZEICHEN-LOGIK (IDENTISCH ZU QUADRAT)
+// 4. WASSERZEICHEN
 function drawPreviewWatermark(g, wmImg, kind = "preview") {
   if (kind === "final") return;
   if (!g || !wmImg || isAdmin) return;
-
   g.push();
   g.resetMatrix();
   const ctx = g.drawingContext;
   if (ctx) { ctx.save(); ctx.globalAlpha = 0.32; }
-
   const wWidth = Math.round(g.width * 0.18);
   const wHeight = (wmImg.height / wmImg.width) * wWidth;
   const stepX = wWidth * 1.8;
   const stepY = wHeight * 2.2;
-
   for (let x = -wWidth * 0.4; x < g.width + wWidth; x += stepX) {
     for (let y = -wHeight * 0.6; y < g.height + wHeight; y += stepY) {
       g.image(wmImg, x, y, wWidth, wHeight);
@@ -117,7 +114,7 @@ function drawPreviewWatermark(g, wmImg, kind = "preview") {
   g.pop();
 }
 
-// 5. EXPORT & LOGO-POSITIONIERUNG
+// 5. EXPORT & LOGO POSITIONIERUNG (NEU & RADIKAL)
 async function exportHighRes(kind = "preview") {
   const settings = getExportSettings(kind);
   const pg = createGraphics(settings.width, settings.height);
@@ -129,44 +126,37 @@ async function exportHighRes(kind = "preview") {
   while (code.length < 8) code.push(0);
   code = code.slice(0, 8);
 
-  const cKey = code[0] || 1;
-  const renderColors = getRenderColors(cKey);
-
   pg.push();
-  // 45% von oben zentriert das Mandala besser auf dem A4 Blatt
+  // ZENTRIERUNG: 45% von oben für bessere Blatt-Aufteilung
   pg.translate(pg.width / 2, pg.height * 0.45);
   
-  // SAFE AREA: Faktor von 2.4 auf 2.05 reduziert für schönen weißen Rand
-  const safeScale = 2.05 * (pg.width / 2480);
+  // SKALIERUNG: 2.0 für viel weißen Rand (Safe Zone)
+  const safeScale = 2.0 * (pg.width / 2480);
   pg.scale(safeScale);
   
-  renderWabeKorrekt(code, cKey, pg, renderColors);
+  renderWabeKorrekt(code, code[0] || 1, pg, getRenderColors(code[0] || 1));
   pg.pop();
 
   const exportLogo = await waitForLogo(settings.logoWaitMs);
-  
-  // Wasserzeichen nur in der Vorschau
   drawPreviewWatermark(pg, exportLogo, kind);
 
   if (exportLogo) {
     pg.push();
     pg.resetMatrix();
-    pg.noTint();
-
+    
+    // Logo Größe
     const lW = kind === "final" ? 500 : Math.round(pg.width * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
     
-    // LOGO-POSITION FÜR DRUCK (final): 450px von rechts, 500px von unten
-    // Dies verhindert das Abschneiden durch den Rahmen.
-    const marginX = kind === "final" ? 450 : Math.round(pg.width * 0.04);
-    const marginY = kind === "final" ? 500 : Math.round(pg.width * 0.04);
+    // DER SICHERHEITS-ABSTAND: 600px für beide Modi!
+    // Das Logo rückt damit massiv vom Rand weg.
+    const margin = 600;
 
-    pg.image(exportLogo, pg.width - lW - marginX, pg.height - lH - marginY, lW, lH);
+    pg.image(exportLogo, pg.width - lW - margin, pg.height - lH - margin, lW, lH);
     pg.pop();
   }
 
   const dUrl = pg.canvas.toDataURL("image/png");
-  // Cache wird durch getExportSettings gesteuert (useCache: false)
   window.parent.postMessage({ type: "EXPORT_RESULT", dataUrl: dUrl }, "*");
 }
 

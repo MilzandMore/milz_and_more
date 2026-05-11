@@ -14,7 +14,6 @@ let extState = {};
 let logoImg = null;
 let isAdmin = false;
 let exportKind = "preview"; 
-// Cache-Variablen entfernt für sofortige Aktualisierung
 
 const colorMatrix = {
   1: ["#FF0000", "#00008B", "#00FF00", "#FFFF00", "#87CEEB", "#40E0D0", "#FFC0CB", "#FFA500", "#9400D3"],
@@ -134,14 +133,19 @@ async function exportHighRes(kind = "preview") {
   const renderColors = getRenderColors(cKey);
 
   pg.push();
-  pg.translate(pg.width / 2, pg.height * 0.40);
-  pg.scale(2.4 * (pg.width / 2480));
+  // 45% von oben zentriert das Mandala besser auf dem A4 Blatt
+  pg.translate(pg.width / 2, pg.height * 0.45);
+  
+  // SAFE AREA: Faktor von 2.4 auf 2.05 reduziert für schönen weißen Rand
+  const safeScale = 2.05 * (pg.width / 2480);
+  pg.scale(safeScale);
+  
   renderWabeKorrekt(code, cKey, pg, renderColors);
   pg.pop();
 
   const exportLogo = await waitForLogo(settings.logoWaitMs);
   
-  // Wasserzeichen nur in der Vorschau zeichnen
+  // Wasserzeichen nur in der Vorschau
   drawPreviewWatermark(pg, exportLogo, kind);
 
   if (exportLogo) {
@@ -152,14 +156,17 @@ async function exportHighRes(kind = "preview") {
     const lW = kind === "final" ? 500 : Math.round(pg.width * 0.18);
     const lH = (exportLogo.height / exportLogo.width) * lW;
     
-    // LOGO-POSITION: 650px Abstand für die Druckversion (Sicherheit für Rahmen)
-    const margin = kind === "final" ? 650 : Math.round(pg.width * 0.04);
+    // LOGO-POSITION FÜR DRUCK (final): 450px von rechts, 500px von unten
+    // Dies verhindert das Abschneiden durch den Rahmen.
+    const marginX = kind === "final" ? 450 : Math.round(pg.width * 0.04);
+    const marginY = kind === "final" ? 500 : Math.round(pg.width * 0.04);
 
-    pg.image(exportLogo, pg.width - lW - margin, pg.height - lH - margin, lW, lH);
+    pg.image(exportLogo, pg.width - lW - marginX, pg.height - lH - marginY, lW, lH);
     pg.pop();
   }
 
   const dUrl = pg.canvas.toDataURL("image/png");
+  // Cache wird durch getExportSettings gesteuert (useCache: false)
   window.parent.postMessage({ type: "EXPORT_RESULT", dataUrl: dUrl }, "*");
 }
 

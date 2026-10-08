@@ -672,84 +672,92 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 📸 ULTRA-STABILER EXPORTER & FARB-MENÜ FIX
+// 📸 DIRECT-SCREEN-CAPTURE EXPORTER (BESEITIGT JEDEN ENGINE-FEHLER BEI RUND & WABE)
 els.download.addEventListener("click", () => {
+  // Triggert das Anzeigen der Vorschau im Hintergrund
   showPreviewInfo();
-  requestExport("final");
 
-  // Wartezeit, um Bilddaten aus dem System abzugreifen
-  setTimeout(() => {
-    // SECURITY-NET: Holt das Bild direkt aus der Benutzeroberfläche des Browsers
-    const screenPreviewImg = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img, .app-viewer img");
-    let sourceSrc = window.__FINAL_MANDALA;
-
-    if (screenPreviewImg && screenPreviewImg.src && screenPreviewImg.src.startsWith("data:image")) {
-      sourceSrc = screenPreviewImg.src;
-    }
-
-    if (!sourceSrc) {
-      const activeCanvas = document.querySelector("canvas");
-      if (activeCanvas) {
-        sourceSrc = activeCanvas.toDataURL("image/png");
-      }
-    }
-
-    if (!sourceSrc) {
-      alert("Das Frequenzbild wird vorbereitet – bitte klicke in 2 Sekunden noch einmal.");
-      return;
-    }
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = sourceSrc;
-    
-    img.onload = function() {
-      const canvas = document.createElement("canvas");
+  // WICHTIG: Wir holen uns das Bild DIREKT aus dem fehlerfreien HTML-Vorschaubild auf deinem Bildschirm!
+  // Das ignoriert die abstürzende Engine (mandala.js:351) und rettet den Download bedingungslos!
+  const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img, .app-viewer img");
+  
+  // Falls das Vorschaubild bereits geladen ist, nutzen wir es sofort, andernfalls warten wir kurz
+  if (previewImgElement && previewImgElement.src && previewImgElement.src.startsWith("data:image")) {
+    processAndDownloadMandala(previewImgElement.src);
+  } else {
+    // Falls das System einen Moment braucht (z.B. bei langsameren Geräten)
+    requestExport("final");
+    setTimeout(() => {
+      const retryImg = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img, .app-viewer img");
+      let finalSrc = retryImg ? retryImg.src : window.__FINAL_MANDALA;
       
-      // Erzwingt das edle 3:4 Hochformat für alle 3 Modelle einheitlich
-      canvas.width = 1200;
-      canvas.height = 1600;
-      const ctx = canvas.getContext("2d");
-
-      // 1. Hintergrund rein weiß grundieren
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // 2. Proportionen anpassen (Rund bleibt rund, Wabe bleibt Wabe!)
-      const imgWidth = img.naturalWidth || img.width;
-      const imgHeight = img.naturalHeight || img.height;
-      
-      let size = canvas.width * 0.76;
-      let x = (canvas.width - size) / 2;
-      let y = (canvas.height - size) / 2.5;
-
-      if (imgWidth > imgHeight && state.mode !== "quadrat") {
-        // Bereinigt das breite Querband der Engine und setzt das Mandala zentriert ein
-        ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
-      } else {
-        ctx.drawImage(img, x, y, size, size);
+      if (!finalSrc) {
+        const fallbackCanvas = document.querySelector("canvas");
+        if (fallbackCanvas) finalSrc = fallbackCanvas.toDataURL("image/png");
       }
 
-      // 3. Logo einbrennen
-      const logoImg = new Image();
-      logoImg.crossOrigin = "anonymous";
-      logoImg.src = "assets/Logo_gold.png";
-      
-      logoImg.onload = function() {
-        let logow = canvas.width * 0.16;
-        let logoh = logow * (logoImg.height / logoImg.width);
-        let logox = canvas.width - logow - (canvas.width * 0.08);
-        let logoy = canvas.height - logoh - (canvas.height * 0.06);
-        ctx.drawImage(logoImg, logox, logoy, logow, logoh);
-        executeFinalSave(canvas.toDataURL("image/png"));
-      };
-
-      logoImg.onerror = function() {
-        executeFinalSave(canvas.toDataURL("image/png"));
-      };
-    };
-  }, 1300);
+      if (!finalSrc) {
+        alert("Das Frequenzbild wird vorbereitet – bitte klicke in 2 Sekunden noch einmal.");
+        return;
+      }
+      processAndDownloadMandala(finalSrc);
+    }, 1200);
+  }
 });
+
+// Verarbeitet das Bild im exakten 3:4 Hochformat mit weißem Hintergrund und Logo unten rechts
+function processAndDownloadMandala(sourceSrc) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = sourceSrc;
+  
+  img.onload = function() {
+    const canvas = document.createElement("canvas");
+    
+    // ERZWINGT DAS EXACTE PRESTIGE-HOCHFORMAT (3:4) WIE BEIM QUADRAT-PREVIEW
+    canvas.width = 1200;
+    canvas.height = 1600;
+    const ctx = canvas.getContext("2d");
+
+    // 1. Hintergrund bombensicher weiß grundieren (Löscht jegliche Transparenz-Schwarzfärbung)
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 2. Geometrien proportional einpassen (Rund bleibt rund, Wabe bleibt Wabe!)
+    const imgWidth = img.naturalWidth || img.width;
+    const imgHeight = img.naturalHeight || img.height;
+    
+    let size = canvas.width * 0.76;
+    let x = (canvas.width - size) / 2;
+    let y = (canvas.height - size) / 2.5;
+
+    if (imgWidth > imgHeight && state.mode !== "quadrat") {
+      // Schneidet das fehlerhafte Querband der Engine ab und zentriert das Mandala
+      ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
+    } else {
+      ctx.drawImage(img, x, y, size, size);
+    }
+
+    // 3. Logo-Ebene: Platziert das Logo exakt unten rechts
+    const logoImg = new Image();
+    logoImg.crossOrigin = "anonymous";
+    logoImg.src = "assets/Logo_gold.png";
+    
+    logoImg.onload = function() {
+      let logow = canvas.width * 0.16;
+      let logoh = logow * (logoImg.height / logoImg.width);
+      let logox = canvas.width - logow - (canvas.width * 0.08);
+      let logoy = canvas.height - logoh - (canvas.height * 0.06);
+      ctx.drawImage(logoImg, logox, logoy, logow, logoh);
+      
+      executeFinalSave(canvas.toDataURL("image/png"));
+    };
+
+    logoImg.onerror = function() {
+      executeFinalSave(canvas.toDataURL("image/png"));
+    };
+  };
+}
 
 function executeFinalSave(finalDataUrl) {
   const link = document.createElement("a");
@@ -760,7 +768,7 @@ function executeFinalSave(finalDataUrl) {
   document.body.removeChild(link);
 }
 
-// 🎛️ REPARATUR DER MENÜSTEUERUNG UND FARB-SLIDER (Stellt die Leiste links wieder her)
+// App-Menüführung und Event-Zuweisungen
 els.openSliders.addEventListener("click", openSheet);
 els.closeSliders.addEventListener("click", closeSheet);
 els.sliderBackdrop.addEventListener("click", closeSheet);
@@ -773,20 +781,10 @@ if (els.buyPreviewPng) {
   });
 }
 
-// Initialisiert deine originalen Farbregler-Funktionen sauber im System
-if (typeof buildSliders === "function") {
-  buildSliders();
-}
-if (typeof refreshComputedCodeAndColors === "function") {
-  refreshComputedCodeAndColors();
-}
-if (typeof updateConditionalFields === "function") {
-  updateConditionalFields();
-}
-if (typeof updateViewerWatermarkPosition === "function") {
-  updateViewerWatermarkPosition();
-}
-
+if (typeof buildSliders === "function") buildSliders();
+if (typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
+if (typeof updateConditionalFields === "function") updateConditionalFields();
+if (typeof updateViewerWatermarkPosition === "function") updateViewerWatermarkPosition();
 loadEngine("quadrat");
 
 document.addEventListener("DOMContentLoaded", function() {

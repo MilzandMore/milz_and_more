@@ -673,26 +673,72 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 🔥 DIREKTER & KOSTENLOSER DOWNLOAD FÜR KURS-TEILNEHMER
+// 🔥 UNIVERSAL-REPARATUR FÜR PC & MOBIL (QUADRAT, RUND & WABE)
 els.download.addEventListener("click", () => {
   showPreviewInfo();
   requestExport("final");
 
-  // Kurze Verzögerung, damit die Engine das Bild in den Speicher laden kann
   setTimeout(() => {
-    const dataUrl = window.__FINAL_MANDALA;
-    if (!dataUrl) {
+    // Wir holen uns das Bild direkt aus der fehlerfreien Druckvorschau
+    // Das fängt alle Skalierungs- und Transparenzfehler bei Rund & Wabe ab
+    const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img");
+    let sourceSrc = window.__FINAL_MANDALA;
+
+    if (previewImgElement && previewImgElement.src) {
+      sourceSrc = previewImgElement.src;
+    }
+
+    if (!sourceSrc) {
       alert("Mandala wird vorbereitet – bitte klicke in 2 Sekunden noch einmal.");
       return;
     }
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = "mein-lebenscode-mandala.png";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, 800);
+
+    const img = new Image();
+    img.src = sourceSrc;
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      
+      // Hohe Druckauflösung sichern
+      canvas.width = img.naturalWidth || img.width || 1200;
+      canvas.height = img.naturalHeight || img.height || 1600;
+      
+      const ctx = canvas.getContext("2d");
+
+      // Hintergrund bombensicher WEISS brennen
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Das unverzerrte Originalbild exakt aufzeichnen
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // Logo-Ebene fixieren
+      const logoImg = new Image();
+      logoImg.src = "assets/Logo_gold.png";
+      logoImg.onload = function() {
+        let logow = canvas.width * 0.16;
+        let logoh = logow * (logoImg.height / logoImg.width);
+        let logox = canvas.width - logow - (canvas.width * 0.06);
+        let logoy = canvas.height - logoh - (canvas.height * 0.04);
+        
+        ctx.drawImage(logoImg, logox, logoy, logow, logoh);
+        executeActualDownload(canvas.toDataURL("image/png"));
+      };
+
+      logoImg.onerror = function() {
+        executeActualDownload(canvas.toDataURL("image/png"));
+      };
+    };
+  }, 900);
 });
+
+function executeActualDownload(finalDataUrl) {
+  const link = document.createElement("a");
+  link.href = finalDataUrl;
+  link.download = "mein-lebenscode-mandala.png";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
 els.openSliders.addEventListener("click", openSheet);
 els.closeSliders.addEventListener("click", closeSheet);
@@ -700,10 +746,9 @@ els.sliderBackdrop.addEventListener("click", closeSheet);
 els.closePrintPreview.addEventListener("click", closePrintPreview);
 els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-// 🎨 KUNSTDRUCK-BUTTTON LOGIK
+// 🎨 KUNSTDRUCK-BUTTTON ZU TENTARY
 if (els.buyPreviewPng) {
   els.buyPreviewPng.addEventListener("click", () => {
-    // Leitet deine Kunden direkt auf deine Tentary-Shop-Auswahl weiter
     window.open("https://mytentary.com", "_blank");
   });
 }
@@ -715,7 +760,7 @@ updateViewerWatermarkPosition();
 loadEngine("quadrat");
 
 document.addEventListener("DOMContentLoaded", function() {
-  // Der alte, fehlerhafte PayPal-Container wird hier sicher und sauber entfernt
+  // Der alte, fehlerhafte PayPal-Button wird hier sicher ausgeblendet
   const paypalContainer = document.getElementById('paypal-button-container');
   if (paypalContainer) {
     paypalContainer.style.display = 'none';

@@ -676,12 +676,12 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 📸 STABILER DIRECT-CLICK EXPORTER (FILTERT SCHWARZE ENGINE-HINTERGRÜNDE HERAUS)
+// 📸 INDIVIDUELLER HIGH-END EXPORTER (TRENNT QUADRAT, RUND & WABE STRIKT VONEINANDER)
 els.download.addEventListener("click", () => {
   requestExport("final");
 
   setTimeout(() => {
-    const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img, .app-viewer img");
+    const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img");
     let sourceSrc = window.__FINAL_MANDALA;
 
     if (previewImgElement && previewImgElement.src && previewImgElement.src.startsWith("data:image")) {
@@ -698,77 +698,92 @@ els.download.addEventListener("click", () => {
       return;
     }
 
+    // 🛑 STRIKTE WEGWEISUNG JE NACH AKTIVEM MODELL
+    const currentMode = state.mode; 
+
+    // --- REPARATUR 1: DAS QUADRAT (Vollständig im Originalzustand wiederhergestellt) ---
+    if (currentMode === "quadrat") {
+      executeFinalSave(sourceSrc);
+      return; 
+    }
+
+    // --- REPARATUR 2 & 3: RUND UND WABE (Maßgeschneiderte Aufbereitung) ---
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.src = sourceSrc;
     
     img.onload = function() {
-      // 1. Hilfs-Canvas erstellen, um das Schwarz der Engine herauszufiltern
-      const helperCanvas = document.createElement("canvas");
-      helperCanvas.width = img.naturalWidth || img.width;
-      helperCanvas.height = img.naturalHeight || img.height;
-      const hCtx = helperCanvas.getContext("2d");
-      hCtx.drawImage(img, 0, 0);
-      
-      // Pixel untersuchen und reines Schwarz (#111111 oder dunkler) transparent machen
-      try {
-        const imgData = hCtx.getImageData(0, 0, helperCanvas.width, helperCanvas.height);
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          // Wenn Rot, Grün und Blau sehr dunkel/schwarz sind (unter Schwellenwert 35)
-          if (data[i] < 35 && data[i+1] < 35 && data[i+2] < 35) {
-            data[i+3] = 0; // Macht den Pixel unsichtbar/transparent
-          }
-        }
-        hCtx.putImageData(imgData, 0, 0);
-      } catch(e) { console.log("Filter-Skip (CORS)"); }
-
-      // 2. Haupt-Canvas im exakten 3:4 Hochformat aufbauen
       const canvas = document.createElement("canvas");
-      canvas.width = 1200;
-      canvas.height = 1600;
       const ctx = canvas.getContext("2d");
 
-      // Hintergrund bombenfest WEISS grundieren
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Maße für die Platzierung
-      let size = canvas.width * 0.76;
-      let x = (canvas.width - size) / 2;
-      let y = 140;
+      const imgWidth = img.naturalWidth || img.width;
+      const imgHeight = img.naturalHeight || img.height;
 
-      const imgWidth = helperCanvas.width;
-      const imgHeight = helperCanvas.height;
+      if (currentMode === "rund") {
+        // Erzeugt ein perfekt proportionales Quadrat, um das runde Mandala ohne Verzerrung aufzunehmen
+        canvas.width = imgHeight;
+        canvas.height = imgHeight;
 
-      // Das gefilterte Bild ohne das störende Schwarz aufzeichnen
-      if (imgWidth > imgHeight && state.mode !== "quadrat") {
-        ctx.drawImage(helperCanvas, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
-      } else {
-        ctx.drawImage(helperCanvas, x, y, size, size);
-      }
+        // Hintergrund rein weiß grundieren
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 3. Logo unten rechts einbrennen
-      const logoImg = new Image();
-      logoImg.crossOrigin = "anonymous";
-      logoImg.src = "assets/Logo_gold.png";
-      
-      logoImg.onload = function() {
-        let logow = 200;
-        let logoh = logow * (logoImg.height / logoImg.width);
-        let logox = canvas.width - logow - 80;
-        let logoy = canvas.height - logoh - 80;
-        ctx.drawImage(logoImg, logox, logoy, logow, logoh);
+        // Schneidet das schwarze Querband der Engine ab und filtert den schwarzen Kreis-Hintergrund
+        ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, 0, 0, canvas.width, canvas.height);
         
-        executeFinalSave(canvas.toDataURL("image/png"));
-      };
+        // Pixel-Filter: Macht das tiefe Schwarz um die runde Form herum rein weiß
+        try {
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imgData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            if (data[i] < 40 && data[i+1] < 40 && data[i+2] < 40) {
+              data[i] = 255;   // Rot auf Weiss
+              data[i+1] = 255; // Grün auf Weiss
+              data[i+2] = 255; // Blau auf Weiss
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
+        } catch(e) { console.log("Filter-Skip"); }
 
-      logoImg.onerror = function() {
+        // Das goldene Logo exakt unten rechts einbrennen
+        burnGoldenLogo(canvas, ctx);
+
+      } else if (currentMode === "wabe") {
+        // Die Wabe liefert bereits einen weißen Grund, wird hier aber vor dem Verzerren geschützt
+        canvas.width = imgWidth;
+        canvas.height = imgHeight;
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+
+        // Da die Wabe bereits ihr eigenes Logo besitzt, wird hier KEIN zweites Logo aufgetragen
         executeFinalSave(canvas.toDataURL("image/png"));
-      };
+      }
     };
   }, 1400);
 });
+
+// Funktion zum Einbrennen des edlen goldenen Logos
+function burnGoldenLogo(canvas, ctx) {
+  const logoImg = new Image();
+  logoImg.crossOrigin = "anonymous";
+  logoImg.src = "assets/Logo_gold.png";
+  
+  logoImg.onload = function() {
+    let logow = canvas.width * 0.16;
+    let logoh = logow * (logoImg.height / logoImg.width);
+    let logox = canvas.width - logow - (canvas.width * 0.05);
+    let logoy = canvas.height - logoh - (canvas.height * 0.05);
+    ctx.drawImage(logoImg, logox, logoy, logow, logoh);
+    
+    executeFinalSave(canvas.toDataURL("image/png"));
+  };
+
+  logoImg.onerror = function() {
+    executeFinalSave(canvas.toDataURL("image/png"));
+  };
+}
 
 function executeFinalSave(finalDataUrl) {
   const link = document.createElement("a");

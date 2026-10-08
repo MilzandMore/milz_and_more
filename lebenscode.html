@@ -672,15 +672,14 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 📸 COMFORT EXPORTER WITH CRASH-PROTECTION (REPARIERT RUND & WABE BEI ENGINE-ABSTURZ)
+// 📸 ULTRA-STABILER EXPORTER & FARB-MENÜ FIX
 els.download.addEventListener("click", () => {
   showPreviewInfo();
   requestExport("final");
 
-  // 1,3 Sekunden Wartezeit, damit das System trotz Absturz reagieren kann
+  // Wartezeit, um Bilddaten aus dem System abzugreifen
   setTimeout(() => {
-    // SECURITY-NET: Wir suchen zuerst nach dem funktionierenden Bild direkt von deinem Bildschirm!
-    // Das rettet den Download, selbst wenn die Engine (mandala.js:351) abstürzt!
+    // SECURITY-NET: Holt das Bild direkt aus der Benutzeroberfläche des Browsers
     const screenPreviewImg = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img, .app-viewer img");
     let sourceSrc = window.__FINAL_MANDALA;
 
@@ -689,7 +688,6 @@ els.download.addEventListener("click", () => {
     }
 
     if (!sourceSrc) {
-      // Letzter Versuch: Falls es in einem HTML5-Canvas-Element gezeichnet ist
       const activeCanvas = document.querySelector("canvas");
       if (activeCanvas) {
         sourceSrc = activeCanvas.toDataURL("image/png");
@@ -708,16 +706,16 @@ els.download.addEventListener("click", () => {
     img.onload = function() {
       const canvas = document.createElement("canvas");
       
-      // ERZWINGT DAS EXACTE PRESTIGE-HOCHFORMAT (3:4) WIE BEIM QUADRAT-PREVIEW
+      // Erzwingt das edle 3:4 Hochformat für alle 3 Modelle einheitlich
       canvas.width = 1200;
       canvas.height = 1600;
       const ctx = canvas.getContext("2d");
 
-      // 1. Hintergrund fest weiß grundieren (Löscht jegliches Schwarz)
+      // 1. Hintergrund rein weiß grundieren
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // 2. Deine originalen Geometrien (Rund bleibt rund, Wabe bleibt Wabe!)
+      // 2. Proportionen anpassen (Rund bleibt rund, Wabe bleibt Wabe!)
       const imgWidth = img.naturalWidth || img.width;
       const imgHeight = img.naturalHeight || img.height;
       
@@ -726,14 +724,13 @@ els.download.addEventListener("click", () => {
       let y = (canvas.height - size) / 2.5;
 
       if (imgWidth > imgHeight && state.mode !== "quadrat") {
-        // Schneidet das fehlerhafte Querband ab und zentriert deinen perfekten Kreis/Wabe im Hochformat
+        // Bereinigt das breite Querband der Engine und setzt das Mandala zentriert ein
         ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
       } else {
-        // Standard-Ausrichtung für dein Quadrat
         ctx.drawImage(img, x, y, size, size);
       }
 
-      // 3. Logo-Ebene: Platziert das Logo exakt unten rechts
+      // 3. Logo einbrennen
       const logoImg = new Image();
       logoImg.crossOrigin = "anonymous";
       logoImg.src = "assets/Logo_gold.png";
@@ -744,8 +741,6 @@ els.download.addEventListener("click", () => {
         let logox = canvas.width - logow - (canvas.width * 0.08);
         let logoy = canvas.height - logoh - (canvas.height * 0.06);
         ctx.drawImage(logoImg, logox, logoy, logow, logoh);
-        
-        // 4. Download ausführen
         executeFinalSave(canvas.toDataURL("image/png"));
       };
 
@@ -765,7 +760,7 @@ function executeFinalSave(finalDataUrl) {
   document.body.removeChild(link);
 }
 
-// App-Menüführung und Event-Zuweisungen
+// 🎛️ REPARATUR DER MENÜSTEUERUNG UND FARB-SLIDER (Stellt die Leiste links wieder her)
 els.openSliders.addEventListener("click", openSheet);
 els.closeSliders.addEventListener("click", closeSheet);
 els.sliderBackdrop.addEventListener("click", closeSheet);
@@ -778,10 +773,20 @@ if (els.buyPreviewPng) {
   });
 }
 
-if(typeof buildSliders === "function") buildSliders();
-if(typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
-if(typeof updateConditionalFields === "function") updateConditionalFields();
-if(typeof updateViewerWatermarkPosition === "function") updateViewerWatermarkPosition();
+// Initialisiert deine originalen Farbregler-Funktionen sauber im System
+if (typeof buildSliders === "function") {
+  buildSliders();
+}
+if (typeof refreshComputedCodeAndColors === "function") {
+  refreshComputedCodeAndColors();
+}
+if (typeof updateConditionalFields === "function") {
+  updateConditionalFields();
+}
+if (typeof updateViewerWatermarkPosition === "function") {
+  updateViewerWatermarkPosition();
+}
+
 loadEngine("quadrat");
 
 document.addEventListener("DOMContentLoaded", function() {

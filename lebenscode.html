@@ -672,17 +672,28 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 📸 COMPACT PREMIUM EXPORTER (PERFEKTE PROPORTIONEN FÜR QUADRAT, RUND & WABE)
+// 📸 COMFORT EXPORTER WITH CRASH-PROTECTION (REPARIERT RUND & WABE BEI ENGINE-ABSTURZ)
 els.download.addEventListener("click", () => {
   showPreviewInfo();
   requestExport("final");
 
+  // 1,3 Sekunden Wartezeit, damit das System trotz Absturz reagieren kann
   setTimeout(() => {
-    const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img");
+    // SECURITY-NET: Wir suchen zuerst nach dem funktionierenden Bild direkt von deinem Bildschirm!
+    // Das rettet den Download, selbst wenn die Engine (mandala.js:351) abstürzt!
+    const screenPreviewImg = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img, .app-viewer img");
     let sourceSrc = window.__FINAL_MANDALA;
 
-    if (previewImgElement && previewImgElement.src) {
-      sourceSrc = previewImgElement.src;
+    if (screenPreviewImg && screenPreviewImg.src && screenPreviewImg.src.startsWith("data:image")) {
+      sourceSrc = screenPreviewImg.src;
+    }
+
+    if (!sourceSrc) {
+      // Letzter Versuch: Falls es in einem HTML5-Canvas-Element gezeichnet ist
+      const activeCanvas = document.querySelector("canvas");
+      if (activeCanvas) {
+        sourceSrc = activeCanvas.toDataURL("image/png");
+      }
     }
 
     if (!sourceSrc) {
@@ -697,31 +708,28 @@ els.download.addEventListener("click", () => {
     img.onload = function() {
       const canvas = document.createElement("canvas");
       
-      // ERZWINGT DAS EXACTE HOCHFORMAT (3:4) WIE BEIM QUADRAT-PREVIEW
+      // ERZWINGT DAS EXACTE PRESTIGE-HOCHFORMAT (3:4) WIE BEIM QUADRAT-PREVIEW
       canvas.width = 1200;
       canvas.height = 1600;
-      
       const ctx = canvas.getContext("2d");
 
-      // 1. Hintergrund fest weiß grundieren
+      // 1. Hintergrund fest weiß grundieren (Löscht jegliches Schwarz)
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // 2. Proportionale Form-Korrektur für Rund & Wabe gegen das waagerechte Verzerren
+      // 2. Deine originalen Geometrien (Rund bleibt rund, Wabe bleibt Wabe!)
       const imgWidth = img.naturalWidth || img.width;
       const imgHeight = img.naturalHeight || img.height;
       
-      if (state.mode !== "quadrat" && imgWidth > imgHeight) {
-        // Schneidet das fehlerhafte Querband der Engine ab und platziert das runde/Waben-Mandala perfekt im oberen Drittel
-        let size = canvas.width * 0.76; 
-        let x = (canvas.width - size) / 2;
-        let y = (canvas.height - size) / 2.5; // Exakte Höhe wie beim Quadrat
+      let size = canvas.width * 0.76;
+      let x = (canvas.width - size) / 2;
+      let y = (canvas.height - size) / 2.5;
+
+      if (imgWidth > imgHeight && state.mode !== "quadrat") {
+        // Schneidet das fehlerhafte Querband ab und zentriert deinen perfekten Kreis/Wabe im Hochformat
         ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
       } else {
-        // Standard-Ausrichtung für dein bereits perfektes Quadrat
-        let size = canvas.width * 0.76;
-        let x = (canvas.width - size) / 2;
-        let y = (canvas.height - size) / 2.5;
+        // Standard-Ausrichtung für dein Quadrat
         ctx.drawImage(img, x, y, size, size);
       }
 
@@ -737,26 +745,25 @@ els.download.addEventListener("click", () => {
         let logoy = canvas.height - logoh - (canvas.height * 0.06);
         ctx.drawImage(logoImg, logox, logoy, logow, logoh);
         
-        // 4. Download starten
-        const link = document.createElement("a");
-        link.href = canvas.toDataURL("image/png");
-        link.download = `mein-lebenscode-mandala-${state.mode}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // 4. Download ausführen
+        executeFinalSave(canvas.toDataURL("image/png"));
       };
 
       logoImg.onerror = function() {
-        const link = document.createElement("a");
-        link.href = canvas.toDataURL("image/png");
-        link.download = `mein-lebenscode-mandala-${state.mode}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        executeFinalSave(canvas.toDataURL("image/png"));
       };
     };
-  }, 1200);
+  }, 1300);
 });
+
+function executeFinalSave(finalDataUrl) {
+  const link = document.createElement("a");
+  link.href = finalDataUrl;
+  link.download = `mein-lebenscode-mandala-${state.mode}.png`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
 // App-Menüführung und Event-Zuweisungen
 els.openSliders.addEventListener("click", openSheet);
@@ -771,7 +778,7 @@ if (els.buyPreviewPng) {
   });
 }
 
-buildSlidersiders = typeof buildSliders === "function" ? buildSliders : function(){};
+if(typeof buildSliders === "function") buildSliders();
 if(typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
 if(typeof updateConditionalFields === "function") updateConditionalFields();
 if(typeof updateViewerWatermarkPosition === "function") updateViewerWatermarkPosition();

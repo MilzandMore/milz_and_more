@@ -623,7 +623,7 @@ function closeSheet() {
   const sheet = document.getElementById("sliderSheet");
   if(sheet) sheet.classList.remove("active");
 }
-   // ✅ 1. MESSAGE LISTENER (Öffnet die Vorschau ruhig, ohne automatischen Download)
+  // ✅ 1. MESSAGE LISTENER (ORIGINAL-ZUSTAND)
 window.addEventListener("message", (ev) => {
   const msg = ev.data;
 
@@ -676,167 +676,31 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 📸 ORIGINAL HIGH-END EXPORTER (PREMIUM HOCHFORMAT FÜR ALLE FORMEN IDENTISCH)
+// 🔥 UNBERÜHRTER ORIGINAL-DOWNLOAD (STARTET DIREKT & REIN ÜBER DEINE ENGINES)
 els.download.addEventListener("click", () => {
+  showPreviewInfo();
   requestExport("final");
+
+  setTimeout(() => {
+    const dataUrl = window.__FINAL_MANDALA;
+    if (!dataUrl) {
+      alert("Mandala wird vorbereitet – bitte klicke gleich noch einmal.");
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `mein-lebenscode-mandala-${state.mode}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, 1000);
 });
 
-// Steuert das automatische Abfangen der Bilddaten im Hintergrund
-window.addEventListener("message", (ev) => {
-  const msg = ev.data;
-  if (!msg || typeof msg !== "object") return;
-
-  if (msg.type === "READY") {
-    hideLoading();
-    pushStateToEngine();
-    return;
-  }
-
-  if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
-    state.colors = [...msg.colors];
-    applySliderColorsToUI();
-    return;
-  }
-
-  // 🔥 AUTOMATISCHER WORKFLOW STARTET SOBALD ENGINE ANTIVERT
-  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-    hideLoading();
-    window.__FINAL_MANDALA = msg.dataUrl;
-    
-    // Verarbeitet das Bild im Hintergrund zu deinem perfekten Hochformat-Standard
-    processAndGenerateStandardPremiumFormat(msg.dataUrl, (cleanPremiumDataUrl) => {
-      // Zeigt das perfekt formatierte Bild in der Druckvorschau an
-      openPrintPreview(cleanPremiumDataUrl);
-      
-      // Startet den Download vollautomatisch mit der fehlerfreien Hochformat-Datei
-      const link = document.createElement("a");
-      link.href = cleanPremiumDataUrl;
-      link.download = `mein-lebenscode-mandala-${state.mode}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
-  }
-});
-
-// Die "virtuelle Fotobox": Formatiert JEDE Form starr in dein perfektes Wunsch-Hochformat
-function processAndGenerateStandardPremiumFormat(sourceSrc, callback) {
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.src = sourceSrc;
-  
-  img.onload = function() {
-    const canvas = document.createElement("canvas");
-    
-    // Erzeugt exakt die Maße deines perfekten Hochformat-Quadrats (Druckauflösung)
-    canvas.width = 1200;
-    canvas.height = 1600;
-    const ctx = canvas.getContext("2d");
-
-    // 1. Hintergrund bombensicher WEISS grundieren (Löscht jegliches Schwarz bei Rund)
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // 2. Mandala-Ausrichtung im oberen Bereich (Exakt deckungsgleich mit deinem Beispielbild)
-    let size = 912; // Feste Premium-Breite des Mandalas (ca. 76% der Blattbreite)
-    let x = (canvas.width - size) / 2; // Perfekt zentriert
-    let y = 140; // Festgenagelte Höhe von oben
-
-    const imgWidth = img.naturalWidth || img.width;
-    const imgHeight = img.naturalHeight || img.height;
-
-    // Filtert das fehlerhafte Breitbild-Querformat der Rund-/Waben-Engine automatisch aus
-    if (state.mode !== "quadrat" && imgWidth > imgHeight) {
-      // Schneidet die überschüssigen transparenten/schwarzen Seitenränder präzise ab
-      ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
-    } else {
-      // Nutzt die originale, fehlerfreie Platzierung deines Quadrats
-      ctx.drawImage(img, x, y, size, size);
-    }
-
-    // 3. Rein weißer Filter-Schutz für das runde Mandala gegen das schwarze Quadrat in der Grafik
-    if (state.mode === "rund") {
-      try {
-        const imgData = ctx.getImageData(x, y, size, size);
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          // Ersetzt das tiefe Engine-Schwarz im Quadrat um den Kreis herum durch reines Weiß
-          if (data[i] < 45 && data[i+1] < 45 && data[i+2] < 45) {
-            data[i] = 255; data[i+1] = 255; data[i+2] = 255;
-          }
-        }
-        ctx.putImageData(imgData, x, y);
-      } catch (e) { console.log("Filter-Skip"); }
-    }
-
-    // 4. Logo-Ebene: Lädt dein originales SCHWARZES Marken-Logo und platziert es exakt unten rechts
-    const logoImg = new Image();
-    logoImg.crossOrigin = "anonymous";
-    // Nutzt das originale schwarze Logo deiner App
-    logoImg.src = "assets/Logo_black.png"; 
-
-    // Sicherheitsnetz falls assets/Logo_black.png anders benannt ist, nutzen wir das Haupt-Asset
-    logoImg.onerror = function() {
-      const fallbackLogo = new Image();
-      fallbackLogo.crossOrigin = "anonymous";
-      fallbackLogo.src = "assets/Logo_gold.png"; // Nutzt das verhandene Asset falls schwarz fehlt
-      fallbackLogo.onload = function() {
-        drawLogoToCanvas(fallbackLogo, canvas, ctx, callback);
-      };
-    };
-
-    logoImg.onload = function() {
-      drawLogoToCanvas(logoImg, canvas, ctx, callback);
-    };
-  };
-}
-
-// Platziert das gewünschte Logo passgenau in die Ecke unten rechts
-function drawLogoToCanvas(logoElement, canvas, ctx, callback) {
-  let logow = 210; // Edle Logobreite proportional zur Blattgröße
-  let logoh = logow * (logoElement.height / logoElement.width);
-  let logox = canvas.width - logow - 80; // Korrekter Abstand vom rechten Rand
-  let logoy = canvas.height - logoh - 80; // Korrekter Abstand vom unteren Rand
-  
-  ctx.drawImage(logoElement, logox, logoy, logow, logoh);
-  
-  // Gibt das fertige High-End-Bild an den automatischen Download weiter
-  callback(canvas.toDataURL("image/png"));
-}
-
-// App-Menüführung und Steuerung
 els.openSliders.addEventListener("click", openSheet);
 els.closeSliders.addEventListener("click", closeSheet);
 els.sliderBackdrop.addEventListener("click", closeSheet);
 els.closePrintPreview.addEventListener("click", closePrintPreview);
 els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-
-document.querySelectorAll(".engine-btn").forEach(btn => {
-  if (!btn.dataset.engine) return;
-  btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
-});
-
-els.mode.addEventListener("change", () => {
-  state.mode = els.mode.value;
-  refreshComputedCodeAndColors();
-  pushStateToEngine();
-});
-
-els.input.addEventListener("input", () => {
-  state.input = els.input.value;
-  refreshComputedCodeAndColors();
-  pushStateToEngine();
-});
-
-els.direction.addEventListener("change", () => {
-  state.direction = els.direction.value;
-  pushStateToEngine();
-});
-
-els.sector.addEventListener("change", () => {
-  state.sector = Number(els.sector.value);
-  pushStateToEngine();
-});
 
 if (els.buyPreviewPng) {
   els.buyPreviewPng.addEventListener("click", () => {
@@ -844,15 +708,20 @@ if (els.buyPreviewPng) {
   });
 }
 
+// 🎛️ SAUBERE MENÜ-INITIALISIERUNG (REPARIERT DIE MOBILEN REGLER)
 if (typeof buildSliders === "function") buildSliders();
 if (typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
 if (typeof updateConditionalFields === "function") updateConditionalFields();
 if (typeof updateViewerWatermarkPosition === "function") updateViewerWatermarkPosition();
 
+// Lädt das Quadrat ganz normal als Basis
+loadEngine("quadrat");
+
 document.addEventListener("DOMContentLoaded", function() {
+  // Blendet PayPal einfach nur visuell aus, damit im Code nichts abstürzt
   const paypalContainer = document.getElementById('paypal-button-container');
-  if (paypalContainer) { paypalContainer.style.display = 'none'; }
+  if (paypalContainer) {
+    paypalContainer.style.display = 'none';
+  }
 });
 </script>
-</body>
-</html>

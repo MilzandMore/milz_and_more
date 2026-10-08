@@ -673,80 +673,66 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 🔥 INTEGRALE UNIVERSAL-REPARATUR (GARANTIERT WEISSER HINTERGRUND FÜR QUADRAT, RUND & WABE)
+// 📸 ULTIMATIVER VORSCHAU-CAPTURE-DOWNLOAD (BESEITIGT FEHLER BEI RUND & WABE)
 els.download.addEventListener("click", () => {
   showPreviewInfo();
   requestExport("final");
 
-  // Wir warten kurz, bis die Engine das Bild erzeugt hat
+  // 1,1 Sekunden Wartezeit, damit das System das Vorschaubild sicher im RAM aufgebaut hat
   setTimeout(() => {
-    // 1. Wir suchen das echte, fertige Vorschaubild aus der Druckvorschau
-    const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img");
-    let sourceSrc = window.__FINAL_MANDALA;
+    const allImagesOnPage = document.querySelectorAll("img");
+    let sourceSrc = null;
 
-    if (previewImgElement && previewImgElement.src && previewImgElement.src.startsWith("data:image")) {
-      sourceSrc = previewImgElement.src;
+    // Filtert das korrekte, fertig gerenderte Vorschaubild aus der Ansicht heraus
+    for (let imgEl of allImagesOnPage) {
+      if (imgEl.src && imgEl.src.startsWith("data:image")) {
+        sourceSrc = imgEl.src;
+        break;
+      }
+    }
+
+    // Sicherheits-Backup falls oben nichts greift
+    if (!sourceSrc) {
+      sourceSrc = window.__FINAL_MANDALA;
     }
 
     if (!sourceSrc) {
-      alert("Mandala wird vorbereitet – bitte klicke in 2 Sekunden noch einmal.");
+      alert("Das Frequenzbild wird vorbereitet – bitte klicke in 2 Sekunden noch einmal.");
       return;
     }
 
     const img = new Image();
-    // Verhindert Blockaden beim Auslesen der Bildpunkte (CORS)
-    img.crossOrigin = "anonymous"; 
+    img.crossOrigin = "anonymous";
     img.src = sourceSrc;
     
     img.onload = function() {
       const canvas = document.createElement("canvas");
       
-      // Nutze die Originalgröße des Mandalas für maximale Druckqualität
-      canvas.width = img.naturalWidth || img.width || 1400;
-      canvas.height = img.naturalHeight || img.height || 1800;
+      // Nutzt exakt die unverzerrten Proportionen deines fehlerfreien Vorschau-Ausschnitts
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
       
       const ctx = canvas.getContext("2d");
 
-      // 2. HINTERGRUND STRICKT WEISS BRENNEN (Löscht jegliche Transparenz und Schwarzfärbung)
+      // Den Hintergrund bedingungslos WEISS grundieren (Löscht jegliche Transparenz- und Schwarzfehler)
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // 3. Das unverzerrte Originalbild exakt auf die weiße Fläche zeichnen
+      // Das zentrierte Vorschau-Bild 1:1 deckungsgleich aufzeichnen
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      // 4. Logo-Ebene: Wir brennen das Milz & More Logo fest unten rechts ein
-      const logoImg = new Image();
-      logoImg.crossOrigin = "anonymous";
-      logoImg.src = "assets/Logo_gold.png";
-      
-      logoImg.onload = function() {
-        // Berechnet die Logo-Proportionen proportional zur Bildgröße
-        let logow = canvas.width * 0.16;
-        let logoh = logow * (logoImg.height / logoImg.width);
-        let logox = canvas.width - logow - (canvas.width * 0.06);
-        let logoy = canvas.height - logoh - (canvas.height * 0.04);
-        
-        ctx.drawImage(logoImg, logox, logoy, logow, logoh);
-        executeActualDownload(canvas.toDataURL("image/png"));
-      };
-
-      // Sicherheitsnetz: Falls das Logo-Asset blockiert wird, trotzdem das weiße Mandala sichern
-      logoImg.onerror = function() {
-        executeActualDownload(canvas.toDataURL("image/png"));
-      };
+      // FINALE DIREKT-AUSGABE
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "mein-lebenscode-mandala.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     };
-  }, 1000); // Leicht erhöhte Verzögerung für langsame Geräte
+  }, 1100);
 });
 
-function executeActualDownload(finalDataUrl) {
-  const link = document.createElement("a");
-  link.href = finalDataUrl;
-  link.download = "mein-lebenscode-mandala.png";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
+// App-Menüführung und Event-Zuweisungen
 els.openSliders.addEventListener("click", openSheet);
 els.closeSliders.addEventListener("click", closeSheet);
 els.sliderBackdrop.addEventListener("click", closeSheet);

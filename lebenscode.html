@@ -672,14 +672,12 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 📸 SAUBERER SPEICHER-EXPORTER (GARANTIERT QUADRATISCH & WEISS BEI ALLEN FORMEN)
+// 📸 COMPACT PREMIUM EXPORTER (PERFEKTE PROPORTIONEN FÜR QUADRAT, RUND & WABE)
 els.download.addEventListener("click", () => {
   showPreviewInfo();
   requestExport("final");
 
-  // 1,2 Sekunden Wartezeit, damit das System das Bild im Speicher stabil aufgebaut hat
   setTimeout(() => {
-    // Wir greifen uns das fehlerfreie Vorschaubild direkt aus deiner Bildschirm-Druckvorschau ab
     const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img");
     let sourceSrc = window.__FINAL_MANDALA;
 
@@ -699,41 +697,35 @@ els.download.addEventListener("click", () => {
     img.onload = function() {
       const canvas = document.createElement("canvas");
       
-      // ERZWINGT EIN ABSOLUT QUADRATISCHES FORMAT (Beseitigt das waagerechte Verzerren)
-      // Wir nehmen die längste Seite als Basis für ein gestochen scharfes Ergebnis
-      const maxSide = Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height);
-      const targetSize = maxSide > 2000 ? 1500 : 1200; // Perfekt ausbalancierte High-Res-Größe
-      
-      canvas.width = targetSize;
-      canvas.height = targetSize;
+      // ERZWINGT DAS EXACTE HOCHFORMAT (3:4) WIE BEIM QUADRAT-PREVIEW
+      canvas.width = 1200;
+      canvas.height = 1600;
       
       const ctx = canvas.getContext("2d");
 
-      // 1. DEN HINTERGRUND BEDINGUNGSLOS REIN WEISS GRUNDIEREN (Löscht das Schwarz)
+      // 1. Hintergrund fest weiß grundieren
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // 2. MATHEMATISCHE AUSRICHTUNG: Zeichnet das Mandala perfekt zentriert ins Quadrat
+      // 2. Proportionale Form-Korrektur für Rund & Wabe gegen das waagerechte Verzerren
       const imgWidth = img.naturalWidth || img.width;
       const imgHeight = img.naturalHeight || img.height;
       
-      // Falls die Engine ein verzerrtes Breitband liefert, schneiden wir die Ränder ab
-      let drawWidth = targetSize;
-      let drawHeight = targetSize;
-      let offsetX = 0;
-      let offsetY = 0;
-
-      if (imgWidth > imgHeight && state.mode !== "quadrat") {
-        // Logik für das fehlerhafte Rund-/Waben-Breitband der Engine
-        // Wir fokussieren uns stur auf das quadratische Zentrum des Bildes
-        let aspectRatio = imgWidth / imgHeight;
-        drawWidth = targetSize * aspectRatio;
-        offsetX = -(drawWidth - targetSize) / 2;
+      if (state.mode !== "quadrat" && imgWidth > imgHeight) {
+        // Schneidet das fehlerhafte Querband der Engine ab und platziert das runde/Waben-Mandala perfekt im oberen Drittel
+        let size = canvas.width * 0.76; 
+        let x = (canvas.width - size) / 2;
+        let y = (canvas.height - size) / 2.5; // Exakte Höhe wie beim Quadrat
+        ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
+      } else {
+        // Standard-Ausrichtung für dein bereits perfektes Quadrat
+        let size = canvas.width * 0.76;
+        let x = (canvas.width - size) / 2;
+        let y = (canvas.height - size) / 2.5;
+        ctx.drawImage(img, x, y, size, size);
       }
 
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-
-      // 3. LOGO-EBENE: Wir brennen dein "Milz & More"-Logo fest an die richtige Stelle ein
+      // 3. Logo-Ebene: Platziert das Logo exakt unten rechts
       const logoImg = new Image();
       logoImg.crossOrigin = "anonymous";
       logoImg.src = "assets/Logo_gold.png";
@@ -741,25 +733,23 @@ els.download.addEventListener("click", () => {
       logoImg.onload = function() {
         let logow = canvas.width * 0.16;
         let logoh = logow * (logoImg.height / logoImg.width);
-        let logox = canvas.width - logow - (canvas.width * 0.06);
-        let logoy = canvas.height - logoh - (canvas.height * 0.04);
-        
+        let logox = canvas.width - logow - (canvas.width * 0.08);
+        let logoy = canvas.height - logoh - (canvas.height * 0.06);
         ctx.drawImage(logoImg, logox, logoy, logow, logoh);
         
-        // 4. DIREKTER DOWNLOAD AUSFÜHREN
+        // 4. Download starten
         const link = document.createElement("a");
         link.href = canvas.toDataURL("image/png");
-        link.download = "mein-lebenscode-mandala.png";
+        link.download = `mein-lebenscode-mandala-${state.mode}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       };
 
-      // Sicherheitsnetz: Falls das Logo blockiert wird, trotzdem das weiße Mandala sichern
       logoImg.onerror = function() {
         const link = document.createElement("a");
         link.href = canvas.toDataURL("image/png");
-        link.download = "mein-lebenscode-mandala.png";
+        link.download = `mein-lebenscode-mandala-${state.mode}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -767,6 +757,7 @@ els.download.addEventListener("click", () => {
     };
   }, 1200);
 });
+
 // App-Menüführung und Event-Zuweisungen
 els.openSliders.addEventListener("click", openSheet);
 els.closeSliders.addEventListener("click", closeSheet);
@@ -774,25 +765,21 @@ els.sliderBackdrop.addEventListener("click", closeSheet);
 els.closePrintPreview.addEventListener("click", closePrintPreview);
 els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-// 🎨 KUNSTDRUCK-BUTTTON ZU TENTARY
 if (els.buyPreviewPng) {
   els.buyPreviewPng.addEventListener("click", () => {
     window.open("https://mytentary.com", "_blank");
   });
 }
 
-buildSliders();
-refreshComputedCodeAndColors();
-updateConditionalFields();
-updateViewerWatermarkPosition();
+buildSlidersiders = typeof buildSliders === "function" ? buildSliders : function(){};
+if(typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
+if(typeof updateConditionalFields === "function") updateConditionalFields();
+if(typeof updateViewerWatermarkPosition === "function") updateViewerWatermarkPosition();
 loadEngine("quadrat");
 
 document.addEventListener("DOMContentLoaded", function() {
-  // Der alte, fehlerhafte PayPal-Button wird hier sicher ausgeblendet
   const paypalContainer = document.getElementById('paypal-button-container');
-  if (paypalContainer) {
-    paypalContainer.style.display = 'none';
-  }
+  if (paypalContainer) { paypalContainer.style.display = 'none'; }
 });
 </script>
 </body>

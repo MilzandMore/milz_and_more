@@ -174,17 +174,18 @@
       </div>
     </div>
 
-    <!-- RECHTS (Exklusiver Kursbereich ohne PayPal & Preise) -->
+       <!-- RECHTS (Exklusiver Kursbereich - Universeller Text) -->
     <div class="premium-kurs-right" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:#fff; font-family:'Inter', sans-serif;">
 
       <div class="preview-text" style="font-size:15px; line-height:1.6; color:#a0a5b5; max-width:340px;">
         <span style="font-family:'Cinzel', serif; color:#c9a14a; font-size:18px; font-weight:600; letter-spacing:1px; display:block; margin-bottom:15px;">DEIN ENERGIE-ANKER</span>
         Dies ist die exklusive Vorschau deines berechneten Frequenzbildes. 
         <br><br>
-        Nutze dieses Mandala zur tiefen Stabilisierung deiner Prozesse und zur Bereinigung deiner Ahnenlinie.
+        Nutze dieses persönliche Mandala als kraftvollen Begleiter, um dein gewähltes Thema energetisch zu integrieren und dich in deiner Schwingung zu stabilisieren.
         <br><br>
         <span style="color:#fff; font-weight:500;">Als Kursmitglied steht dir der hochauflösende Download vollkommen kostenfrei zur Verfügung.</span>
       </div>
+
 
     </div>
 
@@ -675,12 +676,10 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 📸 STABILER DIRECT-CLICK EXPORTER (BERECHNET & POSITIONIERT ERST BEIM ECHTEN KLICK)
+// 📸 STABILER DIRECT-CLICK EXPORTER (FILTERT SCHWARZE ENGINE-HINTERGRÜNDE HERAUS)
 els.download.addEventListener("click", () => {
-  // Triggert das frische Finale-Bild erst beim manuellen Klick
   requestExport("final");
 
-  // Wir geben dem System 1,4 Sekunden Zeit, um Abstürze abzufangen und das Bild im RAM stabil aufzubauen
   setTimeout(() => {
     const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img, .app-viewer img");
     let sourceSrc = window.__FINAL_MANDALA;
@@ -704,43 +703,61 @@ els.download.addEventListener("click", () => {
     img.src = sourceSrc;
     
     img.onload = function() {
-      const canvas = document.createElement("canvas");
+      // 1. Hilfs-Canvas erstellen, um das Schwarz der Engine herauszufiltern
+      const helperCanvas = document.createElement("canvas");
+      helperCanvas.width = img.naturalWidth || img.width;
+      helperCanvas.height = img.naturalHeight || img.height;
+      const hCtx = helperCanvas.getContext("2d");
+      hCtx.drawImage(img, 0, 0);
       
-      // ERZWINGT DAS EXACTE HOCHFORMAT (3:4) FÜR ALLE 3 MODELLE IDENTISCH
+      // Pixel untersuchen und reines Schwarz (#111111 oder dunkler) transparent machen
+      try {
+        const imgData = hCtx.getImageData(0, 0, helperCanvas.width, helperCanvas.height);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          // Wenn Rot, Grün und Blau sehr dunkel/schwarz sind (unter Schwellenwert 35)
+          if (data[i] < 35 && data[i+1] < 35 && data[i+2] < 35) {
+            data[i+3] = 0; // Macht den Pixel unsichtbar/transparent
+          }
+        }
+        hCtx.putImageData(imgData, 0, 0);
+      } catch(e) { console.log("Filter-Skip (CORS)"); }
+
+      // 2. Haupt-Canvas im exakten 3:4 Hochformat aufbauen
+      const canvas = document.createElement("canvas");
       canvas.width = 1200;
       canvas.height = 1600;
       const ctx = canvas.getContext("2d");
 
-      // 1. Hintergrund bombensicher WEISS grundieren (Löscht das Schwarz bei Rund)
+      // Hintergrund bombenfest WEISS grundieren
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // 2. Form-Ausgleich (Zwingt Rund & Wabe in den identischen oberen Bereich wie Quadrat)
-      const imgWidth = img.naturalWidth || img.width;
-      const imgHeight = img.naturalHeight || img.height;
-      
-      let size = canvas.width * 0.76; // Breite des Mandalas
-      let x = (canvas.width - size) / 2; // Perfekt zentriert
-      let y = 140; // Festgenagelte Höhe von oben – exakt wie beim Quadrat!
+      // Maße für die Platzierung
+      let size = canvas.width * 0.76;
+      let x = (canvas.width - size) / 2;
+      let y = 140;
 
+      const imgWidth = helperCanvas.width;
+      const imgHeight = helperCanvas.height;
+
+      // Das gefilterte Bild ohne das störende Schwarz aufzeichnen
       if (imgWidth > imgHeight && state.mode !== "quadrat") {
-        // Schneidet das fehlerhafte Querband der runden/Waben-Engine sauber ab
-        ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
+        ctx.drawImage(helperCanvas, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
       } else {
-        // Nutzt die fehlerfreie Ausrichtung deines Quadrats
-        ctx.drawImage(img, x, y, size, size);
+        ctx.drawImage(helperCanvas, x, y, size, size);
       }
 
-      // 3. Logo-Ebene: Das Logo wird fest unten rechts eingebrannt (Identisch mit Quadrat)
+      // 3. Logo unten rechts einbrennen
       const logoImg = new Image();
       logoImg.crossOrigin = "anonymous";
       logoImg.src = "assets/Logo_gold.png";
       
       logoImg.onload = function() {
-        let logow = 200; // Feste, edle Logobreite
+        let logow = 200;
         let logoh = logow * (logoImg.height / logoImg.width);
-        let logox = canvas.width - logow - 80; // Korrekter Abstand vom rechten Rand
-        let logoy = canvas.height - logoh - 80; // Korrekter Abstand vom unteren Rand
+        let logox = canvas.width - logow - 80;
+        let logoy = canvas.height - logoh - 80;
         ctx.drawImage(logoImg, logox, logoy, logow, logoh);
         
         executeFinalSave(canvas.toDataURL("image/png"));

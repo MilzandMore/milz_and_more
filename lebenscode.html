@@ -673,18 +673,18 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 🔥 UNIVERSAL-REPARATUR FÜR PC & MOBIL (QUADRAT, RUND & WABE)
+// 🔥 INTEGRALE UNIVERSAL-REPARATUR (GARANTIERT WEISSER HINTERGRUND FÜR QUADRAT, RUND & WABE)
 els.download.addEventListener("click", () => {
   showPreviewInfo();
   requestExport("final");
 
+  // Wir warten kurz, bis die Engine das Bild erzeugt hat
   setTimeout(() => {
-    // Wir holen uns das Bild direkt aus der fehlerfreien Druckvorschau
-    // Das fängt alle Skalierungs- und Transparenzfehler bei Rund & Wabe ab
-    const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img");
+    // 1. Wir suchen das echte, fertige Vorschaubild aus der Druckvorschau
+    const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img");
     let sourceSrc = window.__FINAL_MANDALA;
 
-    if (previewImgElement && previewImgElement.src) {
+    if (previewImgElement && previewImgElement.src && previewImgElement.src.startsWith("data:image")) {
       sourceSrc = previewImgElement.src;
     }
 
@@ -694,27 +694,33 @@ els.download.addEventListener("click", () => {
     }
 
     const img = new Image();
+    // Verhindert Blockaden beim Auslesen der Bildpunkte (CORS)
+    img.crossOrigin = "anonymous"; 
     img.src = sourceSrc;
+    
     img.onload = function() {
       const canvas = document.createElement("canvas");
       
-      // Hohe Druckauflösung sichern
-      canvas.width = img.naturalWidth || img.width || 1200;
-      canvas.height = img.naturalHeight || img.height || 1600;
+      // Nutze die Originalgröße des Mandalas für maximale Druckqualität
+      canvas.width = img.naturalWidth || img.width || 1400;
+      canvas.height = img.naturalHeight || img.height || 1800;
       
       const ctx = canvas.getContext("2d");
 
-      // Hintergrund bombensicher WEISS brennen
+      // 2. HINTERGRUND STRICKT WEISS BRENNEN (Löscht jegliche Transparenz und Schwarzfärbung)
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Das unverzerrte Originalbild exakt aufzeichnen
+      // 3. Das unverzerrte Originalbild exakt auf die weiße Fläche zeichnen
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      // Logo-Ebene fixieren
+      // 4. Logo-Ebene: Wir brennen das Milz & More Logo fest unten rechts ein
       const logoImg = new Image();
+      logoImg.crossOrigin = "anonymous";
       logoImg.src = "assets/Logo_gold.png";
+      
       logoImg.onload = function() {
+        // Berechnet die Logo-Proportionen proportional zur Bildgröße
         let logow = canvas.width * 0.16;
         let logoh = logow * (logoImg.height / logoImg.width);
         let logox = canvas.width - logow - (canvas.width * 0.06);
@@ -724,11 +730,12 @@ els.download.addEventListener("click", () => {
         executeActualDownload(canvas.toDataURL("image/png"));
       };
 
+      // Sicherheitsnetz: Falls das Logo-Asset blockiert wird, trotzdem das weiße Mandala sichern
       logoImg.onerror = function() {
         executeActualDownload(canvas.toDataURL("image/png"));
       };
     };
-  }, 900);
+  }, 1000); // Leicht erhöhte Verzögerung für langsame Geräte
 });
 
 function executeActualDownload(finalDataUrl) {

@@ -35,22 +35,34 @@
 <script>
   function checkAppPassword() {
     const userInput = document.getElementById('app-password-input').value;
-    // HIER WIEDER DEIN PASSWORT EINTRAGEN:
-    const correctPassword = LEBENSCODE1; 
+    // Passwort mit korrekten Anführungszeichen:
+    const correctPassword = "LEBENSCODE1"; 
     
     if (userInput === correctPassword) {
-      document.getElementById('password-overlay').style.style.setProperty('display', 'none', 'important');
-      document.getElementById('password-overlay').style.removeAttribute('display');
-      document.getElementById('password-overlay').style.opacity = '0';
-      document.getElementById('password-overlay').style.pointerEvents = 'none';
+      const overlay = document.getElementById('password-overlay');
+      if (overlay) {
+        overlay.style.setProperty('display', 'none', 'important');
+        overlay.style.pointerEvents = 'none';
+      }
       sessionStorage.setItem('mandala_authorized', 'true');
     } else {
       document.getElementById('password-error').style.display = 'block';
     }
   }
 
-  // Prüft sofort beim Laden, ob man schon eingeloggt war
+  // Ermöglicht das Absenden mit der ENTER-Taste & prüft den Login-Status
   document.addEventListener("DOMContentLoaded", function() {
+    // 1. Enter-Taste aktivieren
+    const passwordInput = document.getElementById('app-password-input');
+    if (passwordInput) {
+      passwordInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          checkAppPassword();
+        }
+      });
+    }
+
+    // 2. Sofort prüfen, ob man schon eingeloggt war
     if (sessionStorage.getItem('mandala_authorized') === 'true') {
       const overlay = document.getElementById('password-overlay');
       if (overlay) {

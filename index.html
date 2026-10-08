@@ -58,15 +58,7 @@
     </div>
   </main>
 
-  <!-- Service Worker -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js")
-        .then(() => console.log("Service Worker registriert"))
-        .catch((err) => console.log("SW Fehler:", err));
-    }
-  </script>
-
+  
   <!-- 🔒 GLOBALER RECHTSKLICK-SCHUTZ -->
   <script>
     (function () {

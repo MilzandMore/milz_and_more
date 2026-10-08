@@ -676,8 +676,9 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 📸 INDIVIDUELLER HIGH-END EXPORTER (TRENNT QUADRAT, RUND & WABE STRIKT VONEINANDER)
+// 📸 ORIGINAL HIGH-END EXPORTER (REPARIERT PROPORTIONEN UND ENPFERNT GOLDENE LOGOS)
 els.download.addEventListener("click", () => {
+  // Triggert den sauberen Original-Export deiner Triangel-Engines
   requestExport("final");
 
   setTimeout(() => {
@@ -698,16 +699,15 @@ els.download.addEventListener("click", () => {
       return;
     }
 
-    // 🛑 STRIKTE WEGWEISUNG JE NACH AKTIVEM MODELL
     const currentMode = state.mode; 
 
-    // --- REPARATUR 1: DAS QUADRAT (Vollständig im Originalzustand wiederhergestellt) ---
+    // --- MODUS 1: DAS QUADRAT (Vollständig im makellosen Originalzustand) ---
     if (currentMode === "quadrat") {
       executeFinalSave(sourceSrc);
       return; 
     }
 
-    // --- REPARATUR 2 & 3: RUND UND WABE (Maßgeschneiderte Aufbereitung) ---
+    // --- MODUS 2 & 3: RUND UND WABE (Proprozionaler Schutz ohne Verzerrung) ---
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.src = sourceSrc;
@@ -715,41 +715,37 @@ els.download.addEventListener("click", () => {
     img.onload = function() {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-
       const imgWidth = img.naturalWidth || img.width;
       const imgHeight = img.naturalHeight || img.height;
 
       if (currentMode === "rund") {
-        // Erzeugt ein perfekt proportionales Quadrat, um das runde Mandala ohne Verzerrung aufzunehmen
+        // Erzeugt ein absolut quadratisches Bild, damit die runde Geometrie nicht verzerrt wird
         canvas.width = imgHeight;
         canvas.height = imgHeight;
 
-        // Hintergrund rein weiß grundieren
+        // Hintergrund sauber weiß grundieren
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Schneidet das schwarze Querband der Engine ab und filtert den schwarzen Kreis-Hintergrund
+        // Zeichnet den Kreis exakt zentriert auf den weißen Untergrund
         ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, 0, 0, canvas.width, canvas.height);
         
-        // Pixel-Filter: Macht das tiefe Schwarz um die runde Form herum rein weiß
+        // Löscht das tiefe Schwarz um die runde Form herum und färbt es weiß
         try {
           const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imgData.data;
           for (let i = 0; i < data.length; i += 4) {
-            if (data[i] < 40 && data[i+1] < 40 && data[i+2] < 40) {
-              data[i] = 255;   // Rot auf Weiss
-              data[i+1] = 255; // Grün auf Weiss
-              data[i+2] = 255; // Blau auf Weiss
+            if (data[i] < 45 && data[i+1] < 45 && data[i+2] < 45) {
+              data[i] = 255; data[i+1] = 255; data[i+2] = 255;
             }
           }
           ctx.putImageData(imgData, 0, 0);
         } catch(e) { console.log("Filter-Skip"); }
 
-        // Das goldene Logo exakt unten rechts einbrennen
-        burnGoldenLogo(canvas, ctx);
+        executeFinalSave(canvas.toDataURL("image/png"));
 
       } else if (currentMode === "wabe") {
-        // Die Wabe liefert bereits einen weißen Grund, wird hier aber vor dem Verzerren geschützt
+        // Schützt die Wabenstruktur vor jeglicher Stauchung
         canvas.width = imgWidth;
         canvas.height = imgHeight;
 
@@ -757,33 +753,11 @@ els.download.addEventListener("click", () => {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
 
-        // Da die Wabe bereits ihr eigenes Logo besitzt, wird hier KEIN zweites Logo aufgetragen
         executeFinalSave(canvas.toDataURL("image/png"));
       }
     };
   }, 1400);
 });
-
-// Funktion zum Einbrennen des edlen goldenen Logos
-function burnGoldenLogo(canvas, ctx) {
-  const logoImg = new Image();
-  logoImg.crossOrigin = "anonymous";
-  logoImg.src = "assets/Logo_gold.png";
-  
-  logoImg.onload = function() {
-    let logow = canvas.width * 0.16;
-    let logoh = logow * (logoImg.height / logoImg.width);
-    let logox = canvas.width - logow - (canvas.width * 0.05);
-    let logoy = canvas.height - logoh - (canvas.height * 0.05);
-    ctx.drawImage(logoImg, logox, logoy, logow, logoh);
-    
-    executeFinalSave(canvas.toDataURL("image/png"));
-  };
-
-  logoImg.onerror = function() {
-    executeFinalSave(canvas.toDataURL("image/png"));
-  };
-}
 
 function executeFinalSave(finalDataUrl) {
   const link = document.createElement("a");
@@ -794,7 +768,7 @@ function executeFinalSave(finalDataUrl) {
   document.body.removeChild(link);
 }
 
-// App-Menüführung und Event-Zuweisungen
+// App-Menüführung und Steuerung
 els.openSliders.addEventListener("click", openSheet);
 els.closeSliders.addEventListener("click", closeSheet);
 els.sliderBackdrop.addEventListener("click", closeSheet);
@@ -807,15 +781,21 @@ if (els.buyPreviewPng) {
   });
 }
 
+// Initialisiert deine originalen Regler-Funktionen
 if (typeof buildSliders === "function") buildSliders();
 if (typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
 if (typeof updateConditionalFields === "function") updateConditionalFields();
 if (typeof updateViewerWatermarkPosition === "function") updateViewerWatermarkPosition();
-loadEngine("quadrat");
 
+// 🚨 ENTFERNT DEN STARRER QUADRAT-ZWANG BEIM BACKEND-UPDATE
 document.addEventListener("DOMContentLoaded", function() {
   const paypalContainer = document.getElementById('paypal-button-container');
   if (paypalContainer) { paypalContainer.style.display = 'none'; }
+  
+  // Verkleinert die runde Live-Vorschau im Kasten harmonisch
+  const style = document.createElement('style');
+  style.innerHTML = '.print-preview__image { max-height: 70vh !important; object-fit: contain !important; }';
+  document.head.appendChild(style);
 });
 </script>
 </body>

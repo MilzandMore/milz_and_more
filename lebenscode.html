@@ -637,128 +637,89 @@ window.addEventListener("message", (ev) => {
     return;
   }
 
-if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-  hideLoading();
-
-  console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50)); // 👈 HIER
-
-  window.__FINAL_MANDALA = msg.dataUrl;
-
-  openPrintPreview(msg.dataUrl);
-}
-
-});
-    document.querySelectorAll(".engine-btn").forEach(btn => {
-      if (!btn.dataset.engine) return;
-      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
-    });
-
-    els.mode.addEventListener("change", () => {
-      state.mode = els.mode.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
-
-    els.input.addEventListener("input", () => {
-      state.input = els.input.value;
-      refreshComputedCodeAndColors();
-      pushStateToEngine();
-    });
-
-    els.direction.addEventListener("change", () => {
-      state.direction = els.direction.value;
-      pushStateToEngine();
-    });
-
-    els.sector.addEventListener("change", () => {
-      state.sector = Number(els.sector.value);
-      pushStateToEngine();
-    });
-
-    els.download.addEventListener("click", () => {
-      showPreviewInfo();
-      requestExport();
-    });
-
-    els.openSliders.addEventListener("click", openSheet);
-    els.closeSliders.addEventListener("click", closeSheet);
-    els.sliderBackdrop.addEventListener("click", closeSheet);
-    els.closePrintPreview.addEventListener("click", closePrintPreview);
-    els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-    if (els.buyPreviewPng) {
-  els.buyPreviewPng.addEventListener("click", handlePaidDownload);
-}
-
-    buildSliders();
-    refreshComputedCodeAndColors();
-    updateConditionalFields();
-    updateViewerWatermarkPosition();
-    loadEngine("quadrat");
-    document.addEventListener("DOMContentLoaded", function() {
-
-  if (typeof paypal === "undefined") {
-    console.error("PayPal SDK nicht geladen");
-    return;
+  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+    hideLoading();
+    console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
+    window.__FINAL_MANDALA = msg.dataUrl;
+    openPrintPreview(msg.dataUrl);
   }
-
-  paypal.Buttons({
-
-  style: {
-    layout: 'vertical'
-  },
-
-  createOrder: function(data, actions) {
-
-    // 🔥 Mandala speichern (optional Backup)
-    const exportState = getEnginePayloadState();
-    window.__mandalaState = exportState; // 👉 WICHTIG: im RAM behalten
-
-    return actions.order.create({
-      purchase_units: [{
-        amount: { value: "0.01" }
-      }]
-    });
-  },
-
-onApprove: function(data, actions) {
-  return actions.order.capture().then(function(details) {
-
-    // 🔥 1. FINAL EXPORT ANFORDERN
-    requestExport("final");
-
-    // 🔥 2. WARTEN bis Engine antwortet
-    setTimeout(() => {
-
-      console.log("DOWNLOAD:", window.__FINAL_MANDALA?.slice(0,50));
-
-      const dataUrl = window.__FINAL_MANDALA;
-
-      if (!dataUrl) {
-        alert("Fehler – kein Mandala erhalten");
-        return;
-      }
-
-      // 🔥 3. DOWNLOAD STARTEN
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "mandala.png";
-      link.click();
-
-      alert("Download gestartet 🎉");
-
-    }, 700); // ⏱ leicht erhöht für Sicherheit
-
-  });
-},
-    
-  onError: function(err) {
-    alert("PayPal Fehler – bitte im Browser öffnen.");
-    console.error(err);
-  }
-
-}).render('#paypal-button-container');
-
 });
-  </script>
+
+document.querySelectorAll(".engine-btn").forEach(btn => {
+  if (!btn.dataset.engine) return;
+  btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+});
+
+els.mode.addEventListener("change", () => {
+  state.mode = els.mode.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
+
+els.input.addEventListener("input", () => {
+  state.input = els.input.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
+
+els.direction.addEventListener("change", () => {
+  state.direction = els.direction.value;
+  pushStateToEngine();
+});
+
+els.sector.addEventListener("change", () => {
+  state.sector = Number(els.sector.value);
+  pushStateToEngine();
+});
+
+// 🔥 DIREKTER & KOSTENLOSER DOWNLOAD FÜR KURS-TEILNEHMER
+els.download.addEventListener("click", () => {
+  showPreviewInfo();
+  requestExport("final");
+
+  // Kurze Verzögerung, damit die Engine das Bild in den Speicher laden kann
+  setTimeout(() => {
+    const dataUrl = window.__FINAL_MANDALA;
+    if (!dataUrl) {
+      alert("Mandala wird vorbereitet – bitte klicke in 2 Sekunden noch einmal.");
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = "mein-lebenscode-mandala.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, 800);
+});
+
+els.openSliders.addEventListener("click", openSheet);
+els.closeSliders.addEventListener("click", closeSheet);
+els.sliderBackdrop.addEventListener("click", closeSheet);
+els.closePrintPreview.addEventListener("click", closePrintPreview);
+els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
+
+// 🎨 KUNSTDRUCK-BUTTTON LOGIK
+if (els.buyPreviewPng) {
+  els.buyPreviewPng.addEventListener("click", () => {
+    // Leitet deine Kunden direkt auf deine Tentary-Shop-Auswahl weiter
+    window.open("https://mytentary.com", "_blank");
+  });
+}
+
+buildSliders();
+refreshComputedCodeAndColors();
+updateConditionalFields();
+updateViewerWatermarkPosition();
+loadEngine("quadrat");
+
+document.addEventListener("DOMContentLoaded", function() {
+  // Der alte, fehlerhafte PayPal-Container wird hier sicher und sauber entfernt
+  const paypalContainer = document.getElementById('paypal-button-container');
+  if (paypalContainer) {
+    paypalContainer.style.display = 'none';
+  }
+});
+</script>
 </body>
 </html>

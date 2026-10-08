@@ -676,96 +676,132 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 📸 ORIGINAL HIGH-END EXPORTER (REPARIERT PROPORTIONEN UND ENPFERNT GOLDENE LOGOS)
+// 📸 ORIGINAL HIGH-END EXPORTER (PREMIUM HOCHFORMAT FÜR ALLE FORMEN IDENTISCH)
 els.download.addEventListener("click", () => {
-  // Triggert den sauberen Original-Export deiner Triangel-Engines
   requestExport("final");
-
-  setTimeout(() => {
-    const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img");
-    let sourceSrc = window.__FINAL_MANDALA;
-
-    if (previewImgElement && previewImgElement.src && previewImgElement.src.startsWith("data:image")) {
-      sourceSrc = previewImgElement.src;
-    }
-
-    if (!sourceSrc) {
-      const fallbackCanvas = document.querySelector("canvas");
-      if (fallbackCanvas) sourceSrc = fallbackCanvas.toDataURL("image/png");
-    }
-
-    if (!sourceSrc) {
-      alert("Das Frequenzbild wird vorbereitet – bitte klicke in 2 Sekunden noch einmal auf Download.");
-      return;
-    }
-
-    const currentMode = state.mode; 
-
-    // --- MODUS 1: DAS QUADRAT (Vollständig im makellosen Originalzustand) ---
-    if (currentMode === "quadrat") {
-      executeFinalSave(sourceSrc);
-      return; 
-    }
-
-    // --- MODUS 2 & 3: RUND UND WABE (Proprozionaler Schutz ohne Verzerrung) ---
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = sourceSrc;
-    
-    img.onload = function() {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      const imgWidth = img.naturalWidth || img.width;
-      const imgHeight = img.naturalHeight || img.height;
-
-      if (currentMode === "rund") {
-        // Erzeugt ein absolut quadratisches Bild, damit die runde Geometrie nicht verzerrt wird
-        canvas.width = imgHeight;
-        canvas.height = imgHeight;
-
-        // Hintergrund sauber weiß grundieren
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Zeichnet den Kreis exakt zentriert auf den weißen Untergrund
-        ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, 0, 0, canvas.width, canvas.height);
-        
-        // Löscht das tiefe Schwarz um die runde Form herum und färbt es weiß
-        try {
-          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const data = imgData.data;
-          for (let i = 0; i < data.length; i += 4) {
-            if (data[i] < 45 && data[i+1] < 45 && data[i+2] < 45) {
-              data[i] = 255; data[i+1] = 255; data[i+2] = 255;
-            }
-          }
-          ctx.putImageData(imgData, 0, 0);
-        } catch(e) { console.log("Filter-Skip"); }
-
-        executeFinalSave(canvas.toDataURL("image/png"));
-
-      } else if (currentMode === "wabe") {
-        // Schützt die Wabenstruktur vor jeglicher Stauchung
-        canvas.width = imgWidth;
-        canvas.height = imgHeight;
-
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-
-        executeFinalSave(canvas.toDataURL("image/png"));
-      }
-    };
-  }, 1400);
 });
 
-function executeFinalSave(finalDataUrl) {
-  const link = document.createElement("a");
-  link.href = finalDataUrl;
-  link.download = `mein-lebenscode-mandala-${state.mode}.png`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+// Steuert das automatische Abfangen der Bilddaten im Hintergrund
+window.addEventListener("message", (ev) => {
+  const msg = ev.data;
+  if (!msg || typeof msg !== "object") return;
+
+  if (msg.type === "READY") {
+    hideLoading();
+    pushStateToEngine();
+    return;
+  }
+
+  if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
+    state.colors = [...msg.colors];
+    applySliderColorsToUI();
+    return;
+  }
+
+  // 🔥 AUTOMATISCHER WORKFLOW STARTET SOBALD ENGINE ANTIVERT
+  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+    hideLoading();
+    window.__FINAL_MANDALA = msg.dataUrl;
+    
+    // Verarbeitet das Bild im Hintergrund zu deinem perfekten Hochformat-Standard
+    processAndGenerateStandardPremiumFormat(msg.dataUrl, (cleanPremiumDataUrl) => {
+      // Zeigt das perfekt formatierte Bild in der Druckvorschau an
+      openPrintPreview(cleanPremiumDataUrl);
+      
+      // Startet den Download vollautomatisch mit der fehlerfreien Hochformat-Datei
+      const link = document.createElement("a");
+      link.href = cleanPremiumDataUrl;
+      link.download = `mein-lebenscode-mandala-${state.mode}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  }
+});
+
+// Die "virtuelle Fotobox": Formatiert JEDE Form starr in dein perfektes Wunsch-Hochformat
+function processAndGenerateStandardPremiumFormat(sourceSrc, callback) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = sourceSrc;
+  
+  img.onload = function() {
+    const canvas = document.createElement("canvas");
+    
+    // Erzeugt exakt die Maße deines perfekten Hochformat-Quadrats (Druckauflösung)
+    canvas.width = 1200;
+    canvas.height = 1600;
+    const ctx = canvas.getContext("2d");
+
+    // 1. Hintergrund bombensicher WEISS grundieren (Löscht jegliches Schwarz bei Rund)
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 2. Mandala-Ausrichtung im oberen Bereich (Exakt deckungsgleich mit deinem Beispielbild)
+    let size = 912; // Feste Premium-Breite des Mandalas (ca. 76% der Blattbreite)
+    let x = (canvas.width - size) / 2; // Perfekt zentriert
+    let y = 140; // Festgenagelte Höhe von oben
+
+    const imgWidth = img.naturalWidth || img.width;
+    const imgHeight = img.naturalHeight || img.height;
+
+    // Filtert das fehlerhafte Breitbild-Querformat der Rund-/Waben-Engine automatisch aus
+    if (state.mode !== "quadrat" && imgWidth > imgHeight) {
+      // Schneidet die überschüssigen transparenten/schwarzen Seitenränder präzise ab
+      ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
+    } else {
+      // Nutzt die originale, fehlerfreie Platzierung deines Quadrats
+      ctx.drawImage(img, x, y, size, size);
+    }
+
+    // 3. Rein weißer Filter-Schutz für das runde Mandala gegen das schwarze Quadrat in der Grafik
+    if (state.mode === "rund") {
+      try {
+        const imgData = ctx.getImageData(x, y, size, size);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          // Ersetzt das tiefe Engine-Schwarz im Quadrat um den Kreis herum durch reines Weiß
+          if (data[i] < 45 && data[i+1] < 45 && data[i+2] < 45) {
+            data[i] = 255; data[i+1] = 255; data[i+2] = 255;
+          }
+        }
+        ctx.putImageData(imgData, x, y);
+      } catch (e) { console.log("Filter-Skip"); }
+    }
+
+    // 4. Logo-Ebene: Lädt dein originales SCHWARZES Marken-Logo und platziert es exakt unten rechts
+    const logoImg = new Image();
+    logoImg.crossOrigin = "anonymous";
+    // Nutzt das originale schwarze Logo deiner App
+    logoImg.src = "assets/Logo_black.png"; 
+
+    // Sicherheitsnetz falls assets/Logo_black.png anders benannt ist, nutzen wir das Haupt-Asset
+    logoImg.onerror = function() {
+      const fallbackLogo = new Image();
+      fallbackLogo.crossOrigin = "anonymous";
+      fallbackLogo.src = "assets/Logo_gold.png"; // Nutzt das verhandene Asset falls schwarz fehlt
+      fallbackLogo.onload = function() {
+        drawLogoToCanvas(fallbackLogo, canvas, ctx, callback);
+      };
+    };
+
+    logoImg.onload = function() {
+      drawLogoToCanvas(logoImg, canvas, ctx, callback);
+    };
+  };
+}
+
+// Platziert das gewünschte Logo passgenau in die Ecke unten rechts
+function drawLogoToCanvas(logoElement, canvas, ctx, callback) {
+  let logow = 210; // Edle Logobreite proportional zur Blattgröße
+  let logoh = logow * (logoElement.height / logoElement.width);
+  let logox = canvas.width - logow - 80; // Korrekter Abstand vom rechten Rand
+  let logoy = canvas.height - logoh - 80; // Korrekter Abstand vom unteren Rand
+  
+  ctx.drawImage(logoElement, logox, logoy, logow, logoh);
+  
+  // Gibt das fertige High-End-Bild an den automatischen Download weiter
+  callback(canvas.toDataURL("image/png"));
 }
 
 // App-Menüführung und Steuerung
@@ -775,27 +811,47 @@ els.sliderBackdrop.addEventListener("click", closeSheet);
 els.closePrintPreview.addEventListener("click", closePrintPreview);
 els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
+document.querySelectorAll(".engine-btn").forEach(btn => {
+  if (!btn.dataset.engine) return;
+  btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+});
+
+els.mode.addEventListener("change", () => {
+  state.mode = els.mode.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
+
+els.input.addEventListener("input", () => {
+  state.input = els.input.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
+
+els.direction.addEventListener("change", () => {
+  state.direction = els.direction.value;
+  pushStateToEngine();
+});
+
+els.sector.addEventListener("change", () => {
+  state.sector = Number(els.sector.value);
+  pushStateToEngine();
+});
+
 if (els.buyPreviewPng) {
   els.buyPreviewPng.addEventListener("click", () => {
     window.open("https://mytentary.com", "_blank");
   });
 }
 
-// Initialisiert deine originalen Regler-Funktionen
 if (typeof buildSliders === "function") buildSliders();
 if (typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
 if (typeof updateConditionalFields === "function") updateConditionalFields();
 if (typeof updateViewerWatermarkPosition === "function") updateViewerWatermarkPosition();
 
-// 🚨 ENTFERNT DEN STARRER QUADRAT-ZWANG BEIM BACKEND-UPDATE
 document.addEventListener("DOMContentLoaded", function() {
   const paypalContainer = document.getElementById('paypal-button-container');
   if (paypalContainer) { paypalContainer.style.display = 'none'; }
-  
-  // Verkleinert die runde Live-Vorschau im Kasten harmonisch
-  const style = document.createElement('style');
-  style.innerHTML = '.print-preview__image { max-height: 70vh !important; object-fit: contain !important; }';
-  document.head.appendChild(style);
 });
 </script>
 </body>

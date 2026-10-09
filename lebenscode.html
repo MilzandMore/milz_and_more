@@ -727,28 +727,18 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
           return;
         }
 
-        const link = document.createElement("a");
-        link.href = dataUrl;
-        link.download = "mandala_" + state.engine + ".png";
-        link.click();
-      }, 700);
-    }
+       // 🔥 3. DOWNLOAD STARTEN
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = "mandala.png";
+      link.click();
 
-    // Verknüpft den manuellen Button in der Vorschau
-    if (els.buyPreviewPng) {
-      els.buyPreviewPng.addEventListener("click", handleFreeDownload);
-    }
+      alert("Download gestartet 🎉");
 
-    // AUTOMATISCHER DOWNLOAD SOBALD DER EXPORT BEENDET IST
-    // Überschreibt den Message-Listener oder ergänzt ihn so, dass er direkt triggert:
-    const originalListener = window.onmessage;
-    window.addEventListener("message", (ev) => {
-      const msg = ev.data;
-      if (msg && msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-        // Wenn ein finaler Export angefordert wurde, direkt im Browser herunterladen
-        window.__FINAL_MANDALA = msg.dataUrl;
-      }
-    });
+    }, 700); // ⏱ leicht erhöht für Sicherheit
+
+  });
+
   </script>
 </body>
 </html>

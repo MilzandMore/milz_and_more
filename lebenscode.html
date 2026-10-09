@@ -676,31 +676,205 @@ els.sector.addEventListener("change", () => {
   pushStateToEngine();
 });
 
-// 🔥 UNBERÜHRTER ORIGINAL-DOWNLOAD (STARTET DIREKT & REIN ÜBER DEINE ENGINES)
+// 📸 PROFESSIONELLER HIGH-END EXPORTER (TRENNT QUADRAT, RUND & WABE PERFEKT)
 els.download.addEventListener("click", () => {
-  showPreviewInfo();
-  requestExport("final");
-
-  setTimeout(() => {
-    const dataUrl = window.__FINAL_MANDALA;
-    if (!dataUrl) {
-      alert("Mandala wird vorbereitet – bitte klicke gleich noch einmal.");
-      return;
-    }
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = `mein-lebenscode-mandala-${state.mode}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, 1000);
+  executeMandalaExportWorkflow();
 });
 
+// Steuert den automatischen Workflow beim Öffnen des Vorschaufensters
+window.addEventListener("message", (ev) => {
+  const msg = ev.data;
+  if (!msg || typeof msg !== "object") return;
+
+  if (msg.type === "READY") {
+    hideLoading();
+    pushStateToEngine();
+    return;
+  }
+
+  if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
+    state.colors = [...msg.colors];
+    applySliderColorsToUI();
+    return;
+  }
+
+  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+    hideLoading();
+    window.__FINAL_MANDALA = msg.dataUrl;
+    
+    // Verarbeitet das Bild und korrigiert die Vorschau auf dem Bildschirm
+    executeMandalaExportWorkflow((formattedDataUrl) => {
+      openPrintPreview(formattedDataUrl);
+      
+      // Startet den Download vollautomatisch im Hintergrund
+      const link = document.createElement("a");
+      link.href = formattedDataUrl;
+      link.download = `mein-lebenscode-mandala-${state.mode}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  }
+});
+
+function executeMandalaExportWorkflow(callback) {
+  let sourceSrc = window.__FINAL_MANDALA;
+  const previewImgElement = document.querySelector("#print-preview-modal img, .print-preview img, [id*='preview'] img, .modal img, .print-preview-content img");
+
+  if (previewImgElement && previewImgElement.src && previewImgElement.src.startsWith("data:image")) {
+    sourceSrc = previewImgElement.src;
+  }
+
+  if (!sourceSrc) return;
+
+  const currentMode = state.mode; 
+
+  // ==========================================
+  // ⏹️ KANAL 1: DAS QUADRAT (100% ORIGINALZUSTAND - UNBERÜHRT)
+  // ==========================================
+  if (currentMode === "quadrat") {
+    if (callback) callback(sourceSrc);
+    else {
+      const link = document.createElement("a");
+      link.href = sourceSrc;
+      link.download = `mein-lebenscode-mandala-quadrat.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    return; 
+  }
+
+  // ==========================================
+  // ⚪ / ⬢ KANAL 2 & 3: MAẞGESCHNEIDERTE PROPORTIONS-KORREKTUR
+  // ==========================================
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = sourceSrc;
+  
+  img.onload = function() {
+    const canvas = document.createElement("canvas");
+    
+    // Erzeugt exakt das gleiche, edle 3:4 Hochformat-Blatt wie beim Quadrat
+    canvas.width = 1200;
+    canvas.height = 1600;
+    const ctx = canvas.getContext("2d");
+
+    // 1. Hintergrund rein weiß grundieren
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 2. Exakte Maße für die Platzierung im oberen Bereich wie beim Quadrat
+    let size = 912; 
+    let x = (canvas.width - size) / 2; 
+    let y = 140; 
+
+    const imgWidth = img.naturalWidth || img.width;
+    const imgHeight = img.naturalHeight || img.height;
+
+    // --- MAẞARBEIT FÜR DAS RUNDE MANDALA ---
+    if (currentMode === "rund") {
+      // Schneidet das breite Querband der Engine ab und setzt den Kreis perfekt ein
+      ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
+      
+      // Filtert das tiefe Schwarz um das runde Frequenzbild herum restlos weg
+      try {
+        const imgData = ctx.getImageData(x, y, size, size);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          if (data[i] < 45 && data[i+1] < 45 && data[i+2] < 45) {
+            data[i] = 255; data[i+1] = 255; data[i+2] = 255;
+          }
+        }
+        ctx.putImageData(imgData, x, y);
+      } catch(e) { console.log("Filter-Skip"); }
+
+    // --- MAẞARBEIT FÜR DIE WABE ---
+    } else if (currentMode === "wabe") {
+      // Schützt das hexagonale Format vor Verzerrung und zentriert es sauber im Ausschnitt
+      if (imgWidth > imgHeight) {
+        ctx.drawImage(img, (imgWidth - imgHeight) / 2, 0, imgHeight, imgHeight, x, y, size, size);
+      } else {
+        ctx.drawImage(img, x, y, size, size);
+      }
+    }
+
+    // 3. LOGO-EBENE: Lädt dein originales, schwarzes Logo und platziert es unten rechts
+    const logoImg = new Image();
+    logoImg.crossOrigin = "anonymous";
+    logoImg.src = "assets/Logo_black.png"; 
+
+    logoImg.onload = function() {
+      let logow = 210; 
+      let logoh = logow * (logoImg.height / logoImg.width);
+      let logox = canvas.width - logow - 80; 
+      let logoy = canvas.height - logoh - 80; 
+      ctx.drawImage(logoImg, logox, logoy, logow, logoh);
+      
+      const cleanDataUrl = canvas.toDataURL("image/png");
+      if (callback) callback(cleanDataUrl);
+      else {
+        const link = document.createElement("a");
+        link.href = cleanDataUrl;
+        link.download = `mein-lebenscode-mandala-${currentMode}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    };
+
+    // Fallback falls das schwarze Logo im Ordner fehlt
+    logoImg.onerror = function() {
+      const fallbackLogo = new Image();
+      fallbackLogo.crossOrigin = "anonymous";
+      fallbackLogo.src = "assets/Logo_gold.png"; 
+      fallbackLogo.onload = function() {
+        let logow = 210; 
+        let logoh = logow * (fallbackLogo.height / fallbackLogo.width);
+        let logox = canvas.width - logow - 80; 
+        let logoy = canvas.height - logoh - 80; 
+        ctx.drawImage(fallbackLogo, logox, logoy, logow, logoh);
+        
+        const cleanDataUrl = canvas.toDataURL("image/png");
+        if (callback) callback(cleanDataUrl);
+      };
+    };
+  };
+}
+
+// App-Menüführung und Steuerung
 els.openSliders.addEventListener("click", openSheet);
 els.closeSliders.addEventListener("click", closeSheet);
 els.sliderBackdrop.addEventListener("click", closeSheet);
 els.closePrintPreview.addEventListener("click", closePrintPreview);
 els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
+
+document.querySelectorAll(".engine-btn").forEach(btn => {
+  if (!btn.dataset.engine) return;
+  btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+});
+
+els.mode.addEventListener("change", () => {
+  state.mode = els.mode.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
+
+els.input.addEventListener("input", () => {
+  state.input = els.input.value;
+  refreshComputedCodeAndColors();
+  pushStateToEngine();
+});
+
+els.direction.addEventListener("change", () => {
+  state.direction = els.direction.value;
+  pushStateToEngine();
+});
+
+els.sector.addEventListener("change", () => {
+  state.sector = Number(els.sector.value);
+  pushStateToEngine();
+});
 
 if (els.buyPreviewPng) {
   els.buyPreviewPng.addEventListener("click", () => {
@@ -708,21 +882,19 @@ if (els.buyPreviewPng) {
   });
 }
 
-// 🎛️ SAUBERE MENÜ-INITIALISIERUNG (REPARIERT DIE MOBILEN REGLER)
 if (typeof buildSliders === "function") buildSliders();
 if (typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
 if (typeof updateConditionalFields === "function") updateConditionalFields();
-if (typeof updateViewerWatermarkPosition === "function") updateViewerWatermarkPosition();
-
-
-// Lädt das Quadrat ganz normal als Basis
-loadEngine("quadrat");
 
 document.addEventListener("DOMContentLoaded", function() {
-  // Blendet PayPal einfach nur visuell aus, damit im Code nichts abstürzt
   const paypalContainer = document.getElementById('paypal-button-container');
-  if (paypalContainer) {
-    paypalContainer.style.display = 'none';
-  }
+  if (paypalContainer) { paypalContainer.style.display = 'none'; }
+  
+  // Zwingt die Live-Vorschau im Browser bei allen 3 Formen in dasselbe edle Hochformat
+  const style = document.createElement('style');
+  style.innerHTML = '.print-preview__image-wrap { max-width: 440px !important; margin: 0 auto !important; aspect-ratio: 3/4 !important; background: #fff !important; padding: 20px !important; box-sizing: border-box !important; } .print-preview__image { width: 100% !important; height: 100% !important; object-fit: contain !important; }';
+  document.head.appendChild(style);
 });
 </script>
+</body>
+</html>

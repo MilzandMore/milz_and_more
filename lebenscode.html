@@ -679,6 +679,188 @@ function buildDownloadWatermark(){
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
+   function handlePaidDownload() {
+      if (!PAYMENT_URL || PAYMENT_URL === "#") {
+        alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");
+        return;
+      }
+      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
+    }
+
+    function buildSlidersInto(containerEl) {
+      if (!containerEl) return;
+      containerEl.innerHTML = "";
+
+      for (let i = 1; i <= 9; i++) {
+        const row = document.createElement("div");
+        row.className = "slider-row";
+
+        const dot = document.createElement("div");
+        dot.className = "dot";
+        dot.id = containerEl.id + "_dot" + i;
+
+        const label = document.createElement("div");
+        label.className = "digit";
+        label.dataset.digit = String(i);
+        label.textContent = String(i);
+
+        const input = document.createElement("input");
+        input.type = "range";
+        input.min = "20";
+        input.max = "100";
+        input.value = String(state.sliders[i] ?? 85);
+        input.dataset.digit = String(i);
+
+        setSliderVisual(input);
+
+        input.addEventListener("input", () => {
+          state.sliders[i] = Number(input.value);
+          setSliderVisual(input);
+          syncSameDigitSliders(i, input.value, input);
+          refreshComputedCodeAndColors();
+          pushStateToEngine();
+        });
+
+        row.appendChild(dot);
+        row.appendChild(label);
+        row.appendChild(input);
+        containerEl.appendChild(row);
+      }
+    }
+
+    function buildSliders() {
+      buildSlidersInto(els.sliders);
+      buildSlidersInto(els.slidersMobile);
+    }
+
+    function setActiveEngineButton(engine) {
+      document.querySelectorAll(".engine-btn").forEach(btn => {
+        if (!btn.dataset.engine) return;
+        btn.classList.toggle("active", btn.dataset.engine === engine);
+      });
+    }
+
+    function updateViewerWatermarkPosition() {
+      if (!els.engineWrap) return;
+      els.engineWrap.classList.remove("wm-quadrat", "wm-rund", "wm-wabe");
+      els.engineWrap.classList.add("wm-" + state.engine);
+    }
+
+    function updateConditionalFields() {
+      if (els.sectorWrap) {
+        els.sectorWrap.style.display = state.engine === "rund" ? "flex" : "none";
+      }
+    }
+
+    function pushStateToEngine() {
+      if (!els.frame.contentWindow) return;
+
+      const enginePayload = getEnginePayloadState();
+      els.frame.contentWindow.postMessage(
+        { type: "SET_STATE", payload: enginePayload },
+        "*"
+      );
+    }
+
+    function requestExport(kind = "preview") {
+      const enginePayload = getEnginePayloadState();
+      enginePayload.exportKind = kind;
+
+      els.frame.contentWindow.postMessage(
+        { type: "EXPORT", payload: enginePayload },
+        "*"
+      );
+    }
+
+    function loadEngine(engine) {
+      state.engine = engine;
+      setActiveEngineButton(engine);
+      updateConditionalFields();
+      updateViewerWatermarkPosition();
+      showLoading();
+
+      els.frame.onload = () => {
+        hideLoading();
+        pushStateToEngine();
+      };
+
+      els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+    }
+
+    function openSheet() {
+      const sheet = document.getElementById("sliderSheet");
+      if(sheet) sheet.classList.add("active");
+    }
+
+    function closeSheet() {
+      const sheet = document.getElementById("sliderSheet");
+      if(sheet) sheet.classList.remove("active");
+    }
+
+    // ✅ MESSAGE LISTENER
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
+
+      if (!msg || typeof msg !== "object") return;
+
+      if (msg.type === "READY") {
+        hideLoading();
+        pushStateToEngine();
+        return;
+      }
+
+      if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
+        state.colors = [...msg.colors];
+        applySliderColorsToUI();
+        return;
+      }
+
+      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+        hideLoading();
+        console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
+        window.__FINAL_MANDALA = msg.dataUrl;
+        openPrintPreview(msg.dataUrl);
+      }
+    });
+
+    document.querySelectorAll(".engine-btn").forEach(btn => {
+      if (!btn.dataset.engine) return;
+      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+    });
+
+    els.mode.addEventListener("change", () => {
+      state.mode = els.mode.value;
+      refreshComputedCodeAndColors();
+      pushStateToEngine();
+    });
+
+    els.input.addEventListener("input", () => {
+      state.input = els.input.value;
+      refreshComputedCodeAndColors();
+      pushStateToEngine();
+    });
+
+    els.direction.addEventListener("change", () => {
+      state.direction = els.direction.value;
+      pushStateToEngine();
+    });
+
+    els.sector.addEventListener("change", () => {
+      state.sector = Number(els.sector.value);
+      pushStateToEngine();
+    });
+
+    els.download.addEventListener("click", () => {
+      showPreviewInfo();
+      requestExport();
+    });
+
+    els.openSliders.addEventListener("click", openSheet);
+    els.closeSliders.addEventListener("click", closeSheet);
+    els.sliderBackdrop.addEventListener("click", closeSheet);
+    els.closePrintPreview.addEventListener("click", closePrintPreview);
+    els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
+
     // 🚀 KOSTENFREIER DIREKT-DOWNLOAD MIT ETWAS ERHÖHTER WARTEZEIT FÜR DIE ENGINE
     function handleFreeDownload() {
       requestExport("final");

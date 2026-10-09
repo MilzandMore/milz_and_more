@@ -83,7 +83,7 @@
   });
 </script>
 
-  <header class="app-header">
+    <header class="app-header">
     <div class="brand">
       <a href="index.html" class="brand-link">
         <img class="brand-logo" src="assets/Logo_gold.png" alt="Milz & More Logo">
@@ -98,7 +98,6 @@
           <option value="text">Text / Affirmation</option>
         </select>
       </div>
-
       <div class="field">
         <label for="input">Eingabe</label>
         <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT">
@@ -116,7 +115,6 @@
           <option value="innen">Innen</option>
         </select>
       </div>
-
       <div class="field" id="sectorWrap">
         <label for="sector">Sektor</label>
         <select id="sector">
@@ -174,34 +172,12 @@
  <button id="closePrintPreview" class="print-preview__close" type="button">×</button>
 
   <div class="preview-layout">
-
-    <!-- LINKS (Mandala mit absolut fixierter Logo-Ebene für Wabe & Rund) -->
+    <!-- LINKS (Mandala) -->
     <div class="preview-left">
-      <div class="print-preview__image-wrap" style="position: relative !important;">
+      <div class="print-preview__image-wrap">
         <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
-        
-        <!-- 🎨 CSS-KLAMMER: Zwingt das Logo bei allen Modellen fest unten rechts in die Ecke -->
-        <style>
-          .print-preview__image-wrap {
-            position: relative !important;
-          }
-          /* Erkennt das in der Wabe/Rund-Engine eingebettete oder überlagerte Logo und nagelt es fest */
-          .print-preview__image-wrap img[src*="logo"], 
-          .print-preview__image-wrap [class*="logo"],
-          .app-viewer-logo {
-            position: absolute !important;
-            bottom: 25px !important;
-            right: 25px !important;
-            left: auto !important;
-            top: auto !important;
-            width: 75px !important; /* Edle, proportionale Logogröße */
-            height: auto !important;
-            z-index: 99999 !important;
-          }
-        </style>
       </div>
     </div>
-
     <!-- RECHTS (Exklusiver Kursbereich - Universeller Text) -->
     <div class="premium-kurs-right" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:#fff; font-family:'Inter', sans-serif;">
 
@@ -355,8 +331,7 @@
     function clamp(n, min, max) {
       return Math.max(min, Math.min(max, n));
     }
-
-    function hexToRgb(hex) {
+function hexToRgb(hex) {
       const clean = hex.replace("#", "");
       const full = clean.length === 3
         ? clean.split("").map(ch => ch + ch).join("")
@@ -399,7 +374,6 @@
       const t = Math.pow(tLinear, 0.86);
       return interpolateHex(ramp.soft, ramp.vivid, t);
     }
-
     function computeFinalColors() {
       const seedDigit = Number(state.computedCode?.charAt(0) || 1);
       const rotatedRamps = rotateRampsBySeed(seedDigit);
@@ -530,7 +504,6 @@ function buildDownloadWatermark(){
       }
       window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
     }
-
     function buildSlidersInto(containerEl) {
       if (!containerEl) return;
       containerEl.innerHTML = "";
@@ -595,7 +568,6 @@ function buildDownloadWatermark(){
         els.sectorWrap.style.display = state.engine === "rund" ? "flex" : "none";
       }
     }
-
     function pushStateToEngine() {
       if (!els.frame.contentWindow) return;
 
@@ -651,7 +623,7 @@ function closeSheet() {
   const sheet = document.getElementById("sliderSheet");
   if(sheet) sheet.classList.remove("active");
 }
-  // ✅ 1. MESSAGE LISTENER (ZURÜCK IM FEHLERFREIEN HIGH-END ORIGINALZUSTAND)
+// ✅ 1. MESSAGE LISTENER
 window.addEventListener("message", (ev) => {
   const msg = ev.data;
 
@@ -669,10 +641,10 @@ window.addEventListener("message", (ev) => {
     return;
   }
 
-  if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
   hideLoading();
 
-  console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
+  console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50)); // 👈 HIER
 
   window.__FINAL_MANDALA = msg.dataUrl;
 
@@ -717,7 +689,9 @@ window.addEventListener("message", (ev) => {
     els.sliderBackdrop.addEventListener("click", closeSheet);
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-    
+    if (els.buyPreviewPng) {
+  els.buyPreviewPng.addEventListener("click", handlePaidDownload);
+}
     // Falls du den kostenlosen Download direkt über den Button triggern willst:
     if (els.buyPreviewPng) {
       els.buyPreviewPng.addEventListener("click", function() {
@@ -748,7 +722,6 @@ window.addEventListener("message", (ev) => {
       setTimeout(() => {
         console.log("DOWNLOAD:", window.__FINAL_MANDALA?.slice(0, 50));
         const dataUrl = window.__FINAL_MANDALA;
-
         if (!dataUrl) {
           alert("Fehler – kein Mandala erhalten. Bitte versuche es erneut.");
           return;
@@ -776,53 +749,8 @@ window.addEventListener("message", (ev) => {
         window.__FINAL_MANDALA = msg.dataUrl;
       }
     });
-
-    // 🛡️ DESIGN-SCHUTZSCHILD: SPEZIELL FÜR DIE QUADRATISCH GELIEFERTEN WABEN/RUND-GRAFIKEN
-    document.addEventListener("DOMContentLoaded", function() {
-      const style = document.createElement('style');
-      style.innerHTML = `
-        /* Die weiße Trägerkarte im edlen 3:4 Hochformat */
-        .print-preview__image-wrap { 
-          max-width: 440px !important; 
-          margin: 0 auto !important; 
-          aspect-ratio: 3/4 !important; 
-          background: #FFFFFF !important; 
-          padding: 0 !important; /* Padding auf 0, um Ränder innerhalb der Grafik zu vermeiden */
-          box-sizing: border-box !important; 
-          position: relative !important; 
-          display: block !important;
-          overflow: hidden !important;
-        } 
-        
-        /* Zwingt das von der Engine gelieferte Bild, sich exakt oben bündig zu setzen */
-        .print-preview__image { 
-          display: block !important;
-          width: 100% !important; 
-          height: auto !important; 
-          max-height: 440px !important; /* Begrenzt die Höhe auf ein perfektes Quadrat oben */
-          object-fit: contain !important; 
-          margin: 0 auto !important;
-          position: absolute !important;
-          top: 0 !important;
-          left: 0 !important;
-        }
-        
-        /* Setzt dein schwarzes Logo vollkommen unabhängig exakt unten rechts in den freien weißen Raum */
-        .print-preview__image-wrap::after {
-          content: "" !important;
-          position: absolute !important;
-          bottom: 30px !important;
-          right: 35px !important;
-          width: 110px !important; /* Etwas breiter für optimale Premium-Optik unten */
-          height: 45px !important;
-          background: url('assets/Logo_gold.png') no-repeat center !important;
-          background-size: contain !important;
-          z-index: 99999 !important;
-          display: block !important;
-        }
-      `;
-      document.head.appendChild(style);
-    });
   </script>
 </body>
 </html>
+
+  

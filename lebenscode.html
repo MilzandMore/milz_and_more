@@ -692,7 +692,7 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
     if (els.buyPreviewPng) {
   els.buyPreviewPng.addEventListener("click", handlePaidDownload);
 }
-    // Falls du den kostenlosen Download direkt über den Button triggern willst:
+   // Falls du den kostenlosen Download direkt über den Button triggern willst:
     if (els.buyPreviewPng) {
       els.buyPreviewPng.addEventListener("click", function() {
         requestExport("final");
@@ -710,7 +710,7 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
       });
     }
 
-       buildSliders();
+    buildSliders();
     refreshComputedCodeAndColors();
     updateConditionalFields();
     updateViewerWatermarkPosition();
@@ -727,19 +727,15 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
           return;
         }
 
-       // 🔥 3. DOWNLOAD STARTEN
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "mandala.png";
-      link.click();
+        // 🔥 3. DOWNLOAD STARTEN
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = "mandala.png";
+        link.click();
 
-      alert("Download gestartet 🎉");
-
-    }, 700); // ⏱ leicht erhöht für Sicherheit
-
-
+        alert("Download gestartet 🎉");
+      }, 700); // ⏱ leicht erhöht für Sicherheit
+    }
   </script>
 </body>
 </html>
-
-  

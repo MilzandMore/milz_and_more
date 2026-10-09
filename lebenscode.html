@@ -23,7 +23,7 @@
 </head>
 
 <body>
- <!-- 🔒 SAUBERER PASSPORT-SCHUTZ MIT MERK-FUNKTION -->
+ <!-- 🔒 SICHERER PASSPORT-SCHUTZ MIT CRYPTO-HASHING -->
 <div id="password-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#11141a; z-index:9999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Inter', sans-serif; color:#fff; padding:20px; box-sizing:border-box;">
   <img src="assets/Logo_gold.png" alt="Milz & More" style="max-width:180px; margin-bottom:30px;">
   <h2 style="font-family:'Cinzel', serif; color:#c9a14a; margin-bottom:10px; font-weight:600; letter-spacing:1px; text-align:center;">EXKLUSIVER KURSBEREICH</h2>
@@ -39,16 +39,26 @@
 </div>
 
 <script>
-  function checkAppPassword() {
+  // Erzeugt einen unumkehrbaren SHA-256 Hashwert im Browser
+  async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function checkAppPassword() {
     var userInput = document.getElementById('app-password-input').value;
-    var correctPassword = "LEBENSCODE1"; 
     
-    if (userInput === correctPassword) {
+    // Mathematischer Fingerabdruck für "LEBENSCODE1"
+    var correctPasswordHash = "c7d2c14041b6c757dc567634f195d9da6396e4efcb1e0b571343719910d5402a"; 
+    var inputHash = await sha256(userInput);
+    
+    if (inputHash === correctPasswordHash) {
       document.getElementById('password-overlay').style.display = 'none';
       
-      // Wenn das Häkchen gesetzt ist, im dauerhaften Speicher sichern, sonst nur für die Session
       if (document.getElementById('remember-password-chk').checked) {
-        localStorage.setItem('mandala_pass_v2', correctPassword);
+        localStorage.setItem('mandala_pass_v2', inputHash);
       } else {
         sessionStorage.setItem('mandala_authorized', 'true');
       }
@@ -57,13 +67,16 @@
     }
   }
 
-  // Prüft sofort beim Starten der App die Berechtigung mit dem AKTUELLEN Passwort
-  if (localStorage.getItem('mandala_pass_v2') === "LEBENSCODE1" || sessionStorage.getItem('mandala_authorized') === 'true') {
-    document.write('<style>#password-overlay { display: none !important; }</style>');
-  } else {
-    // Falls das Passwort auf GitHub geändert wurde, alten Speicher ungültig machen:
-    localStorage.removeItem('mandala_pass_v2');
+  // Überprüft den gespeicherten Zustand sofort vor dem Rendern der restlichen UI
+  async function checkStoredPassword() {
+    var correctPasswordHash = "c7d2c14041b6c757dc567634f195d9da6396e4efcb1e0b571343719910d5402a";
+    if (localStorage.getItem('mandala_pass_v2') === correctPasswordHash || sessionStorage.getItem('mandala_authorized') === 'true') {
+      document.write('<style>#password-overlay { display: none !important; }</style>');
+    } else {
+      localStorage.removeItem('mandala_pass_v2');
+    }
   }
+  checkStoredPassword();
 
   window.addEventListener('load', function() {
     var input = document.getElementById('app-password-input');
@@ -74,6 +87,7 @@
     }
   });
 </script>
+
 
   <header class="app-header">
     <div class="brand">

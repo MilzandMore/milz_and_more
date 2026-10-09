@@ -748,7 +748,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const paypalContainer = document.getElementById('paypal-button-container');
   if (paypalContainer) { paypalContainer.style.display = 'none'; }
   
-  // 🛡️ DAS INTELLIGENTE DESIGN-SCHUTZSCHILD FÜR RUND & WABE
+// 🛡️ DAS INTELLIGENTE DESIGN-SCHUTZSCHILD FÜR RUND, QUADRAT & WABE
   // Zwingt die Vorschau-Box im Browser bei ALLEN Formen in dasselbe edle Weiß-Hochformat (3:4)
   const style = document.createElement('style');
   style.innerHTML = `
@@ -757,17 +757,31 @@ document.addEventListener("DOMContentLoaded", function() {
       margin: 0 auto !important; 
       aspect-ratio: 3/4 !important; 
       background: #FFFFFF !important; 
-      padding: 30px !important; 
+      padding: 40px 30px 60px 30px !important; /* Mehr Platz unten für das Logo */
       box-sizing: border-box !important; 
+      position: relative !important; /* Basis für die absolute Positionierung des Logos */
       display: flex !important;
-      align-items: center !important;
+      align-items: flex-start !important; /* Schiebt das Mandala nach oben, exakt wie beim Quadrat */
       justify-content: center !important;
     } 
     .print-preview__image { 
       width: 100% !important; 
-      height: 100% !important; 
+      height: auto !important; /* Verhindert das Verzerren von runden/waben Formen */
+      max-height: 80% !important; /* Lässt unten Platz für das Logo */
       object-fit: contain !important; 
       background: #FFFFFF !important;
+    }
+    /* 🎨 CSS-ANKER: Nagelt das Logo bei JEDER Form unumstößlich unten rechts fest */
+    .print-preview__image-wrap img[src*="logo"], 
+    .print-preview__image-wrap [class*="logo"],
+    .app-viewer-logo {
+      position: absolute !important;
+      bottom: 25px !important;
+      right: 35px !important;
+      width: 90px !important; /* Optimale, edle Breite für dein Logo */
+      height: auto !important;
+      z-index: 99 !important;
+      display: block !important;
     }
   `;
   document.head.appendChild(style);

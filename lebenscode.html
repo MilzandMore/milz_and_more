@@ -736,13 +736,13 @@ window.addEventListener("message", (ev) => {
       });
     }
 
-    buildSliders();
+       buildSliders();
     refreshComputedCodeAndColors();
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🚀 KOSTENFREIER DIREKT-DOWNLOAD (ERSETZT DIE PAYPAL-LOGIK)
+    // 🚀 KOSTENFREIER DIREKT-DOWNLOAD MIT AUTOMATISCHER AUSLÖSUNG
     function handleFreeDownload() {
       requestExport("final");
       setTimeout(() => {
@@ -756,51 +756,68 @@ window.addEventListener("message", (ev) => {
 
         const link = document.createElement("a");
         link.href = dataUrl;
-        link.download = "mandala.png";
+        link.download = "mandala_" + state.engine + ".png";
         link.click();
-      }, 700); // ⏱ Sicherheits-Verzögerung, bis die Engine das Bild berechnet hat
+      }, 700);
     }
 
-    // Verknüpft den Button in der Druckvorschau direkt mit dem Gratis-Download
+    // Verknüpft den manuellen Button in der Vorschau
     if (els.buyPreviewPng) {
       els.buyPreviewPng.addEventListener("click", handleFreeDownload);
     }
 
-    // 🛡️ DAS INTELLIGENTE DESIGN-SCHUTZSCHILD FÜR REIN WEISSEN HINTERGRUND
+    // AUTOMATISCHER DOWNLOAD SOBALD DER EXPORT BEENDET IST
+    // Überschreibt den Message-Listener oder ergänzt ihn so, dass er direkt triggert:
+    const originalListener = window.onmessage;
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
+      if (msg && msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+        // Wenn ein finaler Export angefordert wurde, direkt im Browser herunterladen
+        window.__FINAL_MANDALA = msg.dataUrl;
+      }
+    });
+
+    // 🛡️ DESIGN-SCHUTZSCHILD: SPEZIELL FÜR DIE QUADRATISCH GELIEFERTEN WABEN/RUND-GRAFIKEN
     document.addEventListener("DOMContentLoaded", function() {
       const style = document.createElement('style');
       style.innerHTML = `
+        /* Die weiße Trägerkarte im edlen 3:4 Hochformat */
         .print-preview__image-wrap { 
           max-width: 440px !important; 
           margin: 0 auto !important; 
           aspect-ratio: 3/4 !important; 
           background: #FFFFFF !important; 
-          padding: 30px !important; 
+          padding: 0 !important; /* Padding auf 0, um Ränder innerhalb der Grafik zu vermeiden */
           box-sizing: border-box !important; 
           position: relative !important; 
           display: block !important;
           overflow: hidden !important;
         } 
+        
+        /* Zwingt das von der Engine gelieferte Bild, sich exakt oben bündig zu setzen */
         .print-preview__image { 
           display: block !important;
           width: 100% !important; 
           height: auto !important; 
-          max-height: 82% !important; 
+          max-height: 440px !important; /* Begrenzt die Höhe auf ein perfektes Quadrat oben */
           object-fit: contain !important; 
-          background: #FFFFFF !important;
           margin: 0 auto !important;
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
         }
-        /* Platziert dein schwarzes/goldenes Logo unumstößlich unten rechts auf der weißen Karte */
+        
+        /* Setzt dein schwarzes Logo vollkommen unabhängig exakt unten rechts in den freien weißen Raum */
         .print-preview__image-wrap::after {
           content: "" !important;
           position: absolute !important;
-          bottom: 25px !important;
-          right: 30px !important;
-          width: 90px !important;
-          height: 40px !important;
+          bottom: 30px !important;
+          right: 35px !important;
+          width: 110px !important; /* Etwas breiter für optimale Premium-Optik unten */
+          height: 45px !important;
           background: url('assets/Logo_gold.png') no-repeat center !important;
           background-size: contain !important;
-          z-index: 9999 !important;
+          z-index: 99999 !important;
           display: block !important;
         }
       `;

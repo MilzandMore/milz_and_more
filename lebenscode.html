@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://googleapis.com" rel="stylesheet">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
@@ -19,7 +19,7 @@
 
   <link rel="stylesheet" href="app.css?v=premium-kurs-2026">
 
-  <script src="https://www.paypal.com/sdk/js?client-id=AYwApQvq8SiMYPEHcgMpcN8q77ffjb2_47JkkL4voZk8uEfk8daNM6sbgTIwOHqTbgk-IfCmSKbc8VXE&currency=EUR"></script>
+  <script src="https://paypal.com"></script>
 </head>
 
 <body>
@@ -39,7 +39,10 @@
 </div>
 
 <script>
-  // Erzeugt einen unumkehrbaren SHA-256 Hashwert im Browser
+  // Der korrekte SHA-256 Hashwert für "LEBENSCODE1"
+  const CORRECT_HASH = "c7d2c14041b6c757dc567634f195d9da6396e4efcb1e0b571343719910d5402a";
+
+  // Erzeugt einen SHA-256 Hashwert im Browser
   async function sha256(message) {
     const msgBuffer = new TextEncoder().encode(message);
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -49,12 +52,9 @@
 
   async function checkAppPassword() {
     var userInput = document.getElementById('app-password-input').value;
-    
-    // Mathematischer Fingerabdruck für "LEBENSCODE1"
-    var correctPasswordHash = "c7d2c14041b6c757dc567634f195d9da6396e4efcb1e0b571343719910d5402a"; 
     var inputHash = await sha256(userInput);
     
-    if (inputHash === correctPasswordHash) {
+    if (inputHash === CORRECT_HASH) {
       document.getElementById('password-overlay').style.display = 'none';
       
       if (document.getElementById('remember-password-chk').checked) {
@@ -67,16 +67,10 @@
     }
   }
 
-  // Überprüft den gespeicherten Zustand sofort vor dem Rendern der restlichen UI
-  async function checkStoredPassword() {
-    var correctPasswordHash = "c7d2c14041b6c757dc567634f195d9da6396e4efcb1e0b571343719910d5402a";
-    if (localStorage.getItem('mandala_pass_v2') === correctPasswordHash || sessionStorage.getItem('mandala_authorized') === 'true') {
-      document.write('<style>#password-overlay { display: none !important; }</style>');
-    } else {
-      localStorage.removeItem('mandala_pass_v2');
-    }
+  // Überprüft gespeicherte Logins fehlerfrei direkt beim Skriptstart
+  if (localStorage.getItem('mandala_pass_v2') === CORRECT_HASH || sessionStorage.getItem('mandala_authorized') === 'true') {
+    document.write('<style>#password-overlay { display: none !important; }</style>');
   }
-  checkStoredPassword();
 
   window.addEventListener('load', function() {
     var input = document.getElementById('app-password-input');
@@ -87,6 +81,7 @@
     }
   });
 </script>
+
 
 
   <header class="app-header">

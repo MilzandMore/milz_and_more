@@ -39,10 +39,10 @@
 </div>
 
 <script>
-  // Der korrekte SHA-256 Hashwert für "LEBENSCODE1"
+  // Der exakte, verifizierte SHA-256 Hashwert für das reine Großbuchstaben-Passwort "LEBENSCODE1"
   const CORRECT_HASH = "c7d2c14041b6c757dc567634f195d9da6396e4efcb1e0b571343719910d5402a";
 
-  // Erzeugt einen SHA-256 Hashwert im Browser
+  // Erzeugt den SHA-256 Hashwert im Browser
   async function sha256(message) {
     const msgBuffer = new TextEncoder().encode(message);
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -52,13 +52,16 @@
 
   async function checkAppPassword() {
     var userInput = document.getElementById('app-password-input').value;
-    var inputHash = await sha256(userInput);
+    
+    // Bereinigung: Entfernt nur versehentliche Leerzeichen, behält die Großbuchstaben bei
+    var cleanInput = userInput.trim();
+    var inputHash = await sha256(cleanInput);
     
     if (inputHash === CORRECT_HASH) {
       document.getElementById('password-overlay').style.display = 'none';
       
       if (document.getElementById('remember-password-chk').checked) {
-        localStorage.setItem('mandala_pass_v2', inputHash);
+        localStorage.setItem('mandala_pass_strict', inputHash);
       } else {
         sessionStorage.setItem('mandala_authorized', 'true');
       }
@@ -67,9 +70,13 @@
     }
   }
 
-  // Überprüft gespeicherte Logins fehlerfrei direkt beim Skriptstart
-  if (localStorage.getItem('mandala_pass_v2') === CORRECT_HASH || sessionStorage.getItem('mandala_authorized') === 'true') {
+  // Überprüft gespeicherte Logins direkt beim Skriptstart
+  if (localStorage.getItem('mandala_pass_strict') === CORRECT_HASH || sessionStorage.getItem('mandala_authorized') === 'true') {
     document.write('<style>#password-overlay { display: none !important; }</style>');
+  } else {
+    // Alte Cache-Versionen aufräumen
+    localStorage.removeItem('mandala_pass_v2');
+    localStorage.removeItem('mandala_pass_v3');
   }
 
   window.addEventListener('load', function() {

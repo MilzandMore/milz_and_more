@@ -167,14 +167,34 @@
 
   <div class="preview-layout">
 
-    <!-- LINKS (Mandala) -->
+    <!-- LINKS (Mandala mit absolut fixierter Logo-Ebene für Wabe & Rund) -->
     <div class="preview-left">
-      <div class="print-preview__image-wrap">
+      <div class="print-preview__image-wrap" style="position: relative !important;">
         <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
+        
+        <!-- 🎨 CSS-KLAMMER: Zwingt das Logo bei allen Modellen fest unten rechts in die Ecke -->
+        <style>
+          .print-preview__image-wrap {
+            position: relative !important;
+          }
+          /* Erkennt das in der Wabe/Rund-Engine eingebettete oder überlagerte Logo und nagelt es fest */
+          .print-preview__image-wrap img[src*="logo"], 
+          .print-preview__image-wrap [class*="logo"],
+          .app-viewer-logo {
+            position: absolute !important;
+            bottom: 25px !important;
+            right: 25px !important;
+            left: auto !important;
+            top: auto !important;
+            width: 75px !important; /* Edle, proportionale Logogröße */
+            height: auto !important;
+            z-index: 99999 !important;
+          }
+        </style>
       </div>
     </div>
 
-       <!-- RECHTS (Exklusiver Kursbereich - Universeller Text) -->
+    <!-- RECHTS (Exklusiver Kursbereich - Universeller Text) -->
     <div class="premium-kurs-right" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:#fff; font-family:'Inter', sans-serif;">
 
       <div class="preview-text" style="font-size:15px; line-height:1.6; color:#a0a5b5; max-width:340px;">

@@ -757,30 +757,31 @@ document.addEventListener("DOMContentLoaded", function() {
       margin: 0 auto !important; 
       aspect-ratio: 3/4 !important; 
       background: #FFFFFF !important; 
-      padding: 40px 30px 60px 30px !important; /* Mehr Platz unten für das Logo */
+      padding: 30px !important; 
       box-sizing: border-box !important; 
-      position: relative !important; /* Basis für die absolute Positionierung des Logos */
-      display: flex !important;
-      align-items: flex-start !important; /* Schiebt das Mandala nach oben, exakt wie beim Quadrat */
-      justify-content: center !important;
+      position: relative !important; /* Absolute Basis für das Logo */
+      display: block !important; /* Wechsel zu Block verhindert das Entstehen von Balken */
+      overflow: hidden !important;
     } 
     .print-preview__image { 
+      display: block !important;
       width: 100% !important; 
-      height: auto !important; /* Verhindert das Verzerren von runden/waben Formen */
-      max-height: 80% !important; /* Lässt unten Platz für das Logo */
+      height: auto !important; 
+      max-height: 82% !important; /* Garantiert Platz an der Unterkante für das Logo */
       object-fit: contain !important; 
       background: #FFFFFF !important;
+      margin: 0 auto !important;
     }
-    /* 🎨 CSS-ANKER: Nagelt das Logo bei JEDER Form unumstößlich unten rechts fest */
+    /* 🎨 CSS-ANKER: Nagelt das Logo bei JEDER Form unumstößlich unten rechts auf der weißen Karte fest */
     .print-preview__image-wrap img[src*="logo"], 
     .print-preview__image-wrap [class*="logo"],
     .app-viewer-logo {
       position: absolute !important;
       bottom: 25px !important;
-      right: 35px !important;
-      width: 90px !important; /* Optimale, edle Breite für dein Logo */
+      right: 30px !important;
+      width: 90px !important; /* Optimale Premium-Breite für dein Logo */
       height: auto !important;
-      z-index: 99 !important;
+      z-index: 999 !important;
       display: block !important;
     }
   `;

@@ -670,123 +670,119 @@ window.addEventListener("message", (ev) => {
   }
 
   if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-    hideLoading();
-    console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
-    window.__FINAL_MANDALA = msg.dataUrl;
-    openPrintPreview(msg.dataUrl);
-    
-    // Originaler, stabiler automatischer Download deiner Engines
-    const link = document.createElement("a");
-    link.href = msg.dataUrl;
-    link.download = `mein-lebenscode-mandala-${state.mode}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-});
+  hideLoading();
 
-document.querySelectorAll(".engine-btn").forEach(btn => {
-  if (!btn.dataset.engine) return;
-  btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
-});
+  console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
 
-els.mode.addEventListener("change", () => {
-  state.mode = els.mode.value;
-  refreshComputedCodeAndColors();
-  pushStateToEngine();
-});
+  window.__FINAL_MANDALA = msg.dataUrl;
 
-els.input.addEventListener("input", () => {
-  state.input = els.input.value;
-  refreshComputedCodeAndColors();
-  pushStateToEngine();
-});
-
-els.direction.addEventListener("change", () => {
-  state.direction = els.direction.value;
-  pushStateToEngine();
-});
-
-els.sector.addEventListener("change", () => {
-  state.sector = Number(els.sector.value);
-  pushStateToEngine();
-});
-
-els.download.addEventListener("click", () => {
-  showPreviewInfo();
-  requestExport("final");
-});
-
-els.openSliders.addEventListener("click", openSheet);
-els.closeSliders.addEventListener("click", closeSheet);
-els.sliderBackdrop.addEventListener("click", closeSheet);
-els.closePrintPreview.addEventListener("click", closePrintPreview);
-els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
-
-if (els.buyPreviewPng) {
-  els.buyPreviewPng.addEventListener("click", () => {
-    window.open("https://mytentary.com", "_blank");
-  });
+  openPrintPreview(msg.dataUrl);
 }
 
-// 🎛️ SYSTEM-START FÜR MOBILGERÄTE (REPARIERT DIE FARBREGLER)
-setTimeout(() => {
-  try {
-    if (typeof buildSliders === "function") buildSliders();
-    if (typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
-    if (typeof updateConditionalFields === "function") updateConditionalFields();
-    console.log("System erfolgreich initialisiert.");
-  } catch(e) {
-    console.error("Fehler beim Start abgefangen:", e);
-  }
-}, 350);
-
-// Startet das Quadrat vollautomatisch direkt beim Laden
-loadEngine("quadrat");
-
-document.addEventListener("DOMContentLoaded", function() {
-  const paypalContainer = document.getElementById('paypal-button-container');
-  if (paypalContainer) { paypalContainer.style.display = 'none'; }
-  
-// 🛡️ DAS INTELLIGENTE DESIGN-SCHUTZSCHILD FÜR RUND, QUADRAT & WABE
-  // Zwingt die Vorschau-Box im Browser bei ALLEN Formen in dasselbe edle Weiß-Hochformat (3:4)
-  const style = document.createElement('style');
-  style.innerHTML = `
-    .print-preview__image-wrap { 
-      max-width: 440px !important; 
-      margin: 0 auto !important; 
-      aspect-ratio: 3/4 !important; 
-      background: #FFFFFF !important; 
-      padding: 30px !important; 
-      box-sizing: border-box !important; 
-      position: relative !important; /* Absolute Basis für das Logo */
-      display: block !important; /* Wechsel zu Block verhindert das Entstehen von Balken */
-      overflow: hidden !important;
-    } 
-    .print-preview__image { 
-      display: block !important;
-      width: 100% !important; 
-      height: auto !important; 
-      max-height: 82% !important; /* Garantiert Platz an der Unterkante für das Logo */
-      object-fit: contain !important; 
-      background: #FFFFFF !important;
-      margin: 0 auto !important;
-    }
-    /* 🎨 CSS-ANKER: Nagelt das Logo bei JEDER Form unumstößlich unten rechts auf der weißen Karte fest */
-    .print-preview__image-wrap img[src*="logo"], 
-    .print-preview__image-wrap [class*="logo"],
-    .app-viewer-logo {
-      position: absolute !important;
-      bottom: 25px !important;
-      right: 30px !important;
-      width: 90px !important; /* Optimale Premium-Breite für dein Logo */
-      height: auto !important;
-      z-index: 999 !important;
-      display: block !important;
-    }
-  `;
-  document.head.appendChild(style);
 });
-</script>
+    document.querySelectorAll(".engine-btn").forEach(btn => {
+      if (!btn.dataset.engine) return;
+      btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
+    });
+
+    els.mode.addEventListener("change", () => {
+      state.mode = els.mode.value;
+      refreshComputedCodeAndColors();
+      pushStateToEngine();
+    });
+
+    els.input.addEventListener("input", () => {
+      state.input = els.input.value;
+      refreshComputedCodeAndColors();
+      pushStateToEngine();
+    });
+
+    els.direction.addEventListener("change", () => {
+      state.direction = els.direction.value;
+      pushStateToEngine();
+    });
+
+    els.sector.addEventListener("change", () => {
+      state.sector = Number(els.sector.value);
+      pushStateToEngine();
+    });
+
+    els.download.addEventListener("click", () => {
+      showPreviewInfo();
+      requestExport();
+    });
+
+    els.openSliders.addEventListener("click", openSheet);
+    els.closeSliders.addEventListener("click", closeSheet);
+    els.sliderBackdrop.addEventListener("click", closeSheet);
+    els.closePrintPreview.addEventListener("click", closePrintPreview);
+    els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
+    
+    // Falls du den kostenlosen Download direkt über den Button triggern willst:
+    if (els.buyPreviewPng) {
+      els.buyPreviewPng.addEventListener("click", function() {
+        requestExport("final");
+        setTimeout(() => {
+          const dataUrl = window.__FINAL_MANDALA;
+          if (!dataUrl) {
+            alert("Fehler – kein Mandala erhalten");
+            return;
+          }
+          const link = document.createElement("a");
+          link.href = dataUrl;
+          link.download = "mandala.png";
+          link.click();
+        }, 700);
+      });
+    }
+
+    buildSliders();
+    refreshComputedCodeAndColors();
+    updateConditionalFields();
+    updateViewerWatermarkPosition();
+    loadEngine("quadrat");
+
+    // 🛡️ DAS INTELLIGENTE DESIGN-SCHUTZSCHILD (HIER WURDE ES VORHER ZERSCHOSSEN)
+    document.addEventListener("DOMContentLoaded", function() {
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .print-preview__image-wrap { 
+          max-width: 440px !important; 
+          margin: 0 auto !important; 
+          aspect-ratio: 3/4 !important; 
+          background: #FFFFFF !important; 
+          padding: 30px !important; 
+          box-sizing: border-box !important; 
+          position: relative !important; 
+          display: block !important;
+          overflow: hidden !important;
+        } 
+        .print-preview__image { 
+          display: block !important;
+          width: 100% !important; 
+          height: auto !important; 
+          max-height: 82% !important; 
+          object-fit: contain !important; 
+          background: #FFFFFF !important;
+          margin: 0 auto !important;
+        }
+        .print-preview__image-wrap img[src*="logo"], 
+        .print-preview__image-wrap [class*="logo"],
+        .app-viewer-logo {
+          position: absolute !important;
+          bottom: 25px !important;
+          right: 30px !important;
+          width: 90px !important; 
+          height: auto !important; 
+          z-index: 9999 !important;
+          display: block !important;
+        }
+      `;
+      document.head.appendChild(style);
+    });
+  </script>
+</body>
+</html>
+
 </body>
 </html>

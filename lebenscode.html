@@ -721,10 +721,17 @@ if (els.buyPreviewPng) {
   });
 }
 
-// 🎛️ STABILE MENÜ-INITIALISIERUNG
-if (typeof buildSliders === "function") buildSliders();
-if (typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
-if (typeof updateConditionalFields === "function") updateConditionalFields();
+// 🎛️ SYSTEM-START FÜR MOBILGERÄTE (REPARIERT DIE FARBREGLER)
+setTimeout(() => {
+  try {
+    if (typeof buildSliders === "function") buildSliders();
+    if (typeof refreshComputedCodeAndColors === "function") refreshComputedCodeAndColors();
+    if (typeof updateConditionalFields === "function") updateConditionalFields();
+    console.log("System erfolgreich initialisiert.");
+  } catch(e) {
+    console.error("Fehler beim Start abgefangen:", e);
+  }
+}, 350);
 
 // Startet das Quadrat vollautomatisch direkt beim Laden
 loadEngine("quadrat");

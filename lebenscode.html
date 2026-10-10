@@ -276,10 +276,12 @@
         .map(c => charMap[c])
         .filter(Boolean);
 
-      if (arr.length === 0) arr =;
+     if (arr.length === 0) {
+        arr = new Array(9);
+      }
 
       while (arr.length > 8) {
-        const next = [];
+        const next = new Array();
         for (let i = 0; i < arr.length - 1; i++) {
           next.push(ex(arr[i], arr[i + 1]));
         }

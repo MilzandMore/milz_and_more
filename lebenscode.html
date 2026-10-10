@@ -554,17 +554,24 @@
       };
 
       els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+      
+      // 🎨 Hängt die aktive Form als Klasse an den Body, damit das CSS auf dem Server stabil trennt
+      document.body.className = "active-engine-" + engine;
     }
 
+    // 📱 KORRIGIERTE MOBILE STRUKTUR: Nutzt jetzt "open" statt "active" exakt wie deine app.css
     function openSheet() {
       const sheet = document.getElementById("sliderSheet");
-      if(sheet) sheet.classList.add("active");
+      if(sheet) sheet.classList.add("open");
+      document.body.style.overflow = "hidden";
     }
 
-    // Unifizierte Schließen-Funktion für die Farbregler
     function closeSheet() {
       const sheet = document.getElementById("sliderSheet");
-      if(sheet) sheet.classList.remove("active");
+      if(sheet) sheet.classList.remove("open");
+      if (els.printPreview.hidden) {
+        document.body.style.overflow = "";
+      }
     }
 
     // ✅ MESSAGE LISTENER (Empfängt die Grafik aus den unantastbaren Engines)
@@ -589,14 +596,6 @@
         hideLoading();
         console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
         window.__FINAL_MANDALA = msg.dataUrl;
-        
-        // Zwingt das übergebene Bild im Browser auf ein rein weißes Canvas/Hintergrund-Element
-        const imgEl = document.getElementById("printPreviewImage");
-        if (imgEl) {
-          imgEl.style.background = "#FFFFFF";
-          imgEl.style.backgroundColor = "#FFFFFF";
-        }
-        
         openPrintPreview(msg.dataUrl);
       }
     });
@@ -639,29 +638,27 @@
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-    // 🚀 AUSFALLSICHERE, TIMING-STABILE GENERIERUNG FÜR RUND & WABE
+    // 🚀 STABILE PREMIUM-DOWNLOAD-LOGIK FÜR WEB-SERVER
     function handleFreePremiumDownload() {
-      // 1. FINALEN HOCHAUFLÖSENDEN EXPORT ANFORDERN
       requestExport("final");
 
-      // 2. WARTEN bis Engine antwortet (auf 1300ms erhöht, um Waben-Berechnung im Speicher abzuwarten)
+      // Sicherheits-Timer, damit die Bilddaten vollständig auf GitHub Pages bereitliegen
       setTimeout(() => {
-        console.log("DOWNLOAD TRIGGERS:", window.__FINAL_MANDALA?.slice(0,50));
+        console.log("DOWNLOAD ACCESSED:", window.__FINAL_MANDALA?.slice(0,50));
         const dataUrl = window.__FINAL_MANDALA;
 
         if (!dataUrl) {
-          alert("Das hochauflösende Premium-Bild wird im Hintergrund noch aufgebaut. Bitte klicke in 1 Sekunde noch einmal.");
+          alert("Das hochauflösende Premium-Bild wird im Hintergrund noch aufgebaut. Bitte klicke gleich noch einmal.");
           return;
         }
 
-        // 3. DOWNLOAD ÜBER UNSICHTBAREN ANKER STABIL AUSLÖSEN
         const link = document.createElement("a");
         link.href = dataUrl;
         link.download = "mandala_" + state.engine + ".png";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      }, 1300);
+      }, 1400);
     }
 
     if (els.buyPreviewPng) {
@@ -674,11 +671,11 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 DEFINITIVE CSS-KORREKTUR: ZENTRIERT DEN BUTTONTEXT & SCHIEBT DIE WABE SELEKTIV HOCH
+    // 🎨 ABSOLUT STABILES LAYOUT-CSS: TRENNT QUADRAT, RUND UND WABE VONEINANDER SPATIAL
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
-        /* Verhindert, dass Text unten aus dem goldenen Button herausfällt */
+        /* Rückt den Text im goldenen Button gerade */
         #buyPreviewPng {
           height: auto !important;
           padding: 16px 24px !important;
@@ -689,25 +686,36 @@
           text-align: center !important;
         }
         
-        /* Zwingt das Vorschau-Bild auf einheitlich edles Weiß (Rettet das runde Modell vor dem Schwarz) */
-        #printPreviewImage {
-          background: #FFFFFF !important;
-          background-color: #FFFFFF !important;
-        }
-        
-        /* Verhindert Ränder oder Beschnitt im Vorschau-Container */
+        /* Die weiße Premium-Basis-Karte für deine Druckvorschau */
         .print-preview__image-wrap {
           overflow: hidden !important;
           background: #FFFFFF !important;
+          background-color: #FFFFFF !important;
           position: relative !important;
         }
-        
-        /* 🛡️ DESIGN-SCHUTZSCHILD: Schiebt EXCLUSIV nur die Wabe hoch und skaliert sie harmonisch ans Quadrat heran */
-        .wm-wabe #printPreviewImage,
-        [class*="wm-wabe"] #printPreviewImage {
+
+        /* 🟥 LAYOUT A: ENTWEDER QUADRAT IST AKTIV */
+        .active-engine-quadrat #printPreviewImage {
+          background: #FFFFFF !important;
+          object-fit: contain !important;
+        }
+
+        /* 🟡 LAYOUT B: ENTWEDER RUND IST AKTIV (Rettet das runde Modell vor dem Schwarz) */
+        .active-engine-rund #printPreviewImage {
+          background: #FFFFFF !important;
+          background-color: #FFFFFF !important;
+          object-fit: contain !important;
+        }
+        .active-engine-rund .print-preview__image-wrap {
+          background: #FFFFFF !important;
+        }
+
+        /* ⬢ LAYOUT C: ENTWEDER WABE IST AKTIV (Schiebt das Bild bündig nach oben) */
+        .active-engine-wabe #printPreviewImage {
           object-fit: contain !important;
           transform: translateY(-8%) !important;
           scale: 1.15 !important;
+          background: #FFFFFF !important;
         }
       `;
       document.head.appendChild(style);

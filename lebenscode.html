@@ -17,13 +17,11 @@
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=premium-kurs-2026">
-
-  <script src="https://paypal.com"></script>
+  <link rel="stylesheet" href="app.css?v=clean-preview-8">
 </head>
 
 <body>
- <!-- 🔒 SAUBERER PASSPORT-SCHUTZ MIT MERK-FUNKTION -->
+ <!-- 🔒 SAUBERER BOT-SICHERER PASSPORT-SCHUTZ MIT MERK-FUNKTION -->
 <div id="password-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#11141a; z-index:9999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Inter', sans-serif; color:#fff; padding:20px; box-sizing:border-box;">
   <img src="assets/Logo_gold.png" alt="Milz & More" style="max-width:180px; margin-bottom:30px;">
   <h2 style="font-family:'Cinzel', serif; color:#c9a14a; margin-bottom:10px; font-weight:600; letter-spacing:1px; text-align:center;">EXKLUSIVER KURSBEREICH</h2>
@@ -41,17 +39,12 @@
 <script>
   function checkAppPassword() {
     var userInput = document.getElementById('app-password-input').value;
-    
-    // Bereinigt eventuelle Leerzeichen beim Kopieren
     var cleanInput = userInput.trim();
-    
-    // Das Passwort rückwärts gelesen, damit GitHub-Suchbots "LEBENSCODE1" nicht im Klartext indizieren
     var checkSecret = "1EDOCSNEBEL"; 
     var reversedInput = cleanInput.split("").reverse().join("");
     
     if (reversedInput === checkSecret) {
       document.getElementById('password-overlay').style.display = 'none';
-      
       if (document.getElementById('remember-password-chk').checked) {
         localStorage.setItem('mandala_pass_final', 'granted');
       } else {
@@ -62,15 +55,8 @@
     }
   }
 
-  // Prüft sofort beim Starten die Berechtigung
   if (localStorage.getItem('mandala_pass_final') === 'granted' || sessionStorage.getItem('mandala_authorized') === 'true') {
     document.write('<style>#password-overlay { display: none !important; }</style>');
-  } else {
-    // Reste der fehlgeschlagenen Krypto-Versuche gründlich aufräumen
-    localStorage.removeItem('mandala_pass_v2');
-    localStorage.removeItem('mandala_pass_v3');
-    localStorage.removeItem('mandala_pass_strict');
-    localStorage.removeItem('mandala_pass_stable');
   }
 
   window.addEventListener('load', function() {
@@ -83,7 +69,7 @@
   });
 </script>
 
-    <header class="app-header">
+  <header class="app-header">
     <div class="brand">
       <a href="index.html" class="brand-link">
         <img class="brand-logo" src="assets/Logo_gold.png" alt="Milz & More Logo">
@@ -98,6 +84,7 @@
           <option value="text">Text / Affirmation</option>
         </select>
       </div>
+
       <div class="field">
         <label for="input">Eingabe</label>
         <input id="input" type="text" value="15011987" placeholder="z.B. 15011987 oder TEXT">
@@ -115,6 +102,7 @@
           <option value="innen">Innen</option>
         </select>
       </div>
+
       <div class="field" id="sectorWrap">
         <label for="sector">Sektor</label>
         <select id="sector">
@@ -138,7 +126,6 @@
       </nav>
     </div>
   </header>
-
   <main class="app-main">
     <aside class="slider-panel desktop-only">
       <div class="slider-title">Farbintensität</div>
@@ -168,37 +155,30 @@
     <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
 
     <div class="print-preview__panel">
+      <button id="closePrintPreview" class="print-preview__close" type="button">×</button>
 
- <button id="closePrintPreview" class="print-preview__close" type="button">×</button>
+      <div class="preview-layout">
+        <!-- LINKS (Mandala) -->
+        <div class="preview-left">
+          <div class="print-preview__image-wrap">
+            <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
+          </div>
+        </div>
 
-  <div class="preview-layout">
-    <!-- LINKS (Mandala) -->
-    <div class="preview-left">
-      <div class="print-preview__image-wrap">
-        <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
+        <!-- RECHTS (Neuer edler Text + Kostenfreier Premium Download-Button) -->
+        <div class="preview-right">
+          <div class="preview-text">
+            <h3 style="font-family:'Cinzel', serif; color:#c9a14a; margin-top:0; letter-spacing:1px;">DEIN GENERIERTES MANDALA</h3>
+            Dies ist die exklusive Vorschau deines berechneten Frequenzbildes.<br><br>
+            Nutze dieses persönliche Mandala als kraftvollen Begleiter, um dein gewähltes Thema energetisch zu integrieren und dich in deiner Schwingung zu stabilisieren.<br><br>
+            <strong>Als Mitglied unseres Premium-Kurses steht dir der hochauflösende Download vollkommen kostenfrei zur Verfügung.</strong>
+          </div>
+          <button id="buyPreviewPng" class="primary" type="button" style="width:100%; margin-top:30px; padding:14px; font-weight:bold; letter-spacing:1px; border-radius:30px; cursor:pointer;">JETZT HOCHAUFLÖSEND HERUNTERLADEN 🎉</button>
+        </div>
       </div>
     </div>
-    <!-- RECHTS (Exklusiver Kursbereich - Universeller Text) -->
-    <div class="premium-kurs-right" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; color:#fff; font-family:'Inter', sans-serif;">
-
-      <div class="preview-text" style="font-size:15px; line-height:1.6; color:#a0a5b5; max-width:340px;">
-        <span style="font-family:'Cinzel', serif; color:#c9a14a; font-size:18px; font-weight:600; letter-spacing:1px; display:block; margin-bottom:15px;">DEIN ENERGIE-ANKER</span>
-        Dies ist die exklusive Vorschau deines berechneten Frequenzbildes. 
-        <br><br>
-        Nutze dieses persönliche Mandala als kraftvollen Begleiter, um dein gewähltes Thema energetisch zu integrieren und dich in deiner Schwingung zu stabilisieren.
-        <br><br>
-        <span style="color:#fff; font-weight:500;">Als Kursmitglied steht dir der hochauflösende Download vollkommen kostenfrei zur Verfügung.</span>
-      </div>
-
-
-    </div>
-
-
-    </div>
-
   </div>
 
-</div>
   <div id="sliderSheet" class="slider-sheet">
     <div class="slider-sheet__backdrop" id="sliderBackdrop"></div>
     <div class="slider-sheet__panel">
@@ -214,8 +194,6 @@
   </div>
 
   <script>
-    const PAYMENT_URL = "https://www.paypal.com/ncp/payment/G7ZXADZZXL73L";
-
     const state = {
       engine: "quadrat",
       mode: "geburtstag",
@@ -275,7 +253,7 @@
       printPreviewBackdrop: document.getElementById("printPreviewBackdrop"),
       printPreviewImage: document.getElementById("printPreviewImage"),
       closePrintPreview: document.getElementById("closePrintPreview"),
-      buyPreviewPng: document.getElementById("buyPreviewPng") || null
+      buyPreviewPng: document.getElementById("buyPreviewPng")
     };
 
     function ex(a, b) {
@@ -297,7 +275,7 @@
         .map(c => charMap[c])
         .filter(Boolean);
 
-      if (arr.length === 0) arr = [9];
+      if (arr.length === 0) arr =;
 
       while (arr.length > 8) {
         const next = [];
@@ -331,7 +309,8 @@
     function clamp(n, min, max) {
       return Math.max(min, Math.min(max, n));
     }
-function hexToRgb(hex) {
+
+    function hexToRgb(hex) {
       const clean = hex.replace("#", "");
       const full = clean.length === 3
         ? clean.split("").map(ch => ch + ch).join("")
@@ -374,6 +353,7 @@ function hexToRgb(hex) {
       const t = Math.pow(tLinear, 0.86);
       return interpolateHex(ramp.soft, ramp.vivid, t);
     }
+
     function computeFinalColors() {
       const seedDigit = Number(state.computedCode?.charAt(0) || 1);
       const rotatedRamps = rotateRampsBySeed(seedDigit);
@@ -388,8 +368,7 @@ function hexToRgb(hex) {
     function setSliderVisual(input) {
       input.style.setProperty("--val", input.value + "%");
     }
-
-    function syncSameDigitSliders(digit, value, sourceInput = null) {
+     function syncSameDigitSliders(digit, value, sourceInput = null) {
       const sliders = document.querySelectorAll(
         '.slider-row input[type="range"][data-digit="' + digit + '"]'
       );
@@ -465,44 +444,12 @@ function hexToRgb(hex) {
       els.printPreviewImage.src = dataUrl;
       els.printPreview.hidden = false;
       document.body.style.overflow = "auto";
-      buildDownloadWatermark();
     }
 
     function closePrintPreview() {
       els.printPreview.hidden = true;
       els.printPreviewImage.src = "";
       document.body.style.overflow = "";
-    }
-function buildDownloadWatermark(){
-  const container = document.getElementById("downloadWatermark");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  const stepY = 220;
-  const stepX = 300;
-
-  for(let y = -100; y < 1200; y += stepY){
-    for(let x = -100; x < 1200; x += stepX){
-
-      const img = document.createElement("img");
-      img.src = "assets/Logo_gold.png";
-
-      const offset = (Math.floor(y / stepY) % 2 === 0) ? 0 : stepX / 2;
-
-      img.style.top = y + "px";
-      img.style.left = (x + offset) + "px";
-
-      container.appendChild(img);
-    }
-  }
-}
-        function handlePaidDownload() {
-      if (!PAYMENT_URL || PAYMENT_URL === "#") {
-        alert("https://www.paypal.com/ncp/payment/G7ZXADZZXL73L");
-        return;
-      }
-      window.open(PAYMENT_URL, "_blank", "noopener,noreferrer");
     }
 
     function buildSlidersInto(containerEl) {
@@ -570,6 +517,7 @@ function buildDownloadWatermark(){
       }
     }
 
+    // Übergibt den berechneten Frequenzcode an das Iframe der gewählten Form
     function pushStateToEngine() {
       if (!els.frame.contentWindow) return;
 
@@ -581,14 +529,14 @@ function buildDownloadWatermark(){
     }
 
     function requestExport(kind = "preview") {
-  const enginePayload = getEnginePayloadState();
-  enginePayload.exportKind = kind;
+      const enginePayload = getEnginePayloadState();
+      enginePayload.exportKind = kind;
 
-  els.frame.contentWindow.postMessage(
-    { type: "EXPORT", payload: enginePayload },
-    "*"
-  );
-}
+      els.frame.contentWindow.postMessage(
+        { type: "EXPORT", payload: enginePayload },
+        "*"
+      );
+    }
 
     function loadEngine(engine) {
       state.engine = engine;
@@ -606,54 +554,41 @@ function buildDownloadWatermark(){
     }
 
     function openSheet() {
-      els.sliderSheet.classList.add("open");
-      document.body.style.overflow = "hidden";
+      const sheet = document.getElementById("sliderSheet");
+      if(sheet) sheet.classList.add("active");
     }
 
     function closeSheet() {
-      els.sliderSheet.classList.remove("open");
-      if (els.printPreview.hidden) {
-        document.body.style.overflow = "";
-      }
+      const sheet = document.getElementById("sliderSheet");
+      if(sheet) sheet.classList.remove("active");
     }
-function openSheet() {
-  const sheet = document.getElementById("sliderSheet");
-  if(sheet) sheet.classList.add("active");
-}
 
-function closeSheet() {
-  const sheet = document.getElementById("sliderSheet");
-  if(sheet) sheet.classList.remove("active");
-}
-   // ✅ 1. MESSAGE LISTENER
-window.addEventListener("message", (ev) => {
-  const msg = ev.data;
+    // ✅ MESSAGE LISTENER (Empfängt die berechnete Grafik aus den unantastbaren Engines)
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
 
-  if (!msg || typeof msg !== "object") return;
+      if (!msg || typeof msg !== "object") return;
 
-  if (msg.type === "READY") {
-    hideLoading();
-    pushStateToEngine();
-    return;
-  }
+      if (msg.type === "READY") {
+        hideLoading();
+        pushStateToEngine();
+        return;
+      }
 
-  if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
-    state.colors = [...msg.colors];
-    applySliderColorsToUI();
-    return;
-  }
+      if (msg.type === "COLORS" && Array.isArray(msg.colors) && msg.colors.length === 9) {
+        state.colors = [...msg.colors];
+        applySliderColorsToUI();
+        return;
+      }
 
-if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
-  hideLoading();
+      if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
+        hideLoading();
+        console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
+        window.__FINAL_MANDALA = msg.dataUrl;
+        openPrintPreview(msg.dataUrl);
+      }
+    });
 
-  console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50)); // 👈 HIER
-
-  window.__FINAL_MANDALA = msg.dataUrl;
-
-  openPrintPreview(msg.dataUrl);
-}
-
-});
     document.querySelectorAll(".engine-btn").forEach(btn => {
       if (!btn.dataset.engine) return;
       btn.addEventListener("click", () => loadEngine(btn.dataset.engine));
@@ -691,80 +626,39 @@ if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
     els.sliderBackdrop.addEventListener("click", closeSheet);
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
+
+    // 🚀 STABILE KOSTENFREIE PREMIUM-DOWNLOAD-LOGIK
+    function handleFreePremiumDownload() {
+      // 1. FINAL EXPORT ANFORDERN
+      requestExport("final");
+
+      // 2. WARTEN bis Engine antwortet (950ms für optimale Rechenzeit bei Wabe & Rund)
+      setTimeout(() => {
+        console.log("DOWNLOAD:", window.__FINAL_MANDALA?.slice(0,50));
+        const dataUrl = window.__FINAL_MANDALA;
+
+        if (!dataUrl) {
+          alert("Das hochauflösende Bild wird noch vorbereitet. Bitte klicke gleich noch einmal.");
+          return;
+        }
+
+        // 3. DOWNLOAD STARTEN
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = "mandala_" + state.engine + ".png";
+        link.click();
+      }, 950);
+    }
+
     if (els.buyPreviewPng) {
-  els.buyPreviewPng.addEventListener("click", handlePaidDownload);
-}
+      els.buyPreviewPng.addEventListener("click", handleFreePremiumDownload);
+    }
 
     buildSliders();
     refreshComputedCodeAndColors();
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
-    document.addEventListener("DOMContentLoaded", function() {
-
-  if (typeof paypal === "undefined") {
-    console.error("PayPal SDK nicht geladen");
-    return;
-  }
-
-  paypal.Buttons({
-
-  style: {
-    layout: 'vertical'
-  },
-
-  createOrder: function(data, actions) {
-
-    // 🔥 Mandala speichern (optional Backup)
-    const exportState = getEnginePayloadState();
-    window.__mandalaState = exportState; // 👉 WICHTIG: im RAM behalten
-
-    return actions.order.create({
-      purchase_units: [{
-        amount: { value: "0.01" }
-      }]
-    });
-  },
-
-  onApprove: function(data, actions) {
-  return actions.order.capture().then(function(details) {
-
-    // 🔥 1. FINAL EXPORT ANFORDERN
-    requestExport("final");
-
-    // 🔥 2. WARTEN bis Engine antwortet
-    setTimeout(() => {
-
-      console.log("DOWNLOAD:", window.__FINAL_MANDALA?.slice(0,50));
-
-      const dataUrl = window.__FINAL_MANDALA;
-
-      if (!dataUrl) {
-        alert("Fehler – kein Mandala erhalten");
-        return;
-      }
-
-      // 🔥 3. DOWNLOAD STARTEN
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "mandala.png";
-      link.click();
-
-      alert("Download gestartet 🎉");
-
-    }, 700); // ⏱ leicht erhöht für Sicherheit
-
-  });
-},
-    
-  onError: function(err) {
-    alert("PayPal Fehler – bitte im Browser öffnen.");
-    console.error(err);
-  }
-
-}).render('#paypal-button-container');
-
-});
   </script>
 </body>
 </html>

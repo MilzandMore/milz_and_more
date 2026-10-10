@@ -520,7 +520,7 @@
       }
     }
 
-    // Übergibt den berechneten Frequenzcode an das Iframe der gewählten Form
+  // Übergibt den berechneten Frequenzcode an das Iframe der gewählten Form
     function pushStateToEngine() {
       if (!els.frame.contentWindow) return;
 
@@ -561,12 +561,13 @@
       if(sheet) sheet.classList.add("active");
     }
 
+    // Unifizierte Schließen-Funktion für die Farbregler
     function closeSheet() {
       const sheet = document.getElementById("sliderSheet");
       if(sheet) sheet.classList.remove("active");
     }
 
-    // ✅ MESSAGE LISTENER (Empfängt die berechnete Grafik aus den unantastbaren Engines)
+    // ✅ MESSAGE LISTENER (Empfängt die Grafik aus den unantastbaren Engines)
     window.addEventListener("message", (ev) => {
       const msg = ev.data;
 
@@ -588,6 +589,14 @@
         hideLoading();
         console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
         window.__FINAL_MANDALA = msg.dataUrl;
+        
+        // Zwingt das übergebene Bild im Browser auf ein rein weißes Canvas/Hintergrund-Element
+        const imgEl = document.getElementById("printPreviewImage");
+        if (imgEl) {
+          imgEl.style.background = "#FFFFFF";
+          imgEl.style.backgroundColor = "#FFFFFF";
+        }
+        
         openPrintPreview(msg.dataUrl);
       }
     });
@@ -621,7 +630,7 @@
 
     els.download.addEventListener("click", () => {
       showPreviewInfo();
-      requestExport();
+      requestExport("preview");
     });
 
     els.openSliders.addEventListener("click", openSheet);
@@ -630,27 +639,29 @@
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-    // 🚀 STABILE KOSTENFREIE PREMIUM-DOWNLOAD-LOGIK
+    // 🚀 AUSFALLSICHERE, TIMING-STABILE GENERIERUNG FÜR RUND & WABE
     function handleFreePremiumDownload() {
-      // 1. FINAL EXPORT ANFORDERN
+      // 1. FINALEN HOCHAUFLÖSENDEN EXPORT ANFORDERN
       requestExport("final");
 
-      // 2. WARTEN bis Engine antwortet (950ms für optimale Rechenzeit bei Wabe & Rund)
+      // 2. WARTEN bis Engine antwortet (auf 1300ms erhöht, um Waben-Berechnung im Speicher abzuwarten)
       setTimeout(() => {
-        console.log("DOWNLOAD:", window.__FINAL_MANDALA?.slice(0,50));
+        console.log("DOWNLOAD TRIGGERS:", window.__FINAL_MANDALA?.slice(0,50));
         const dataUrl = window.__FINAL_MANDALA;
 
         if (!dataUrl) {
-          alert("Das hochauflösende Bild wird noch vorbereitet. Bitte klicke gleich noch einmal.");
+          alert("Das hochauflösende Premium-Bild wird im Hintergrund noch aufgebaut. Bitte klicke in 1 Sekunde noch einmal.");
           return;
         }
 
-        // 3. DOWNLOAD STARTEN
+        // 3. DOWNLOAD ÜBER UNSICHTBAREN ANKER STABIL AUSLÖSEN
         const link = document.createElement("a");
         link.href = dataUrl;
         link.download = "mandala_" + state.engine + ".png";
+        document.body.appendChild(link);
         link.click();
-      }, 950);
+        document.body.removeChild(link);
+      }, 1300);
     }
 
     if (els.buyPreviewPng) {
@@ -662,7 +673,45 @@
     updateConditionalFields();
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
+
+    // 🎨 DEFINITIVE CSS-KORREKTUR: ZENTRIERT DEN BUTTONTEXT & SCHIEBT DIE WABE SELEKTIV HOCH
+    (() => {
+      const style = document.createElement('style');
+      style.innerHTML = `
+        /* Verhindert, dass Text unten aus dem goldenen Button herausfällt */
+        #buyPreviewPng {
+          height: auto !important;
+          padding: 16px 24px !important;
+          line-height: 1.4 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          text-align: center !important;
+        }
+        
+        /* Zwingt das Vorschau-Bild auf einheitlich edles Weiß (Rettet das runde Modell vor dem Schwarz) */
+        #printPreviewImage {
+          background: #FFFFFF !important;
+          background-color: #FFFFFF !important;
+        }
+        
+        /* Verhindert Ränder oder Beschnitt im Vorschau-Container */
+        .print-preview__image-wrap {
+          overflow: hidden !important;
+          background: #FFFFFF !important;
+          position: relative !important;
+        }
+        
+        /* 🛡️ DESIGN-SCHUTZSCHILD: Schiebt EXCLUSIV nur die Wabe hoch und skaliert sie harmonisch ans Quadrat heran */
+        .wm-wabe #printPreviewImage,
+        [class*="wm-wabe"] #printPreviewImage {
+          object-fit: contain !important;
+          transform: translateY(-8%) !important;
+          scale: 1.15 !important;
+        }
+      `;
+      document.head.appendChild(style);
+    })();
   </script>
 </body>
 </html>
-

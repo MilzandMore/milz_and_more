@@ -520,7 +520,7 @@
       }
     }
 
-  // Übergibt den berechneten Frequenzcode an das Iframe der gewählten Form
+ // Übergibt den berechneten Frequenzcode an das Iframe der gewählten Form
     function pushStateToEngine() {
       if (!els.frame.contentWindow) return;
 
@@ -593,6 +593,24 @@
         hideLoading();
         console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
         window.__FINAL_MANDALA = msg.dataUrl;
+        
+        // ⚡ DER DIREKTE LAYOUT-SCHALTER:
+        // Setzt den Layout-Korrektur-Stempel genau JETZT direkt auf das Vorschaubild,
+        // bevor das Vorschau-Fenster sich überhaupt öffnet!
+        const previewImage = document.getElementById("printPreviewImage");
+        if (previewImage) {
+          if (state.engine === "wabe") {
+            previewImage.style.transform = "translateY(-7%)";
+            previewImage.style.scale = "1.14";
+            previewImage.style.objectFit = "contain";
+          } else {
+            // Löscht alte Waben-Reste, wenn danach Quadrat oder Rund geöffnet werden
+            previewImage.style.transform = "";
+            previewImage.style.scale = "";
+            previewImage.style.objectFit = "";
+          }
+        }
+        
         openPrintPreview(msg.dataUrl);
       }
     });
@@ -635,9 +653,8 @@
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-    // 🚀 BOMBENSICHERE PREMIUM-DOWNLOAD-LOGIK (NUTZT DIREKT DIE GELIEFERTEN ENGINE-BILDER)
+    // 🚀 BOMBENSICHERE PREMIUM-DOWNLOAD-LOGIK
     function handleFreePremiumDownload() {
-      // Wenn bereits ein Bild in der Vorschau geladen ist, lade es direkt herunter ohne neuen Server-Request
       const currentDataUrl = window.__FINAL_MANDALA || els.printPreviewImage.src;
 
       if (currentDataUrl && currentDataUrl.startsWith("data:")) {
@@ -648,7 +665,6 @@
         link.click();
         document.body.removeChild(link);
       } else {
-        // Falls noch kein Bild im RAM liegt, fordere es frisch an
         requestExport("final");
         setTimeout(() => {
           const dataUrl = window.__FINAL_MANDALA;
@@ -676,7 +692,7 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 REINER BUTTON-FIX (KEINE ZUSÄTZLICHEN LOGOS ODER FILTER)
+    // 🎨 BUTTON-STYLING (Strukturell komplett getrennt von den Bildern)
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
@@ -688,6 +704,12 @@
           align-items: center !important;
           justify-content: center !important;
           text-align: center !important;
+        }
+        .print-preview__image-wrap {
+          overflow: hidden !important;
+          background: #FFFFFF !important;
+          background-color: #FFFFFF !important;
+          position: relative !important;
         }
       `;
       document.head.appendChild(style);

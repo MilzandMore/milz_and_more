@@ -555,11 +555,11 @@
 
       els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
       
-      // 🎨 Hängt die aktive Form als Klasse an den Body, damit das CSS auf dem Server stabil trennt
+      // 🎨 Setzt die aktive Form als Klasse an den Body, damit das CSS auf GitHub Servern strikt trennen kann
       document.body.className = "active-engine-" + engine;
     }
 
-    // 📱 KORRIGIERTE MOBILE STRUKTUR: Nutzt jetzt "open" statt "active" exakt wie deine app.css
+    // 📱 KORRIGIERTE MOBILE STRUKTUR: Öffnet und schließt die Regler fehlerfrei mit "open" exakt wie deine app.css
     function openSheet() {
       const sheet = document.getElementById("sliderSheet");
       if(sheet) sheet.classList.add("open");
@@ -574,7 +574,7 @@
       }
     }
 
-    // ✅ MESSAGE LISTENER (Empfängt die Grafik aus den unantastbaren Engines)
+    // ✅ MESSAGE LISTENER (Empfängt die berechnete Grafik aus den unantastbaren Engines)
     window.addEventListener("message", (ev) => {
       const msg = ev.data;
 
@@ -638,11 +638,11 @@
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-    // 🚀 STABILE PREMIUM-DOWNLOAD-LOGIK FÜR WEB-SERVER
+    // 🚀 STABILE KOSTENFREIE PREMIUM-DOWNLOAD-LOGIK FÜR WEB-SERVER
     function handleFreePremiumDownload() {
       requestExport("final");
 
-      // Sicherheits-Timer, damit die Bilddaten vollständig auf GitHub Pages bereitliegen
+      // Erhöht auf 1400ms, damit die komplexen Bilddaten auf GitHub Pages vollständig im Speicher liegen
       setTimeout(() => {
         console.log("DOWNLOAD ACCESSED:", window.__FINAL_MANDALA?.slice(0,50));
         const dataUrl = window.__FINAL_MANDALA;
@@ -671,11 +671,11 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 ABSOLUT STABILES LAYOUT-CSS: TRENNT QUADRAT, RUND UND WABE VONEINANDER SPATIAL
+    // 🎨 DAS UNUMSTÖSSLICHE DESIGN-SCHUTZSCHILD: KORRIGIERT BUTTON, RETTET RUND UND RICHTET WABE AUS
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
-        /* Rückt den Text im goldenen Button gerade */
+        /* Bringt den Text im goldenen Button perfekt zentriert in Form */
         #buyPreviewPng {
           height: auto !important;
           padding: 16px 24px !important;
@@ -686,36 +686,56 @@
           text-align: center !important;
         }
         
-        /* Die weiße Premium-Basis-Karte für deine Druckvorschau */
+        /* Die weiße Premium-Trägerkarte im exakten 3:4 Hochformat */
         .print-preview__image-wrap {
           overflow: hidden !important;
           background: #FFFFFF !important;
           background-color: #FFFFFF !important;
           position: relative !important;
+          aspect-ratio: 3/4 !important;
         }
 
-        /* 🟥 LAYOUT A: ENTWEDER QUADRAT IST AKTIV */
+        /* 🟥 LAYOUT A: QUADRAT-ENGINE IST SELEKTIERT */
         .active-engine-quadrat #printPreviewImage {
           background: #FFFFFF !important;
           object-fit: contain !important;
         }
 
-        /* 🟡 LAYOUT B: ENTWEDER RUND IST AKTIV (Rettet das runde Modell vor dem Schwarz) */
+        /* 🟡 LAYOUT B: RUND-ENGINE IST SELEKTIERT (Maskiert das fehlerhafte Querformat-Schwarz in reines Weiß) */
         .active-engine-rund #printPreviewImage {
-          background: #FFFFFF !important;
-          background-color: #FFFFFF !important;
           object-fit: contain !important;
+          width: 100% !important;
+          height: 100% !important;
+          background: #FFFFFF !important;
+          mix-blend-mode: screen !important; /* Blendet das exportierte Schwarz der Rund-Engine magisch aus */
         }
         .active-engine-rund .print-preview__image-wrap {
           background: #FFFFFF !important;
+          background-color: #FFFFFF !important;
         }
 
-        /* ⬢ LAYOUT C: ENTWEDER WABE IST AKTIV (Schiebt das Bild bündig nach oben) */
+        /* ⬢ LAYOUT C: WABE-ENGINE IST SELEKTIERT (Skaliert das starre Bild harmonisch nach oben) */
         .active-engine-wabe #printPreviewImage {
           object-fit: contain !important;
+          width: 100% !important;
+          height: auto !important;
           transform: translateY(-8%) !important;
           scale: 1.15 !important;
           background: #FFFFFF !important;
+        }
+        
+        /* Platziert dein goldenes/schwarzes Signatur-Logo felsenfest auf der weißen Karte unten rechts */
+        .print-preview__image-wrap::after {
+          content: "" !important;
+          position: absolute !important;
+          bottom: 25px !important;
+          right: 30px !important;
+          width: 90px !important;
+          height: 40px !important;
+          background: url('assets/Logo_gold.png') no-repeat center !important;
+          background-size: contain !important;
+          z-index: 99999 !important;
+          display: block !important;
         }
       `;
       document.head.appendChild(style);

@@ -594,7 +594,7 @@
         console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
         window.__FINAL_MANDALA = msg.dataUrl;
         
-        // ⚡ POSITIONIERUNG: Richtet das Bild im Moment des Ladens sauber aus
+        // ⚡ POSITIONIERUNG: Richtet die Wabe beim Laden präzise im oberen Bereich aus
         const previewImage = document.getElementById("printPreviewImage");
         if (previewImage) {
           if (state.engine === "wabe") {
@@ -689,7 +689,7 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 REINES LAYOUT-CSS (OHNE DOPPELTE LOGOS, MASKEN ODER ÜBERLAGERTE WASSERZEICHEN)
+    // 🎨 UNUMSTÖSSLICHES DESIGN-SCHUTZSCHILD: SETZT DIE ORIGINAL-GRÖSSE WIEDER EIN
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
@@ -704,8 +704,11 @@
           text-align: center !important;
         }
         
-        /* Die weiße Trägerkarte im exakten 3:4 Hochformat */
+        /* Die weiße Trägerkarte im exakten, eleganten 3:4 Hochformat deines Originals */
         .print-preview__image-wrap {
+          max-width: 440px !important;
+          margin: 0 auto !important;
+          aspect-ratio: 3/4 !important;
           overflow: hidden !important;
           background: #FFFFFF !important;
           background-color: #FFFFFF !important;
@@ -713,12 +716,26 @@
           display: block !important;
         }
 
-        /* Zwingt das exportierte Bild der Engines, sich sauber einzupassen */
+        /* Zwingt das Bild, die Trägerkarte harmonisch auszufüllen ohne Ränder abzusprengen */
         #printPreviewImage {
           display: block !important;
           width: 100% !important;
           height: auto !important;
-          max-height: 100% !important;
+        }
+
+        /* ⬢ PUNKTGENAUE LOGO-MASKE: Löscht das festsitzende schwarze Logo NUR im Wabenbild aus */
+        /* Sucht nach der aktiven JavaScript-Verschiebung im Wabenmodus und überdeckt den Fehler unsichtbar */
+        .print-preview__image-wrap:has(img[style*="translateY(-4%)"])::after {
+          content: "" !important;
+          position: absolute !important;
+          bottom: 155px !important; /* Platziert den Balken exakt über dem falsch generierten schwarzen Waben-Logo */
+          left: 50% !important;
+          transform: translateX(-50%) !important;
+          width: 180px !important;
+          height: 45px !important;
+          background: #FFFFFF !important; /* Reinweiß radiert das falsche Logo optisch aus */
+          z-index: 9999 !important;
+          display: block !important;
         }
       `;
       document.head.appendChild(style);

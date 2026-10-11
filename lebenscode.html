@@ -594,13 +594,12 @@
         console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
         window.__FINAL_MANDALA = msg.dataUrl;
         
-        // ⚡ DER DIREKTE LAYOUT-SCHALTER:
-        // Steuert die Größe und Positionierung des Bildes im RAM vor dem Öffnen
+        // ⚡ POSITIONIERUNG: Richtet das Bild im Moment des Ladens sauber aus
         const previewImage = document.getElementById("printPreviewImage");
         if (previewImage) {
           if (state.engine === "wabe") {
-            previewImage.style.transform = "translateY(-7%)";
-            previewImage.style.scale = "1.14";
+            previewImage.style.transform = "translateY(-4%)";
+            previewImage.style.scale = "1.05";
             previewImage.style.objectFit = "contain";
           } else {
             previewImage.style.transform = "";
@@ -690,11 +689,11 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 DAS PRESETS-DESIGN-SCHUTZSCHILD: ERZWINGT 100% IDENTISCHE WASSERZEICHEN & LOGO-POSITIONIERUNG
+    // 🎨 REINES LAYOUT-CSS (OHNE DOPPELTE LOGOS, MASKEN ODER ÜBERLAGERTE WASSERZEICHEN)
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
-        /* Zentriert den Text im goldenen Premium-Button */
+        /* Zentriert den Text im goldenen Premium-Button fehlerfrei */
         #buyPreviewPng {
           height: auto !important;
           padding: 16px 24px !important;
@@ -705,75 +704,21 @@
           text-align: center !important;
         }
         
-        /* Die weiße Trägerkarte im edlen 3:4 Hochformat */
+        /* Die weiße Trägerkarte im exakten 3:4 Hochformat */
         .print-preview__image-wrap {
           overflow: hidden !important;
           background: #FFFFFF !important;
           background-color: #FFFFFF !important;
           position: relative !important;
-        }
-
-        /* 🟦 EINHEITLICHES PREMIUM-WASSERZEICHEN-GITTER (FÜR ALLE DREI FORMEN EXAKT IDENTISCH) */
-        .print-preview__image-wrap::before {
-          content: "" !important;
-          position: absolute !important;
-          top: 0 !important;
-          left: 0 !important;
-          width: 100% !important;
-          height: 80% !important; /* Deckt den gesamten oberen Mandala-Bereich ab */
-          background-image: url('assets/Logo_gold.png') !important;
-          background-repeat: repeat !important;
-          background-size: 110px auto !important; /* Perfekte, edle Kachelgröße der Logos */
-          opacity: 0.06 !important; /* Hauchzartes, edles Wasserzeichen im Hintergrund */
-          z-index: 10 !important;
-          pointer-events: none !important; /* Macht das Gitter für Klicks unsichtbar */
           display: block !important;
         }
 
-        /* ❌ DIE KOSMETISCHE ABDECKUNG FÜR DAS FALSCHE SCHWARZE WABEN-LOGO */
-        /* Wir legen eine weiße Kachel über den fehlerhaften Bereich der Wabe */
-        #printPreviewImage[style*="translateY(-7%)"] {
-          margin-bottom: 0 !important;
-        }
-        
-        .print-preview__image-wrap:has(img[style*="translateY(-7%)"])::after {
-          content: "" !important;
-          position: absolute !important;
-          bottom: 140px !important; /* Deckt die fehlerhafte Logo-Ausgabe der Waben-Engine sauber ab */
-          left: 0 !important;
-          width: 100% !important;
-          height: 120px !important;
-          background: #FFFFFF !important;
-          z-index: 5 !important;
-        }
-
-        /* 👑 GLOBALER KURS-SIGNATUR-ANKER */
-        /* Platziert dein echtes, hochauflösendes Logo bei JEDER Form exakt an derselben Koordinate unten rechts */
-        .preview-left {
-          position: relative !important;
-        }
-        
-        .print-preview__panel {
-          position: relative !important;
-        }
-
-        /* Setzt das finale Logo felsenfest über alle Bildebenen in die weiße Papierecke */
-        .print-preview__image-wrap {
-          position: relative !important;
-        }
-        
-        /* Erzeugt die finale, unumstößliche Signatur-Ebene */
-        .print-preview__image-wrap::after {
-          content: "" !important;
-          position: absolute !important;
-          bottom: 25px !important;
-          right: 30px !important;
-          width: 90px !important;
-          height: 40px !important;
-          background: url('assets/Logo_gold.png') no-repeat center !important;
-          background-size: contain !important;
-          z-index: 99999 !important; /* Liegt über allen Wasserzeichen und Masken */
+        /* Zwingt das exportierte Bild der Engines, sich sauber einzupassen */
+        #printPreviewImage {
           display: block !important;
+          width: 100% !important;
+          height: auto !important;
+          max-height: 100% !important;
         }
       `;
       document.head.appendChild(style);

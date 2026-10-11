@@ -554,6 +554,12 @@
       };
 
       els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
+      
+      // 🎨 Setzt die aktive Form als ID an den Vorschau-Container für absolut sicheres Server-CSS
+      const wrapEl = document.querySelector(".print-preview__image-wrap");
+      if (wrapEl) {
+        wrapEl.id = "preview-wrap-" + engine;
+      }
     }
 
     // 📱 KORRIGIERTE MOBILE STRUKTUR: Öffnet und schließt die Regler fehlerfrei mit "open" exakt wie deine app.css
@@ -593,15 +599,6 @@
         hideLoading();
         console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
         window.__FINAL_MANDALA = msg.dataUrl;
-        
-        // ⚡ POSITIONIERUNG GELÖSCHT: Verhindert das Abschneiden und Verrutschen bei allen 3 Formen!
-        const previewImage = document.getElementById("printPreviewImage");
-        if (previewImage) {
-          previewImage.style.transform = "";
-          previewImage.style.scale = "";
-          previewImage.style.objectFit = "";
-        }
-        
         openPrintPreview(msg.dataUrl);
       }
     });
@@ -683,7 +680,7 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 UNUMSTÖSSLICHES DESIGN-SCHUTZSCHILD: KORRIGIERT GRÖSSE UND VERSTECKT DAS WABEN-LOGO
+    // 🎨 UNUMSTÖSSLICHES DESIGN-SCHUTZSCHILD: FIXIERT GRÖSSEN, VERHINDERT FREIE BALKEN & VERSTECKT WABE-LOGO
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
@@ -701,34 +698,41 @@
         /* Die weiße Trägerkarte im exakten, eleganten 3:4 Hochformat deines Originals */
         .print-preview__image-wrap {
           max-width: 440px !important;
-          margin: 0 auto !important;
+          width: 100% !important;
           aspect-ratio: 3/4 !important;
           overflow: hidden !important;
           background: #FFFFFF !important;
           background-color: #FFFFFF !important;
           position: relative !important;
           display: block !important;
+          padding: 0 !important;
         }
 
-        /* Bringt alle Grafiken auf die exakt identische Ausgangslage deines PCs */
+        /* Zwingt das Vorschaubild, oben bündig abzuschließen und füllt die Karte sauber aus (Verhindert freie Ränder oben!) */
         #printPreviewImage {
           display: block !important;
           width: 100% !important;
-          height: auto !important;
+          height: 100% !important;
+          object-fit: fill !important; /* Verhindert das Herunterrutschen oder Schrumpfen bei Quadrat und Rund */
+          margin: 0 !important;
+          padding: 0 !important;
         }
 
-        /* ⬢ MILLIMETERGENAUE LOGO-MASKE: Löscht das festsitzende schwarze Logo NUR im Wabenbild aus */
-        /* Sucht nach der aktiven Waben-Klasse im übergeordneten Element und löscht das Logo unsichtbar aus */
-        .wm-wabe .print-preview__image-wrap::after,
-        [class*="wm-wabe"] .print-preview__image-wrap::after {
+        /* ⬢ SONDERREGEL WABE: Holt das Bild zurück in die perfekte Proportion, damit oben nichts abgeschnitten wird */
+        #preview-wrap-wabe #printPreviewImage {
+          object-fit: contain !important;
+        }
+
+        /* ⬢ MILLIMETERGENAUE LOGO-MASKE: Platziert das Abdeck-Rechteck direkt über dem falschen Wabenlogo */
+        #preview-wrap-wabe::before {
           content: "" !important;
           position: absolute !important;
-          bottom: 110px !important; /* Platziert den Balken exakt über dem tiefschwarzen Waben-Logo */
+          bottom: 22% !important; /* Dynamischer Prozentwert hält den Schutz auf jeder Bildschirmgröße stabil */
           left: 50% !important;
           transform: translateX(-50%) !important;
-          width: 180px !important;
-          height: 45px !important;
-          background: #FFFFFF !important; /* Reinweiß radiert den Fehler unsichtbar aus */
+          width: 45% !important;
+          height: 10% !important;
+          background: #FFFFFF !important; /* Reinweiß radiert das festsitzende schwarze Wabenlogo unsichtbar aus */
           z-index: 9999 !important;
           display: block !important;
         }

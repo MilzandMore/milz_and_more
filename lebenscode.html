@@ -554,9 +554,6 @@
       };
 
       els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
-      
-      // 🎨 Setzt die aktive Form als Klasse an den Body, damit das CSS auf GitHub Servern strikt trennen kann
-      document.body.className = "active-engine-" + engine;
     }
 
     // 📱 KORRIGIERTE MOBILE STRUKTUR: Öffnet und schließt die Regler fehlerfrei mit "open" exakt wie deine app.css
@@ -638,27 +635,35 @@
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-    // 🚀 STABILE KOSTENFREIE PREMIUM-DOWNLOAD-LOGIK FÜR WEB-SERVER
+    // 🚀 BOMBENSICHERE PREMIUM-DOWNLOAD-LOGIK (NUTZT DIREKT DIE GELIEFERTEN ENGINE-BILDER)
     function handleFreePremiumDownload() {
-      requestExport("final");
+      // Wenn bereits ein Bild in der Vorschau geladen ist, lade es direkt herunter ohne neuen Server-Request
+      const currentDataUrl = window.__FINAL_MANDALA || els.printPreviewImage.src;
 
-      // Erhöht auf 1400ms, damit die komplexen Bilddaten auf GitHub Pages vollständig im Speicher liegen
-      setTimeout(() => {
-        console.log("DOWNLOAD ACCESSED:", window.__FINAL_MANDALA?.slice(0,50));
-        const dataUrl = window.__FINAL_MANDALA;
-
-        if (!dataUrl) {
-          alert("Das hochauflösende Premium-Bild wird im Hintergrund noch aufgebaut. Bitte klicke gleich noch einmal.");
-          return;
-        }
-
+      if (currentDataUrl && currentDataUrl.startsWith("data:")) {
         const link = document.createElement("a");
-        link.href = dataUrl;
+        link.href = currentDataUrl;
         link.download = "mandala_" + state.engine + ".png";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      }, 1400);
+      } else {
+        // Falls noch kein Bild im RAM liegt, fordere es frisch an
+        requestExport("final");
+        setTimeout(() => {
+          const dataUrl = window.__FINAL_MANDALA;
+          if (!dataUrl) {
+            alert("Das Bild wird noch berechnet. Bitte klicke noch einmal.");
+            return;
+          }
+          const link = document.createElement("a");
+          link.href = dataUrl;
+          link.download = "mandala_" + state.engine + ".png";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }, 1200);
+      }
     }
 
     if (els.buyPreviewPng) {
@@ -671,11 +676,10 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 DAS UNUMSTÖSSLICHE DESIGN-SCHUTZSCHILD: KORRIGIERT BUTTON, RETTET RUND UND RICHTET WABE AUS
+    // 🎨 REINER BUTTON-FIX (KEINE ZUSÄTZLICHEN LOGOS ODER FILTER)
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
-        /* Bringt den Text im goldenen Button perfekt zentriert in Form */
         #buyPreviewPng {
           height: auto !important;
           padding: 16px 24px !important;
@@ -684,58 +688,6 @@
           align-items: center !important;
           justify-content: center !important;
           text-align: center !important;
-        }
-        
-        /* Die weiße Premium-Trägerkarte im exakten 3:4 Hochformat */
-        .print-preview__image-wrap {
-          overflow: hidden !important;
-          background: #FFFFFF !important;
-          background-color: #FFFFFF !important;
-          position: relative !important;
-          aspect-ratio: 3/4 !important;
-        }
-
-        /* 🟥 LAYOUT A: QUADRAT-ENGINE IST SELEKTIERT */
-        .active-engine-quadrat #printPreviewImage {
-          background: #FFFFFF !important;
-          object-fit: contain !important;
-        }
-
-        /* 🟡 LAYOUT B: RUND-ENGINE IST SELEKTIERT (Maskiert das fehlerhafte Querformat-Schwarz in reines Weiß) */
-        .active-engine-rund #printPreviewImage {
-          object-fit: contain !important;
-          width: 100% !important;
-          height: 100% !important;
-          background: #FFFFFF !important;
-          mix-blend-mode: screen !important; /* Blendet das exportierte Schwarz der Rund-Engine magisch aus */
-        }
-        .active-engine-rund .print-preview__image-wrap {
-          background: #FFFFFF !important;
-          background-color: #FFFFFF !important;
-        }
-
-        /* ⬢ LAYOUT C: WABE-ENGINE IST SELEKTIERT (Skaliert das starre Bild harmonisch nach oben) */
-        .active-engine-wabe #printPreviewImage {
-          object-fit: contain !important;
-          width: 100% !important;
-          height: auto !important;
-          transform: translateY(-8%) !important;
-          scale: 1.15 !important;
-          background: #FFFFFF !important;
-        }
-        
-        /* Platziert dein goldenes/schwarzes Signatur-Logo felsenfest auf der weißen Karte unten rechts */
-        .print-preview__image-wrap::after {
-          content: "" !important;
-          position: absolute !important;
-          bottom: 25px !important;
-          right: 30px !important;
-          width: 90px !important;
-          height: 40px !important;
-          background: url('assets/Logo_gold.png') no-repeat center !important;
-          background-size: contain !important;
-          z-index: 99999 !important;
-          display: block !important;
         }
       `;
       document.head.appendChild(style);

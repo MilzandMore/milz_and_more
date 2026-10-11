@@ -594,18 +594,12 @@
         console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
         window.__FINAL_MANDALA = msg.dataUrl;
         
-        // ⚡ POSITIONIERUNG: Richtet die Wabe beim Laden präzise im oberen Bereich aus
+        // ⚡ POSITIONIERUNG GELÖSCHT: Verhindert das Abschneiden und Verrutschen bei allen 3 Formen!
         const previewImage = document.getElementById("printPreviewImage");
         if (previewImage) {
-          if (state.engine === "wabe") {
-            previewImage.style.transform = "translateY(-4%)";
-            previewImage.style.scale = "1.05";
-            previewImage.style.objectFit = "contain";
-          } else {
-            previewImage.style.transform = "";
-            previewImage.style.scale = "";
-            previewImage.style.objectFit = "";
-          }
+          previewImage.style.transform = "";
+          previewImage.style.scale = "";
+          previewImage.style.objectFit = "";
         }
         
         openPrintPreview(msg.dataUrl);
@@ -689,7 +683,7 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 UNUMSTÖSSLICHES DESIGN-SCHUTZSCHILD: SETZT DIE ORIGINAL-GRÖSSE WIEDER EIN
+    // 🎨 UNUMSTÖSSLICHES DESIGN-SCHUTZSCHILD: KORRIGIERT GRÖSSE UND VERSTECKT DAS WABEN-LOGO
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
@@ -716,24 +710,25 @@
           display: block !important;
         }
 
-        /* Zwingt das Bild, die Trägerkarte harmonisch auszufüllen ohne Ränder abzusprengen */
+        /* Bringt alle Grafiken auf die exakt identische Ausgangslage deines PCs */
         #printPreviewImage {
           display: block !important;
           width: 100% !important;
           height: auto !important;
         }
 
-        /* ⬢ PUNKTGENAUE LOGO-MASKE: Löscht das festsitzende schwarze Logo NUR im Wabenbild aus */
-        /* Sucht nach der aktiven JavaScript-Verschiebung im Wabenmodus und überdeckt den Fehler unsichtbar */
-        .print-preview__image-wrap:has(img[style*="translateY(-4%)"])::after {
+        /* ⬢ MILLIMETERGENAUE LOGO-MASKE: Löscht das festsitzende schwarze Logo NUR im Wabenbild aus */
+        /* Sucht nach der aktiven Waben-Klasse im übergeordneten Element und löscht das Logo unsichtbar aus */
+        .wm-wabe .print-preview__image-wrap::after,
+        [class*="wm-wabe"] .print-preview__image-wrap::after {
           content: "" !important;
           position: absolute !important;
-          bottom: 155px !important; /* Platziert den Balken exakt über dem falsch generierten schwarzen Waben-Logo */
+          bottom: 110px !important; /* Platziert den Balken exakt über dem tiefschwarzen Waben-Logo */
           left: 50% !important;
           transform: translateX(-50%) !important;
           width: 180px !important;
           height: 45px !important;
-          background: #FFFFFF !important; /* Reinweiß radiert das falsche Logo optisch aus */
+          background: #FFFFFF !important; /* Reinweiß radiert den Fehler unsichtbar aus */
           z-index: 9999 !important;
           display: block !important;
         }

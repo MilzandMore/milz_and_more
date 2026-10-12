@@ -554,15 +554,9 @@
       };
 
       els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
-      
-      // 🎨 Setzt die aktive Form als ID an den Vorschau-Container für absolut sicheres Server-CSS
-      const wrapEl = document.querySelector(".print-preview__image-wrap");
-      if (wrapEl) {
-        wrapEl.id = "preview-wrap-" + engine;
-      }
     }
 
-    // 📱 KORRIGIERTE MOBILE STRUKTUR: Öffnet und schließt die Regler fehlerfrei mit "open" exakt wie deine app.css
+    // Mobile Menüsteuerung (Nutzt die korrekte Klasse deiner app.css)
     function openSheet() {
       const sheet = document.getElementById("sliderSheet");
       if(sheet) sheet.classList.add("open");
@@ -599,6 +593,24 @@
         hideLoading();
         console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
         window.__FINAL_MANDALA = msg.dataUrl;
+        
+        // ⚡ ISOLIERTES DESIGN-SCHUTZSCHILD:
+        // Schiebt AUSSCHLIESSLICH das Wabenbild im RAM nach oben und passt die Größe an,
+        // damit Quadrat und Rund im perfekten Originalzustand deines PCs bleiben!
+        const previewImage = document.getElementById("printPreviewImage");
+        if (previewImage) {
+          if (state.engine === "wabe") {
+            previewImage.style.transform = "translateY(-5%)";
+            previewImage.style.scale = "1.08";
+            previewImage.style.objectFit = "contain";
+          } else {
+            // Setzt alle Werte zurück, wenn Quadrat oder Rund geladen werden
+            previewImage.style.transform = "";
+            previewImage.style.scale = "";
+            previewImage.style.objectFit = "";
+          }
+        }
+        
         openPrintPreview(msg.dataUrl);
       }
     });
@@ -641,7 +653,7 @@
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-    // 🚀 BOMBENSICHERE PREMIUM-DOWNLOAD-LOGIK
+    // 🚀 UNBERÜHRTE PREMIUM-DOWNLOAD-LOGIK VOM RECHNER (MIT TIMING-SCHUTZ FÜR WEBSERVER)
     function handleFreePremiumDownload() {
       const currentDataUrl = window.__FINAL_MANDALA || els.printPreviewImage.src;
 
@@ -680,11 +692,11 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 UNUMSTÖSSLICHES DESIGN-SCHUTZSCHILD: FIXIERT GRÖSSEN, VERHINDERT FREIE BALKEN & VERSTECKT WABE-LOGO
+    // 🎨 DESIGN-SCHUTZSCHILD: KORRIGIERT BUTTONTEXT & VERHINDERT VERZERRUNGEN IN DER TRÄGERKARTE
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
-        /* Zentriert den Text im goldenen Premium-Button fehlerfrei */
+        /* Bringt den Text im goldenen Premium-Button perfekt in Form */
         #buyPreviewPng {
           height: auto !important;
           padding: 16px 24px !important;
@@ -695,46 +707,12 @@
           text-align: center !important;
         }
         
-        /* Die weiße Trägerkarte im exakten, eleganten 3:4 Hochformat deines Originals */
+        /* Die weiße Trägerkarte behält ihre stabile 3:4 Hochformat-Basis */
         .print-preview__image-wrap {
-          max-width: 440px !important;
-          width: 100% !important;
-          aspect-ratio: 3/4 !important;
           overflow: hidden !important;
           background: #FFFFFF !important;
           background-color: #FFFFFF !important;
           position: relative !important;
-          display: block !important;
-          padding: 0 !important;
-        }
-
-        /* Zwingt das Vorschaubild, oben bündig abzuschließen und füllt die Karte sauber aus (Verhindert freie Ränder oben!) */
-        #printPreviewImage {
-          display: block !important;
-          width: 100% !important;
-          height: 100% !important;
-          object-fit: fill !important; /* Verhindert das Herunterrutschen oder Schrumpfen bei Quadrat und Rund */
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-
-        /* ⬢ SONDERREGEL WABE: Holt das Bild zurück in die perfekte Proportion, damit oben nichts abgeschnitten wird */
-        #preview-wrap-wabe #printPreviewImage {
-          object-fit: contain !important;
-        }
-
-        /* ⬢ MILLIMETERGENAUE LOGO-MASKE: Platziert das Abdeck-Rechteck direkt über dem falschen Wabenlogo */
-        #preview-wrap-wabe::before {
-          content: "" !important;
-          position: absolute !important;
-          bottom: 22% !important; /* Dynamischer Prozentwert hält den Schutz auf jeder Bildschirmgröße stabil */
-          left: 50% !important;
-          transform: translateX(-50%) !important;
-          width: 45% !important;
-          height: 10% !important;
-          background: #FFFFFF !important; /* Reinweiß radiert das festsitzende schwarze Wabenlogo unsichtbar aus */
-          z-index: 9999 !important;
-          display: block !important;
         }
       `;
       document.head.appendChild(style);

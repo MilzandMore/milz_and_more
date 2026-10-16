@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link href="https://googleapis.com" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
@@ -17,7 +17,7 @@
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=clean-preview-9">
+  <link rel="stylesheet" href="app.css?v=clean-preview-10">
 </head>
 
 <body>
@@ -127,7 +127,7 @@
     </div>
   </header>
 
-    <main class="app-main">
+  <main class="app-main">
     <aside class="slider-panel desktop-only">
       <div class="slider-title">Farbintensität</div>
       <div id="sliders" class="sliders"></div>
@@ -144,15 +144,11 @@
           <img src="assets/Logo_gold.png" alt="">
         </div>
       </div>
-
-      <div id="previewInfo" class="preview-info" aria-live="polite">
-        Diese Druckvorschau enthält Wasserzeichen.<br>
-        Der Download ist ohne Wasserzeichen verfügbar.
-      </div>
     </section>
   </main>
 
-  <div id="printPreview" class="print-preview" hidden>
+  <!-- Modal Druckvorschau (Erhöhte Priorität / z-index) -->
+  <div id="printPreview" class="print-preview" hidden style="z-index: 99999999 !important;">
     <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
 
     <div class="print-preview__panel">
@@ -174,7 +170,7 @@
             Nutze dieses persönliche Mandala als kraftvollen Begleiter, um dein gewähltes Thema energetisch zu integrieren und dich in deiner Schwingung zu stabilisieren.<br><br>
             <strong>Als Mitglied unseres Premium-Kurses steht dir der hochauflösende Download vollkommen kostenfrei zur Verfügung.</strong>
           </div>
-          <button id="buyPreviewPng" class="primary" type="button" style="width:100%; margin-top:30px; padding:14px; font-weight:bold; letter-spacing:1px; border-radius:30px; cursor:pointer;">JETZT HOCHAUFLÖSEND HERUNTERLADEN </button>
+          <button id="buyPreviewPng" class="primary" type="button" style="width:100%; margin-top:30px; padding:14px; font-weight:bold; letter-spacing:1px; border-radius:30px; cursor:pointer;">JETZT HOCHAUFLÖSEND HERUNTERLADEN</button>
         </div>
       </div>
     </div>
@@ -242,7 +238,6 @@
       sectorWrap: document.getElementById("sectorWrap"),
       sector: document.getElementById("sector"),
       download: document.getElementById("download"),
-      previewInfo: document.getElementById("previewInfo"),
       sliders: document.getElementById("sliders"),
       slidersMobile: document.getElementById("slidersMobile"),
       openSliders: document.getElementById("openSliders"),
@@ -371,6 +366,7 @@
     function setSliderVisual(input) {
       input.style.setProperty("--val", input.value + "%");
     }
+
     function syncSameDigitSliders(digit, value, sourceInput = null) {
       const sliders = document.querySelectorAll(
         '.slider-row input[type="range"][data-digit="' + digit + '"]'
@@ -427,30 +423,23 @@
     }
 
     function showLoading() {
-      els.loading.style.display = "grid";
+      if(els.loading) els.loading.style.display = "grid";
     }
 
     function hideLoading() {
-      els.loading.style.display = "none";
-    }
-
-    function showPreviewInfo() {
-      if (!els.previewInfo) return;
-      els.previewInfo.classList.add("show");
-      clearTimeout(showPreviewInfo._timer);
-      showPreviewInfo._timer = setTimeout(() => {
-        els.previewInfo.classList.remove("show");
-      }, 1800);
+      if(els.loading) els.loading.style.display = "none";
     }
 
     function openPrintPreview(dataUrl) {
       els.printPreviewImage.src = dataUrl;
-      els.printPreview.hidden = false;
-      document.body.style.overflow = "auto";
+      els.printPreview.removeAttribute("hidden");
+      els.printPreview.style.display = "flex";
+      document.body.style.overflow = "hidden";
     }
 
     function closePrintPreview() {
-      els.printPreview.hidden = true;
+      els.printPreview.setAttribute("hidden", "true");
+      els.printPreview.style.display = "none";
       els.printPreviewImage.src = "";
       document.body.style.overflow = "";
     }
@@ -531,6 +520,7 @@
     }
 
     function requestExport(kind = "preview") {
+      showLoading();
       const enginePayload = getEnginePayloadState();
       enginePayload.exportKind = kind;
 
@@ -569,7 +559,7 @@
     function closeSheet() {
       const sheet = document.getElementById("sliderSheet");
       if(sheet) sheet.classList.remove("open");
-      if (els.printPreview.hidden) {
+      if (els.printPreview.hasAttribute("hidden")) {
         document.body.style.overflow = "";
       }
     }
@@ -595,7 +585,6 @@
         hideLoading();
         window.__FINAL_MANDALA = msg.dataUrl;
         
-        // Form-spezifische Ausrichtung für die Vorschau, damit alle Formen exakt wie das Quadrat wirken
         const previewImage = document.getElementById("printPreviewImage");
         if (previewImage) {
           if (state.engine === "wabe") {
@@ -639,7 +628,6 @@
     });
 
     els.download.addEventListener("click", () => {
-      showPreviewInfo();
       requestExport("preview");
     });
 
@@ -687,10 +675,24 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 STABILER DESIGN-SCHUTZ & FORM-ANPASSUNG FÜR DIE DRUCK-VORSCHAU
+    // 🎨 ABSOLUTER OVERLAY-PROTECTOR DIESER DRUCK-VORSCHAU
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
+        .print-preview {
+          position: fixed !important;
+          inset: 0 !important;
+          z-index: 99999999 !important;
+          background: rgba(0, 0, 0, 0.85) !important;
+          display: none;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .print-preview:not([hidden]) {
+          display: flex !important;
+        }
+
         #buyPreviewPng {
           height: auto !important;
           padding: 16px 24px !important;
@@ -707,7 +709,6 @@
           aspect-ratio: 3/4 !important;
           overflow: hidden !important;
           background: #FFFFFF !important;
-          background-color: #FFFFFF !important;
           position: relative !important;
           display: flex !important;
           align-items: center !important;
@@ -721,7 +722,6 @@
           object-fit: contain !important;
         }
 
-        /* Nahtlose Ausbesserung für die Wabenform, damit der untere Bereich und das Logo einheitlich aussehen */
         .engine-mode-wabe::after {
           content: "" !important;
           position: absolute !important;

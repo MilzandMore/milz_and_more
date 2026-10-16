@@ -17,12 +17,91 @@
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=clean-preview-10">
+  <link rel="stylesheet" href="app.css?v=clean-preview-11">
+
+  <style>
+    /* 🛠 ISOLATION UND STRUKTUR-FIXES */
+    .stage {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+    
+    .engine-frame {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+
+    /* DRUCK-VORSCHAU ABSOLUT IM VORDERGRUND */
+    #printPreview {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 999999999 !important;
+      background: rgba(0, 0, 0, 0.88) !important;
+      display: none;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    #printPreview:not([hidden]) {
+      display: flex !important;
+    }
+
+    .print-preview__panel {
+      position: relative !important;
+      z-index: 10 !important;
+    }
+
+    #buyPreviewPng {
+      height: auto !important;
+      padding: 16px 24px !important;
+      line-height: 1.4 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+    
+    .print-preview__image-wrap {
+      max-width: 440px !important;
+      width: 100% !important;
+      aspect-ratio: 3/4 !important;
+      overflow: hidden !important;
+      background: #FFFFFF !important;
+      position: relative !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    #printPreviewImage {
+      display: block !important;
+      width: 100% !important;
+      height: auto !important;
+      object-fit: contain !important;
+    }
+
+    .engine-mode-wabe::after {
+      content: "" !important;
+      position: absolute !important;
+      bottom: 120px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: 180px !important;
+      height: 50px !important;
+      background: #FFFFFF !important;
+      z-index: 5 !important;
+      display: block !important;
+    }
+  </style>
 </head>
 
 <body>
-<!-- 🔒 SAUBERER BOT-SICHERER PASSPORT-SCHUTZ MIT MERK-FUNKTION -->
-<div id="password-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#11141a; z-index:9999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Inter', sans-serif; color:#fff; padding:20px; box-sizing:border-box;">
+
+<!-- 🔒 PASSPORT-SCHUTZ -->
+<div id="password-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#11141a; z-index:99999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Inter', sans-serif; color:#fff; padding:20px; box-sizing:border-box;">
   <img src="assets/Logo_gold.png" alt="Milz & More" style="max-width:180px; margin-bottom:30px;">
   <h2 style="font-family:'Cinzel', serif; color:#c9a14a; margin-bottom:10px; font-weight:600; letter-spacing:1px; text-align:center;">EXKLUSIVER KURSBEREICH</h2>
   <p style="color:#a0a5b5; font-size:14px; margin-bottom:25px; text-align:center; max-width:320px;">Bitte gib dein Passwort ein, um den Lebenscode-Mandala-Generator freizuschalten.</p>
@@ -69,6 +148,7 @@
   });
 </script>
 
+  <!-- HEADER -->
   <header class="app-header">
     <div class="brand">
       <a href="index.html" class="brand-link">
@@ -127,6 +207,7 @@
     </div>
   </header>
 
+  <!-- MAIN -->
   <main class="app-main">
     <aside class="slider-panel desktop-only">
       <div class="slider-title">Farbintensität</div>
@@ -139,23 +220,34 @@
 
       <div class="engine-wrap wm-quadrat" id="engineWrap">
         <iframe id="engineFrame" class="engine-frame" title="Mandala Engine"></iframe>
-
-        <div class="viewer-watermark" aria-hidden="true">
-          <img src="assets/Logo_gold.png" alt="">
-        </div>
       </div>
     </section>
   </main>
 
-  <!-- Modal Druckvorschau (Erhöhte Priorität / z-index) -->
-  <div id="printPreview" class="print-preview" hidden style="z-index: 99999999 !important;">
+  <!-- MOBILE SLIDER SHEET -->
+  <div id="sliderSheet" class="slider-sheet">
+    <div class="slider-sheet__backdrop" id="sliderBackdrop"></div>
+    <div class="slider-sheet__panel">
+      <div class="slider-sheet__header">
+        <div class="slider-sheet__title">Farbintensität</div>
+        <button id="closeSliders" class="engine-btn" type="button">Schließen</button>
+      </div>
+      <div class="slider-sheet__body">
+        <div id="slidersMobile" class="sliders"></div>
+        <div class="hint">Tipp: Regler steuern jede Farbe von sanftem Pastell bis leuchtend kräftig.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRUCK-VORSCHAU MODAL (Erhöhte Z-Index Ebene) -->
+  <div id="printPreview" class="print-preview" hidden>
     <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
 
     <div class="print-preview__panel">
       <button id="closePrintPreview" class="print-preview__close" type="button">×</button>
 
       <div class="preview-layout">
-        <!-- LINKS (Mandala) -->
+        <!-- LINKS -->
         <div class="preview-left">
           <div class="print-preview__image-wrap" id="previewWrapContainer">
             <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
@@ -172,20 +264,6 @@
           </div>
           <button id="buyPreviewPng" class="primary" type="button" style="width:100%; margin-top:30px; padding:14px; font-weight:bold; letter-spacing:1px; border-radius:30px; cursor:pointer;">JETZT HOCHAUFLÖSEND HERUNTERLADEN</button>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sliderSheet" class="slider-sheet">
-    <div class="slider-sheet__backdrop" id="sliderBackdrop"></div>
-    <div class="slider-sheet__panel">
-      <div class="slider-sheet__header">
-        <div class="slider-sheet__title">Farbintensität</div>
-        <button id="closeSliders" class="engine-btn" type="button">Schließen</button>
-      </div>
-      <div class="slider-sheet__body">
-        <div id="slidersMobile" class="sliders"></div>
-        <div class="hint">Tipp: Regler steuern jede Farbe von sanftem Pastell bis leuchtend kräftig.</div>
       </div>
     </div>
   </div>
@@ -497,12 +575,6 @@
       });
     }
 
-    function updateViewerWatermarkPosition() {
-      if (!els.engineWrap) return;
-      els.engineWrap.classList.remove("wm-quadrat", "wm-rund", "wm-wabe");
-      els.engineWrap.classList.add("wm-" + state.engine);
-    }
-
     function updateConditionalFields() {
       if (els.sectorWrap) {
         els.sectorWrap.style.display = state.engine === "rund" ? "flex" : "none";
@@ -534,7 +606,6 @@
       state.engine = engine;
       setActiveEngineButton(engine);
       updateConditionalFields();
-      updateViewerWatermarkPosition();
       showLoading();
 
       els.frame.onload = () => {
@@ -672,71 +743,7 @@
     buildSliders();
     refreshComputedCodeAndColors();
     updateConditionalFields();
-    updateViewerWatermarkPosition();
     loadEngine("quadrat");
-
-    // 🎨 ABSOLUTER OVERLAY-PROTECTOR DIESER DRUCK-VORSCHAU
-    (() => {
-      const style = document.createElement('style');
-      style.innerHTML = `
-        .print-preview {
-          position: fixed !important;
-          inset: 0 !important;
-          z-index: 99999999 !important;
-          background: rgba(0, 0, 0, 0.85) !important;
-          display: none;
-          align-items: center !important;
-          justify-content: center !important;
-        }
-
-        .print-preview:not([hidden]) {
-          display: flex !important;
-        }
-
-        #buyPreviewPng {
-          height: auto !important;
-          padding: 16px 24px !important;
-          line-height: 1.4 !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          text-align: center !important;
-        }
-        
-        .print-preview__image-wrap {
-          max-width: 440px !important;
-          width: 100% !important;
-          aspect-ratio: 3/4 !important;
-          overflow: hidden !important;
-          background: #FFFFFF !important;
-          position: relative !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-        }
-
-        #printPreviewImage {
-          display: block !important;
-          width: 100% !important;
-          height: auto !important;
-          object-fit: contain !important;
-        }
-
-        .engine-mode-wabe::after {
-          content: "" !important;
-          position: absolute !important;
-          bottom: 120px !important;
-          left: 50% !important;
-          transform: translateX(-50%) !important;
-          width: 180px !important;
-          height: 50px !important;
-          background: #FFFFFF !important;
-          z-index: 5 !important;
-          display: block !important;
-        }
-      `;
-      document.head.appendChild(style);
-    })();
   </script>
 </body>
 </html>

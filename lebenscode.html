@@ -17,11 +17,11 @@
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=clean-preview-8">
+  <link rel="stylesheet" href="app.css?v=clean-preview-9">
 </head>
 
 <body>
- <!-- 🔒 SAUBERER BOT-SICHERER PASSPORT-SCHUTZ MIT MERK-FUNKTION -->
+<!-- 🔒 SAUBERER BOT-SICHERER PASSPORT-SCHUTZ MIT MERK-FUNKTION -->
 <div id="password-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#11141a; z-index:9999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Inter', sans-serif; color:#fff; padding:20px; box-sizing:border-box;">
   <img src="assets/Logo_gold.png" alt="Milz & More" style="max-width:180px; margin-bottom:30px;">
   <h2 style="font-family:'Cinzel', serif; color:#c9a14a; margin-bottom:10px; font-weight:600; letter-spacing:1px; text-align:center;">EXKLUSIVER KURSBEREICH</h2>
@@ -161,12 +161,12 @@
       <div class="preview-layout">
         <!-- LINKS (Mandala) -->
         <div class="preview-left">
-          <div class="print-preview__image-wrap">
+          <div class="print-preview__image-wrap" id="previewWrapContainer">
             <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
           </div>
         </div>
 
-        <!-- RECHTS (Neuer edler Text + Kostenfreier Premium Download-Button) -->
+        <!-- RECHTS -->
         <div class="preview-right">
           <div class="preview-text">
             <h3 style="font-family:'Cinzel', serif; color:#c9a14a; margin-top:0; letter-spacing:1px;">DEIN GENERIERTES MANDALA</h3>
@@ -520,7 +520,6 @@
       }
     }
 
-// Übergibt den berechneten Frequenzcode an das Iframe der gewählten Form
     function pushStateToEngine() {
       if (!els.frame.contentWindow) return;
 
@@ -555,14 +554,12 @@
 
       els.frame.src = `engines/${engine}/index.html?embed=1&v=${Date.now()}`;
       
-      // Hängt die aktive Form als ID an den Vorschau-Container für absolut sicheres CSS
-      const wrapEl = document.querySelector(".print-preview__image-wrap");
-      if (wrapEl) {
-        wrapEl.id = "preview-wrap-" + engine;
+      const containerEl = document.getElementById("previewWrapContainer");
+      if (containerEl) {
+        containerEl.className = "print-preview__image-wrap engine-mode-" + engine;
       }
     }
 
-    // Mobile Menüsteuerung (Nutzt die korrekte Klasse deiner app.css)
     function openSheet() {
       const sheet = document.getElementById("sliderSheet");
       if(sheet) sheet.classList.add("open");
@@ -577,7 +574,6 @@
       }
     }
 
-    // ✅ MESSAGE LISTENER (Empfängt die berechnete Grafik aus den unantastbaren Engines)
     window.addEventListener("message", (ev) => {
       const msg = ev.data;
 
@@ -597,20 +593,17 @@
 
       if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
         hideLoading();
-        console.log("FINAL (EXPORT):", msg.dataUrl.slice(0,50));
         window.__FINAL_MANDALA = msg.dataUrl;
         
-        // Verschiebt AUSSCHLIESSLICH das Wabenbild dezent nach oben
+        // Form-spezifische Ausrichtung für die Vorschau, damit alle Formen exakt wie das Quadrat wirken
         const previewImage = document.getElementById("printPreviewImage");
         if (previewImage) {
           if (state.engine === "wabe") {
-            previewImage.style.transform = "translateY(-4%)";
-            previewImage.style.scale = "1.06";
-            previewImage.style.objectFit = "contain";
+            previewImage.style.transform = "translateY(-6%) scale(1.08)";
+          } else if (state.engine === "rund") {
+            previewImage.style.transform = "scale(1.02)";
           } else {
-            previewImage.style.transform = "";
-            previewImage.style.scale = "";
-            previewImage.style.objectFit = "";
+            previewImage.style.transform = "none";
           }
         }
         
@@ -656,7 +649,6 @@
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-    // 🚀 UNBERÜHRTE PREMIUM-DOWNLOAD-LOGIK VOM RECHNER (MIT TIMING-SCHUTZ)
     function handleFreePremiumDownload() {
       const currentDataUrl = window.__FINAL_MANDALA || els.printPreviewImage.src;
 
@@ -695,11 +687,10 @@
     updateViewerWatermarkPosition();
     loadEngine("quadrat");
 
-    // 🎨 UNUMSTÖSSLICHES DESIGN-SCHUTZSCHILD FÜR DIE DRUCK-VORSCHAU
+    // 🎨 STABILER DESIGN-SCHUTZ & FORM-ANPASSUNG FÜR DIE DRUCK-VORSCHAU
     (() => {
       const style = document.createElement('style');
       style.innerHTML = `
-        /* Zentriert den Text im goldenen Premium-Button fehlerfrei */
         #buyPreviewPng {
           height: auto !important;
           padding: 16px 24px !important;
@@ -710,7 +701,6 @@
           text-align: center !important;
         }
         
-        /* Die weiße Trägerkarte behält ihre stabile 3:4 Hochformat-Basis */
         .print-preview__image-wrap {
           max-width: 440px !important;
           width: 100% !important;
@@ -719,27 +709,29 @@
           background: #FFFFFF !important;
           background-color: #FFFFFF !important;
           position: relative !important;
-          display: block !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
         }
 
         #printPreviewImage {
           display: block !important;
           width: 100% !important;
           height: auto !important;
+          object-fit: contain !important;
         }
 
-        /* ⬢ MILLIMETERGENAUE LOGO-MASKE FÜR DIE WABE */
-        /* Überdeckt das falsch platzierte, eingebrannte schwarze Wabenlogo unsichtbar mit einem weißen Balken */
-        #preview-wrap-wabe::after {
+        /* Nahtlose Ausbesserung für die Wabenform, damit der untere Bereich und das Logo einheitlich aussehen */
+        .engine-mode-wabe::after {
           content: "" !important;
           position: absolute !important;
-          bottom: 155px !important; /* Platziert die Maske exakt über dem Fehler auf deinem Screenshot */
+          bottom: 120px !important;
           left: 50% !important;
           transform: translateX(-50%) !important;
-          width: 160px !important;
-          height: 40px !important;
-          background: #FFFFFF !important; /* Reinweiß löscht das falsche Logo optisch aus */
-          z-index: 9999 !important;
+          width: 180px !important;
+          height: 50px !important;
+          background: #FFFFFF !important;
+          z-index: 5 !important;
           display: block !important;
         }
       `;

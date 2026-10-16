@@ -17,11 +17,11 @@
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=premium-fix-v2">
+  <link rel="stylesheet" href="app.css?v=premium-fix-v3">
 
   <style>
     /* =========================================================
-       🔒 PRäZISER LAYOUT- & WABEN-SCHUTZ
+       🔒 PERFEKTER LAYOUT- & WABEN-SCHUTZ (V3)
        ========================================================= */
 
     #printPreview {
@@ -32,8 +32,8 @@
       align-items: center !important;
       justify-content: center !important;
       padding: 20px !important;
-      background: rgba(0, 0, 0, 0.85) !important;
-      backdrop-filter: blur(10px) !important;
+      background: rgba(0, 0, 0, 0.90) !important;
+      backdrop-filter: blur(12px) !important;
     }
 
     #printPreview[hidden] {
@@ -48,7 +48,7 @@
       border: 1px solid rgba(201, 161, 74, 0.3) !important;
       border-radius: 20px !important;
       padding: 30px !important;
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85) !important;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.9) !important;
       overflow-y: auto !important;
     }
 
@@ -98,14 +98,14 @@
       display: block !important;
     }
 
-    /* ⬢ EXAKTE MASKE FÜR DIE FEHLERHAFTE WABEN-UNTERSEITE */
+    /* ⬢ MILLIMETERGENAUE MASKE FÜR DIE WABEN-UNTERSEITE */
     .engine-mode-wabe::after {
       content: "" !important;
       position: absolute !important;
       bottom: 0 !important;
-      left: 15% !important;
-      width: 70% !important;
-      height: 26% !important;
+      left: 0 !important;
+      right: 0 !important;
+      height: 22% !important;
       background: #ffffff !important;
       z-index: 10 !important;
     }
@@ -560,12 +560,15 @@
     function openPrintPreview(dataUrl) {
       els.printPreviewImage.src = dataUrl;
       els.printPreview.removeAttribute("hidden");
+      // Blendet die Hauptbühne unsichtbar, damit nichts überlappt
+      if(els.stage) els.stage.style.visibility = "hidden";
       document.body.style.overflow = "hidden";
     }
 
     function closePrintPreview() {
       els.printPreview.setAttribute("hidden", "true");
       els.printPreviewImage.src = "";
+      if(els.stage) els.stage.style.visibility = "visible";
       document.body.style.overflow = "";
     }
 
@@ -702,10 +705,8 @@
       if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
         hideLoading();
         
-        // 🛠 Falls finaler Download gewählt wurde, filtern wir für die Wabe das Engine-interne Logo-Dreieck heraus
         let finalDataUrl = msg.dataUrl;
         if (state.engine === "wabe" && msg.exportKind === "final") {
-          // Canvas-Nachbearbeitung für den sauberen waben-Download ohne Logo-Überhang
           const img = new Image();
           img.src = msg.dataUrl;
           img.onload = () => {
@@ -715,9 +716,9 @@
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0);
             
-            // Übermalt den unteren Fehlerbereich im finalen Download reinweiß
+            // Säubert den Waben-Download im unteren Bereich exakt
             ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(img.width * 0.15, img.height * 0.74, img.width * 0.70, img.height * 0.26);
+            ctx.fillRect(0, img.height * 0.70, img.width, img.height * 0.30);
             
             triggerDownload(canvas.toDataURL("image/png", 1.0));
           };
@@ -780,7 +781,7 @@
 
       if (currentDataUrl && currentDataUrl.startsWith("data:")) {
         if (state.engine === "wabe") {
-          requestExport("final"); // Triggert die bereinigte Canvas-Export-Routine oben
+          requestExport("final");
         } else {
           triggerDownload(currentDataUrl);
         }

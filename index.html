@@ -58,7 +58,6 @@
     </div>
   </main>
 
-  
   <!-- 🔒 GLOBALER RECHTSKLICK-SCHUTZ -->
   <script>
     (function () {
@@ -68,10 +67,10 @@
         });
       }
 
-      // sofort aktivieren
+      // Sofort aktivieren
       blockContextMenu();
 
-      // zusätzlich absichern (falls später Scripts was überschreiben)
+      // Zusätzlich absichern (falls später Scripts was überschreiben)
       window.addEventListener("load", blockContextMenu);
       setTimeout(blockContextMenu, 500);
     })();

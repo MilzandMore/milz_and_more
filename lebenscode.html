@@ -17,23 +17,24 @@
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=premium-fix-v4">
+  <link rel="stylesheet" href="app.css?v=premium-fix-v5">
 
   <style>
     /* =========================================================
-       🔒 PERFEKTER LAYOUT- & WABEN-SCHUTZ (V4 - FIX DOWNLOAD)
+       🔒 ISOLATION & MASKEN-FIX (V5 - FINAL)
        ========================================================= */
 
+    /* Druckvorschau ganz oben platzieren */
     #printPreview {
       position: fixed !important;
       inset: 0 !important;
-      z-index: 999999999 !important;
+      z-index: 9999999999 !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       padding: 20px !important;
-      background: rgba(0, 0, 0, 0.90) !important;
-      backdrop-filter: blur(12px) !important;
+      background: rgba(0, 0, 0, 0.92) !important;
+      backdrop-filter: blur(14px) !important;
     }
 
     #printPreview[hidden] {
@@ -48,8 +49,9 @@
       border: 1px solid rgba(201, 161, 74, 0.3) !important;
       border-radius: 20px !important;
       padding: 30px !important;
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.9) !important;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95) !important;
       overflow-y: auto !important;
+      z-index: 2 !important;
     }
 
     .preview-layout {
@@ -98,14 +100,14 @@
       display: block !important;
     }
 
-    /* ⬢ MILLIMETERGENAUE MASKE FÜR DIE WABEN-UNTERSEITE IN DER VORSCHAU */
+    /* ⬢ VOLLSTÄNDIGE ABDECKUNG DES UNTEREN FEHLERBEREICHS FÜR DIE WABE */
     .engine-mode-wabe::after {
       content: "" !important;
       position: absolute !important;
       bottom: 0 !important;
       left: 0 !important;
       right: 0 !important;
-      height: 22% !important;
+      height: 30% !important;
       background: #ffffff !important;
       z-index: 10 !important;
     }
@@ -150,7 +152,7 @@
 <body>
 
 <!-- 🔒 PASSPORT-SCHUTZ -->
-<div id="password-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#11141a; z-index:9999999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Inter', sans-serif; color:#fff; padding:20px; box-sizing:border-box;">
+<div id="password-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#11141a; z-index:99999999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Inter', sans-serif; color:#fff; padding:20px; box-sizing:border-box;">
   <img src="assets/Logo_gold.png" alt="Milz & More" style="max-width:180px; margin-bottom:30px;">
   <h2 style="font-family:'Cinzel', serif; color:#c9a14a; margin-bottom:10px; font-weight:600; letter-spacing:1px; text-align:center;">EXKLUSIVER KURSBEREICH</h2>
   <p style="color:#a0a5b5; font-size:14px; margin-bottom:25px; text-align:center; max-width:320px;">Bitte gib dein Passwort ein, um den Lebenscode-Mandala-Generator freizuschalten.</p>
@@ -258,7 +260,7 @@
 
   <!-- MAIN -->
   <main class="app-main">
-    <aside class="slider-panel desktop-only">
+    <aside id="sliderPanel" class="slider-panel desktop-only">
       <div class="slider-title">Farbintensität</div>
       <div id="sliders" class="sliders"></div>
       <div class="hint">Tipp: Regler steuern jede Farbe von sanftem Pastell bis leuchtend kräftig.</div>
@@ -356,6 +358,7 @@
 
     const els = {
       stage: document.getElementById("stage"),
+      sliderPanel: document.getElementById("sliderPanel"),
       frame: document.getElementById("engineFrame"),
       engineWrap: document.getElementById("engineWrap"),
       loading: document.getElementById("loading"),
@@ -560,14 +563,22 @@
     function openPrintPreview(dataUrl) {
       els.printPreviewImage.src = dataUrl;
       els.printPreview.removeAttribute("hidden");
+      
+      // 🛡 HIGHLIGHT: Blendet Arbeitsfläche + Slider aus, um jegliche Überlappungen zu stoppen
       if(els.stage) els.stage.style.visibility = "hidden";
+      if(els.sliderPanel) els.sliderPanel.style.visibility = "hidden";
+      
       document.body.style.overflow = "hidden";
     }
 
     function closePrintPreview() {
       els.printPreview.setAttribute("hidden", "true");
       els.printPreviewImage.src = "";
+      
+      // Blendet Arbeitsfläche & Slider wieder ein
       if(els.stage) els.stage.style.visibility = "visible";
+      if(els.sliderPanel) els.sliderPanel.style.visibility = "visible";
+      
       document.body.style.overflow = "";
     }
 
@@ -709,6 +720,7 @@
     });
 
     function triggerDownload(dataUrl) {
+      if (!dataUrl) return;
       const link = document.createElement("a");
       link.href = dataUrl;
       link.download = "mandala_" + state.engine + ".png";
@@ -754,14 +766,14 @@
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
-    // 🚀 DIREKTER, SOFORTIGER DOWNLOAD OHNE BLOCKING!
+    // 🚀 DIREKTER, SOFORTIGER DOWNLOAD NATIV ERZWUNGEN
     function handleFreePremiumDownload() {
-      const currentDataUrl = window.__FINAL_MANDALA || els.printPreviewImage.src;
+      const currentDataUrl = els.printPreviewImage.src || window.__FINAL_MANDALA;
 
       if (currentDataUrl && currentDataUrl.startsWith("data:")) {
         triggerDownload(currentDataUrl);
       } else {
-        alert("Das Bild wird noch vorbereitet. Bitte klicke noch einmal.");
+        alert("Bitte warte kurz, bis das Bild gerendert ist.");
       }
     }
 

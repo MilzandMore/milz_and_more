@@ -17,83 +17,140 @@
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=clean-preview-11">
+  <link rel="stylesheet" href="app.css?v=premium-fix-final">
 
   <style>
-    /* 🛠 ISOLATION UND STRUKTUR-FIXES */
-    .stage {
-      position: relative !important;
-      z-index: 1 !important;
-    }
-    
-    .engine-frame {
-      position: relative !important;
-      z-index: 1 !important;
-    }
+    /* =========================================================
+       🔒 EDLES EDITIONS-DESIGN & FIXES FÜR DIE DRUCKVORSCHAU
+       ========================================================= */
 
-    /* DRUCK-VORSCHAU ABSOLUT IM VORDERGRUND */
+    /* Verhindert Durchscheinen der Arbeitsfläche */
     #printPreview {
       position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
+      inset: 0 !important;
       z-index: 999999999 !important;
-      background: rgba(0, 0, 0, 0.88) !important;
-      display: none;
+      display: flex !important;
       align-items: center !important;
       justify-content: center !important;
+      padding: 20px !important;
+      background: rgba(0, 0, 0, 0.85) !important;
+      backdrop-filter: blur(10px) !important;
     }
 
-    #printPreview:not([hidden]) {
-      display: flex !important;
+    #printPreview[hidden] {
+      display: none !important;
     }
 
+    /* Das edle abgerundete Popup-Fenster */
     .print-preview__panel {
       position: relative !important;
-      z-index: 10 !important;
+      width: min(960px, 92vw) !important;
+      max-height: 90vh !important;
+      background: #0f131a !important;
+      border: 1px solid rgba(201, 161, 74, 0.3) !important;
+      border-radius: 20px !important;
+      padding: 28px !important;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.8) !important;
+      overflow-y: auto !important;
     }
 
-    #buyPreviewPng {
-      height: auto !important;
-      padding: 16px 24px !important;
-      line-height: 1.4 !important;
+    /* Das perfekte 2-Spalten Layout (Links Bild, Rechts Text) */
+    .preview-layout {
       display: flex !important;
+      flex-direction: row !important;
+      gap: 32px !important;
       align-items: center !important;
       justify-content: center !important;
-      text-align: center !important;
-    }
-    
-    .print-preview__image-wrap {
-      max-width: 440px !important;
       width: 100% !important;
-      aspect-ratio: 3/4 !important;
+    }
+
+    .preview-left {
+      flex: 1 1 440px !important;
+      max-width: 440px !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    .preview-right {
+      flex: 1 1 380px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      gap: 20px !important;
+      text-align: left !important;
+    }
+
+    /* Der weiße Bildträger */
+    .print-preview__image-wrap {
+      width: 100% !important;
+      aspect-ratio: 3 / 4 !important;
+      background: #ffffff !important;
+      border-radius: 12px !important;
       overflow: hidden !important;
-      background: #FFFFFF !important;
       position: relative !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
     }
 
-    #printPreviewImage {
-      display: block !important;
+    .print-preview__image {
       width: 100% !important;
-      height: auto !important;
+      height: 100% !important;
       object-fit: contain !important;
+      display: block !important;
     }
 
+    /* ⬢ REPARATUR-MASKE FÜR DIE WABENFORM */
+    /* Überdeckt das fehlerhafte schwarze Logo und die Ecken unten absolut sauber mit Weiß */
     .engine-mode-wabe::after {
       content: "" !important;
       position: absolute !important;
-      bottom: 120px !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      width: 180px !important;
-      height: 50px !important;
-      background: #FFFFFF !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      height: 28% !important;
+      background: #ffffff !important;
       z-index: 5 !important;
-      display: block !important;
+    }
+
+    /* Schließen-Button oben rechts */
+    .print-preview__close {
+      position: absolute !important;
+      top: 16px !important;
+      right: 16px !important;
+      width: 38px !important;
+      height: 38px !important;
+      border-radius: 50% !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      color: #ffffff !important;
+      font-size: 20px !important;
+      cursor: pointer !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: background 0.2s ease !important;
+      z-index: 20 !important;
+    }
+
+    .print-preview__close:hover {
+      background: rgba(255, 255, 255, 0.25) !important;
+    }
+
+    /* Responsiv für Smartphones */
+    @media (max-width: 768px) {
+      .preview-layout {
+        flex-direction: column !important;
+      }
+      .preview-left, .preview-right {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .preview-right {
+        text-align: center !important;
+      }
     }
   </style>
 </head>
@@ -101,7 +158,7 @@
 <body>
 
 <!-- 🔒 PASSPORT-SCHUTZ -->
-<div id="password-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#11141a; z-index:99999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Inter', sans-serif; color:#fff; padding:20px; box-sizing:border-box;">
+<div id="password-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#11141a; z-index:9999999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Inter', sans-serif; color:#fff; padding:20px; box-sizing:border-box;">
   <img src="assets/Logo_gold.png" alt="Milz & More" style="max-width:180px; margin-bottom:30px;">
   <h2 style="font-family:'Cinzel', serif; color:#c9a14a; margin-bottom:10px; font-weight:600; letter-spacing:1px; text-align:center;">EXKLUSIVER KURSBEREICH</h2>
   <p style="color:#a0a5b5; font-size:14px; margin-bottom:25px; text-align:center; max-width:320px;">Bitte gib dein Passwort ein, um den Lebenscode-Mandala-Generator freizuschalten.</p>
@@ -239,30 +296,30 @@
     </div>
   </div>
 
-  <!-- DRUCK-VORSCHAU MODAL (Erhöhte Z-Index Ebene) -->
+  <!-- DRUCK-VORSCHAU MODAL -->
   <div id="printPreview" class="print-preview" hidden>
     <div id="printPreviewBackdrop" class="print-preview__backdrop"></div>
 
     <div class="print-preview__panel">
-      <button id="closePrintPreview" class="print-preview__close" type="button">×</button>
+      <button id="closePrintPreview" class="print-preview__close" type="button">✕</button>
 
       <div class="preview-layout">
-        <!-- LINKS -->
+        <!-- LINKS: BILD -->
         <div class="preview-left">
           <div class="print-preview__image-wrap" id="previewWrapContainer">
             <img id="printPreviewImage" class="print-preview__image" alt="Druckvorschau">
           </div>
         </div>
 
-        <!-- RECHTS -->
+        <!-- RECHTS: TEXT & DOWNLOAD -->
         <div class="preview-right">
-          <div class="preview-text">
-            <h3 style="font-family:'Cinzel', serif; color:#c9a14a; margin-top:0; letter-spacing:1px;">DEIN GENERIERTES MANDALA</h3>
+          <h3 style="font-family:'Cinzel', serif; color:#c9a14a; margin:0; letter-spacing:1px; font-size: 20px;">DEIN GENERIERTES MANDALA</h3>
+          <div style="font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.85);">
             Dies ist die exklusive Vorschau deines berechneten Frequenzbildes.<br><br>
             Nutze dieses persönliche Mandala als kraftvollen Begleiter, um dein gewähltes Thema energetisch zu integrieren und dich in deiner Schwingung zu stabilisieren.<br><br>
-            <strong>Als Mitglied unseres Premium-Kurses steht dir der hochauflösende Download vollkommen kostenfrei zur Verfügung.</strong>
+            <strong style="color: #ffffff;">Als Mitglied unseres Premium-Kurses steht dir der hochauflösende Download vollkommen kostenfrei zur Verfügung.</strong>
           </div>
-          <button id="buyPreviewPng" class="primary" type="button" style="width:100%; margin-top:30px; padding:14px; font-weight:bold; letter-spacing:1px; border-radius:30px; cursor:pointer;">JETZT HOCHAUFLÖSEND HERUNTERLADEN</button>
+          <button id="buyPreviewPng" class="primary" type="button" style="width:100%; margin-top:10px; padding:16px; font-weight:bold; letter-spacing:1px; border-radius:30px; cursor:pointer;">JETZT HOCHAUFLÖSEND HERUNTERLADEN</button>
         </div>
       </div>
     </div>
@@ -511,13 +568,11 @@
     function openPrintPreview(dataUrl) {
       els.printPreviewImage.src = dataUrl;
       els.printPreview.removeAttribute("hidden");
-      els.printPreview.style.display = "flex";
       document.body.style.overflow = "hidden";
     }
 
     function closePrintPreview() {
       els.printPreview.setAttribute("hidden", "true");
-      els.printPreview.style.display = "none";
       els.printPreviewImage.src = "";
       document.body.style.overflow = "";
     }
@@ -659,9 +714,7 @@
         const previewImage = document.getElementById("printPreviewImage");
         if (previewImage) {
           if (state.engine === "wabe") {
-            previewImage.style.transform = "translateY(-6%) scale(1.08)";
-          } else if (state.engine === "rund") {
-            previewImage.style.transform = "scale(1.02)";
+            previewImage.style.transform = "scale(1.18) translateY(-4%)";
           } else {
             previewImage.style.transform = "none";
           }

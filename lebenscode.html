@@ -17,11 +17,11 @@
   <meta name="apple-mobile-web-app-title" content="Milz & More">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="app.css?v=premium-fix-v3">
+  <link rel="stylesheet" href="app.css?v=premium-fix-v4">
 
   <style>
     /* =========================================================
-       🔒 PERFEKTER LAYOUT- & WABEN-SCHUTZ (V3)
+       🔒 PERFEKTER LAYOUT- & WABEN-SCHUTZ (V4 - FIX DOWNLOAD)
        ========================================================= */
 
     #printPreview {
@@ -98,7 +98,7 @@
       display: block !important;
     }
 
-    /* ⬢ MILLIMETERGENAUE MASKE FÜR DIE WABEN-UNTERSEITE */
+    /* ⬢ MILLIMETERGENAUE MASKE FÜR DIE WABEN-UNTERSEITE IN DER VORSCHAU */
     .engine-mode-wabe::after {
       content: "" !important;
       position: absolute !important;
@@ -560,7 +560,6 @@
     function openPrintPreview(dataUrl) {
       els.printPreviewImage.src = dataUrl;
       els.printPreview.removeAttribute("hidden");
-      // Blendet die Hauptbühne unsichtbar, damit nichts überlappt
       if(els.stage) els.stage.style.visibility = "hidden";
       document.body.style.overflow = "hidden";
     }
@@ -704,29 +703,8 @@
 
       if (msg.type === "EXPORT_RESULT" && msg.dataUrl) {
         hideLoading();
-        
-        let finalDataUrl = msg.dataUrl;
-        if (state.engine === "wabe" && msg.exportKind === "final") {
-          const img = new Image();
-          img.src = msg.dataUrl;
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-            
-            // Säubert den Waben-Download im unteren Bereich exakt
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(0, img.height * 0.70, img.width, img.height * 0.30);
-            
-            triggerDownload(canvas.toDataURL("image/png", 1.0));
-          };
-          return;
-        }
-
-        window.__FINAL_MANDALA = finalDataUrl;
-        openPrintPreview(finalDataUrl);
+        window.__FINAL_MANDALA = msg.dataUrl;
+        openPrintPreview(msg.dataUrl);
       }
     });
 
@@ -776,25 +754,14 @@
     els.closePrintPreview.addEventListener("click", closePrintPreview);
     els.printPreviewBackdrop.addEventListener("click", closePrintPreview);
 
+    // 🚀 DIREKTER, SOFORTIGER DOWNLOAD OHNE BLOCKING!
     function handleFreePremiumDownload() {
       const currentDataUrl = window.__FINAL_MANDALA || els.printPreviewImage.src;
 
       if (currentDataUrl && currentDataUrl.startsWith("data:")) {
-        if (state.engine === "wabe") {
-          requestExport("final");
-        } else {
-          triggerDownload(currentDataUrl);
-        }
+        triggerDownload(currentDataUrl);
       } else {
-        requestExport("final");
-        setTimeout(() => {
-          const dataUrl = window.__FINAL_MANDALA;
-          if (!dataUrl) {
-            alert("Das Bild wird noch berechnet. Bitte klicke noch einmal.");
-            return;
-          }
-          triggerDownload(dataUrl);
-        }, 1200);
+        alert("Das Bild wird noch vorbereitet. Bitte klicke noch einmal.");
       }
     }
 
